@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALUON ERP - Prototipo SaaS Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        aluonDark: '#111827',
+                        aluonRed: '#d94f4f',
+                        aluonRedHover: '#b94343',
+                        aluonBg: '#f3f4f6'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; overflow: hidden; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-aluonBg text-gray-800 h-screen flex">
+
+    <aside class="w-64 bg-[#111827] text-gray-400 flex flex-col h-full shadow-2xl z-20 transition-all duration-300">
+        <div class="h-16 flex items-center px-6 border-b border-gray-800 bg-[#0b0f19]">
+            <span class="text-white text-xl font-bold tracking-widest">ALUON</span>
+            <span class="ml-2 text-[10px] bg-aluonRed text-white px-2 py-0.5 rounded uppercase font-bold tracking-wider">ERP</span>
+        </div>
+
+        <div class="flex-1 overflow-y-auto py-4">
+            <div class="px-6 mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Operativa Principal</div>
+            <nav class="space-y-1 px-3 mb-6">
+                <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg bg-aluonRed text-white shadow-lg transition-colors">
+                    <i class="fas fa-chart-pie w-5 text-center"></i><span class="text-sm font-medium">Centro de Mando</span>
+                </a>
+				<a href="#" onclick="switchTab('componentes')" id="nav-componentes" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-green-400 font-bold hover:bg-gray-800 hover:text-green-300 transition-colors border border-transparent hover:border-gray-700">
+                    <i class="fas fa-ruler-combined w-5 text-center"></i><span class="text-sm">Generador Despieces</span>
+                </a>
+                <a href="#" onclick="switchTab('ordenes')" id="nav-ordenes" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <i class="fas fa-file-contract w-5 text-center"></i><span class="text-sm font-medium">Órdenes / Oficina</span>
+                </a>
+                <a href="#" onclick="switchTab('stock')" id="nav-stock" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <i class="fas fa-boxes w-5 text-center"></i><span class="text-sm font-medium">Stock y Almacén</span>
+                </a>
+                <a href="#" onclick="switchTab('fabrica')" id="nav-fabrica" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <i class="fas fa-fire-burner w-5 text-center"></i><span class="text-sm font-medium">Fábrica (Tablet)</span>
+                </a>
+                <a href="#" onclick="switchTab('logistica')" id="nav-logistica" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <i class="fas fa-truck-fast w-5 text-center"></i><span class="text-sm font-medium">Logística y Rutas</span>
+                </a>
+            </nav>
+
+            <div class="px-6 mb-2 text-[10px] font-bold uppercase tracking-wider text-gray-500">Gestión y Sistema</div>
+            <nav class="space-y-1 px-3">
+                <a href="#" onclick="switchTab('crm')" id="nav-crm" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <i class="fas fa-users w-5 text-center"></i><span class="text-sm font-medium">Clientes (CRM)</span>
+                </a>
+                <a href="#" onclick="switchTab('facturacion')" id="nav-facturacion" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <i class="fas fa-file-invoice-dollar w-5 text-center"></i><span class="text-sm font-medium">Facturación</span>
+                </a>
+                <a href="#" onclick="switchTab('rrss')" id="nav-rrss" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors">
+                    <i class="fas fa-share-nodes w-5 text-center"></i><span class="text-sm font-medium">Web & RRSS</span>
+                </a>
+                <a href="#" onclick="switchTab('config')" id="nav-config" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-300 hover:bg-gray-800 hover:text-white transition-colors mt-4">
+                    <i class="fas fa-cog w-5 text-center"></i><span class="text-sm font-medium">Configuración</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 bg-[#0b0f19]">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-aluonRed text-white flex items-center justify-center font-bold text-sm">A</div>
+                <div>
+                    <p class="text-sm font-bold text-white leading-none">Admin</p>
+                    <p class="text-[10px] text-green-400 mt-1"><i class="fas fa-circle text-[8px] mr-1"></i> Conectado</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <header class="h-16 glass-panel border-b border-gray-200 flex items-center justify-between px-6 z-10 shrink-0">
+            <div class="flex items-center gap-6 w-1/2">
+                <div class="relative w-full max-w-md">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" placeholder="Buscar presupuesto, código de orden, cliente..." class="w-full pl-9 pr-4 py-2 bg-gray-100 border-transparent rounded-lg text-sm focus:bg-white focus:border-aluonRed focus:ring-2 focus:ring-red-200 outline-none transition-all">
+                </div>
+            </div>
+            <div class="flex items-center gap-6">
+                <button class="relative text-gray-500 hover:text-aluonRed transition-colors">
+                    <i class="far fa-bell text-lg"></i><span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                </button>
+                <div class="text-right hidden md:block">
+                    <div class="text-xs text-gray-500 font-medium uppercase tracking-wider" id="current-date">--</div>
+                    <div class="text-lg font-bold text-gray-800 leading-none" id="current-time">--:--:--</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-6 relative bg-gray-50">
+            
+            <div id="view-dashboard" class="max-w-7xl mx-auto block animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Radar Operativo 360º</h1>
+                        <p class="text-xs text-gray-500 mt-1">Visión global de rendimiento de fábrica y ventas.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 bg-white border rounded text-xs font-medium hover:bg-gray-100">Hoy</button>
+                        <button class="px-3 py-1.5 bg-white border rounded text-xs font-medium hover:bg-gray-100">Semana</button>
+                        <button class="px-3 py-1.5 bg-aluonRed text-white rounded text-xs font-bold shadow-md">Mes Actual</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fas fa-euro-sign"></i></div>
+                            <span class="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-full">+14.2%</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-800">42.850<span class="text-lg text-gray-400">,90€</span></h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1">Facturación Mensual</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-lg"><i class="fas fa-fire-burner"></i></div>
+                            <span class="text-xs font-bold text-gray-500">Capacidad: 85%</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-800">24 <span class="text-lg text-gray-400 font-normal">Puertas</span></h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1">Activas en Fábrica</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-lg"><i class="fas fa-chart-line"></i></div>
+                            <span class="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded-full">+2.4%</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-800">32.4%</h3>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1">Margen Neto Promedio</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-red-500 to-aluonRed rounded-xl p-5 shadow-lg border border-red-600 hover:shadow-xl transition text-white">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg"><i class="fas fa-exclamation-triangle"></i></div>
+                            <span class="text-xs font-bold bg-white/20 px-2 py-1 rounded-full">URGENTE</span>
+                        </div>
+                        <h3 class="text-3xl font-bold">3 <span class="text-lg font-normal opacity-80">Perfiles</span></h3>
+                        <p class="text-xs uppercase tracking-wider font-bold mt-1 opacity-90">Stock Crítico Inferior</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div class="col-span-1 lg:col-span-2 bg-white p-6 rounded-xl border border-gray-100 shadow-sm relative">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Evolución Ingresos vs Producción</h3>
+                            <button class="text-gray-400 hover:text-aluonRed"><i class="fas fa-download"></i></button>
+                        </div>
+                        <div class="h-64 w-full">
+                            <canvas id="chartEvolucion"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+                        <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4 text-center">Ventas por Modelo</h3>
+                        <div class="h-48 w-full relative flex justify-center">
+                            <canvas id="chartModelos"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
+                                <span class="text-2xl font-bold text-gray-800">128</span>
+                                <span class="text-[10px] text-gray-500 uppercase font-bold">Vendidas</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 space-y-2">
+                            <div class="flex justify-between items-center text-xs"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-aluonRed"></div><span class="font-medium text-gray-600">Correderas</span></div><span class="font-bold">45%</span></div>
+                            <div class="flex justify-between items-center text-xs"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-[#1e293b]"></div><span class="font-medium text-gray-600">Batientes</span></div><span class="font-bold">35%</span></div>
+                            <div class="flex justify-between items-center text-xs"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-gray-300"></div><span class="font-medium text-gray-600">Peatonales</span></div><span class="font-bold">20%</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+                    <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-6">Carga de Trabajo en Fábrica (Tiempo Real)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <div class="flex justify-between text-sm mb-2"><span class="font-bold text-gray-700"><i class="fas fa-fire-burner text-orange-500 mr-2"></i> Soldadura</span><span class="text-gray-500">14 Órdenes</span></div>
+                            <div class="w-full bg-gray-100 rounded-full h-3 mb-1 overflow-hidden">
+                                <div class="bg-orange-500 h-3 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <p class="text-[10px] text-right font-bold text-orange-600">ALTA CARGA (85%)</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2"><span class="font-bold text-gray-700"><i class="fas fa-spray-can text-purple-500 mr-2"></i> Lacado / Pintura</span><span class="text-gray-500">6 Órdenes</span></div>
+                            <div class="w-full bg-gray-100 rounded-full h-3 mb-1 overflow-hidden">
+                                <div class="bg-purple-500 h-3 rounded-full" style="width: 40%"></div>
+                            </div>
+                            <p class="text-[10px] text-right font-bold text-green-600">CAPACIDAD ÓPTIMA (40%)</p>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-sm mb-2"><span class="font-bold text-gray-700"><i class="fas fa-truck-loading text-blue-500 mr-2"></i> Preparación Montaje</span><span class="text-gray-500">4 Órdenes</span></div>
+                            <div class="w-full bg-gray-100 rounded-full h-3 mb-1 overflow-hidden">
+                                <div class="bg-blue-500 h-3 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <p class="text-[10px] text-right font-bold text-blue-600">ESTABLE (60%)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-ordenes" class="max-w-7xl mx-auto hidden animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-file-contract text-aluonRed"></i> Órdenes de Producción</h1>
+                    <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md">+ Nueva Orden</button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-[#4338ca] text-white text-xs uppercase tracking-wider">
+                            <tr><th class="px-4 py-3">CÓDIGO</th><th class="px-4 py-3">CLIENTE</th><th class="px-4 py-3">MODELO</th><th class="px-4 py-3">ESTADO</th><th class="px-4 py-3">PROGRESO</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-bold">ORD-2026-478</td>
+                                <td>CONSTRUCTORA GÓMEZ S.L.</td>
+                                <td><span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[10px] font-bold">CORREDERA</span></td>
+                                <td><span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-[10px] font-bold">EN PRODUCCIÓN</span></td>
+                                <td class="px-4 py-3"><div class="w-24 bg-gray-200 rounded-full h-2"><div class="bg-yellow-500 h-2 rounded-full" style="width: 50%"></div></div></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 font-bold">ORD-2026-477</td>
+                                <td>MIGUEL ÁNGEL RUIZ</td>
+                                <td><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">PEATONAL</span></td>
+                                <td><span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-[10px] font-bold">PENDIENTE MATERIAL</span></td>
+                                <td class="px-4 py-3"><div class="w-24 bg-gray-200 rounded-full h-2"><div class="bg-orange-500 h-2 rounded-full" style="width: 20%"></div></div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+			 <div id="view-componentes" class="max-w-7xl mx-auto hidden animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
+                            <i class="fas fa-ruler-combined text-aluonRed"></i> Generador Técnico de Despieces
+                        </h1>
+                        <p class="text-xs text-gray-500 mt-1">Cálculo algorítmico de cortes de perfilería basado en medidas de hueco.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="w-full lg:w-1/3 bg-white border border-gray-200 shadow-sm rounded-xl p-6 h-max">
+                        <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Parámetros de Medición</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">FAMILIA / MODELO</label>
+                                <select id="despiece-modelo" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-aluonRed outline-none bg-gray-50"><option value="classic">Aluon Classic</option><option value="decor">Aluon Decor</option><option value="forja">Aluon Forja</option><option value="veneciana">Aluon Veneciana</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">TIPO DE CERRAJERÍA</label>
+                                <select id="despiece-tipo" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-aluonRed outline-none bg-gray-50"><option value="peatonal">Puerta Peatonal</option><option value="batiente1">Puerta Batiente (1 Hoja)</option><option value="batiente2">Puerta Batiente (2 Hojas)</option><option value="corredera">Puerta Corredera</option></select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">ANCHO (mm)</label><input type="number" id="despiece-ancho" placeholder="1200" value="1200" class="w-full border rounded p-2 text-sm font-mono focus:border-aluonRed outline-none"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">ALTO (mm)</label><input type="number" id="despiece-alto" placeholder="2100" value="2100" class="w-full border rounded p-2 text-sm font-mono focus:border-aluonRed outline-none"></div>
+                            </div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">HOLGURA PERIMETRAL (mm)</label><input type="number" value="10" class="w-full border rounded p-2 text-sm text-gray-500 bg-gray-50 font-mono outline-none" readonly></div>
+                            <button onclick="simularCalculoDespiece()" class="w-full mt-4 bg-gray-900 hover:bg-black text-white font-bold py-3 rounded text-sm shadow transition-colors flex justify-center items-center gap-2">
+                                <i class="fas fa-calculator"></i> Generar Lista de Corte
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="w-full lg:w-2/3 bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden flex flex-col relative min-h-[500px]">
+                        <div id="despiece-empty" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-10">
+                            <i class="fas fa-drafting-compass text-6xl text-gray-300 mb-4"></i>
+                            <h3 class="text-gray-500 font-bold uppercase tracking-widest">Esperando Parámetros</h3>
+                            <p class="text-xs text-gray-400 mt-2">Introduzca las medidas para generar el despiece exacto.</p>
+                        </div>
+
+                        <div id="despiece-loader" class="absolute inset-0 flex flex-col items-center justify-center bg-white z-20 hidden">
+                            <div class="loader ease-linear rounded-full border-4 border-gray-200 h-12 w-12 mb-4"></div>
+                            <p class="text-sm font-bold text-gray-600">Calculando fórmulas de corte...</p>
+                        </div>
+
+                        <div id="despiece-results" class="flex-1 flex flex-col hidden z-0">
+                            <div class="bg-gray-800 text-white p-4 flex justify-between items-center">
+                                <div><h3 class="font-bold text-lg"><i class="fas fa-list-check text-aluonRed mr-2"></i> Órden de Corte de Perfilería</h3><p class="text-xs text-gray-400 mt-1" id="despiece-resumen-texto"></p></div>
+                                <div class="flex gap-2">
+                                    <button class="bg-white text-gray-800 px-3 py-1.5 rounded text-xs font-bold"><i class="fas fa-print mr-1"></i> Imprimir</button>
+                                    <button class="bg-aluonRed text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-red-600"><i class="fas fa-paper-plane mr-1"></i> Enviar a Fábrica</button>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto flex-1">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-gray-100 text-gray-600 text-[10px] uppercase font-bold border-b">
+                                        <tr><th class="px-4 py-3">REF. PERFIL</th><th class="px-4 py-3">DESCRIPCIÓN</th><th class="px-4 py-3 text-center">CANTIDAD</th><th class="px-4 py-3 text-right">LONGITUD CORTE</th><th class="px-4 py-3 text-center">ÁNGULO</th></tr>
+                                    </thead>
+                                    <tbody id="tabla-despiece-body" class="divide-y divide-gray-100"></tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="bg-gray-50 border-t p-4 flex gap-6 items-center">
+                                <div class="w-24 h-32 border-4 border-gray-800 rounded-sm relative flex items-center justify-center">
+                                    <div class="absolute left-[-20px] top-1/2 -translate-y-1/2 text-[10px] text-gray-500 font-mono rotate-270" id="esquema-alto"></div>
+                                    <div class="absolute bottom-[-20px] left-1/2 -translate-x-1/2 text-[10px] text-gray-500 font-mono" id="esquema-ancho"></div>
+                                    <div class="absolute right-2 top-1/2 w-1 h-3 bg-gray-400 rounded"></div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-xs font-bold text-gray-800 uppercase mb-2">Resumen de Materiales</h4>
+                                    <div class="grid grid-cols-2 gap-2 text-[10px] text-gray-600">
+                                        <div><i class="fas fa-check text-green-500 mr-1"></i> Perfil Marco 120mm</div>
+                                        <div><i class="fas fa-check text-green-500 mr-1"></i> Zócalo Inferior 80mm</div>
+                                        <div><i class="fas fa-check text-green-500 mr-1"></i> Lamas Ciega Machihembrada</div>
+                                        <div><i class="fas fa-check text-green-500 mr-1"></i> Kit Bisagras y Cerradura</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-stock" class="max-w-7xl mx-auto hidden animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-boxes text-aluonRed"></i> Gestión de Inventario</h1>
+                    <button class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md"><i class="fas fa-dolly"></i> Registrar Entrada</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white border rounded-xl shadow-sm p-4"><div class="flex justify-between border-b pb-2 mb-3"><h3 class="font-bold">Perfiles 120mm</h3><span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">CRÍTICO</span></div><div class="text-3xl font-bold mb-1">12 <span class="text-sm font-normal text-gray-500">tiras</span></div><div class="w-full bg-gray-200 rounded-full h-1.5 mb-2"><div class="bg-red-500 h-1.5 rounded-full" style="width: 15%"></div></div></div>
+                    <div class="bg-white border rounded-xl shadow-sm p-4"><div class="flex justify-between border-b pb-2 mb-3"><h3 class="font-bold">Motores 800Kg</h3><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">ÓPTIMO</span></div><div class="text-3xl font-bold mb-1">45 <span class="text-sm font-normal text-gray-500">uds</span></div><div class="w-full bg-gray-200 rounded-full h-1.5 mb-2"><div class="bg-green-500 h-1.5 rounded-full" style="width: 85%"></div></div></div>
+                </div>
+            </div>
+
+            <div id="view-fabrica" class="w-full h-[calc(100vh-8rem)] hidden animate-fade-in view-section">
+                <div class="bg-[#1e1e24] w-full h-full rounded-2xl border-4 border-gray-800 p-8 flex flex-col justify-between shadow-2xl">
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-4"><div class="text-white font-bold text-2xl tracking-widest"><i class="fas fa-fire-burner text-aluonRed mr-3"></i> TALLER 1</div></div>
+                    <div class="bg-gray-800 rounded-xl p-8 flex-1 my-6 flex flex-col justify-center border border-gray-700">
+                        <div class="text-aluonRed font-bold mb-2 uppercase tracking-widest text-lg animate-pulse">Trabajo Actual</div>
+                        <h2 class="text-5xl text-white font-bold mb-4">ORD-478: Puerta Corredera</h2>
+                    </div>
+                    <button class="w-full bg-green-600 text-white font-bold py-8 rounded-xl text-3xl uppercase"><i class="fas fa-check-double mr-3"></i> FINALIZAR</button>
+                </div>
+            </div>
+
+            <div id="view-logistica" class="max-w-7xl mx-auto hidden animate-fade-in view-section h-[calc(100vh-10rem)] flex gap-6">
+                <div class="w-1/3 bg-white border rounded-xl shadow-sm flex flex-col"><div class="p-4 border-b bg-gray-50"><h2 class="font-bold">Ruta de Hoy</h2></div><div class="p-4 flex-1">...</div></div>
+                <div class="flex-1 bg-gray-200 border rounded-xl flex items-center justify-center"><h2 class="text-gray-500 font-bold text-xl uppercase tracking-widest">Mapa GPS Interactivo</h2></div>
+            </div>
+
+            <div id="view-crm" class="max-w-7xl mx-auto hidden animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-users text-aluonRed"></i> Base de Datos CRM</h1></div>
+                <div class="bg-white rounded-xl shadow-sm border p-8 text-center text-gray-500">Módulo de clientes activos y presupuestos.</div>
+            </div>
+
+            <div id="view-facturacion" class="max-w-7xl mx-auto hidden animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-file-invoice-dollar text-aluonRed"></i> Facturación</h1></div>
+                <div class="bg-white rounded-xl shadow-sm border p-8 text-center text-gray-500">Módulo financiero y control de cobros.</div>
+            </div>
+
+            <div id="view-rrss" class="max-w-7xl mx-auto hidden animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-share-nodes text-aluonRed"></i> Web y RRSS</h1></div>
+                <div class="bg-white rounded-xl shadow-sm border p-8 text-center text-gray-500">Automatización de marketing e Instagram.</div>
+            </div>
+
+            <div id="view-config" class="max-w-7xl mx-auto hidden animate-fade-in view-section">
+                <div class="flex justify-between items-center mb-6"><h1 class="text-2xl font-bold flex items-center gap-3"><i class="fas fa-cog text-aluonRed"></i> Configuración</h1></div>
+                <div class="bg-white rounded-xl shadow-sm border p-8 text-center text-gray-500">Panel de superadministrador.</div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // 1. INICIALIZAR GRÁFICAS DE CHART.JS
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gráfico Principal (Evolución Área)
+            const ctxMain = document.getElementById('chartEvolucion').getContext('2d');
+            
+            // Crear gradiente para la curva
+            let gradient = ctxMain.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(217, 79, 79, 0.5)'); // aluonRed transparente
+            gradient.addColorStop(1, 'rgba(217, 79, 79, 0.0)');
+
+            new Chart(ctxMain, {
+                type: 'line',
+                data: {
+                    labels: ['Oct', 'Nov', 'Dic', 'Ene', 'Feb', 'Mar'],
+                    datasets: [{
+                        label: 'Facturación (€)',
+                        data: [28000, 32000, 25000, 38000, 36000, 42850],
+                        borderColor: '#d94f4f',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#d94f4f',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4 // Hace la curva suave
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5], color: '#f3f4f6' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+			
+			// 3. SIMULADOR DE CÁLCULO DE DESPIECE (LÓGICA MATEMÁTICA)
+        function simularCalculoDespiece() {
+            // Mostrar Loader
+            document.getElementById('despiece-empty').classList.add('hidden');
+            document.getElementById('despiece-results').classList.add('hidden');
+            document.getElementById('despiece-loader').classList.remove('hidden');
+
+            // Recoger valores del formulario
+            const ancho = parseInt(document.getElementById('despiece-ancho').value) || 0;
+            const alto = parseInt(document.getElementById('despiece-alto').value) || 0;
+            const modeloText = document.getElementById('despiece-modelo').options[document.getElementById('despiece-modelo').selectedIndex].text;
+            const tipoText = document.getElementById('despiece-tipo').options[document.getElementById('despiece-tipo').selectedIndex].text;
+            const holgura = 10;
+
+            // Fórmulas matemáticas ficticias para el simulador
+            const altoHoja = alto - holgura;
+            const anchoHoja = ancho - holgura;
+            const numLamas = Math.ceil(altoHoja / 100);
+
+            // Rellenar cabeceras y esquema
+            document.getElementById('despiece-resumen-texto').innerText = `${modeloText} | ${tipoText} | Hueco Libre: ${ancho} x ${alto} mm`;
+            document.getElementById('esquema-ancho').innerText = ancho + " mm";
+            document.getElementById('esquema-alto').innerText = alto + " mm";
+
+            // Rellenar tabla
+            const tbody = document.getElementById('tabla-despiece-body');
+            tbody.innerHTML = `
+                <tr class="hover:bg-gray-50 border-b">
+                    <td class="px-4 py-3 font-mono text-xs font-bold text-gray-700">MAR-VER-01</td>
+                    <td class="px-4 py-3 text-xs">Perfil Marco Vertical</td>
+                    <td class="px-4 py-3 text-center font-bold">2</td>
+                    <td class="px-4 py-3 text-right font-mono text-blue-600 font-bold">${alto} mm</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">45º / 45º</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50 border-b">
+                    <td class="px-4 py-3 font-mono text-xs font-bold text-gray-700">MAR-HOR-01</td>
+                    <td class="px-4 py-3 text-xs">Perfil Marco Horizontal</td>
+                    <td class="px-4 py-3 text-center font-bold">2</td>
+                    <td class="px-4 py-3 text-right font-mono text-blue-600 font-bold">${ancho} mm</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">45º / 45º</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50 border-b bg-yellow-50">
+                    <td class="px-4 py-3 font-mono text-xs font-bold text-gray-700">HOJ-VER-01</td>
+                    <td class="px-4 py-3 text-xs">Montante Hoja Lateral</td>
+                    <td class="px-4 py-3 text-center font-bold">2</td>
+                    <td class="px-4 py-3 text-right font-mono text-aluonRed font-bold">${altoHoja - 40} mm</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">90º / 90º</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50 border-b bg-yellow-50">
+                    <td class="px-4 py-3 font-mono text-xs font-bold text-gray-700">ZOC-INF-80</td>
+                    <td class="px-4 py-3 text-xs">Zócalo Inferior/Superior</td>
+                    <td class="px-4 py-3 text-center font-bold">2</td>
+                    <td class="px-4 py-3 text-right font-mono text-aluonRed font-bold">${anchoHoja - 110} mm</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">90º / 90º</span></td>
+                </tr>
+                <tr class="hover:bg-gray-50 border-b">
+                    <td class="px-4 py-3 font-mono text-xs font-bold text-gray-700">LAM-CIE-10</td>
+                    <td class="px-4 py-3 text-xs">Lama Relleno (Mod. ${modeloText.split(" ")[1] || "Aluon"})</td>
+                    <td class="px-4 py-3 text-center font-bold">${numLamas}</td>
+                    <td class="px-4 py-3 text-right font-mono text-green-600 font-bold">${anchoHoja - 80} mm</td>
+                    <td class="px-4 py-3 text-center"><span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">90º / 90º</span></td>
+                </tr>
+            `;
+
+            // Retraso para que el loader luzca (simulación de cálculo complejo)
+            setTimeout(() => {
+                document.getElementById('despiece-loader').classList.add('hidden');
+                document.getElementById('despiece-results').classList.remove('hidden');
+            }, 800); 
+        }
+
+            // Gráfico de Donut (Modelos)
+            const ctxDonut = document.getElementById('chartModelos').getContext('2d');
+            new Chart(ctxDonut, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Correderas', 'Batientes', 'Peatonal'],
+                    datasets: [{
+                        data: [45, 35, 20],
+                        backgroundColor: ['#d94f4f', '#1e293b', '#cbd5e1'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%', // Grosor del donut
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+
+        // 2. LÓGICA DE NAVEGACIÓN (PESTAÑAS)
+        function switchTab(tabId) {
+            const views = document.querySelectorAll('.view-section');
+            views.forEach(view => view.classList.add('hidden'));
+            
+            const navs = document.querySelectorAll('.nav-item');
+            navs.forEach(nav => {
+                nav.classList.remove('bg-aluonRed', 'text-white', 'shadow-lg');
+                nav.classList.add('text-gray-300', 'hover:bg-gray-800', 'hover:text-white');
+            });
+
+            document.getElementById('view-' + tabId).classList.remove('hidden');
+            
+            const activeNav = document.getElementById('nav-' + tabId);
+            activeNav.classList.remove('text-gray-300', 'hover:bg-gray-800', 'hover:text-white');
+            activeNav.classList.add('bg-aluonRed', 'text-white', 'shadow-lg');
+        }
+
+        // 3. RELOJ EN TIEMPO REAL
+        function updateClock() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('es-ES', { hour12: false });
+            document.getElementById('current-date').innerText = dateStr;
+            document.getElementById('current-time').innerText = timeStr;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+</body>
+</html>

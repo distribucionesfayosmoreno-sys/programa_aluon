@@ -1,0 +1,59 @@
+ El volumen de la unidad C no tiene etiqueta.
+ El n£mero de serie del volumen es: 2E0F-CB6D
+
+ Directorio de C:\proyectos\registro-clientes\.agent\skills
+
+05/03/2026  19:15    <DIR>          .
+02/03/2026  20:34    <DIR>          ..
+05/03/2026  19:05    <DIR>          antigravity-workflows
+05/03/2026  19:11    <DIR>          backend-security-coder
+05/03/2026  19:11    <DIR>          cc-skill-coding-standards
+05/03/2026  19:11    <DIR>          cc-skill-continuous-learning
+05/03/2026  19:11    <DIR>          cc-skill-frontend-patterns
+05/03/2026  19:11    <DIR>          code-refactoring-context-restore
+05/03/2026  19:11    <DIR>          code-refactoring-refactor-clean
+05/03/2026  19:11    <DIR>          code-refactoring-tech-debt
+05/03/2026  19:11    <DIR>          database-architect
+05/03/2026  19:11    <DIR>          database-optimizer
+05/03/2026  19:11    <DIR>          frontend-dev-guidelines
+05/03/2026  19:11    <DIR>          frontend-developer
+05/03/2026  19:11    <DIR>          full-stack-orchestration-full-stack-feature
+02/03/2026  20:34    <DIR>          GASPROJECT
+05/03/2026  19:11    <DIR>          gemini-api-dev
+02/03/2026  20:34    <DIR>          git-advanced-workflows
+02/03/2026  20:34    <DIR>          git-pr-workflows-git-workflow
+02/03/2026  20:34    <DIR>          git-pr-workflows-onboard
+02/03/2026  20:34    <DIR>          git-pr-workflows-pr-enhance
+02/03/2026  20:34    <DIR>          git-pushing
+02/03/2026  20:34    <DIR>          github-actions-templates
+02/03/2026  20:34    <DIR>          github-automation
+02/03/2026  20:34    <DIR>          github-workflow-automation
+02/03/2026  20:34    <DIR>          java
+05/03/2026  19:11    <DIR>          kpi-dashboard-design
+02/03/2026  20:34    <DIR>          kpis
+05/03/2026  19:15                 0 log.txt
+05/03/2026  19:11    <DIR>          ml-pipeline-workflow
+02/03/2026  20:34    <DIR>          PostgreSQL
+05/03/2026  19:11    <DIR>          postgresql-optimization
+05/03/2026  19:11    <DIR>          react-best-practices
+05/03/2026  19:11    <DIR>          react-modernization
+02/03/2026  20:34    <DIR>          react-native-architecture
+05/03/2026  19:11    <DIR>          react-patterns
+02/03/2026  20:34    <DIR>          react-state-management
+05/03/2026  19:11    <DIR>          react-ui-patterns
+05/03/2026  19:11    <DIR>          saas-mvp-launcher
+02/03/2026  20:34    <DIR>          senior-architect
+02/03/2026  20:34    <DIR>          senior-fullstack
+05/03/2026  19:11    <DIR>          typescript-advanced-types
+05/03/2026  19:11    <DIR>          typescript-expert
+02/03/2026  20:34    <DIR>          typescript-pro
+05/03/2026  19:11    <DIR>          ui-skills
+05/03/2026  19:11    <DIR>          ui-ux-designer
+05/03/2026  19:11    <DIR>          ui-ux-pro-max
+05/03/2026  19:11    <DIR>          ui-visual-validator
+05/03/2026  19:11    <DIR>          vibe-code-auditor
+05/03/2026  19:11    <DIR>          workflow-automation
+05/03/2026  19:11    <DIR>          workflow-orchestration-patterns
+05/03/2026  19:11    <DIR>          workflow-patterns
+               1 archivos              0 bytes
+              51 dirs  844.088.913.920 bytes libres

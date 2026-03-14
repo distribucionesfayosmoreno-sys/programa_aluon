@@ -1,0 +1,64 @@
+version: '3.8'
+
+x-logging:
+  &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aluon-postgres-${ENV_NAME:-local}
+    environment:
+      POSTGRES_DB: ${DB_NAME:-aluon_saas}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - aluon-network
+    restart: unless-stopped
+    logging: *default-logging
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aluon-backend-${ENV_NAME:-local}
+    environment:
+      - SPRING_PROFILES_ACTIVE=${ENV_NAME:-local}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_NAME:-aluon_saas}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER:-postgres}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-postgres}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      - postgres
+    networks:
+      - aluon-network
+    restart: unless-stopped
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: aluon-frontend-${ENV_NAME:-local}
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+    networks:
+      - aluon-network
+    restart: unless-stopped
+    logging: *default-logging
+
+networks:
+  aluon-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    name: aluon-pgdata-${ENV_NAME:-local}

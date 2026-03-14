@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta SaaS - ALUON Aluminio Soldado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aluonBlack: '#111111',
+                        aluonRed: '#d94f4f',
+                        aluonGray: '#f4f4f4'
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        .fade-in { animation: fadeIn 1.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .module-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+        .module-card { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <nav class="bg-aluonBlack text-white p-6 sticky top-0 z-50 shadow-lg border-b-2 border-aluonRed">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-2xl font-light tracking-widest">
+                <span class="font-bold">ALUON</span><span class="text-sm ml-2 text-gray-400">Software Suite</span>
+            </div>
+            <div class="hidden md:flex space-x-6 text-xs uppercase tracking-wider font-bold">
+                <a href="#flujo" class="hover:text-aluonRed transition">Flujo</a>
+                <a href="#roles" class="hover:text-aluonRed transition">Módulos y Roles</a>
+                <a href="#interfaces" class="hover:text-aluonRed transition">Interfaces</a>
+                <a href="#rrss" class="hover:text-aluonRed transition">Web & RRSS</a>
+                <a href="#inversion" class="bg-aluonRed px-4 py-2 rounded text-white hover:bg-white hover:text-aluonBlack transition">Inversión</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="bg-white py-24 fade-in relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-1/2 h-full bg-aluonGray -skew-x-12 transform origin-top-right z-0"></div>
+        
+        <div class="container mx-auto px-6 text-center max-w-5xl relative z-10">
+            <span class="bg-aluonBlack text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest mb-6 inline-block">SaaS Exclusivo Cerrajería Industrial</span>
+            <h1 class="text-4xl md:text-6xl font-light mb-6 text-gray-900 leading-tight">El control total de <br><span class="font-bold text-aluonBlack">Aluminio Soldado</span></h1>
+            <p class="text-lg text-gray-600 mb-10 max-w-3xl mx-auto">Sustituimos el papel y los procesos manuales por una plataforma en la nube. Conecte las mediciones, el almacén, la fábrica y los montadores en tiempo real, incluso sin conexión a internet.</p>
+            <a href="#flujo" class="bg-aluonRed text-white px-10 py-4 uppercase tracking-widest text-sm font-bold hover:bg-red-700 transition shadow-xl inline-block">Ver cómo funciona</a>
+        </div>
+    </header>
+
+    <section id="flujo" class="py-20 bg-aluonGray border-y border-gray-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-light uppercase tracking-widest text-aluonBlack">El Workflow <span class="font-bold">Automatizado</span></h2>
+                <div class="h-1 w-20 bg-aluonRed mx-auto mt-4"></div>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">El viaje perfecto de una puerta: desde que se mide en la obra hasta que se cobra en la oficina.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center relative max-w-5xl mx-auto">
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gray-300 -z-10 transform -translate-y-1/2"></div>
+                
+                <div class="flex flex-col items-center mb-8 md:mb-0 px-4">
+                    <div class="w-16 h-16 rounded-full bg-aluonBlack text-white flex items-center justify-center text-2xl shadow-lg mb-4 border-4 border-aluonGray z-10"><i class="fas fa-ruler"></i></div>
+                    <h4 class="font-bold text-aluonBlack text-center">1. Medición</h4>
+                    <p class="text-xs text-gray-500 text-center mt-1">Tablet en Obra</p>
+                </div>
+                <div class="flex flex-col items-center mb-8 md:mb-0 px-4">
+                    <div class="w-16 h-16 rounded-full bg-white text-aluonBlack flex items-center justify-center text-2xl shadow-lg mb-4 border-4 border-aluonGray z-10"><i class="fas fa-boxes"></i></div>
+                    <h4 class="font-bold text-aluonBlack text-center">2. Almacén</h4>
+                    <p class="text-xs text-gray-500 text-center mt-1">Reserva de Stock</p>
+                </div>
+                <div class="flex flex-col items-center mb-8 md:mb-0 px-4">
+                    <div class="w-16 h-16 rounded-full bg-aluonRed text-white flex items-center justify-center text-2xl shadow-lg mb-4 border-4 border-aluonGray z-10 scale-110"><i class="fas fa-fire-burner"></i></div>
+                    <h4 class="font-bold text-aluonBlack text-center">3. Producción</h4>
+                    <p class="text-xs text-gray-500 text-center mt-1">Soldadura (Tablet Táctil)</p>
+                </div>
+                <div class="flex flex-col items-center mb-8 md:mb-0 px-4">
+                    <div class="w-16 h-16 rounded-full bg-white text-aluonBlack flex items-center justify-center text-2xl shadow-lg mb-4 border-4 border-aluonGray z-10"><i class="fas fa-truck-fast"></i></div>
+                    <h4 class="font-bold text-aluonBlack text-center">4. Montaje</h4>
+                    <p class="text-xs text-gray-500 text-center mt-1">App Offline & Firma</p>
+                </div>
+                <div class="flex flex-col items-center px-4">
+                    <div class="w-16 h-16 rounded-full bg-green-600 text-white flex items-center justify-center text-2xl shadow-lg mb-4 border-4 border-aluonGray z-10"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <h4 class="font-bold text-aluonBlack text-center">5. Cierre</h4>
+                    <p class="text-xs text-gray-500 text-center mt-1">Factura Automática</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="roles" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-light uppercase tracking-widest text-aluonBlack">Módulos por <span class="font-bold">Rol de Empleado</span></h2>
+                <div class="h-1 w-20 bg-aluonRed mx-auto mt-4"></div>
+                <p class="mt-4 text-gray-600">Sistema RBAC (Control de Acceso Basado en Roles). Cada trabajador solo ve las herramientas que necesita para operar, garantizando seguridad y facilidad de uso.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <div class="bg-gray-50 p-8 border-t-4 border-aluonBlack module-card shadow-md">
+                    <div class="text-aluonRed text-3xl mb-4"><i class="fas fa-user-tie"></i></div>
+                    <div class="flex gap-2 mb-3">
+                        <span class="bg-aluonBlack text-white text-[10px] px-2 py-1 rounded font-bold">SUPERADMIN</span>
+                        <span class="bg-gray-800 text-white text-[10px] px-2 py-1 rounded font-bold">ADMIN</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Gerencia y Control Total</h3>
+                    <p class="text-gray-600 text-sm">El SuperAdmin gestiona la plataforma técnica SaaS. El Admin (Gerente de ALUON) accede a paneles de control (Dashboards) para ver la rentabilidad en tiempo real, métricas de producción y control absoluto del negocio.</p>
+                </div>
+
+                <div class="bg-gray-50 p-8 border-t-4 border-aluonBlack module-card shadow-md">
+                    <div class="text-aluonRed text-3xl mb-4"><i class="fas fa-calculator"></i></div>
+                    <div class="flex gap-2 mb-3">
+                        <span class="bg-blue-600 text-white text-[10px] px-2 py-1 rounded font-bold">CONTABILIDAD</span>
+                        <span class="bg-purple-600 text-white text-[10px] px-2 py-1 rounded font-bold">RRHH</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Oficina y Administración</h3>
+                    <p class="text-gray-600 text-sm">Contabilidad factura automáticamente las obras finalizadas y controla cobros. RRHH gestiona altas/bajas de empleados, fichajes, turnos y nóminas desde un panel centralizado.</p>
+                </div>
+
+                <div class="bg-gray-50 p-8 border-t-4 border-aluonBlack module-card shadow-md">
+                    <div class="text-aluonRed text-3xl mb-4"><i class="fas fa-warehouse"></i></div>
+                    <div class="flex gap-2 mb-3">
+                        <span class="bg-yellow-600 text-white text-[10px] px-2 py-1 rounded font-bold">ENCARGADO ALMACÉN</span>
+                        <span class="bg-yellow-500 text-white text-[10px] px-2 py-1 rounded font-bold">ALMACÉN</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Gestión de Stock</h3>
+                    <p class="text-gray-600 text-sm">El Encargado aprueba órdenes y descuenta el material de la base de datos. Los operarios de almacén registran entradas de proveedores y preparan los "kits" de montaje para los soldadores.</p>
+                </div>
+
+                <div class="bg-aluonBlack text-white p-8 border-t-4 border-aluonRed module-card shadow-xl transform md:scale-105 z-10">
+                    <div class="text-aluonRed text-4xl mb-4"><i class="fas fa-fire-burner"></i></div>
+                    <div class="flex gap-2 mb-3">
+                        <span class="bg-aluonRed text-white text-[10px] px-2 py-1 rounded font-bold">SOLDADOR (PRODUCCIÓN)</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Cadena de Montaje</h3>
+                    <p class="text-gray-400 text-sm">El corazón de la fábrica. Los soldadores tienen pantallas táctiles simplificadas (modo oscuro) para ver planos, medidas y marcar con un solo botón gigante cuando la puerta está soldada y terminada.</p>
+                </div>
+
+                <div class="bg-gray-50 p-8 border-t-4 border-aluonBlack module-card shadow-md">
+                    <div class="text-aluonRed text-3xl mb-4"><i class="fas fa-truck"></i></div>
+                    <div class="flex gap-2 mb-3">
+                        <span class="bg-green-600 text-white text-[10px] px-2 py-1 rounded font-bold">CONDUCTOR</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Logística y Rutas</h3>
+                    <p class="text-gray-600 text-sm">App móvil optimizada para vehículos. Visualización de rutas GPS, albaranes de entrega digitales y optimización de cargas para llevar las puertas de la fábrica a la obra sin contratiempos.</p>
+                </div>
+
+                <div class="bg-gray-50 p-8 border-t-4 border-aluonBlack module-card shadow-md">
+                    <div class="text-aluonRed text-3xl mb-4"><i class="fas fa-tools"></i></div>
+                    <div class="flex gap-2 mb-3">
+                        <span class="bg-teal-600 text-white text-[10px] px-2 py-1 rounded font-bold">MONTADOR</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Instalación en Obra (PWA)</h3>
+                    <p class="text-gray-600 text-sm">Los montadores operan con la "Killer Feature": una App Móvil que funciona sin internet. Consultan planos en el sótano, recogen la firma digital del cliente y el sistema se sincroniza al salir a la calle.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="interfaces" class="py-24 bg-aluonBlack text-white overflow-hidden">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl font-light uppercase tracking-widest text-white">Interfaces diseñadas <span class="font-bold">para cada entorno</span></h2>
+                <div class="h-1 w-20 bg-aluonRed mx-auto mt-4"></div>
+                <p class="mt-4 text-gray-400 max-w-2xl mx-auto">Pantallas especializadas para Oficina (PC), Fábrica (Tablet industrial) y Obras (Smartphone).</p>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-center gap-12 mb-24">
+                <div class="lg:w-1/3 order-2 lg:order-1">
+                    <h3 class="text-2xl font-bold mb-3 border-l-4 border-aluonRed pl-4">1. Dashboard (Admin/Contabilidad)</h3>
+                    <p class="text-gray-400 mb-4 text-sm">Vista completa del negocio para la gerencia y finanzas. Permite gestionar clientes, aprobar presupuestos y revisar la facturación general.</p>
+                </div>
+                <div class="lg:w-2/3 order-1 lg:order-2 w-full">
+                    <div class="rounded-xl bg-gray-900 shadow-2xl border border-gray-700 overflow-hidden">
+                        <div class="bg-gray-800 px-4 py-3 flex items-center gap-2 border-b border-gray-700">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div><div class="w-3 h-3 rounded-full bg-yellow-500"></div><div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <div class="mx-auto text-xs text-gray-500 font-mono">aluon.saas/dashboard</div>
+                        </div>
+                        <div class="bg-gray-50 flex h-64 md:h-80">
+                            <div class="w-1/4 bg-white border-r border-gray-200 p-4 hidden md:block">
+                                <div class="font-bold text-aluonBlack mb-6 text-sm">ALUON <span class="text-aluonRed">ERP</span></div>
+                                <div class="space-y-3 text-xs text-gray-500 font-semibold">
+                                    <div class="text-aluonRed bg-red-50 p-2 rounded"><i class="fas fa-chart-line mr-2"></i> Dashboard</div>
+                                    <div class="p-2"><i class="fas fa-file-invoice mr-2"></i> Facturas (Contabilidad)</div>
+                                    <div class="p-2"><i class="fas fa-users mr-2"></i> Personal (RRHH)</div>
+                                </div>
+                            </div>
+                            <div class="flex-1 p-6 text-gray-800">
+                                <h4 class="font-bold mb-4">Vista General</h4>
+                                <div class="grid grid-cols-3 gap-4 mb-6">
+                                    <div class="bg-white p-3 rounded shadow-sm border text-center"><div class="text-xs text-gray-500">Producción</div><div class="text-xl font-bold">14</div></div>
+                                    <div class="bg-white p-3 rounded shadow-sm border text-center"><div class="text-xs text-gray-500">Montajes Hoy</div><div class="text-xl font-bold text-blue-600">3</div></div>
+                                    <div class="bg-white p-3 rounded shadow-sm border text-center"><div class="text-xs text-gray-500">Facturado</div><div class="text-xl font-bold text-green-600">€4.2K</div></div>
+                                </div>
+                                <div class="bg-white rounded shadow-sm border p-3">
+                                    <div class="text-xs text-gray-500 mb-2 font-bold">Últimas Órdenes de Trabajo</div>
+                                    <div class="flex justify-between items-center border-b py-2 text-xs"><span>ORD-1024 (Corredera)</span><span class="bg-yellow-100 text-yellow-700 px-2 rounded">Producción</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-center gap-12 mb-24">
+                <div class="lg:w-2/3 w-full">
+                    <div class="rounded-[2rem] bg-gray-900 shadow-2xl border-8 border-gray-800 overflow-hidden mx-auto max-w-2xl">
+                        <div class="bg-[#1e1e24] p-6 h-72 md:h-96 flex flex-col justify-between">
+                            <div class="flex justify-between items-center border-b border-gray-700 pb-4">
+                                <div class="text-white font-bold text-xl"><i class="fas fa-fire-burner text-aluonRed mr-2"></i> PERFIL: SOLDADOR 1</div>
+                            </div>
+                            <div class="bg-gray-800 rounded-lg p-6 flex-1 my-4 flex flex-col justify-center">
+                                <div class="text-aluonRed font-bold mb-2 uppercase tracking-widest text-sm">Trabajo Actual</div>
+                                <h2 class="text-3xl text-white font-bold mb-2">Puerta Peatonal Classic</h2>
+                                <p class="text-gray-400 mb-4 text-lg">Medidas: <span class="text-white font-mono">1200x2100mm</span></p>
+                                <button class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded text-sm font-bold w-1/2"><i class="fas fa-file-pdf mr-2"></i> Ver Plano</button>
+                            </div>
+                            <button class="w-full bg-green-600 text-white font-bold py-5 rounded-lg text-xl uppercase"><i class="fas fa-check-circle mr-2"></i> Finalizar Puerta</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/3">
+                    <h3 class="text-2xl font-bold mb-3 border-l-4 border-aluonRed pl-4">2. Terminal (Soldador/Almacén)</h3>
+                    <p class="text-gray-400 mb-4 text-sm">Modo oscuro para proteger la vista en la nave y botones gigantes para ser usados con las manos sucias o guantes industriales. Cero distracciones.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <h3 class="text-2xl font-bold mb-3 border-l-4 border-aluonRed pl-4">3. App PWA (Montador/Conductor)</h3>
+                    <p class="text-gray-400 mb-4 text-sm">Aplicación móvil que funciona **Offline** (sin internet). Ideal para sótanos y obras. Recoge rutas GPS, tareas de instalación y la firma digital del cliente.</p>
+                </div>
+                <div class="lg:w-1/2 flex justify-center">
+                    <div class="w-72 border-[10px] border-gray-800 rounded-[2.5rem] bg-white overflow-hidden shadow-2xl relative">
+                        <div class="absolute top-0 inset-x-0 h-6 bg-gray-800 rounded-b-xl w-32 mx-auto z-10"></div>
+                        <div class="bg-gray-100 h-[500px] flex flex-col pt-8">
+                            <div class="bg-aluonBlack text-white p-4">
+                                <div class="text-xs text-gray-400"><i class="fas fa-wifi-slash text-red-500 mr-1"></i> Modo Offline Activo</div>
+                                <div class="font-bold text-lg mt-1">C/ Mayor, 45 (Madrid)</div>
+                            </div>
+                            <div class="p-4 flex-1">
+                                <div class="bg-white border rounded p-3 mb-4 shadow-sm">
+                                    <div class="text-[10px] text-gray-400 uppercase font-bold mb-2">Checklist Montador</div>
+                                    <div class="flex items-center gap-2 mb-2"><input type="checkbox" checked class="accent-aluonRed"> <span class="text-xs line-through text-gray-400">Descarga y Nivelación</span></div>
+                                    <div class="flex items-center gap-2"><input type="checkbox" class="accent-aluonRed"> <span class="text-xs text-gray-800">Fijación de Bisagras</span></div>
+                                </div>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg h-16 flex items-center justify-center bg-white mb-2">
+                                    <span class="text-gray-400 text-xs italic">Firma del cliente...</span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-white border-t">
+                                <button class="w-full bg-aluonRed text-white font-bold py-3 rounded text-sm shadow-md">Instalación Completada</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <section id="rrss" class="py-24 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col lg:flex-row items-center gap-16">
+                
+                <div class="lg:w-1/2">
+                    <div class="inline-block bg-aluonBlack text-white px-3 py-1 rounded text-xs font-bold uppercase tracking-wider mb-4">Módulo Comercial</div>
+                    <h2 class="text-3xl font-light uppercase tracking-widest text-aluonBlack mb-6">Su trabajo diario, <br><span class="font-bold">su mejor publicidad</span></h2>
+                    <p class="mb-6 text-gray-600 text-lg">El SaaS conecta la fábrica con su Catálogo Web Público y sus Redes Sociales. Convierta cada instalación en ventas.</p>
+                    
+                    <ul class="space-y-6">
+                        <li class="flex items-start">
+                            <div class="bg-white p-3 rounded-full shadow-md text-aluonRed mr-4"><i class="fas fa-camera text-xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-aluonBlack mb-1">1. Captura (Montador)</h4>
+                                <p class="text-sm text-gray-600">Al terminar, el montador hace una foto de la puerta instalada desde la App.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-white p-3 rounded-full shadow-md text-blue-600 mr-4"><i class="fas fa-globe text-xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-aluonBlack mb-1">2. Catálogo Dinámico (Web)</h4>
+                                <p class="text-sm text-gray-600">El sistema nutre automáticamente el catálogo de su web corporativa con proyectos reales.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="bg-white p-3 rounded-full shadow-md text-pink-600 mr-4"><i class="fab fa-instagram text-xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-aluonBlack mb-1">3. Automatización Redes (Oficina)</h4>
+                                <p class="text-sm text-gray-600">Genera un post automático para Instagram y Facebook. Usted solo hace clic en "Aprobar".</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="lg:w-1/2 relative">
+                    <div class="relative z-10 w-72 mx-auto bg-white rounded-[2rem] shadow-2xl border-8 border-gray-900 overflow-hidden transform rotate-2">
+                        <div class="flex items-center justify-between p-3 border-b">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full bg-aluonBlack text-white flex items-center justify-center text-xs font-bold">AL</div>
+                                <div class="text-xs font-bold">aluon_oficial</div>
+                            </div>
+                            <i class="fas fa-ellipsis-h text-gray-400 text-sm"></i>
+                        </div>
+                        <div class="w-full h-64 bg-gray-800 relative flex items-center justify-center">
+                             <i class="fas fa-door-closed text-6xl text-gray-500 mb-2"></i>
+                             <div class="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded">Foto de Instalación</div>
+                        </div>
+                        <div class="p-3">
+                            <div class="text-xs font-bold mb-1">Les gusta a 124 personas</div>
+                            <div class="text-xs text-gray-800">
+                                <span class="font-bold">aluon_oficial</span> ¡Terminamos la semana con esta espectacular puerta! Instalación finalizada y cliente satisfecho. 🚀<br>
+                                <span class="text-blue-500 mt-1 inline-block">#AluminioSoldado #Cerrajería #PuertasDeDiseño</span>
+                            </div>
+                            <div class="text-[10px] text-gray-400 mt-2 uppercase">Publicado por SaaS Automation</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="inversion" class="py-20 bg-gray-100 border-t border-gray-200">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-light uppercase tracking-widest text-aluonBlack">Plan de <span class="font-bold">Implantación</span></h2>
+                <div class="h-1 w-20 bg-aluonRed mx-auto mt-4"></div>
+                <p class="mt-4 text-gray-600">Transición segura, por fases y sin detener la producción actual de ALUON.</p>
+            </div>
+
+            <div class="max-w-4xl mx-auto mb-16 flex flex-col md:flex-row gap-4 justify-between text-center">
+                <div class="bg-white p-4 rounded shadow flex-1 border-t-4 border-gray-400"><div class="font-bold mb-1">Fase 1</div><div class="text-xs text-gray-500">Auditoría y Diseño UX</div></div>
+                <div class="bg-white p-4 rounded shadow flex-1 border-t-4 border-gray-600"><div class="font-bold mb-1">Fase 2</div><div class="text-xs text-gray-500">Desarrollo Core & Offline</div></div>
+                <div class="bg-white p-4 rounded shadow flex-1 border-t-4 border-gray-800"><div class="font-bold mb-1">Fase 3</div><div class="text-xs text-gray-500">Pruebas Preproducción</div></div>
+                <div class="bg-aluonBlack text-white p-4 rounded shadow flex-1 border-t-4 border-aluonRed"><div class="font-bold mb-1">Fase 4</div><div class="text-xs text-gray-300">Lanzamiento & Web</div></div>
+            </div>
+
+            <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-aluonBlack hover:shadow-xl transition">
+                    <h3 class="text-2xl font-light text-center mb-2">Desarrollo <span class="font-bold">SaaS a Medida</span></h3>
+                    <p class="text-center text-gray-500 text-sm mb-6">Setup inicial, Ingeniería e Interfaces</p>
+                    <div class="text-center text-4xl font-bold text-aluonBlack mb-6">Presupuesto</div>
+                    <ul class="space-y-3 text-sm text-gray-600 mb-8">
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Desarrollo completo Frontend / Backend</li>
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Interfaces diseñadas por Rol</li>
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Aplicación móvil con modo Offline</li>
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Integración Web / Marketing</li>
+                    </ul>
+                </div>
+                <div class="bg-aluonBlack text-white p-8 rounded-lg shadow-xl border-t-4 border-aluonRed transform md:-translate-y-4">
+                    <div class="text-center mb-2"><span class="bg-aluonRed text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Alojamiento y Soporte</span></div>
+                    <h3 class="text-2xl font-light text-center mb-2">Suscripción <span class="font-bold">Cloud</span></h3>
+                    <p class="text-center text-gray-400 text-sm mb-6">Mantenimiento y Nube de Alta Disponibilidad</p>
+                    <div class="text-center text-4xl font-bold text-white mb-2">Mensualidad</div>
+                    <ul class="space-y-3 text-sm text-gray-300 mb-8 mt-6">
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Servidores Cloud y Base de Datos</li>
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Copias de seguridad automáticas</li>
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Mantenimiento preventivo</li>
+                        <li><i class="fas fa-check text-aluonRed mr-2"></i> Soporte técnico remoto</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-black text-gray-600 py-8 text-center text-sm border-t border-gray-900">
+        <p>&copy; 2026 Plataforma SaaS Cerrajería Industrial. Tecnología PWA + Cloud Independiente.</p>
+    </footer>
+
+</body>
+</html>

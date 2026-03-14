@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5435/aluon_saas_local}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        tenant_identifier_resolver: com.aluon.core.tenant.CurrentTenantIdentifierResolverImpl
+  modulith:
+    events:
+      jdbc-schema-initialization:
+        enabled: true
