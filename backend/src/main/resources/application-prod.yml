@@ -1,15 +1,15 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:3000/aluonbbdd}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/aluonbbdd}
     username: ${SPRING_DATASOURCE_USERNAME:aluon}
     password: ${SPRING_DATASOURCE_PASSWORD:aluon}
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         tenant_identifier_resolver: com.aluon.core.tenant.CurrentTenantIdentifierResolverImpl
   modulith:
     events:

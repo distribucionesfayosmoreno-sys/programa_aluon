@@ -1,22 +1,41 @@
-import Sidebar from './components/Sidebar';
+import { useMemo, useState } from 'react';
+import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './pages/CustomerManagement';
+import WorkOrders from './pages/WorkOrders';
 
-const App = () => (
-  <div className="flex min-h-screen font-sans" style={{ backgroundColor: '#f8f9fb' }}>
-    <Sidebar />
+const App = () => {
+  const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
 
-    <div className="flex-1 flex flex-col min-w-0">
-      {/* Topbar */}
-      <header
-        className="h-16 flex-shrink-0 flex items-center justify-between px-8 sticky top-0 z-30"
-        style={{ background: '#ffffff', borderBottom: '1px solid #e8eaed' }}
-      >
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide">
-          <span style={{ color: '#8b949e' }}>ALUON</span>
-          <span style={{ color: '#8b949e' }}>/</span>
-          <span style={{ color: '#0d1117' }}>Clientes (CRM)</span>
-        </div>
+  const breadcrumb = useMemo(() => {
+    switch (activeModule) {
+      case 'ordenes':
+        return 'Órdenes de trabajo';
+      case 'dashboard':
+        return 'Dashboard';
+      case 'ajustes':
+        return 'Ajustes';
+      case 'clientes':
+      default:
+        return 'Clientes (CRM)';
+    }
+  }, [activeModule]);
+
+  return (
+    <div className="flex min-h-screen font-sans" style={{ backgroundColor: '#f8f9fb' }}>
+      <Sidebar activeModule={activeModule} onSelect={setActiveModule} />
+
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Topbar */}
+        <header
+          className="h-16 flex-shrink-0 flex items-center justify-between px-8 sticky top-0 z-30"
+          style={{ background: '#ffffff', borderBottom: '1px solid #e8eaed' }}
+        >
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide">
+            <span style={{ color: '#8b949e' }}>ALUON</span>
+            <span style={{ color: '#8b949e' }}>/</span>
+            <span style={{ color: '#0d1117' }}>{breadcrumb}</span>
+          </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3">
@@ -64,14 +83,28 @@ const App = () => (
         </div>
       </header>
 
-      {/* Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-screen-xl mx-auto animate-fade-up">
-          <CustomerManagement />
-        </div>
-      </main>
+        {/* Content */}
+        <main className="flex-1 p-8 overflow-y-auto">
+          <div className="max-w-screen-xl mx-auto animate-fade-up">
+            {activeModule === 'clientes' && <CustomerManagement />}
+            {activeModule === 'ordenes' && <WorkOrders />}
+            {activeModule === 'dashboard' && (
+              <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
+                <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Dashboard</h2>
+                <p className="text-xs mt-2" style={{ color: '#9ca3af' }}>Módulo en preparación.</p>
+              </div>
+            )}
+            {activeModule === 'ajustes' && (
+              <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
+                <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Ajustes</h2>
+                <p className="text-xs mt-2" style={{ color: '#9ca3af' }}>Configuración en preparación.</p>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default App;
