@@ -5,6 +5,7 @@ import WorkOrders from './pages/WorkOrders';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
+  const [openNewRequest, setOpenNewRequest] = useState(false);
 
   const breadcrumb = useMemo(() => {
     switch (activeModule) {
@@ -22,7 +23,14 @@ const App = () => {
 
   return (
     <div className="flex min-h-screen font-sans" style={{ backgroundColor: '#f8f9fb' }}>
-      <Sidebar activeModule={activeModule} onSelect={setActiveModule} />
+      <Sidebar
+        activeModule={activeModule}
+        onSelect={setActiveModule}
+        onNewOrder={() => {
+          setActiveModule('ordenes');
+          setOpenNewRequest(true);
+        }}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
@@ -87,7 +95,12 @@ const App = () => {
         <main className="flex-1 p-8 overflow-y-auto">
           <div className="max-w-screen-xl mx-auto animate-fade-up">
             {activeModule === 'clientes' && <CustomerManagement />}
-            {activeModule === 'ordenes' && <WorkOrders />}
+            {activeModule === 'ordenes' && (
+              <WorkOrders
+                openNewRequest={openNewRequest}
+                onNewRequestHandled={() => setOpenNewRequest(false)}
+              />
+            )}
             {activeModule === 'dashboard' && (
               <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
                 <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Dashboard</h2>

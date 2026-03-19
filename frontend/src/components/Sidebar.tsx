@@ -12,6 +12,7 @@ interface NavItemProps {
 interface SidebarProps {
   activeModule: ModuleKey;
   onSelect: (module: ModuleKey) => void;
+  onNewOrder?: () => void;
 }
 
 const NavItem = ({ label, active, icon, onClick }: NavItemProps) => (
@@ -21,7 +22,7 @@ const NavItem = ({ label, active, icon, onClick }: NavItemProps) => (
   </button>
 );
 
-const Sidebar = ({ activeModule, onSelect }: SidebarProps) => (
+const Sidebar = ({ activeModule, onSelect, onNewOrder }: SidebarProps) => (
   <aside
     className="w-64 min-h-screen flex flex-col flex-shrink-0"
     style={{ background: 'linear-gradient(180deg,#0d1117 0%,#161b22 100%)', boxShadow: '4px 0 24px rgba(0,0,0,0.22)' }}
@@ -67,7 +68,10 @@ const Sidebar = ({ activeModule, onSelect }: SidebarProps) => (
 
     {/* CTA */}
     <div className="p-4">
-      <button className="btn-primary w-full justify-center text-xs tracking-widest py-4 rounded-xl" onClick={() => onSelect('ordenes')}>
+      <button
+        className="btn-primary w-full justify-center text-xs tracking-widest py-4 rounded-xl"
+        onClick={() => (onNewOrder ? onNewOrder() : onSelect('ordenes'))}
+      >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
