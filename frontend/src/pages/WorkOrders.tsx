@@ -1,5 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCustomers } from '../hooks/useCustomers';
+import aluonClassicImg from '../assets/cutlist/aluonClassic.jpg';
+import aluonPremiumImg from '../assets/cutlist/aluonPremium.jpg';
+import aluonInoxImg from '../assets/cutlist/aluonInox.jpg';
+import aluonVenecianaImg from '../assets/cutlist/aluonVeneciana.jpg';
+import corte45Img from '../assets/cutlist/corte45.jpg';
+import corte90Img from '../assets/cutlist/corte90.jpg';
+import corte45y90Img from '../assets/cutlist/corte45y90.jpg';
 
 const MODELS = [
   { id: 'CLASSIC', label: 'ALUON Classic', pricePerM2: 140 },
@@ -117,6 +124,42 @@ type CutlistDoorType = 'PEATONAL' | 'ABATIBLE_UNA' | 'ABATIBLE_DOS' | 'CORREDERA
 type CutlistDoorModel = 'PREMIUM' | 'CLASSIC' | 'INOX' | 'VENECIANA';
 type CutlistRailType = 'CARRIL_16' | 'CARRIL_20';
 type CutlistMountingType = 'A' | 'B';
+
+type CutlistImage = {
+  src: string;
+  alt: string;
+  label: string;
+};
+
+const CUTLIST_MODEL_IMAGES: Record<CutlistDoorModel, CutlistImage> = {
+  PREMIUM: { src: aluonPremiumImg, alt: 'ALUON Premium', label: 'Modelo Premium' },
+  CLASSIC: { src: aluonClassicImg, alt: 'ALUON Classic', label: 'Modelo Classic' },
+  INOX: { src: aluonInoxImg, alt: 'ALUON Inox', label: 'Modelo Inox' },
+  VENECIANA: { src: aluonVenecianaImg, alt: 'ALUON Veneciana', label: 'Modelo Veneciana' },
+};
+
+const CUTLIST_TYPE_IMAGES: Record<CutlistDoorType, CutlistImage[]> = {
+  PEATONAL: [
+    { src: corte90Img, alt: 'Corte 90°', label: 'Marco (90°)' },
+    { src: corte45Img, alt: 'Corte 45°', label: 'Esquinas (45°)' },
+  ],
+  ABATIBLE_UNA: [
+    { src: corte45Img, alt: 'Corte 45°', label: 'Esquinas (45°)' },
+    { src: corte90Img, alt: 'Corte 90°', label: 'Marco (90°)' },
+  ],
+  ABATIBLE_DOS: [
+    { src: corte45Img, alt: 'Corte 45°', label: 'Esquinas (45°)' },
+    { src: corte90Img, alt: 'Corte 90°', label: 'Marco (90°)' },
+  ],
+  CORREDERA: [
+    { src: corte45y90Img, alt: 'Corte 45° y 90°', label: 'Esquinas mixtas' },
+    { src: corte90Img, alt: 'Corte 90°', label: 'Marco recto' },
+  ],
+  VALLA: [
+    { src: corte90Img, alt: 'Corte 90°', label: 'Marco (90°)' },
+    { src: corte45Img, alt: 'Corte 45°', label: 'Esquinas (45°)' },
+  ],
+};
 
 type CutlistRequest = {
   doorType: CutlistDoorType;
@@ -548,6 +591,9 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
   const [cutlistResult, setCutlistResult] = useState<CutlistResponse | null>(null);
   const [cutlistError, setCutlistError] = useState('');
   const [cutlistLoading, setCutlistLoading] = useState(false);
+  const [cutlistImageIndex, setCutlistImageIndex] = useState(0);
+  const [cutlistHoverIndex, setCutlistHoverIndex] = useState<number | null>(null);
+  const [cutlistPinnedIndex, setCutlistPinnedIndex] = useState<number | null>(null);
 
   const [prodCut, setProdCut] = useState(false);
   const [prodFab, setProdFab] = useState(false);
@@ -640,6 +686,20 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
   const needsRail = doorType === 'CORREDERA';
   const needsMounting = doorType === 'CORREDERA';
   const needsTail = doorType === 'CORREDERA';
+
+  const cutlistImages = useMemo(() => {
+    const modelImage = CUTLIST_MODEL_IMAGES[doorModel];
+    const typeImages = CUTLIST_TYPE_IMAGES[doorType] ?? [];
+    return [modelImage, ...typeImages];
+  }, [doorModel, doorType]);
+
+  useEffect(() => {
+    setCutlistImageIndex(0);
+    setCutlistHoverIndex(null);
+    setCutlistPinnedIndex(null);
+  }, [doorModel, doorType, cutlistResult]);
+
+  const activeCutlistIndex = cutlistPinnedIndex ?? cutlistHoverIndex;
 
   const canGenerateCutlist = canGenerateDevelopment
     && widthMm > 0
@@ -1293,6 +1353,107 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
                   {cutlistError}
                 </p>
               )}
+              <div
+                className="mt-6 rounded-2xl p-4"
+                style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+                      Despiece visual
+                    </div>
+                    <div className="text-sm font-bold" style={{ color: '#111827' }}>
+                      {DOOR_MODELS.find(model => model.id === doorModel)?.label} · {DOOR_TYPES.find(type => type.id === doorType)?.label}
+                    </div>
+                    <div className="text-[11px]" style={{ color: '#6b7280' }}>
+                      {widthMm > 0 && heightMm > 0 ? `${widthMm} × ${heightMm} mm` : 'Introduce medidas para un cálculo preciso.'}
+                    </div>
+                    {cutlistResult && (
+                      <div className="text-[10px] mt-1" style={{ color: '#9ca3af' }}>
+                        Pasa el ratón por una pieza para resaltarla. Clic para fijar.
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest" style={{ color: cutlistResult ? '#15803d' : '#9ca3af' }}>
+                    {cutlistResult ? 'Despiece generado' : 'Previsualización'}
+                  </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-4">
+                  <div
+                    className="relative rounded-xl border overflow-hidden min-h-[280px] flex items-center justify-center bg-gray-50"
+                    style={{ borderColor: activeCutlistIndex !== null && cutlistResult ? '#e5534b' : '#e5e7eb' }}
+                  >
+                    {cutlistImages[cutlistImageIndex] && (
+                      <img
+                        src={cutlistImages[cutlistImageIndex].src}
+                        alt={cutlistImages[cutlistImageIndex].alt}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {activeCutlistIndex !== null && cutlistResult && (
+                      <div className="absolute left-4 bottom-4 right-4">
+                        <div
+                          className="rounded-xl px-4 py-3 text-xs font-semibold"
+                          style={{ background: 'rgba(17,24,39,0.85)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}
+                        >
+                          <div className="text-[10px] uppercase tracking-widest" style={{ color: '#fca5a5' }}>
+                            Pieza seleccionada
+                          </div>
+                          <div className="mt-1 font-bold">
+                            {cutlistResult.items[activeCutlistIndex]?.description || '—'}
+                          </div>
+                          <div className="mt-1 text-[11px]" style={{ color: '#e5e7eb' }}>
+                            {cutlistResult.items[activeCutlistIndex]
+                              ? `${cutlistResult.items[activeCutlistIndex].units}x · ${cutlistResult.items[activeCutlistIndex].cutMeasure}`
+                              : '—'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {!cutlistResult && (
+                      <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                        <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9ca3af' }}>
+                          Esperando despiece
+                        </div>
+                      </div>
+                    )}
+                    {cutlistLoading && (
+                      <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                        <div
+                          className="w-10 h-10 rounded-full border-2 animate-spin"
+                          style={{ borderColor: '#e5e7eb', borderTopColor: '#e5534b' }}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    {cutlistImages.map((image, index) => {
+                      const active = index === cutlistImageIndex;
+                      return (
+                        <button
+                          key={`${image.label}-${index}`}
+                          type="button"
+                          onClick={() => setCutlistImageIndex(index)}
+                          className="w-full flex items-center gap-3 rounded-xl border p-2 text-left transition"
+                          style={{
+                            background: active ? 'rgba(229,83,75,0.08)' : '#ffffff',
+                            borderColor: active ? '#e5534b' : '#e5e7eb',
+                            boxShadow: active ? '0 6px 18px rgba(229,83,75,0.15)' : 'none',
+                          }}
+                        >
+                          <img src={image.src} alt={image.alt} className="w-16 h-16 rounded-lg object-cover border" style={{ borderColor: '#e5e7eb' }} />
+                          <div>
+                            <div className="text-xs font-bold" style={{ color: '#111827' }}>{image.label}</div>
+                            <div className="text-[10px]" style={{ color: '#6b7280' }}>Vista técnica</div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
               {cutlistResult && (
                 <div className="mt-6">
                   <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
@@ -1309,8 +1470,26 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
                       </thead>
                       <tbody>
                         {cutlistResult.items.map((item, idx) => (
-                          <tr key={`${cutlistResult.id}-${idx}`}>
-                            <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.description}</td>
+                          <tr
+                            key={`${cutlistResult.id}-${idx}`}
+                            onMouseEnter={() => setCutlistHoverIndex(idx)}
+                            onMouseLeave={() => setCutlistHoverIndex(null)}
+                            onClick={() => setCutlistPinnedIndex(current => (current === idx ? null : idx))}
+                            style={{
+                              background: activeCutlistIndex === idx ? 'rgba(229,83,75,0.08)' : '#ffffff',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>
+                              <div className="flex items-center gap-2">
+                                <span>{item.description}</span>
+                                {activeCutlistIndex === idx && (
+                                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e5534b' }}>
+                                    Activa
+                                  </span>
+                                )}
+                              </div>
+                            </td>
                             <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.units}x</td>
                             <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.cutMeasure}</td>
                           </tr>
