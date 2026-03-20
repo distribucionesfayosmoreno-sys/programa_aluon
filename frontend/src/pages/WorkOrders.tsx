@@ -7,6 +7,21 @@ const MODELS = [
   { id: 'LUX', label: 'ALUON Lux', pricePerM2: 260 },
 ];
 
+const DOOR_MODELS = [
+  { id: 'PREMIUM', label: 'ALUON Premium' },
+  { id: 'CLASSIC', label: 'ALUON Classic' },
+  { id: 'INOX', label: 'ALUON Inox' },
+  { id: 'VENECIANA', label: 'ALUON Veneciana' },
+];
+
+const DOOR_TYPES = [
+  { id: 'PEATONAL', label: 'Peatonal' },
+  { id: 'ABATIBLE_UNA', label: 'Abatible 1 hoja' },
+  { id: 'ABATIBLE_DOS', label: 'Abatible 2 hojas' },
+  { id: 'CORREDERA', label: 'Corredera' },
+  { id: 'VALLA', label: 'Valla' },
+];
+
 const MOCK_REQUESTS = [
   {
     id: 'REQ-001',
@@ -96,6 +111,41 @@ type NewRequestData = {
   reference: string;
   googleView: boolean;
   notes: string;
+};
+
+type CutlistDoorType = 'PEATONAL' | 'ABATIBLE_UNA' | 'ABATIBLE_DOS' | 'CORREDERA' | 'VALLA';
+type CutlistDoorModel = 'PREMIUM' | 'CLASSIC' | 'INOX' | 'VENECIANA';
+type CutlistRailType = 'CARRIL_16' | 'CARRIL_20';
+type CutlistMountingType = 'A' | 'B';
+
+type CutlistRequest = {
+  doorType: CutlistDoorType;
+  model: CutlistDoorModel;
+  widthMm: number;
+  heightMm: number;
+  groundClearanceMm?: number;
+  largueroMm?: number;
+  topFrame?: boolean;
+  automationReinforcement?: boolean;
+  railType?: CutlistRailType;
+  mountingType?: CutlistMountingType;
+  tail?: boolean;
+  notes?: string;
+};
+
+type CutlistItem = {
+  description: string;
+  units: number;
+  cutMeasure: string;
+};
+
+type CutlistResponse = {
+  id: string;
+  doorType: CutlistDoorType;
+  model: CutlistDoorModel;
+  widthMm: number;
+  heightMm: number;
+  items: CutlistItem[];
 };
 
 const BudgetModal = ({
@@ -484,6 +534,21 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
   const [developmentGenerated, setDevelopmentGenerated] = useState(false);
   const [cutlistGenerated, setCutlistGenerated] = useState(false);
 
+  const [doorType, setDoorType] = useState<CutlistDoorType>('PEATONAL');
+  const [doorModel, setDoorModel] = useState<CutlistDoorModel>('PREMIUM');
+  const [widthMm, setWidthMm] = useState(0);
+  const [heightMm, setHeightMm] = useState(0);
+  const [groundClearanceMm, setGroundClearanceMm] = useState(0);
+  const [largueroMm, setLargueroMm] = useState<50 | 80>(50);
+  const [topFrame, setTopFrame] = useState(true);
+  const [automationReinforcement, setAutomationReinforcement] = useState(false);
+  const [railType, setRailType] = useState<CutlistRailType>('CARRIL_16');
+  const [mountingType, setMountingType] = useState<CutlistMountingType>('A');
+  const [tail, setTail] = useState(false);
+  const [cutlistResult, setCutlistResult] = useState<CutlistResponse | null>(null);
+  const [cutlistError, setCutlistError] = useState('');
+  const [cutlistLoading, setCutlistLoading] = useState(false);
+
   const [prodCut, setProdCut] = useState(false);
   const [prodFab, setProdFab] = useState(false);
   const [prodLac, setProdLac] = useState(false);
@@ -549,6 +614,9 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
     setAdminApproved(false);
     setDevelopmentGenerated(false);
     setCutlistGenerated(false);
+    setCutlistResult(null);
+    setCutlistError('');
+    setCutlistLoading(false);
     setProdCut(false);
     setProdFab(false);
     setProdLac(false);
@@ -564,6 +632,73 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
   };
 
   const canGenerateDevelopment = budgetGenerated && accountingApproved && adminApproved;
+
+  const needsGroundClearance = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
+  const needsLarguero = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
+  const needsTopFrame = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
+  const needsAutomation = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
+  const needsRail = doorType === 'CORREDERA';
+  const needsMounting = doorType === 'CORREDERA';
+  const needsTail = doorType === 'CORREDERA';
+
+  const canGenerateCutlist = canGenerateDevelopment
+    && widthMm > 0
+    && heightMm > 0
+    && (!needsGroundClearance || groundClearanceMm >= 0)
+    && (!needsLarguero || (largueroMm === 50 || largueroMm === 80))
+    && (!needsTopFrame || typeof topFrame === 'boolean')
+    && (!needsAutomation || typeof automationReinforcement === 'boolean')
+    && (!needsRail || Boolean(railType))
+    && (!needsMounting || Boolean(mountingType))
+    && (!needsTail || typeof tail === 'boolean');
+
+  const buildCutlistPayload = (): CutlistRequest => ({
+    doorType,
+    model: doorModel,
+    widthMm,
+    heightMm,
+    groundClearanceMm: needsGroundClearance ? groundClearanceMm : undefined,
+    largueroMm: needsLarguero ? largueroMm : undefined,
+    topFrame: needsTopFrame ? topFrame : undefined,
+    automationReinforcement: needsAutomation ? automationReinforcement : undefined,
+    railType: needsRail ? railType : undefined,
+    mountingType: needsMounting ? mountingType : undefined,
+    tail: needsTail ? tail : undefined,
+    notes,
+  });
+
+  const handleGenerateCutlist = async () => {
+    if (!canGenerateCutlist) return;
+    setCutlistLoading(true);
+    setCutlistError('');
+    try {
+      const response = await fetch('/api/cutlists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildCutlistPayload()),
+      });
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Error al generar el despiece');
+      }
+      const data: CutlistResponse = await response.json();
+      setCutlistResult(data);
+      setCutlistGenerated(true);
+    } catch (error) {
+      setCutlistGenerated(false);
+      setCutlistResult(null);
+      setCutlistError(error instanceof Error ? error.message : 'Error inesperado al generar el despiece');
+    } finally {
+      setCutlistLoading(false);
+    }
+  };
+
+  const clearCutlist = () => {
+    setCutlistGenerated(false);
+    setCutlistResult(null);
+    setCutlistError('');
+  };
+
   const canStartProduction = canGenerateDevelopment && developmentGenerated && cutlistGenerated;
   const canFinalize = canStartProduction && prodCut && prodFab && prodLac && prodLacControl;
 
@@ -1011,18 +1146,180 @@ const WorkOrders: React.FC<{ openNewRequest?: boolean; onNewRequestHandled?: () 
                 <button
                   type="button"
                   className="btn-primary"
-                  onClick={() => setCutlistGenerated(true)}
-                  disabled={!canGenerateDevelopment}
-                  style={{ opacity: canGenerateDevelopment ? 1 : 0.5, cursor: canGenerateDevelopment ? 'pointer' : 'not-allowed' }}
+                  onClick={handleGenerateCutlist}
+                  disabled={!canGenerateCutlist || cutlistLoading}
+                  style={{ opacity: canGenerateCutlist && !cutlistLoading ? 1 : 0.5, cursor: canGenerateCutlist && !cutlistLoading ? 'pointer' : 'not-allowed' }}
                 >
-                  Generar despiece
+                  {cutlistLoading ? 'Generando...' : 'Generar despiece'}
                 </button>
                 <StatusPill label="Desarrollo generado" ok={developmentGenerated} />
                 <StatusPill label="Despiece generado" ok={cutlistGenerated} />
               </div>
-              <p className="text-xs mt-3" style={{ color: '#9ca3af' }}>
-                El despiece se integrará con el generador JS que aportarás.
-              </p>
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <FieldLabel>Tipo de puerta</FieldLabel>
+                  <select
+                    className="field"
+                    value={doorType}
+                    onChange={e => { setDoorType(e.target.value as CutlistDoorType); clearCutlist(); }}
+                  >
+                    {DOOR_TYPES.map(type => (
+                      <option key={type.id} value={type.id}>{type.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <FieldLabel>Modelo (despiece)</FieldLabel>
+                  <select
+                    className="field"
+                    value={doorModel}
+                    onChange={e => { setDoorModel(e.target.value as CutlistDoorModel); clearCutlist(); }}
+                  >
+                    {DOOR_MODELS.map(model => (
+                      <option key={model.id} value={model.id}>{model.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <FieldLabel>Anchura total (mm)</FieldLabel>
+                  <Field
+                    type="number"
+                    min={0}
+                    value={widthMm}
+                    onChange={e => { setWidthMm(Number(e.target.value || 0)); clearCutlist(); }}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Altura total (mm)</FieldLabel>
+                  <Field
+                    type="number"
+                    min={0}
+                    value={heightMm}
+                    onChange={e => { setHeightMm(Number(e.target.value || 0)); clearCutlist(); }}
+                  />
+                </div>
+                {needsGroundClearance && (
+                  <div>
+                    <FieldLabel>Holgura suelo (mm)</FieldLabel>
+                    <Field
+                      type="number"
+                      min={0}
+                      value={groundClearanceMm}
+                      onChange={e => { setGroundClearanceMm(Number(e.target.value || 0)); clearCutlist(); }}
+                    />
+                  </div>
+                )}
+                {needsLarguero && (
+                  <div>
+                    <FieldLabel>Larguero</FieldLabel>
+                    <select
+                      className="field"
+                      value={String(largueroMm)}
+                      onChange={e => { setLargueroMm(Number(e.target.value) as 50 | 80); clearCutlist(); }}
+                    >
+                      <option value="50">50 mm</option>
+                      <option value="80">80 mm</option>
+                    </select>
+                  </div>
+                )}
+                {needsTopFrame && (
+                  <div>
+                    <FieldLabel>Marco superior</FieldLabel>
+                    <select
+                      className="field"
+                      value={topFrame ? 'yes' : 'no'}
+                      onChange={e => { setTopFrame(e.target.value === 'yes'); clearCutlist(); }}
+                    >
+                      <option value="yes">Sí</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                )}
+                {needsAutomation && (
+                  <div>
+                    <FieldLabel>Refuerzo automatización</FieldLabel>
+                    <select
+                      className="field"
+                      value={automationReinforcement ? 'yes' : 'no'}
+                      onChange={e => { setAutomationReinforcement(e.target.value === 'yes'); clearCutlist(); }}
+                    >
+                      <option value="yes">Sí</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                )}
+                {needsRail && (
+                  <div>
+                    <FieldLabel>Carril</FieldLabel>
+                    <select
+                      className="field"
+                      value={railType}
+                      onChange={e => { setRailType(e.target.value as CutlistRailType); clearCutlist(); }}
+                    >
+                      <option value="CARRIL_16">Carril 16</option>
+                      <option value="CARRIL_20">Carril 20</option>
+                    </select>
+                  </div>
+                )}
+                {needsMounting && (
+                  <div>
+                    <FieldLabel>Montaje</FieldLabel>
+                    <select
+                      className="field"
+                      value={mountingType}
+                      onChange={e => { setMountingType(e.target.value as CutlistMountingType); clearCutlist(); }}
+                    >
+                      <option value="A">Montaje A</option>
+                      <option value="B">Montaje B</option>
+                    </select>
+                  </div>
+                )}
+                {needsTail && (
+                  <div>
+                    <FieldLabel>Cola</FieldLabel>
+                    <select
+                      className="field"
+                      value={tail ? 'yes' : 'no'}
+                      onChange={e => { setTail(e.target.value === 'yes'); clearCutlist(); }}
+                    >
+                      <option value="yes">Sí</option>
+                      <option value="no">No</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+              {cutlistError && (
+                <p className="text-xs font-semibold mt-3" style={{ color: '#dc2626' }}>
+                  {cutlistError}
+                </p>
+              )}
+              {cutlistResult && (
+                <div className="mt-6">
+                  <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+                    Resultado despiece
+                  </div>
+                  <div className="mt-3 overflow-x-auto">
+                    <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: '#f9fafb', color: '#6b7280' }}>
+                          <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Descripción</th>
+                          <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Unidades</th>
+                          <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Medida corte</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cutlistResult.items.map((item, idx) => (
+                          <tr key={`${cutlistResult.id}-${idx}`}>
+                            <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.description}</td>
+                            <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.units}x</td>
+                            <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.cutMeasure}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </section>
           )}
 

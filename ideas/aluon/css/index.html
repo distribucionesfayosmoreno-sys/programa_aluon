@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<!-- basic -->
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<!-- mobile metas -->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+		<!-- site metas -->
+		<title>Eforlad travel</title>
+		<meta name="keywords" content="">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<!-- bootstrap css -->
+		<link rel="stylesheet" href="css/bootstrap.min.css">
+		<!-- style css -->
+		<link rel="stylesheet" href="css/style.css">
+		<!-- Responsive-->
+		<link rel="stylesheet" href="css/responsive.css">
+		<!-- fevicon -->
+		<link rel="icon" href="images/favicon.png" type="image/gif" />
+		<!-- Scrollbar Custom CSS -->
+		<link rel="stylesheet" href="css/jquery.mCustomScrollbar.min.css">
+		<!-- Tweaks for older IEs-->
+		<!-- owl stylesheets --> 
+		<link rel="stylesheet" href="css/owl.carousel.min.css">
+		<link rel="stylesheet" href="css/owl.theme.default.min.css">
+		<!--[if lt IE 9]>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script><![endif]-->
+    </head>
+	<!-- body -->
+	<body class="main-layout">
+		<!-- loader  -->
+		<div class="loader_bg">
+			<div class="loader"><img src="images/loading.gif" alt="#" /></div>
+		</div>
+		<!-- end loader -->
+		<!-- header -->
+		<header>
+			<!-- header inner -->
+			<div class="header">
+				<div class="container">
+					<div class="row">
+						<div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
+							<div class="full">
+								<div class="center-desk">
+									<div class="logo"> 
+										<a href="index.html"><img src="images/logo.png" alt="#"></a> 
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- end header inner -->
+		</header>
+		<!-- end header -->
+		<section >
+			<div class="banner-main">
+				<img src="images/banner.jpg" alt="#" id="imagenFondo"/>
+				<div class="container">
+					<div class="text-bg">
+						<div class="container">
+							<div id="formularioUno">
+								<form class="main-form" onsubmit="comprobarPrimerFormulario()">
+									<h3>Seleccione Tipo Puerta</h3>
+									<div class="row">
+										<div class="col-md-9">
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label>Distribuidor</label>
+													<input class="form-control" placeholder="" type="text" name="" id="distribuidor">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label>Nº Presupuesto</label>
+													<input class="form-control" placeholder="" type="text" name="" id="presupuesto">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label>Fecha</label>
+													<input class="form-control" placeholder="Any" type="date" name="Any" id="fecha">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Seleccione Modelo</label>
+													<select class="form-control" name="select" id="modelo" onchange="selectModeloFunction(this.value)">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">ALUON PREMIUM</option>
+														<option value="1">ALUON CLASSIC</option>
+														<option value="2">ALUON BISEL</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Seleccione Tipo Puerta</label>
+													<select class="form-control" name="select" id="tipoPuerta">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Peatonal</option>
+														<option value="1">Puerta Abatible una hoja</option>
+														<option value="2">Puerta Abatible dos hoja</option>
+														<option value="3">Puerta Corredera</option>
+														<option value="4">Valla</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Introduzca Color</label>
+													<input class="form-control" placeholder="" type="text" name="" id="color">
+												</div>
+												<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+													<label>Observaciones</label>	
+													<textarea class="textarea" placeholder="comment" type="text" id="observaciones"> </textarea>
+												</div>
+											</div>			  
+										</div>
+										<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12" id="submitPrimerFormulario">
+											<a href="#" onclick="comprobarPrimerFormulario()">Inserte medidas</a>
+										</div>
+										<div id="capaMedidas"><h5>Nota: Se deben rellenar todos los campos</h5></div>
+										<div id="advertenciaMenu1"><h5> Debe rellenar todos los campos</h5></div>
+									</div>
+								</form>
+							</div>
+							<div id="formularioPuertaPeatonal">
+								<form class="main-form" onsubmit="comprobarFormularioPuertaPeatonal()">
+									<h3>Seleccione medidas para puerta peatonal</h3>
+									<div class="row">
+										<div class="col-md-9">
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Altura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="alturaTotalPuertaPeatonal">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Anchura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="anchuraTotalPuertaPeatonal">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Holgura con el suelo</label>
+													<input class="form-control" placeholder="" type="text" name="" id="holguraPuertaPeatonal">
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Bisagras</label>
+													<select class="form-control" name="select" id="bisagrasPuertaPeatonal">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Izquierda</option>
+														<option value="1">Derecha</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Portero Automatico</label>
+													<select class="form-control" name="select" id="porteroAutomaticoPuertaPeatonal">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Seleccione Larguero</label>
+													<select class="form-control" name="select" id="largueroPuertaPeatonal">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">50mm</option>
+														<option value="1">80mm</option>
+													</select>
+												</div>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12" id="submitFormularioPuertaPeatonal">
+											<a href="#" onclick="comprobarFormularioPuertaPeatonal()">Inserte medidas</a>
+										</div>
+										<div id="capaMedidasPuertaPeatonal"><h5>Nota: Se deben rellenar todos los campos y la unidad de medida es en mm.</h5></div>
+										<div id="advertenciaPuertaPeatonal"><h5>Deben rellenar todos los campos y recuerde que la unidad de medida es en mm.</h5></div>
+									</div>
+								</form>
+							</div>
+							<div id="formularioPuertaConFijo">
+								<form class="main-form" onsubmit="comprobarFormularioPuertaPeatonal()">
+									<h3>Seleccione medidas para puerta peatonal con fijo</h3>
+									<div class="row">
+										<div class="col-md-9">
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Altura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="anchuraTotalPuertaPeatonal">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Anchura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="alturaTotalPuertaPeatonal">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Anchura Fijo</label>
+													<input class="form-control" placeholder="" type="text" name="" id="alturaTotalPuertaPeatonal">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Holgura con el suelo</label>
+													<input class="form-control" placeholder="" type="text" name="" id="holguraPuertaPeatonal">
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Bisagras</label>
+													<select class="form-control" name="select" id="bisagrasPuertaPeatonal">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Izquierda</option>
+														<option value="1">Derecha</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Portero Automatico</label>
+													<select class="form-control" name="select" id="porteroAutomaticoPuertaPeatonal">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Seleccione Larguero</label>
+													<select class="form-control" name="select" id="bisagrasPuertaPeatonal">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">50mm</option>
+														<option value="1">80mm</option>
+													</select>
+												</div>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12" id="submitFormularioPuertaPeatonal">
+											<a href="#" onclick="comprobarFormularioPuertaPeatonal()">Inserte medidas</a>
+										</div>
+										<div id="capaMedidasPuertaPeatonal"><h5>Nota: Se deben rellenar todos los campos y la unidad de medida es en mm.</h5></div>
+										<div id="advertenciaPuertaPeatonal"><h5>Deben rellenar todos los campos y recuerde que la unidad de medida es en mm.</h5></div>
+									</div>
+								</form>
+							</div>
+							<div id="formularioPuertaAbatibleUnaHoja">
+								<form class="main-form" onsubmit="comprobarFormularioPuertaAbatibleUnaHoja()">
+									<h3>Seleccione medidas para puerta abatible de una hoja</h3>
+									<div class="row">
+										<div class="col-md-9">
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Altura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="alturaTotalPuertaAbatibleUnaHoja">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Anchura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="anchuraTotalPuertaAbatibleUnaHoja">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Holgura con el suelo</label>
+													<input class="form-control" placeholder="" type="text" name="" id="holguraPuertaAbatibleUnaHoja">
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Bisagras</label>
+													<select class="form-control" name="select" id="bisagrasPuertaAbatibleUnaHoja">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Izquierda</option>
+														<option value="1">Derecha</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Incluir Automatizacion</label>
+													<select class="form-control" name="select" id="automatizacionPuertaAbatibleUnaHoja" onchange="comprobarRefuerzoAutomatizacionPuertaAbatibleUnaHoja(this.value)">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Refuerzo Automatizacion</label>
+													<select class="form-control" name="select" id="refuerzoAutomatizacionPuertaAbatibleUnaHoja">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12" id="submitFormularioPuertaAbatibleUnaHoja">
+											<a href="#" onclick="comprobarFormularioPuertaAbatibleUnaHoja()">Inserte medidas</a>
+										</div>
+										<div id="capaMedidasPuertaAbatibleUnaHoja"><h5>Nota: Se deben rellenar todos los campos y la unidad de medida es en mm.</h5></div>
+										<div id="advertenciaPuertaAbatibleUnaHoja"><h5>Deben rellenar todos los campos y recuerde que la unidad de medida es en mm.</h5></div>
+									</div>
+								</form>
+							</div>
+							<div id="formularioPuertaAbatibleDosHojas">
+								<form class="main-form" onsubmit="comprobarFormularioPuertaAbatibleDosHojas()">
+									<h3>Seleccione medidas para puerta abatible de dos hojas</h3>
+									<div class="row">
+										<div class="col-md-9">
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Altura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="alturaTotalPuertaAbatibleDosHojas">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Anchura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="anchuraTotalPuertaAbatibleDosHojas">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Holgura con el suelo</label>
+													<input class="form-control" placeholder="" type="text" name="" id="holguraPuertaAbatibleDosHojas">
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Incluir Automatizacion</label>
+													<select class="form-control" name="select" id="automatizacionPuertaAbatibleDosHojas" onchange="comprobarRefuerzoAutomatizacionPuertaAbatibleDosHojas(this.value)">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Refuerzo Automatizacion</label>
+													<select class="form-control" name="select" id="refuerzoAutomatizacionPuertaAbatibleDosHojas">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12" id="submitFormularioPuertaAbatibleDosHojas">
+											<a href="#" onclick="comprobarFormularioPuertaAbatibleDosHojas()">Inserte medidas</a>
+										</div>
+										<div id="capaMedidasPuertaAbatibleDosHojas"><h5>Nota: Se deben rellenar todos los campos y la unidad de medida es en mm.</h5></div>
+										<div id="advertenciaPuertaAbatibleDosHojas"><h5>Deben rellenar todos los campos y recuerde que la unidad de medida es en mm.</h5></div>
+									</div>
+								</form>
+							</div>
+							<div id="formularioPuertaCorredera">
+								<form class="main-form" onsubmit="comprobarFormularioPuertaCorredera()">
+									<h3>Seleccione medidas para puerta corredera</h3>
+									<div class="row">
+										<div class="col-md-9">
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Altura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="alturaTotalPuertaCorredera">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Anchura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="anchuraTotalPuertaCorredera">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Tipo Apertura</label>
+													<select class="form-control" name="select" id="aperturaPuertaCorredera">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Izquierda</option>
+														<option value="1">Derecha</option>
+													</select>
+												</div>
+											</div>
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Carril a instalar</label>
+													<select class="form-control" name="select" id="carrilPuertaCorredera">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">16mm</option>
+														<option value="1">20mm</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Incluir Automatizacion</label>
+													<select class="form-control" name="select" id="automatizacionPuertaCorredera" onchange="comprobarRefuerzoAutomatizacionPuertaCorredera(this.value)">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Refuerzo Automatizacion</label>
+													<select class="form-control" name="select" id="refuerzoAutomatizacionPuertaCorredera">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Si</option>
+														<option value="1">No</option>
+													</select>
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Seleccione Tipo de Montaje</label>
+													<select class="form-control" name="select" id="montajePuertaCorredera">
+														<option value="-1" selected>Seleccione una opción</option>
+														<option value="0">Montaje A</option>
+														<option value="1">Montaje B</option>
+													</select>
+												</div>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12" id="submitFormularioPuertaCorredera">
+											<a href="#" onclick="comprobarFormularioPuertaCorredera()">Inserte medidas</a>
+										</div>
+										<div id="capaMedidasPuertaCorredera"><h5>Nota: Se deben rellenar todos los campos y la unidad de medida es en mm.</h5></div>
+										<div id="advertenciaPuertaCorredera"><h5>Deben rellenar todos los campos y recuerde que la unidad de medida es en mm.</h5></div>
+									</div>
+								</form>
+							</div>
+							<div id="formularioValla">
+								<form class="main-form" onsubmit="comprobarFormularioValla()">
+									<h3>Seleccione medidas para valla</h3>
+									<div class="row">
+										<div class="col-md-9">
+											<div class="row">
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Altura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="alturaTotalValla">
+												</div>
+												<div class="col-xl-4 col-lg-4 col-md-4 col-sm-6 col-12">
+													<label >Anchura Total</label>
+													<input class="form-control" placeholder="" type="text" name="" id="anchuraTotalValla">
+												</div>
+											</div>
+										</div>
+										<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12" id="submitFormularioValla">
+											<a href="#" onclick="comprobarFormularioValla()">Inserte medidas</a>
+										</div>
+										<div id="capaMedidasValla"><h5>Nota: Se deben rellenar todos los campos y la unidad de medida es en mm.</h5></div>
+										<div id="advertenciaValla"><h5>Deben rellenar todos los campos y recuerde que la unidad de medida es en mm.</h5></div>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<!--  
+		-->
+		<div id="about" class="about">
+			<div class="container" id="etiquetaAcotadoPuertaPeatonal">
+				<div class="row">
+					<div class="col-md-12 ">
+						<div class="titlepage">
+							<h2>Puerta Peatonal</h2>
+							<span>A continuación se detalla el desglose de piezas para la construccion de esta puerta</span>
+							<p>Distribuidor: <span id="spanPuertaPeatonalDistribuidor"></span></p>
+							<p>Numero de Presupuesto: <span id="spanPuertaPeatonalPresupuesto"></span></p>
+							<p>Fecha: <span id="spanPuertaPeatonalFecha"></span></p>
+							<p>Modelo: <span id="spanPuertaPeatonalModelo"></span></p>
+							<p>Tipo de Puerta: <span id="spanPuertaPeatonalTipo"></span></p>
+							<p>Color: <span id="spanPuertaPeatonalColor"></span></p>
+							<p>Altura Total: <span id="spanPuertaPeatonalAltura"></span></p>
+							<p>Anchura Total: <span id="spanPuertaPeatonalAnchura"></span></p>
+							<p>Holgura con el suelo: <span id="spanPuertaPeatonalHolgura"></span></p>
+							<p>Bisagras: <span id="spanPuertaPeatonalBisagras"></span></p>
+							<p>Portero Automatico: <span id="spanPuertaPeatonalPorteroAutomatico"></span></p>
+							<p>Larguero: <span id="spanPuertaPeatonalLarguero"></span></p>
+							<p>Observaciones: <span id="spanPuertaPeatonalObervaciones"></span></p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="bg" id="desglosePuertaPeatonal">
+				<!-- PEATONAL -->
+				<div class="container printable_form" id="peatonal">
+					<div class="campo_distribuidor"></div>
+					<div class="campo_num_presupuesto"></div>
+					<div class="campo_fecha"></div>
+					<div class="campo_modelo"></div>
+					<div class="campo_color"></div>
+					<div class="campo_acabado"></div>
+					<div class="campo_portero_si"></div>
+					<div class="campo_portero_no"></div>
+					<div class="campo_bisagra_izq"></div>
+					<div class="campo_bisagra_der"></div>
+					<div class="campo_altura"></div>
+					<div class="campo_anchura"></div>
+					<div class="campo_holgura"></div>
+					<div class="campo_nombre_instalador"></div>
+					<div class="campo_observaciones"></div>
+				</div> 
+				<!-- VALLAS -->
+				<div class="container printable_form" id="vallas">
+					<div class="campo_distribuidor"></div>
+					<div class="campo_num_presupuesto"></div>
+					<div class="campo_fecha"></div>
+					<div class="campo_modelo"></div>
+					<div class="campo_color"></div>
+					<div class="campo_acabado"></div>
+					<div class="campo_alto"></div>
+					<div class="campo_ancho"></div>
+					<div class="campo_nombre_instalador"></div>
+					<div class="campo_observaciones"></div>
+				</div>
+				<!-- ABATIBLE 1 HOJA -->
+				<div class="container printable_form" id="abatible_una">
+					<div class="campo_distribuidor"></div>
+					<div class="campo_num_presupuesto"></div>
+					<div class="campo_fecha"></div>
+					<div class="campo_modelo"></div>
+					<div class="campo_color"></div>
+					<div class="campo_acabado"></div>
+					<div class="campo_automatizacion_si"></div>
+					<div class="campo_automatizacion_no"></div>
+					<div class="campo_bisagra_izq"></div>
+					<div class="campo_bisagra_der"></div>
+					<div class="campo_altura_izq"></div>
+					<div class="campo_altura_der"></div>
+					<div class="campo_holgura"></div>
+					<div class="campo_anchura"></div>
+					<div class="campo_nombre_instalador"></div>
+					<div class="campo_observaciones"></div>
+				</div>   
+				<!-- ABATIBLE 2 HOJAS -->
+				<div class="container printable_form" id="abatible_dos">
+					<div class="campo_distribuidor"></div>
+					<div class="campo_num_presupuesto"></div>
+					<div class="campo_fecha"></div>
+					<div class="campo_modelo"></div>
+					<div class="campo_color"></div>
+					<div class="campo_acabado"></div>
+					<div class="campo_automatizacion_si"></div>
+					<div class="campo_automatizacion_no"></div>
+					<div class="campo_primera_hoja_izq"></div>
+					<div class="campo_primera_hoja_der"></div>
+					<div class="campo_altura_izq"></div>
+					<div class="campo_altura_der"></div>
+					<div class="campo_holgura"></div>
+					<div class="campo_anchura"></div>
+					<div class="campo_nombre_instalador"></div>
+					<div class="campo_observaciones"></div>
+				</div>
+				<!-- CORREDERA -->
+				<div class="container printable_form" id="corredera">
+					<div class="campo_distribuidor"></div>
+					<div class="campo_num_presupuesto"></div>
+					<div class="campo_fecha"></div>
+					<div class="campo_modelo"></div>
+					<div class="campo_color"></div>
+					<div class="campo_acabado"></div>
+					<div class="campo_automatizacion_si"></div>
+					<div class="campo_automatizacion_no"></div>
+					<div class="campo_apertura_izq"></div>
+					<div class="campo_apertura_der"></div>
+					<div class="campo_anchura_izq"></div>
+					<div class="campo_anchura_der"></div>
+					<div class="campo_altura"></div>
+					<div class="campo_carril_16"></div>
+					<div class="campo_carril_20"></div>
+					<div class="campo_montaje_A"></div>
+					<div class="campo_montaje_B"></div>
+					<div class="campo_nombre_instalador"></div>
+					<div class="campo_observaciones"></div>
+				</div>
+
+
+				<!-- TABLA DESGLOSE -->
+				<div class="container" id="desglose">
+					<h2>DESGLOSE</h2>
+					<h5>Aluminio soldado</h5>
+					<table border="1" cellpadding="6">
+						<thead>
+							<tr>
+								<th>Img Seccional</th>
+								<th>Descripción</th>
+								<th>Img Lateral</th>
+								<th>Unidades</th>
+								<th>Medida corte</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td id="img-seccional"></td>
+								<td id="descripcion"></td>
+								<td id="img-lateral"></td>
+								<td id="unidades"></td>
+								<td id="medida-corte"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div> 
+				<!-- FINAL TABLA DESGLOSE -->
+
+
+			</div>
+		</div>
+	<!-- end about -->      
+    <!-- Javascript files-->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery-3.0.0.min.js"></script>
+    <script src="js/plugin.js"></script>
+    <!-- sidebar -->
+    <script src="js/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="js/custom.js"></script>
+    <!-- javascript --> 
+    <script src="js/owl.carousel.js"></script>
+    <script>
+       $(document).ready(function() {
+			$('#advertenciaMenu1').hide();
+			$(advertenciaPuertaPeatonal).hide();
+			$('#formularioPuertaPeatonal').hide();
+			$('#formularioPuertaConFijo').hide();
+			$('#formularioPuertaAbatibleUnaHoja').hide();
+			$('#formularioPuertaAbatibleDosHojas').hide();
+			$('#formularioPuertaCorredera').hide();
+			$('#formularioValla').hide();
+			$('#desglosePuertaPeatonal').hide();
+			$('#etiquetaAcotadoPuertaPeatonal').hide();
+			
+							
+			var owl = $('.owl-carousel');
+			owl.owlCarousel({
+				margin: 10,
+				nav: true,
+				loop: true,
+				responsive: {
+					0: {items: 1},
+					600: {items: 2},
+					1000: {items: 3}
+				}
+			})
+        })
+    </script>
+    <script type="text/javascript">
+		function comprobarPrimerFormulario() {
+			
+			var distribuidor=$('#distribuidor').val();
+			var presupuesto=$('#presupuesto').val();
+			var fecha=$('#fecha').val();
+			var modelo=$('#modelo').val();
+			var tipoPuerta=$('#tipoPuerta').val();
+			var color=$('#color').val();
+			
+			console.log("Distribuidor: "+$('#distribuidor').val());
+			console.log("Presupuesto: "+$('#presupuesto').val());
+			console.log("Fecha: "+$('#fecha').val());
+			console.log("Modelo: "+$('#modelo').val());
+			console.log("Tipo Puerta: "+$('#tipoPuerta').val());
+			console.log("color: "+$('#color').val());
+			
+			if(modelo>=0 && tipoPuerta>=0 && color.length>0 && distribuidor.length >0 && presupuesto.length >0 && fecha.length >0){
+				$('#capaMedidas').show();
+				$('#advertenciaMenu1').hide();
+				if(tipoPuerta==="0"){/*Puerta peatonal*/
+					deshabilitarPropiedadesMenuPrincipal();
+					$('#formularioPuertaPeatonal').show();
+				}else if(tipoPuerta==="1"){/*Puerta abatible una hoja*/
+					deshabilitarPropiedadesMenuPrincipal();
+					$('#formularioPuertaAbatibleUnaHoja').show();
+				}else if(tipoPuerta==="2"){/*Puerta abatible doble hoja*/
+					deshabilitarPropiedadesMenuPrincipal();
+					$('#formularioPuertaAbatibleDosHojas').show();
+				}else if(tipoPuerta==="3"){/*Puerta corredera*/
+					deshabilitarPropiedadesMenuPrincipal();
+					$('#formularioPuertaCorredera').show();
+				}else if(tipoPuerta==="4"){/*Valla*/
+					deshabilitarPropiedadesMenuPrincipal();
+					$('#formularioValla').show();
+				}
+			}else{
+				$('#capaMedidas').hide();
+				$('#advertenciaMenu1').show();
+			}
+		}
+		
+		
+		/*funcion para comprobar los parametros del formulario para la puerta peatonal*/
+		function comprobarFormularioPuertaPeatonal() {
+			/*Recogemos el valor de los parametros de su formulario y los pasamos a variables*/
+			var distribuidor = $('#distribuidor').val();
+			var presupuesto = $('#presupuesto').val();
+			var fecha = $('#fecha').val();
+			var modelo = $('#modelo').val();
+			var tipo = $('#tipoPuerta').val();
+			var color = $('#color').val();
+			var alturaTotalPuertaPeatonal=$('#alturaTotalPuertaPeatonal').val();
+			var anchuraTotalPuertaPeatonal=$('#anchuraTotalPuertaPeatonal').val();
+			var holguraPuertaPeatonal=$('#holguraPuertaPeatonal').val();
+			var bisagrasPuertaPeatonal=$('#bisagrasPuertaPeatonal').val();	
+			var porteroAutomaticoPuertaPeatonal=$('#porteroAutomaticoPuertaPeatonal').val();	
+			var largueroPuertaPeatonal=$('#largueroPuertaPeatonal').val();	
+			var bisagras;
+			var portero;
+			var larguero;
+			var observaciones = $('#observaciones').val();
+			console.log("Altura Total Puerta Peatonal: "+alturaTotalPuertaPeatonal);
+			console.log("Anchura Total Puerta Peatonal: "+anchuraTotalPuertaPeatonal);
+			console.log("Holgura con el suelo: "+holguraPuertaPeatonal);
+			console.log("Bisagras:"+bisagrasPuertaPeatonal);
+			if(bisagrasPuertaPeatonal==="1"){
+				console.log("Bisagras: Derecha");
+				bisagras="Derecha";
+			}else if(bisagrasPuertaPeatonal==="0"){
+				console.log("Bisagras: Izquierda");
+				bisagras="Izquierda";
+			}
+			if(porteroAutomaticoPuertaPeatonal==="1"){
+				console.log("Portero: No");
+				portero="No";
+			}else if(porteroAutomaticoPuertaPeatonal==="0"){
+				console.log("Portero: Sí");
+				portero="Sí";
+			}
+			if(largueroPuertaPeatonal==="1"){
+				console.log("Larguero: 80mm");
+				larguero="80";
+			}else if(largueroPuertaPeatonal==="0"){
+				console.log("Larguero: 50mm");
+				larguero="50";
+			}
+			
+			if(alturaTotalPuertaPeatonal.length > 0 && anchuraTotalPuertaPeatonal.length > 0 && holguraPuertaPeatonal.length >= 0 && bisagrasPuertaPeatonal >= 0){
+				$('#capaMedidasPuertaPeatonal').show();
+				$('#advertenciaPuertaPeatonal').hide();
+				$('#submitFormularioPuertaPeatonal').hide();
+				$('#formularioPuertaPeatonal').show();
+				$('#alturaTotalPuertaPeatonal').prop('disabled', true);
+				$('#anchuraTotalPuertaPeatonal').prop('disabled', true);
+				$('#holguraPuertaPeatonal').prop('disabled', true);
+				$('#bisagrasPuertaPeatonal').prop('disabled', true);
+				$('#porteroAutomaticoPuertaPeatonal').prop('disabled', true);
+				$('#largueroPuertaPeatonal').prop('disabled', true);
+				$('#desglosePuertaPeatonal').show();
+				$('#etiquetaAcotadoPuertaPeatonal').show();
+				$("#spanPuertaPeatonalDistribuidor").text(distribuidor);
+				$("#spanPuertaPeatonalPresupuesto").text(presupuesto);
+				$("#spanPuertaPeatonalFecha").text(fecha);
+				$("#spanPuertaPeatonalModelo").text(modelo);
+				$("#spanPuertaPeatonalTipo").text(tipo);
+				$("#spanPuertaPeatonalColor").text(color);
+				$("#spanPuertaPeatonalAltura").text(alturaTotalPuertaPeatonal);
+				$("#spanPuertaPeatonalAnchura").text(anchuraTotalPuertaPeatonal);
+				$("#spanPuertaPeatonalHolgura").text(holguraPuertaPeatonal);
+				$("#spanPuertaPeatonalBisagras").text(bisagras);
+				$("#spanPuertaPeatonalPorteroAutomatico").text(portero);
+				$("#spanPuertaPeatonalLarguero").text(larguero);
+				$("#spanPuertaPeatonalObervaciones").text(observaciones);
+				generarDesglosePuertaPeatonal(alturaTotalPuertaPeatonal, anchuraTotalPuertaPeatonal, holguraPuertaPeatonal, bisagras, portero, larguero, tipo);
+			}else{
+				$('#capaMedidasPuertaPeatonal').hide();
+				$('#advertenciaPuertaPeatonal').show();
+			}
+		}
+		
+		function generarDesglosePuertaPeatonal(alturaTotalPuertaPeatonal, anchuraTotalPuertaPeatonal, holguraPuertaPeatonal, bisagras, portero, larguero, tipo){
+			console.log('--> generarDesglosePuertaPeatonal');
+			var ancho = parseInt(anchuraTotalPuertaPeatonal,10);
+			var alto = parseInt(alturaTotalPuertaPeatonal,10);
+			var holgura = parseInt('18',10);
+			var largueros = parseInt(larguero,10);
+			var lama;
+			var medidaAnchoInterior;
+			var medidaAlturaInterior;
+			var numeroDeLamas;
+			var lamaRestante;
+			if(tipo==='0'){/*Modelo PREMIUM 20cm - 200mm*/
+				lama = parseInt('200', 10);
+				medidaAnchoInterior = ancho - (largueros*2) - holgura;
+				medidaAlturaInterior = alto - (largueros*2) - holguraPuertaPeatonal;
+				numeroDeLamas = medidaAlturaInterior / lama;
+				lamaRestante = medidaAlturaInterior - (Math.trunc(numeroDeLamas)*lama);
+			}else if (tipo==='1'){/*Modelo CLASSIC 10cm - 100mm*/
+				lama = parseInt('100', 10);
+			}
+			
+			console.log('ancho: '+ancho);
+			console.log('alto: '+alto);
+			console.log('holgura: '+holgura);
+			console.log('largueros: '+largueros);
+			console.log('medidaAnchoInterior: '+medidaAnchoInterior);
+			console.log('medidaAlturaInterior: '+medidaAlturaInterior);
+			console.log('medidaLama: '+lama);
+			console.log('numeroDeLamas: '+numeroDeLamas);
+			console.log('lamaRestante: '+lamaRestante);
+			console.log('<-- generarDesglosePuertaPeatonal');
+		}
+		
+		/*funcion para comprobar los parametros del formulario para la puerta abatible de una hoja*/
+		function comprobarFormularioPuertaAbatibleUnaHoja() {
+			/*Recogemos el valor de los parametros de su formulario y los pasamos a variables*/
+			var alturaTotalPuertaAbatibleUnaHoja=$('#alturaTotalPuertaAbatibleUnaHoja').val();
+			var anchuraTotalPuertaAbatibleUnaHoja=$('#anchuraTotalPuertaAbatibleUnaHoja').val();
+			var automatizacionPuertaAbatibleUnaHoja=$('#automatizacionPuertaAbatibleUnaHoja').val();
+			var refuerzoAutomatizacionPuertaAbatibleUnaHoja=$('#refuerzoAutomatizacionPuertaAbatibleUnaHoja').val();	
+			var holguraPuertaAbatibleUnaHoja=$('#holguraPuertaAbatibleUnaHoja').val();
+			var bisagrasPuertaAbatibleUnaHoja=$('#bisagrasPuertaAbatibleUnaHoja').val();
+			var bisagras;
+			console.log("Altura Total Puerta Abatible Una Hoja: "+alturaTotalPuertaAbatibleUnaHoja);
+			console.log("Anchura Total Puerta Abatible Una Hoja: "+anchuraTotalPuertaAbatibleUnaHoja);
+			console.log("Holgura con el suelo: "+holguraPuertaAbatibleUnaHoja);
+			console.log("Bisagras:"+bisagrasPuertaPeatonal);
+			console.log("Automatizacion Puerta Abatible Una Hoja:"+automatizacionPuertaAbatibleUnaHoja);
+			console.log("Refuerzo Automatizacion Puerta Abatible Una Hoja:"+refuerzoAutomatizacionPuertaAbatibleUnaHoja);
+			
+			/*Comprobamos la posicion de las bisagras*/
+			if(bisagrasPuertaPeatonal==="1"){
+				console.log("Bisagras: Derecha");
+				bisagras="Derecha";
+			}else if(bisagrasPuertaPeatonal==="0"){
+				console.log("Bisagras: Izquierda");
+				bisagras="Izquierda";
+			}
+			
+			if(alturaTotalPuertaAbatibleUnaHoja.length > 0 && anchuraTotalPuertaAbatibleUnaHoja.length > 0 && holguraPuertaAbatibleUnaHoja.length > 0 && bisagrasPuertaAbatibleUnaHoja >= 0 && automatizacionPuertaAbatibleUnaHoja >= 0 && refuerzoAutomatizacionPuertaAbatibleUnaHoja >= 0){
+				if(!isNaN(alturaTotalPuertaAbatibleUnaHoja) && !isNaN(anchuraTotalPuertaAbatibleUnaHoja) && !isNaN(holguraPuertaAbatibleUnaHoja)){
+					console.log('entra al log');
+					$('#capaMedidasPuertaAbatibleUnaHoja').show();
+					$('#advertenciaPuertaAbatibleUnaHoja').hide();
+					$('#submitFormularioPuertaAbatibleUnaHoja').hide();
+					$('#formularioPuertaAbatibleUnaHoja').show();
+					$('#alturaTotalPuertaAbatibleUnaHoja').prop('disabled', true);
+					$('#anchuraTotalPuertaAbatibleUnaHoja').prop('disabled', true);
+					$('#holguraPuertaAbatibleUnaHoja').prop('disabled', true);
+					$('#bisagrasPuertaAbatibleUnaHoja').prop('disabled', true);
+					$('#automatizacionPuertaAbatibleUnaHoja').prop('disabled', true);
+					$('#refuerzoAutomatizacionPuertaAbatibleUnaHoja').prop('disabled', true);
+				}
+			}else{
+				$('#capaMedidasPuertaAbatibleUnaHoja').hide();
+				$('#advertenciaPuertaAbatibleUnaHoja').show();
+			}
+		}
+		
+		
+		/*funcion para comprobar los parametros del formulario para la puerta abatible de dos hojas hoja*/
+		function comprobarFormularioPuertaAbatibleDosHojas() {
+			/*Recogemos el valor de los parametros de su formulario y los pasamos a variables*/
+			var alturaTotalPuertaAbatibleDosHojas=$('#alturaTotalPuertaAbatibleDosHojas').val();
+			var anchuraTotalPuertaAbatibleDosHojas=$('#anchuraTotalPuertaAbatibleDosHojas').val();
+			var automatizacionPuertaAbatibleDosHojas=$('#automatizacionPuertaAbatibleDosHojas').val();
+			var refuerzoAutomatizacionPuertaAbatibleDosHojas=$('#refuerzoAutomatizacionPuertaAbatibleDosHojas').val();	
+			var holguraPuertaAbatibleDosHojas=$('#holguraPuertaAbatibleDosHojas').val();
+			
+			console.log("Altura Total Puerta Abatible Dos Hojas: "+alturaTotalPuertaAbatibleDosHojas);
+			console.log("Anchura Total Puerta Abatible Dos Hojas: "+anchuraTotalPuertaAbatibleDosHojas);
+			console.log("Holgura con el suelo: "+holguraPuertaAbatibleDosHojas);
+			console.log("Automatizacion Puerta Abatible Dos Hojas:"+automatizacionPuertaAbatibleDosHojas);
+			console.log("Refuerzo Automatizacion Puerta Abatible Dos Hojas:"+refuerzoAutomatizacionPuertaAbatibleDosHojas);
+			
+			if(alturaTotalPuertaAbatibleDosHojas.length > 0 && anchuraTotalPuertaAbatibleDosHojas.length > 0 && holguraPuertaAbatibleDosHojas.length > 0 && automatizacionPuertaAbatibleDosHojas >= 0 && refuerzoAutomatizacionPuertaAbatibleDosHojas >= 0){
+				if(!isNaN(alturaTotalPuertaAbatibleDosHojas) && !isNaN(anchuraTotalPuertaAbatibleDosHojas) && !isNaN(holguraPuertaAbatibleDosHojas)){
+					console.log('entra al log');
+					$('#capaMedidasPuertaAbatibleDosHojas').show();
+					$('#advertenciaPuertaAbatibleDosHojas').hide();
+					$('#submitFormularioPuertaAbatibleDosHojas').hide();
+					$('#formularioPuertaAbatibleDosHojas').show();
+					$('#alturaTotalPuertaAbatibleDosHojas').prop('disabled', true);
+					$('#anchuraTotalPuertaAbatibleDosHojas').prop('disabled', true);
+					$('#holguraPuertaAbatibleDosHojas').prop('disabled', true);
+					$('#automatizacionPuertaAbatibleDosHojas').prop('disabled', true);
+					$('#refuerzoAutomatizacionPuertaAbatibleDosHojas').prop('disabled', true);
+				}
+			}else{
+				$('#capaMedidasPuertaAbatibleDosHojas').hide();
+				$('#advertenciaPuertaAbatibleDosHojas').show();
+			}
+		}
+		
+		/*funcion para comprobar los parametros del formulario para la puerta abatible de dos hojas hoja*/
+		function comprobarFormularioPuertaCorredera() {
+			/*Recogemos el valor de los parametros de su formulario y los pasamos a variables*/
+			var alturaTotalPuertaCorredera=$('#alturaTotalPuertaCorredera').val();
+			var anchuraTotalPuertaCorredera=$('#anchuraTotalPuertaCorredera').val();
+			var automatizacionPuertaCorredera=$('#automatizacionPuertaCorredera').val();
+			var refuerzoAutomatizacionPuertaCorredera=$('#refuerzoAutomatizacionPuertaCorredera').val();
+			var aperturaPuertaCorredera=$('#aperturaPuertaCorredera').val();
+			var carrilPuertaCorredera=$('#carrilPuertaCorredera').val();
+			var montajePuertaCorredera=$('#montajePuertaCorredera').val();
+						
+			console.log("Altura Total Puerta Corredera: "+alturaTotalPuertaCorredera);
+			console.log("Anchura Total Puerta Corredera: "+anchuraTotalPuertaCorredera);
+			console.log("Apertura: "+aperturaPuertaCorredera);
+			console.log("Automatizacion Puerta Corredera:"+automatizacionPuertaCorredera);
+			console.log("Refuerzo Automatizacion Puerta Corredera:"+refuerzoAutomatizacionPuertaCorredera);
+			console.log("Carril Puerta Corredera:"+carrilPuertaCorredera);
+			console.log("Tipo Montaje Puerta Corredera:"+montajePuertaCorredera);
+					
+			if(alturaTotalPuertaCorredera.length > 0 && anchuraTotalPuertaCorredera.length > 0 && automatizacionPuertaCorredera >= 0 && refuerzoAutomatizacionPuertaCorredera >= 0 && aperturaPuertaCorredera >= 0 && carrilPuertaCorredera >= 0 && montajePuertaCorredera >= 0){
+				if(!isNaN(alturaTotalPuertaCorredera) && !isNaN(anchuraTotalPuertaCorredera)){
+					console.log('entra al log');
+					$('#capaMedidasPuertaCorredera').show();
+					$('#advertenciaPuertaCorredera').hide();
+					$('#submitFormularioPuertaCorredera').hide();
+					$('#formularioPuertaCorredera').show();
+					$('#alturaTotalPuertaCorredera').prop('disabled', true);
+					$('#anchuraTotalPuertaCorredera').prop('disabled', true);
+					$('#automatizacionPuertaCorredera').prop('disabled', true);
+					$('#refuerzoAutomatizacionPuertaCorredera').prop('disabled', true);
+					$('#aperturaPuertaCorredera').prop('disabled', true);
+					$('#carrilPuertaCorredera').prop('disabled', true);
+					$('#montajePuertaCorredera').prop('disabled', true);
+				}
+			}else{
+				$('#capaMedidasPuertaCorredera').hide();
+				$('#advertenciaPuertaCorredera').show();
+			}	
+		}
+		
+		/*funcion para comprobar los parametros del formulario para la valla*/
+		function comprobarFormularioValla() {
+			/*Recogemos el valor de los parametros de su formulario y los pasamos a variables*/
+			var alturaTotalValla=$('#alturaTotalValla').val();
+			var anchuraTotalValla=$('#anchuraTotalValla').val();
+			console.log("Altura Total Valla: "+alturaTotalValla);
+			console.log("Anchura Total Valla: "+anchuraTotalValla);
+			
+			if(alturaTotalValla.length > 0 && anchuraTotalValla.length > 0){
+				if(!isNaN(alturaTotalValla) && !isNaN(anchuraTotalValla)){
+					console.log('entra al log');
+					$('#capaMedidasValla').show();
+					$('#advertenciaValla').hide();
+					$('#submitFormularioValla').hide();
+					$('#formularioValla').show();
+					$('#alturaTotalValla').prop('disabled', true);
+					$('#anchuraTotalValla').prop('disabled', true);
+				}
+			}else{
+				$('#capaMedidasValla').hide();
+				$('#advertenciaValla').show();
+			}
+		}
+		
+		/*Funcion que se encarga de cambiar la imagen de fondo dependiendo del modelo de puerta seleccionado*/
+		function selectModeloFunction(val) {
+			var modelo = $("#modelo").val();
+			
+			if(modelo==='0'){
+				$("#imagenFondo").attr("src","images/aluonPremium.jpg");
+			}else if(modelo==='1'){
+				$("#imagenFondo").attr("src","images/aluonClassic.jpg");
+			}else if(modelo==='2'){
+				$("#imagenFondo").attr("src","images/aluonBisel.jpg");
+			}
+		}
+		
+		/*Funcion para comprobar si se cambia el estado del refuerzo de la automatizacion de la puerta abatible de una hoja*/
+		function comprobarRefuerzoAutomatizacionPuertaAbatibleUnaHoja(val){
+			console.log('--> comprobarRefuerzoAutomatizacionPuertaAbatibleUnaHoja');
+			console.log('value: '+val);
+			if(val==='0'){
+				$("#refuerzoAutomatizacionPuertaAbatibleUnaHoja").val('0');	
+				$('#refuerzoAutomatizacionPuertaAbatibleUnaHoja').prop('disabled', true);
+			}else if(val==='1'){
+				$("#refuerzoAutomatizacionPuertaAbatibleUnaHoja").val('-1');
+				$('#refuerzoAutomatizacionPuertaAbatibleUnaHoja').prop('disabled', false);
+			}
+			console.log('<-- comprobarRefuerzoAutomatizacionPuertaAbatibleUnaHoja');
+		}
+		
+		/*Funcion para comprobar si se cambia el estado del refuerzo de la automatizacion de la puerta abatible de dos hojas*/
+		function comprobarRefuerzoAutomatizacionPuertaAbatibleDosHojas(val){
+			console.log('--> comprobarRefuerzoAutomatizacionPuertaAbatibleDosHojas');
+			console.log('value: '+val);
+			if(val==='0'){
+				$("#refuerzoAutomatizacionPuertaAbatibleDosHojas").val('0');	
+				$('#refuerzoAutomatizacionPuertaAbatibleDosHojas').prop('disabled', true);
+			}else if(val==='1'){
+				$("#refuerzoAutomatizacionPuertaAbatibleDosHojas").val('-1');
+				$('#refuerzoAutomatizacionPuertaAbatibleDosHojas').prop('disabled', false);
+			}
+			console.log('<-- comprobarRefuerzoAutomatizacionPuertaAbatibleDosHojas');
+		}
+		
+		/*Funcion para comprobar si se cambia el estado del refuerzo de la automatizacion de la puerta corredera*/
+		function comprobarRefuerzoAutomatizacionPuertaCorredera(val){
+			console.log('--> comprobarRefuerzoAutomatizacionPuertaCorredera');
+			console.log('value: '+val);
+			if(val==='0'){
+				$("#refuerzoAutomatizacionPuertaCorredera").val('0');	
+				$('#refuerzoAutomatizacionPuertaCorredera').prop('disabled', true);
+			}else if(val==='1'){
+				$("#refuerzoAutomatizacionPuertaCorredera").val('-1');
+				$('#refuerzoAutomatizacionPuertaCorredera').prop('disabled', false);
+			}
+			console.log('<-- comprobarRefuerzoAutomatizacionPuertaCorredera');
+		}
+		
+		/*Funcion que deshabilitara todas las opciones del menu principal*/
+		function deshabilitarPropiedadesMenuPrincipal(){
+			$('#submitPrimerFormulario').hide();
+			$('#distribuidor').prop('disabled', true);
+			$('#presupuesto').prop('disabled', true);
+			$('#fecha').prop('disabled', true);
+			$('#modelo').prop('disabled', true);
+			$('#tipoPuerta').prop('disabled', true);
+			$('#color').prop('disabled', true);
+		}
+	</script>
+   </body>
+</html>
