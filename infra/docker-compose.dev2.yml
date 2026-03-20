@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.8"
 
-x-logging:
-  &default-logging
+x-logging: &default-logging
   driver: "json-file"
   options:
     max-size: "10m"
@@ -10,7 +9,7 @@ x-logging:
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: aluon-postgres-${ENV_NAME:-local}
+    container_name: aluon-postgres-dev2
     environment:
       POSTGRES_DB: ${DB_NAME:-aluonbbdd}
       POSTGRES_USER: ${DB_USER:-aluon}
@@ -25,12 +24,10 @@ services:
     logging: *default-logging
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    container_name: aluon-backend-${ENV_NAME:-local}
+    image: docker.io/r0dr1g0m0r3n0/aluon-backend:dev2
+    container_name: aluon-backend-dev2
     environment:
-      - SPRING_PROFILES_ACTIVE=${ENV_NAME:-local}
+      - SPRING_PROFILES_ACTIVE=dev2
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_NAME:-aluonbbdd}
       - SPRING_DATASOURCE_USERNAME=${DB_USER:-aluon}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-aluon}
@@ -44,10 +41,8 @@ services:
     logging: *default-logging
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    container_name: aluon-frontend-${ENV_NAME:-local}
+    image: docker.io/r0dr1g0m0r3n0/aluon-frontend:dev2
+    container_name: aluon-frontend-dev2
     ports:
       - "${FRONTEND_PORT:-5173}:80"
     networks:
@@ -61,4 +56,4 @@ networks:
 
 volumes:
   pgdata:
-    name: aluon-pgdata-${ENV_NAME:-local}
+    name: aluon-pgdata-dev2
