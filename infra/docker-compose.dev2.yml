@@ -41,6 +41,9 @@ services:
     logging: *default-logging
 
   frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
     image: docker.io/r0dr1g0m0r3n0/aluon-frontend:dev2
     container_name: aluon-frontend-dev2
     ports:
