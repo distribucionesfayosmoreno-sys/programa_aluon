@@ -373,10 +373,15 @@ export const useWorkOrders = ({
     budgetNumber: cutlistBudgetNumber.trim(),
     budgetDate: cutlistBudgetDate.trim(),
     color: cutlistColor.trim(),
+    installerName: installerName.trim(),
     doorType,
     model: doorModel,
     widthMm,
     heightMm,
+    heightLeftMm,
+    heightRightMm,
+    widthLeftMm,
+    widthRightMm,
     groundClearanceMm: needsGroundClearance ? groundClearanceMm : undefined,
     largueroMm: needsLarguero ? largueroMm : undefined,
     topFrame: needsTopFrame ? topFrame : undefined,
@@ -576,10 +581,15 @@ export const useWorkOrders = ({
     budgetNumber: cutlistBudgetNumber,
     budgetDate: cutlistBudgetDate,
     color: cutlistColor,
+    installerName,
     doorModelLabel,
     doorTypeLabel,
     widthMm,
     heightMm,
+    heightLeftMm,
+    heightRightMm,
+    widthLeftMm,
+    widthRightMm,
     groundClearanceMm,
     largueroMm,
     topFrame,
@@ -1019,7 +1029,8 @@ export const useWorkOrders = ({
     Distribuidor: ${workOrderData.distributor || '—'} ·
     Nº Presupuesto: ${workOrderData.budgetNumber || '—'} ·
     Fecha: ${workOrderData.budgetDate || '—'} ·
-    Color: ${workOrderData.color || '—'}
+    Color: ${workOrderData.color || '—'} ·
+    Instalador: ${workOrderData.installerName || '—'}
   </div>
   <div class="block small">
     Holgura suelo: ${workOrderData.groundClearanceMm ?? '—'} mm ·
@@ -1030,6 +1041,10 @@ export const useWorkOrders = ({
     Automatización: ${workOrderData.automationIncluded ? 'Sí' : 'No'} ·
     Refuerzo automatización: ${workOrderData.automationReinforcement ? 'Sí' : 'No'}<br />
     Primera hoja: ${workOrderData.openingSide === 'LEFT' ? 'Izquierda' : workOrderData.openingSide === 'RIGHT' ? 'Derecha' : '—'} ·
+    Altura izq: ${workOrderData.heightLeftMm ?? '—'} ·
+    Altura der: ${workOrderData.heightRightMm ?? '—'} ·
+    Anchura izq: ${workOrderData.widthLeftMm ?? '—'} ·
+    Anchura der: ${workOrderData.widthRightMm ?? '—'} ·
     Carril: ${workOrderData.railType ?? '—'} ·
     Montaje: ${workOrderData.mountingType ?? '—'} ·
     Cola: ${workOrderData.tail ? 'Sí' : 'No'}

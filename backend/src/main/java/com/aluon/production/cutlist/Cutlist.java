@@ -53,8 +53,23 @@ public class Cutlist {
     @Column(name = "color")
     private String color;
 
+    @Column(name = "installer_name")
+    private String installerName;
+
     @Column(name = "ground_clearance_mm")
     private Integer groundClearanceMm;
+
+    @Column(name = "height_left_mm")
+    private Integer heightLeftMm;
+
+    @Column(name = "height_right_mm")
+    private Integer heightRightMm;
+
+    @Column(name = "width_left_mm")
+    private Integer widthLeftMm;
+
+    @Column(name = "width_right_mm")
+    private Integer widthRightMm;
 
     @Column(name = "larguero_mm")
     private Integer largueroMm;

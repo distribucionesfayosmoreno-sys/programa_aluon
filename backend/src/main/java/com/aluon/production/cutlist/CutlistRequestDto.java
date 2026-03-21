@@ -14,10 +14,15 @@ public class CutlistRequestDto {
     private String budgetNumber;
     private java.time.LocalDate budgetDate;
     private String color;
+    private String installerName;
     private DoorType doorType;
     private DoorModel model;
     private Integer widthMm;
     private Integer heightMm;
+    private Integer heightLeftMm;
+    private Integer heightRightMm;
+    private Integer widthLeftMm;
+    private Integer widthRightMm;
     private Integer groundClearanceMm;
     private Integer largueroMm;
     private Boolean topFrame;

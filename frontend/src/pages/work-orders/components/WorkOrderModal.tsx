@@ -94,6 +94,7 @@ export const WorkOrderModal = ({
               <div>Nº Presupuesto: {data.budgetNumber || '—'}</div>
               <div>Fecha: {data.budgetDate || '—'}</div>
               <div>Color: {data.color || '—'}</div>
+              <div>Instalador: {data.installerName || '—'}</div>
             </div>
           </div>
 
@@ -110,6 +111,10 @@ export const WorkOrderModal = ({
               <div>Automatización: {data.automationIncluded ? 'Sí' : 'No'}</div>
               <div>Refuerzo automatización: {data.automationReinforcement ? 'Sí' : 'No'}</div>
               <div>Primera hoja: {data.openingSide === 'LEFT' ? 'Izquierda' : data.openingSide === 'RIGHT' ? 'Derecha' : '—'}</div>
+              <div>Altura izquierda: {data.heightLeftMm ?? '—'} mm</div>
+              <div>Altura derecha: {data.heightRightMm ?? '—'} mm</div>
+              <div>Anchura izquierda: {data.widthLeftMm ?? '—'} mm</div>
+              <div>Anchura derecha: {data.widthRightMm ?? '—'} mm</div>
               <div>Carril: {data.railType ?? '—'}</div>
               <div>Montaje: {data.mountingType ?? '—'}</div>
               <div>Cola: {data.tail ? 'Sí' : 'No'}</div>
