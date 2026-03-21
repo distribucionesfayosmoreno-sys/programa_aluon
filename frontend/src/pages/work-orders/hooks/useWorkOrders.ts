@@ -1,51 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useCustomers } from '../../../hooks/useCustomers';
-import { CUTLIST_MODEL_IMAGES, CUTLIST_TYPE_IMAGES, DOOR_MODELS, DOOR_TYPES, MODELS, MOCK_REQUESTS } from '../constants';
-import formPeatonalImg from '../../../assets/cutlist/forms/form-peatonal.jpg';
-import formVallasImg from '../../../assets/cutlist/forms/form-vallas.jpg';
-import formAbatibleUnaImg from '../../../assets/cutlist/forms/form-abatible-una.jpg';
-import formAbatibleDosImg from '../../../assets/cutlist/forms/form-abatible-dos.jpg';
-import formCorrederaImg from '../../../assets/cutlist/forms/form-corredera.jpg';
-import type {
-  BudgetData,
-  CutlistDoorModel,
-  CutlistDoorType,
-  HingesSide,
-  OpeningSide,
-  CutlistMountingType,
-  CutlistRailType,
-  CutlistRequest,
-  CutlistResponse,
-  NewRequestData,
-  PendingBudget,
-  TabKey,
-  WorkOrderData,
-  WorkOrderRequest,
-} from '../models';
-import { generateCutlist } from '../services/cutlistApi';
-import { approveBudgetValidation, createBudgetValidation, listPendingBudgetValidations } from '../services/budgetValidationApi';
+import { MODELS } from '../constants';
+import { buildWorkOrderNumber, formatLongDate } from '../utils/workOrderNumbers';
+import { buildCutlistFormPayload, buildWorkOrderData } from '../utils/workOrderData';
+import { useBudgetWorkflow } from './useBudgetWorkflow';
+import { useCutlistWorkflow } from './useCutlistWorkflow';
+import { useWorkOrderBaseState } from './useWorkOrderBaseState';
+import { useWorkOrderRequests } from './useWorkOrderRequests';
+import { useWorkflowProgress } from './useWorkflowProgress';
+import { useWorkOrderPrinting } from './useWorkOrderPrinting';
+import { buildWorkOrdersResult } from './workOrdersResult';
 
 export type UseWorkOrdersResult = ReturnType<typeof useWorkOrders>;
-
-type BudgetStatus = {
-  budgetGenerated: boolean;
-  accountingApproved: boolean;
-  adminApproved: boolean;
-  budgetNumber?: string;
-  validationId?: string;
-  customerName?: string;
-  modelLabel?: string;
-  m2?: number;
-  total?: number;
-  approvedAt?: string;
-  createdAt?: string;
-};
-
-const emptyBudgetStatus: BudgetStatus = {
-  budgetGenerated: false,
-  accountingApproved: false,
-  adminApproved: false,
-};
 
 export const useWorkOrders = ({
   openNewRequest,
@@ -55,205 +21,83 @@ export const useWorkOrders = ({
   onNewRequestHandled?: () => void;
 }) => {
   const { customers } = useCustomers();
-  const [requests, setRequests] = useState<WorkOrderRequest[]>(MOCK_REQUESTS);
-  const [customerId, setCustomerId] = useState('');
-  const [modelId, setModelId] = useState(MODELS[0].id);
-  const [modelReference, setModelReference] = useState('');
-  const [modelImage, setModelImage] = useState<File | null>(null);
-  const [m2, setM2] = useState(0);
-  const [googleView, setGoogleView] = useState(false);
-  const [notes, setNotes] = useState('');
+  const base = useWorkOrderBaseState();
 
-  const [budgetGenerated, setBudgetGenerated] = useState(false);
-  const [accountingApproved, setAccountingApproved] = useState(false);
-  const [adminApproved, setAdminApproved] = useState(false);
-  const [budgetStatusByRequestId, setBudgetStatusByRequestId] = useState<Record<string, BudgetStatus>>({});
-  const [approverUserId, setApproverUserId] = useState('');
-  const [budgetValidationError, setBudgetValidationError] = useState('');
+  const { requests, setRequests, customerId, setCustomerId, modelId, setModelId, modelReference, setModelReference, modelImage, setModelImage, m2, setM2, setGoogleView, notes, setNotes, developmentGenerated, setDevelopmentGenerated, prodCut, setProdCut, prodFab, setProdFab, prodLac, setProdLac, prodLacControl, setProdLacControl, finalized, setFinalized, ready, setReady, selectedRequestId, setSelectedRequestId, setTab, setShowRequestModal } = base;
 
-  const [developmentGenerated, setDevelopmentGenerated] = useState(false);
-  const [cutlistGenerated, setCutlistGenerated] = useState(false);
-
-  const [doorType, setDoorType] = useState<CutlistDoorType>('PEATONAL');
-  const [doorModel, setDoorModel] = useState<CutlistDoorModel>('PREMIUM');
-  const [widthMm, setWidthMm] = useState(0);
-  const [heightMm, setHeightMm] = useState(0);
-  const [groundClearanceMm, setGroundClearanceMm] = useState(0);
-  const [largueroMm, setLargueroMm] = useState<50 | 80>(50);
-  const [topFrame, setTopFrame] = useState(true);
-  const [hingesSide, setHingesSide] = useState<HingesSide>('LEFT');
-  const [porterAutomatic, setPorterAutomatic] = useState(false);
-  const [automationIncluded, setAutomationIncluded] = useState(false);
-  const [automationReinforcement, setAutomationReinforcement] = useState(false);
-  const [openingSide, setOpeningSide] = useState<OpeningSide>('LEFT');
-  const [railType, setRailType] = useState<CutlistRailType>('CARRIL_16');
-  const [mountingType, setMountingType] = useState<CutlistMountingType>('A');
-  const [tail, setTail] = useState(false);
-  const [cutlistResult, setCutlistResult] = useState<CutlistResponse | null>(null);
-  const [cutlistError, setCutlistError] = useState('');
-  const [cutlistLoading, setCutlistLoading] = useState(false);
-  const [cutlistImageIndex, setCutlistImageIndex] = useState(0);
-  const [cutlistHoverIndex, setCutlistHoverIndex] = useState<number | null>(null);
-  const [cutlistPinnedIndex, setCutlistPinnedIndex] = useState<number | null>(null);
-  const [installerName, setInstallerName] = useState('');
-  const [heightLeftMm, setHeightLeftMm] = useState<number | null>(null);
-  const [heightRightMm, setHeightRightMm] = useState<number | null>(null);
-  const [widthLeftMm, setWidthLeftMm] = useState<number | null>(null);
-  const [widthRightMm, setWidthRightMm] = useState<number | null>(null);
-  const [cutlistDistributor, setCutlistDistributor] = useState('');
-  const [cutlistBudgetNumber, setCutlistBudgetNumber] = useState('');
-  const [cutlistBudgetDate, setCutlistBudgetDate] = useState('');
-  const [cutlistColor, setCutlistColor] = useState('');
-
-  const [prodCut, setProdCut] = useState(false);
-  const [prodFab, setProdFab] = useState(false);
-  const [prodLac, setProdLac] = useState(false);
-  const [prodLacControl, setProdLacControl] = useState(false);
-
-  const [finalized, setFinalized] = useState(false);
-  const [ready, setReady] = useState<'PICKUP' | 'SHIPPING' | ''>('');
-  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-  const [tab, setTab] = useState<TabKey>('INBOX');
-  const [showBudgetModal, setShowBudgetModal] = useState(false);
-  const [showRequestModal, setShowRequestModal] = useState(false);
-  const [showWorkOrderModal, setShowWorkOrderModal] = useState(false);
-
-  const selectedModel = MODELS.find(m => m.id === modelId) ?? MODELS[0];
+  const selectedModel = useMemo(() => MODELS.find(m => m.id === modelId) ?? MODELS[0], [modelId]);
   const hasModelRef = Boolean(modelReference.trim()) || Boolean(modelImage);
-  const canGenerateBudget = Boolean(customerId) && m2 > 0 && hasModelRef;
+  const selectedCustomer = useMemo(() => customers.find(c => c.id === customerId), [customers, customerId]);
 
-  const getBudgetStatus = (requestId: string | null) => (
-    requestId ? (budgetStatusByRequestId[requestId] ?? emptyBudgetStatus) : emptyBudgetStatus
-  );
+  const budget = useBudgetWorkflow({
+    selectedRequestId,
+    customerId,
+    selectedModel,
+    m2,
+    hasModelRef,
+    modelReference,
+    notes,
+    requests,
+    selectedCustomer,
+  });
 
-  const updateBudgetStatus = (requestId: string, patch: Partial<BudgetStatus>) => {
-    setBudgetStatusByRequestId(prev => ({
-      ...prev,
-      [requestId]: {
-        ...emptyBudgetStatus,
-        ...prev[requestId],
-        ...patch,
-      },
-    }));
-  };
+  const canGenerateDevelopment = budget.budgetGenerated && budget.accountingApproved && budget.adminApproved;
 
-  const updateRequestWorkflowStep = (requestId: string, workflowStep: TabKey) => {
-    setRequests(prev => prev.map(req => (req.id === requestId ? { ...req, workflowStep } : req)));
-  };
+  const cutlist = useCutlistWorkflow({ budgetNumber: budget.budgetNumber, canGenerateDevelopment, notes });
 
-  useEffect(() => {
-    if (!selectedRequestId) return;
-    const status = getBudgetStatus(selectedRequestId);
-    setBudgetGenerated(status.budgetGenerated);
-    setAccountingApproved(status.accountingApproved);
-    setAdminApproved(status.adminApproved);
-  }, [selectedRequestId, budgetStatusByRequestId]);
-
-  useEffect(() => {
-    const loadPending = async () => {
-      try {
-        const records = await listPendingBudgetValidations();
-        setBudgetStatusByRequestId(prev => {
-          const next = { ...prev };
-          records.forEach(record => {
-            next[record.requestId] = {
-              ...emptyBudgetStatus,
-              ...next[record.requestId],
-              budgetGenerated: true,
-              accountingApproved: true,
-              adminApproved: false,
-              validationId: record.id,
-              budgetNumber: record.budgetNumber,
-              customerName: record.customerName,
-              modelLabel: record.modelLabel ?? undefined,
-              m2: record.m2 ?? undefined,
-              total: record.total,
-              createdAt: record.createdAt,
-            };
-          });
-          return next;
-        });
-        setBudgetValidationError('');
-      } catch (error) {
-        setBudgetValidationError(error instanceof Error ? error.message : 'Error al cargar validaciones pendientes');
-      }
-    };
-
-    loadPending();
-  }, []);
-
-  const budget = useMemo(() => {
-    const base = selectedModel.pricePerM2;
-    const total = Math.round(m2 * base * 100) / 100;
-    return { base, total };
-  }, [m2, selectedModel]);
-
-  const buildBudgetNumber = (requestId: string | null, date = new Date()) => {
-    const yy = date.getFullYear().toString().slice(-2);
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const ref = (requestId ?? 'GEN').replace('REQ-', '');
-    return `P-${yy}${mm}${dd}-${ref}`;
-  };
-
-  const budgetNumber = useMemo(() => {
-    const status = getBudgetStatus(selectedRequestId);
-    return status.budgetNumber ?? buildBudgetNumber(selectedRequestId);
-  }, [selectedRequestId, budgetStatusByRequestId]);
-
-  const budgetDate = useMemo(() => {
-    const date = new Date();
-    const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('es-ES', opts);
-  }, []);
-
-  const productionSteps = [prodCut, prodFab, prodLac, prodLacControl];
-  const productionPct = Math.round((productionSteps.filter(Boolean).length / productionSteps.length) * 100);
-
-  const overallPct = useMemo(() => {
-    const checks = [
-      Boolean(customerId) && m2 > 0 && hasModelRef,
-      budgetGenerated,
-      accountingApproved,
-      adminApproved,
-      developmentGenerated,
-      cutlistGenerated,
-      prodCut,
-      prodFab,
-      prodLac,
-      prodLacControl,
-      finalized,
-      ready !== '',
-    ];
-    const done = checks.filter(Boolean).length;
-    return Math.round((done / checks.length) * 100);
-  }, [
+  const workflow = useWorkflowProgress({
     customerId,
     m2,
     hasModelRef,
-    budgetGenerated,
-    accountingApproved,
-    adminApproved,
-    approverUserId,
+    budgetGenerated: budget.budgetGenerated,
+    accountingApproved: budget.accountingApproved,
+    adminApproved: budget.adminApproved,
     developmentGenerated,
-    cutlistGenerated,
+    cutlistGenerated: cutlist.cutlistGenerated,
     prodCut,
     prodFab,
     prodLac,
     prodLacControl,
     finalized,
     ready,
-  ]);
+    selectedRequestId,
+  });
+  const currentWorkflowStep = workflow.resolveWorkflowStep();
+
+  const workOrderNumber = useMemo(() => buildWorkOrderNumber(selectedRequestId), [selectedRequestId]);
+  const workOrderDate = useMemo(() => formatLongDate(), []);
+  const cutlistSnapshot = { doorType: cutlist.doorType, cutlistDistributor: cutlist.cutlistDistributor, cutlistBudgetNumber: cutlist.cutlistBudgetNumber, cutlistBudgetDate: cutlist.cutlistBudgetDate, cutlistColor: cutlist.cutlistColor, installerName: cutlist.installerName, doorModelLabel: cutlist.doorModelLabel, doorTypeLabel: cutlist.doorTypeLabel, widthMm: cutlist.widthMm, heightMm: cutlist.heightMm, heightLeftMm: cutlist.heightLeftMm, heightRightMm: cutlist.heightRightMm, widthLeftMm: cutlist.widthLeftMm, widthRightMm: cutlist.widthRightMm, groundClearanceMm: cutlist.groundClearanceMm, largueroMm: cutlist.largueroMm, topFrame: cutlist.topFrame, hingesSide: cutlist.hingesSide, porterAutomatic: cutlist.porterAutomatic, automationIncluded: cutlist.automationIncluded, automationReinforcement: cutlist.automationReinforcement, openingSide: cutlist.openingSide, railType: cutlist.railType, mountingType: cutlist.mountingType, tail: cutlist.tail, cutlistResult: cutlist.cutlistResult };
+
+  const workOrderData = buildWorkOrderData({
+    customer: selectedCustomer,
+    model: selectedModel,
+    modelReference,
+    notes,
+    workOrderNumber,
+    workOrderDate,
+    cutlist: cutlistSnapshot,
+  });
+
+  const printing = useWorkOrderPrinting({
+    budgetData: budget.budgetData,
+    workOrderData,
+    accountingApproved: budget.accountingApproved,
+    adminApproved: budget.adminApproved,
+    canGenerateCutlist: cutlist.canGenerateCutlist,
+    cutlistGenerated: cutlist.cutlistGenerated,
+    cutlistResult: cutlist.cutlistResult,
+    cutlistForm: buildCutlistFormPayload({ cutlist: cutlistSnapshot, notes }),
+  });
 
   const resetDownstream = ({ keepBudget }: { keepBudget?: boolean } = {}) => {
-    setBudgetGenerated(false);
-    setAccountingApproved(false);
-    setAdminApproved(false);
+    budget.setBudgetGenerated(false);
+    budget.setAccountingApproved(false);
+    budget.setAdminApproved(false);
     setDevelopmentGenerated(false);
-    setCutlistGenerated(false);
-    setCutlistResult(null);
-    setCutlistError('');
-    setCutlistLoading(false);
+    cutlist.setCutlistGenerated(false);
+    cutlist.setCutlistResult(null);
+    cutlist.setCutlistError('');
+    cutlist.setCutlistLoading(false);
     setProdCut(false);
     setProdFab(false);
     setProdLac(false);
@@ -261,7 +105,7 @@ export const useWorkOrders = ({
     setFinalized(false);
     setReady('');
     if (selectedRequestId && !keepBudget) {
-      updateBudgetStatus(selectedRequestId, {
+      budget.updateBudgetStatus(selectedRequestId, {
         budgetGenerated: false,
         accountingApproved: false,
         adminApproved: false,
@@ -270,955 +114,25 @@ export const useWorkOrders = ({
     }
   };
 
-  const handleGenerateBudget = () => {
-    if (!canGenerateBudget) return;
-    setBudgetGenerated(true);
-    setShowBudgetModal(true);
-    if (selectedRequestId) {
-      updateBudgetStatus(selectedRequestId, {
-        budgetGenerated: true,
-        budgetNumber: buildBudgetNumber(selectedRequestId),
-        createdAt: new Date().toISOString(),
-        customerName: selectedCustomerName,
-        modelLabel: selectedModel.label,
-        m2,
-        total: budget.total,
-      });
-    }
-  };
-
-  const canGenerateDevelopment = budgetGenerated && accountingApproved && adminApproved;
-
-  const needsGroundClearance = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
-  const needsLarguero = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
-  const needsTopFrame = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
-  const needsHingesSide = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA';
-  const needsPorterAutomatic = doorType === 'PEATONAL';
-  const needsAutomation = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
-  const needsOpeningSide = doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
-  const needsLeftRightHeights = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
-  const needsLeftRightWidths = doorType === 'CORREDERA';
-  const needsRail = doorType === 'CORREDERA';
-  const needsMounting = doorType === 'CORREDERA';
-  const needsTail = doorType === 'CORREDERA';
-
-  const cutlistImages = useMemo(() => {
-    const modelImageItem = CUTLIST_MODEL_IMAGES[doorModel];
-    const typeImages = CUTLIST_TYPE_IMAGES[doorType] ?? [];
-    return [modelImageItem, ...typeImages];
-  }, [doorModel, doorType]);
-
-  useEffect(() => {
-    setCutlistImageIndex(0);
-    setCutlistHoverIndex(null);
-    setCutlistPinnedIndex(null);
-  }, [doorModel, doorType, cutlistResult]);
-
-  useEffect(() => {
-    if (!needsLeftRightHeights) {
-      setHeightLeftMm(null);
-      setHeightRightMm(null);
-    }
-    if (!needsLeftRightWidths) {
-      setWidthLeftMm(null);
-      setWidthRightMm(null);
-    }
-  }, [needsLeftRightHeights, needsLeftRightWidths]);
-
-  useEffect(() => {
-    if (automationIncluded) {
-      setAutomationReinforcement(true);
-    }
-  }, [automationIncluded]);
-
-  useEffect(() => {
-    if (!cutlistBudgetNumber.trim()) {
-      setCutlistBudgetNumber(budgetNumber);
-    }
-  }, [budgetNumber, cutlistBudgetNumber]);
-
-  useEffect(() => {
-    if (!cutlistBudgetDate.trim()) {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      setCutlistBudgetDate(`${yyyy}-${mm}-${dd}`);
-    }
-  }, [cutlistBudgetDate]);
-
-  const activeCutlistIndex = cutlistPinnedIndex ?? cutlistHoverIndex;
-
-  const canGenerateCutlist = canGenerateDevelopment
-    && widthMm > 0
-    && heightMm > 0
-    && cutlistDistributor.trim().length > 0
-    && cutlistBudgetNumber.trim().length > 0
-    && cutlistBudgetDate.trim().length > 0
-    && cutlistColor.trim().length > 0
-    && (!needsGroundClearance || groundClearanceMm >= 0)
-    && (!needsLarguero || (largueroMm === 50 || largueroMm === 80))
-    && (!needsTopFrame || typeof topFrame === 'boolean')
-    && (!needsHingesSide || Boolean(hingesSide))
-    && (!needsPorterAutomatic || typeof porterAutomatic === 'boolean')
-    && (!needsAutomation || typeof automationIncluded === 'boolean')
-    && (!needsAutomation || typeof automationReinforcement === 'boolean')
-    && (!needsOpeningSide || Boolean(openingSide))
-    && (!needsRail || Boolean(railType))
-    && (!needsMounting || Boolean(mountingType))
-    && (!needsTail || typeof tail === 'boolean');
-
-  const buildCutlistPayload = (): CutlistRequest => ({
-    distributor: cutlistDistributor.trim(),
-    budgetNumber: cutlistBudgetNumber.trim(),
-    budgetDate: cutlistBudgetDate.trim(),
-    color: cutlistColor.trim(),
-    installerName: installerName.trim(),
-    doorType,
-    model: doorModel,
-    widthMm,
-    heightMm,
-    heightLeftMm,
-    heightRightMm,
-    widthLeftMm,
-    widthRightMm,
-    groundClearanceMm: needsGroundClearance ? groundClearanceMm : undefined,
-    largueroMm: needsLarguero ? largueroMm : undefined,
-    topFrame: needsTopFrame ? topFrame : undefined,
-    hingesSide: needsHingesSide ? hingesSide : undefined,
-    porterAutomatic: needsPorterAutomatic ? porterAutomatic : undefined,
-    automationIncluded: needsAutomation ? automationIncluded : undefined,
-    automationReinforcement: needsAutomation ? automationReinforcement : undefined,
-    openingSide: needsOpeningSide ? openingSide : undefined,
-    railType: needsRail ? railType : undefined,
-    mountingType: needsMounting ? mountingType : undefined,
-    tail: needsTail ? tail : undefined,
-    notes,
+  const { applyRequest, createRequest } = useWorkOrderRequests({
+    customers, requests, setRequests, selectedRequestId, setSelectedRequestId, setCustomerId, setModelId, setM2, setModelReference, setGoogleView, setNotes, setModelImage, setTab, setShowRequestModal, openNewRequest, onNewRequestHandled, resetDownstream,
+    budget: { budgetStatusByRequestId: budget.budgetStatusByRequestId, getBudgetStatus: budget.getBudgetStatus, setBudgetGenerated: budget.setBudgetGenerated, setAccountingApproved: budget.setAccountingApproved, setAdminApproved: budget.setAdminApproved, updateBudgetStatus: budget.updateBudgetStatus },
+    currentWorkflowStep,
   });
 
-  const handleGenerateCutlist = async () => {
-    if (!canGenerateCutlist) return;
-    setCutlistLoading(true);
-    setCutlistError('');
-    try {
-      const data = await generateCutlist(buildCutlistPayload());
-      setCutlistResult(data);
-      setCutlistGenerated(true);
-    } catch (error) {
-      setCutlistGenerated(false);
-      setCutlistResult(null);
-      setCutlistError(error instanceof Error ? error.message : 'Error inesperado al generar el despiece');
-    } finally {
-      setCutlistLoading(false);
-    }
-  };
-
-  const clearCutlist = () => {
-    setCutlistGenerated(false);
-    setCutlistResult(null);
-    setCutlistError('');
-  };
-
-  const canStartProduction = canGenerateDevelopment && developmentGenerated && cutlistGenerated;
-  const canFinalize = canStartProduction && prodCut && prodFab && prodLac && prodLacControl;
-
-  const resolveWorkflowStep = () => {
-    if (finalized && ready !== '') return 'FINAL';
-    if (prodCut && prodFab && prodLac && prodLacControl) return 'PROD';
-    if (developmentGenerated && cutlistGenerated) return 'DEV';
-    if (adminApproved) return 'VALIDATION';
-    if (budgetGenerated && accountingApproved) return 'BUDGET';
-    if (Boolean(customerId) && m2 > 0 && hasModelRef) return 'REQUEST';
-    return 'INBOX';
-  };
-
-  const pipelineSteps: Array<{ key: TabKey; label: string; done: boolean }> = [
-    { key: 'INBOX', label: 'Solicitudes', done: selectedRequestId !== null },
-    { key: 'REQUEST', label: 'Solicitud', done: Boolean(customerId) && m2 > 0 && hasModelRef },
-    { key: 'BUDGET', label: 'Presupuesto', done: budgetGenerated && accountingApproved },
-    { key: 'VALIDATION', label: 'Validación ptos', done: adminApproved },
-    { key: 'DEV', label: 'Desarrollo', done: developmentGenerated && cutlistGenerated },
-    { key: 'PROD', label: 'Producción', done: prodCut && prodFab && prodLac && prodLacControl },
-    { key: 'FINAL', label: 'Finalización', done: finalized && ready !== '' },
-  ];
-
-  const resolveCustomerId = (name: string) => {
-    const match = customers.find(c => {
-      const n = (c.nombreComercial || c.razonSocial || '').toLowerCase();
-      return n.includes(name.toLowerCase());
-    });
-    return match?.id ?? '';
-  };
-
-  const applyRequest = (req: WorkOrderRequest) => {
-    resetDownstream({ keepBudget: true });
-    setSelectedRequestId(req.id);
-    setCustomerId(resolveCustomerId(req.customerName));
-    setModelId(req.modelId);
-    setM2(req.m2);
-    setModelReference(req.reference.toUpperCase());
-    setGoogleView(req.googleView);
-    setNotes(req.notes);
-    setModelImage(null);
-    setTab('REQUEST');
-    const status = getBudgetStatus(req.id);
-    setBudgetGenerated(status.budgetGenerated);
-    setAccountingApproved(status.accountingApproved);
-    setAdminApproved(status.adminApproved);
-  };
-
-  useEffect(() => {
-    if (openNewRequest) {
-      setShowRequestModal(true);
-      onNewRequestHandled?.();
-    }
-  }, [openNewRequest, onNewRequestHandled]);
-
-  useEffect(() => {
-    if (!selectedRequestId) return;
-    updateRequestWorkflowStep(selectedRequestId, resolveWorkflowStep());
-  }, [
-    selectedRequestId,
-    budgetGenerated,
-    accountingApproved,
-    adminApproved,
-    developmentGenerated,
-    cutlistGenerated,
-    prodCut,
-    prodFab,
-    prodLac,
-    prodLacControl,
-    finalized,
-    ready,
-    customerId,
-    m2,
-    hasModelRef,
-  ]);
-
-  useEffect(() => {
-    setRequests(prev => prev.map(req => {
-      const status = budgetStatusByRequestId[req.id];
-      if (!status) return req;
-      const nextStep = status.adminApproved
-        ? 'VALIDATION'
-        : (status.budgetGenerated && status.accountingApproved ? 'BUDGET' : req.workflowStep);
-      return nextStep === req.workflowStep ? req : { ...req, workflowStep: nextStep };
-    }));
-  }, [budgetStatusByRequestId]);
-
-  const createRequest = (data: NewRequestData) => {
-    const lastId = requests
-      .map(r => Number(r.id.replace('REQ-', '')))
-      .filter(n => !Number.isNaN(n))
-      .sort((a, b) => b - a)[0] ?? 0;
-    const nextId = `REQ-${String(lastId + 1).padStart(3, '0')}`;
-    setRequests(prev => ([
-      {
-        id: nextId,
-        customerName: data.customerName,
-        modelId: data.modelId,
-        m2: data.m2,
-        reference: data.reference,
-        googleView: data.googleView,
-        notes: data.notes,
-        workflowStep: 'INBOX',
-      },
-      ...prev,
-    ]));
-    setSelectedRequestId(nextId);
-    setShowRequestModal(false);
-    setTab('INBOX');
-    updateBudgetStatus(nextId, emptyBudgetStatus);
-  };
-
-  const workOrderNumber = useMemo(() => {
-    const date = new Date();
-    const yy = date.getFullYear().toString().slice(-2);
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const ref = (selectedRequestId ?? 'GEN').replace('REQ-', '');
-    return `OT-${yy}${mm}${dd}-${ref}`;
-  }, [selectedRequestId]);
-
-  const workOrderDate = useMemo(() => {
-    const date = new Date();
-    const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('es-ES', opts);
-  }, []);
-
-  const selectedCustomer = customers.find(c => c.id === customerId);
-  const selectedCustomerName = selectedCustomer?.nombreComercial || selectedCustomer?.razonSocial || '—';
-  const budgetData: BudgetData = {
-    budgetNumber,
-    budgetDate,
-    customerName: selectedCustomerName,
-    customerAddress: [selectedCustomer?.direccion, selectedCustomer?.cp, selectedCustomer?.poblacion, selectedCustomer?.provincia]
-      .filter(Boolean)
-      .join(' · '),
-    customerEmail: selectedCustomer?.email || '',
-    customerPhone: selectedCustomer?.telefono || '—',
-    modelLabel: selectedModel.label,
-    m2,
-    pricePerM2: selectedModel.pricePerM2,
-    total: budget.total,
-    notes,
-    reference: modelReference,
-  };
-
-  const doorTypeLabel = DOOR_TYPES.find(type => type.id === doorType)?.label ?? '—';
-  const doorModelLabel = DOOR_MODELS.find(model => model.id === doorModel)?.label ?? '—';
-  const workOrderData: WorkOrderData = {
-    workOrderNumber,
-    workOrderDate,
-    customerName: selectedCustomer?.nombreComercial || selectedCustomer?.razonSocial || '—',
-    customerAddress: [selectedCustomer?.direccion, selectedCustomer?.cp, selectedCustomer?.poblacion, selectedCustomer?.provincia]
-      .filter(Boolean)
-      .join(' · '),
-    customerPhone: selectedCustomer?.telefono || '—',
-    modelLabel: selectedModel.label,
-    modelReference: modelReference,
-    distributor: cutlistDistributor,
-    budgetNumber: cutlistBudgetNumber,
-    budgetDate: cutlistBudgetDate,
-    color: cutlistColor,
-    installerName,
-    doorModelLabel,
-    doorTypeLabel,
-    widthMm,
-    heightMm,
-    heightLeftMm,
-    heightRightMm,
-    widthLeftMm,
-    widthRightMm,
-    groundClearanceMm,
-    largueroMm,
-    topFrame,
-    hingesSide,
-    porterAutomatic,
-    automationIncluded,
-    automationReinforcement,
-    openingSide,
-    railType,
-    mountingType,
-    tail,
-    notes,
-    items: cutlistResult?.items ?? [],
-  };
-
-  const pendingBudgets: PendingBudget[] = useMemo(() => {
-    const pending: PendingBudget[] = [];
-    const handled = new Set<string>();
-
-    requests.forEach(req => {
-      const status = getBudgetStatus(req.id);
-      if (!status.validationId || !status.budgetGenerated || !status.accountingApproved || status.adminApproved) return;
-      const model = MODELS.find(m => m.id === req.modelId) ?? MODELS[0];
-      const total = status.total ?? Math.round(req.m2 * model.pricePerM2 * 100) / 100;
-      pending.push({
-        validationId: status.validationId,
-        requestId: req.id,
-        budgetNumber: status.budgetNumber ?? buildBudgetNumber(req.id),
-        customerName: status.customerName ?? req.customerName,
-        modelLabel: status.modelLabel ?? model.label,
-        m2: status.m2 ?? req.m2,
-        total,
-      });
-      handled.add(req.id);
-    });
-
-    Object.entries(budgetStatusByRequestId).forEach(([requestId, status]) => {
-      if (handled.has(requestId)) return;
-      if (!status.validationId || !status.budgetGenerated || !status.accountingApproved || status.adminApproved) return;
-      if (!status.customerName || !status.modelLabel || status.m2 == null || status.total == null) return;
-      pending.push({
-        validationId: status.validationId,
-        requestId,
-        budgetNumber: status.budgetNumber ?? buildBudgetNumber(requestId),
-        customerName: status.customerName,
-        modelLabel: status.modelLabel,
-        m2: status.m2,
-        total: status.total,
-      });
-    });
-
-    return pending;
-  }, [requests, budgetStatusByRequestId]);
-
-  const handleToggleAccounting = async () => {
-    if (!budgetGenerated) return;
-    const nextValue = !accountingApproved;
-    setAccountingApproved(nextValue);
-    if (selectedRequestId) {
-      updateBudgetStatus(selectedRequestId, { accountingApproved: nextValue });
-    }
-    if (!nextValue || !selectedRequestId) return;
-
-    const status = getBudgetStatus(selectedRequestId);
-    if (status.validationId) return;
-
-    try {
-      const record = await createBudgetValidation({
-        budgetNumber: status.budgetNumber ?? buildBudgetNumber(selectedRequestId),
-        requestId: selectedRequestId,
-        customerName: selectedCustomerName,
-        modelLabel: selectedModel.label,
-        m2,
-        total: budget.total,
-      });
-      updateBudgetStatus(selectedRequestId, {
-        validationId: record.id,
-        budgetNumber: record.budgetNumber,
-        customerName: record.customerName,
-        modelLabel: record.modelLabel ?? undefined,
-        m2: record.m2 ?? undefined,
-        total: record.total,
-        createdAt: record.createdAt,
-      });
-      setBudgetValidationError('');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al crear validación del presupuesto';
-      setBudgetValidationError(message);
-      setAccountingApproved(false);
-      updateBudgetStatus(selectedRequestId, { accountingApproved: false });
-    }
-  };
-
-  const handleApproverUserIdChange = (value: string) => {
-    setApproverUserId(value);
-  };
-
-  const handleApproveBudget = async (validationId: string) => {
-    if (!approverUserId.trim()) return;
-    try {
-      const record = await approveBudgetValidation(validationId, approverUserId.trim());
-      updateBudgetStatus(record.requestId, {
-        adminApproved: true,
-        approvedAt: record.approvedAt ?? new Date().toISOString(),
-      });
-      if (selectedRequestId === record.requestId) {
-        setAdminApproved(true);
-      }
-      setBudgetValidationError('');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al aprobar el presupuesto';
-      setBudgetValidationError(message);
-    }
-  };
-
-  const handlePrint = () => {
-    if (!accountingApproved || !adminApproved) return;
-    const w = window.open('', '_blank', 'width=900,height=700');
-    if (!w) return;
-    w.document.write(`<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Presupuesto ${budgetData.budgetNumber}</title>
-  <style>
-    body { font-family: Arial, sans-serif; color: #111827; margin: 24px; }
-    .row { display: flex; justify-content: space-between; gap: 24px; }
-    .small { font-size: 12px; color: #6b7280; }
-    .title { font-weight: 800; letter-spacing: 0.15em; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
-    th, td { border: 1px solid #e5e7eb; padding: 8px; vertical-align: top; }
-    th { background: #f9fafb; text-align: left; color: #6b7280; }
-    .right { text-align: right; }
-    .signature { margin-top: 32px; display: flex; justify-content: space-between; }
-  </style>
-</head>
-<body>
-  <div class="row">
-    <div>
-      <div class="title">ALUON</div>
-      <div class="small">ALUMINIO SOLDADO, S.L.</div>
-      <div class="small">Telf. 925 55 40 14</div>
-      <div class="small">Ctra. 4004 Km 29,200 · 45290 Pantoja (Toledo)</div>
-      <div class="small">info@aluon.es</div>
-    </div>
-    <div>
-      <div class="title" style="background:#111827;color:#fff;padding:8px 12px;display:inline-block;">ALUON</div>
-      <div class="small">${budgetData.customerName}</div>
-      <div class="small">${budgetData.customerAddress}</div>
-      <div class="small">Telf. ${budgetData.customerPhone}</div>
-      <div class="small">Email ${budgetData.customerEmail || '—'}</div>
-    </div>
-  </div>
-  <div class="row" style="margin-top:16px;">
-    <div class="small">${budgetData.budgetDate}</div>
-    <div><strong>Presupuesto Nº ${budgetData.budgetNumber}</strong></div>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Cantidad</th>
-        <th>Descripción</th>
-        <th class="right">Precio Ud.</th>
-        <th class="right">Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>${budgetData.m2.toFixed(2)}</td>
-        <td>
-          <strong>${budgetData.modelLabel}</strong><br />
-          <span class="small">Referencia: ${budgetData.reference || '—'}</span><br />
-          <span class="small">m²: ${budgetData.m2.toFixed(2)}</span><br />
-          ${budgetData.notes ? `<span class="small">Notas: ${budgetData.notes}</span>` : ''}
-        </td>
-        <td class="right">${budgetData.pricePerM2.toFixed(2)}</td>
-        <td class="right"><strong>${budgetData.total.toFixed(2)}</strong></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="small" style="margin-top:16px;">
-    <strong style="color:#111827;">Condiciones generales</strong><br />
-    Forma de pago: a la aceptación del presupuesto 50%, resto el día anterior del suministro del material.<br />
-    Validez del presupuesto: 15 días.<br />
-    Cualquier modificación de la presente oferta llevará consigo un nuevo estudio.
-  </div>
-  <div class="signature">
-    <div class="small">Conforme el cliente</div>
-    <div class="small">Conforme la empresa</div>
-  </div>
-</body>
-</html>`);
-    w.document.close();
-    w.focus();
-    w.print();
-  };
-
-  const handleEmail = () => {
-    if (!accountingApproved || !adminApproved) return;
-    const subject = `Presupuesto ${budgetData.budgetNumber}`;
-    const body = `Adjunto presupuesto ${budgetData.budgetNumber}.\n\nCliente: ${budgetData.customerName}\nModelo: ${budgetData.modelLabel}\nTotal: ${budgetData.total.toFixed(2)} €\n`;
-    const mail = `mailto:${budgetData.customerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mail;
-  };
-
-  const handleCutlistFormPrint = () => {
-    if (!canGenerateCutlist) return;
-    const w = window.open('', '_blank', 'width=1200,height=900');
-    if (!w) return;
-
-    const formConfig = {
-      PEATONAL: { id: 'peatonal', bg: formPeatonalImg },
-      VALLA: { id: 'vallas', bg: formVallasImg },
-      ABATIBLE_UNA: { id: 'abatible_una', bg: formAbatibleUnaImg },
-      ABATIBLE_DOS: { id: 'abatible_dos', bg: formAbatibleDosImg },
-      CORREDERA: { id: 'corredera', bg: formCorrederaImg },
-    } as const;
-
-    const config = formConfig[doorType];
-    const x = (value: boolean) => (value ? 'X' : '');
-    const text = (value: string | number | null | undefined) => (value == null || value === '' ? '' : String(value));
-
-    const commonFields = `
-      <div class="campo_distribuidor">${text(cutlistDistributor)}</div>
-      <div class="campo_num_presupuesto">${text(cutlistBudgetNumber)}</div>
-      <div class="campo_fecha">${text(cutlistBudgetDate)}</div>
-      <div class="campo_modelo">${text(doorModelLabel)}</div>
-      <div class="campo_color">${text(cutlistColor)}</div>
-      <div class="campo_acabado">${text(doorTypeLabel)}</div>
-      <div class="campo_nombre_instalador">${text(installerName)}</div>
-    `;
-
-    const peatonalFields = `
-      <div class="campo_portero_si">${x(porterAutomatic)}</div>
-      <div class="campo_portero_no">${x(!porterAutomatic)}</div>
-      <div class="campo_bisagra_izq">${x(hingesSide === 'LEFT')}</div>
-      <div class="campo_bisagra_der">${x(hingesSide === 'RIGHT')}</div>
-      <div class="campo_altura">${text(heightMm)}</div>
-      <div class="campo_anchura">${text(widthMm)}</div>
-      <div class="campo_holgura">${text(groundClearanceMm)}</div>
-      <div class="campo_observaciones">${text(notes)}</div>
-    `;
-
-    const vallaFields = `
-      <div class="campo_ancho">${text(widthMm)}</div>
-      <div class="campo_alto">${text(heightMm)}</div>
-      <div class="campo_observaciones">${text(notes)}</div>
-    `;
-
-    const heightLeft = heightLeftMm ?? heightMm;
-    const heightRight = heightRightMm ?? heightMm;
-    const widthLeft = widthLeftMm ?? Math.round(widthMm / 2);
-    const widthRight = widthRightMm ?? Math.round(widthMm / 2);
-
-    const abatibleCommon = `
-      <div class="campo_automatizacion_si">${x(automationIncluded)}</div>
-      <div class="campo_automatizacion_no">${x(!automationIncluded)}</div>
-      <div class="campo_altura_izq">${text(heightLeft)}</div>
-      <div class="campo_altura_der">${text(heightRight)}</div>
-      <div class="campo_holgura">${text(groundClearanceMm)}</div>
-      <div class="campo_anchura">${text(widthMm)}</div>
-      <div class="campo_observaciones">${text(notes)}</div>
-    `;
-
-    const abatibleUnaFields = `
-      <div class="campo_bisagra_izq">${x(hingesSide === 'LEFT')}</div>
-      <div class="campo_bisagra_der">${x(hingesSide === 'RIGHT')}</div>
-      ${abatibleCommon}
-    `;
-
-    const abatibleDosFields = `
-      <div class="campo_primera_hoja_izq">${x(openingSide === 'LEFT')}</div>
-      <div class="campo_primera_hoja_der">${x(openingSide === 'RIGHT')}</div>
-      <div class="campo_observaciones_abatible_dos_hojas">${text(notes)}</div>
-      ${abatibleCommon}
-    `;
-
-    const correderaFields = `
-      <div class="campo_automatizacion_si">${x(automationIncluded)}</div>
-      <div class="campo_automatizacion_no">${x(!automationIncluded)}</div>
-      <div class="campo_apertura_izq">${x(openingSide === 'LEFT')}</div>
-      <div class="campo_apertura_der">${x(openingSide === 'RIGHT')}</div>
-      <div class="campo_anchura_izq">${text(widthLeft)}</div>
-      <div class="campo_anchura_der">${text(widthRight)}</div>
-      <div class="campo_altura">${text(heightMm)}</div>
-      <div class="campo_carril_16">${x(railType === 'CARRIL_16')}</div>
-      <div class="campo_carril_20">${x(railType === 'CARRIL_20')}</div>
-      <div class="campo_montaje_A">${x(mountingType === 'A')}</div>
-      <div class="campo_montaje_B">${x(mountingType === 'B')}</div>
-      <div class="campo_observaciones">${text(notes)}</div>
-    `;
-
-    const fieldsByType: Record<typeof doorType, string> = {
-      PEATONAL: peatonalFields,
-      VALLA: vallaFields,
-      ABATIBLE_UNA: abatibleUnaFields,
-      ABATIBLE_DOS: abatibleDosFields,
-      CORREDERA: correderaFields,
-    };
-
-    const css = `
-      body { margin: 0; font-family: Arial, sans-serif; }
-      .printable_form {
-        position: relative;
-        height: 1250px;
-        width: 1140px;
-        max-width: 1140px;
-        background-position: center;
-        background-size: contain;
-        background-repeat: no-repeat;
-        -webkit-print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-      .printable_form div[class*="campo"] { position: absolute; font-size: 14px; font-weight: 600; }
-      .printable_form#peatonal { background-image: url('${config.bg}'); }
-      .printable_form#vallas { background-image: url('${config.bg}'); }
-      .printable_form#abatible_una { background-image: url('${config.bg}'); }
-      .printable_form#abatible_dos { background-image: url('${config.bg}'); }
-      .printable_form#corredera { background-image: url('${config.bg}'); }
-      .printable_form .campo_distribuidor { top: 112px; left: 165px; }
-      .printable_form .campo_num_presupuesto { top: 112px; left: 605px; }
-      .printable_form .campo_fecha { top: 112px; left: 805px; }
-      .printable_form .campo_modelo { top: 170px; left: 165px; }
-      .printable_form .campo_color { top: 170px; left: 605px; }
-      .printable_form .campo_acabado { top: 170px; left: 805px; }
-      .printable_form .campo_automatizacion_si { top: 308px; left: 334px; }
-      .printable_form .campo_automatizacion_no { top: 308px; left: 433px; }
-      .printable_form#peatonal .campo_portero_si { top: 258px; left: 868px; }
-      .printable_form#peatonal .campo_portero_no { top: 258px; left: 965px; }
-      .printable_form#peatonal .campo_bisagra_izq { top: 372px; left: 439px; }
-      .printable_form#peatonal .campo_bisagra_der { top: 372px; left: 698px; }
-      .printable_form#peatonal .campo_altura { top: 626px; left: 290px; }
-      .printable_form#peatonal .campo_anchura { top: 988px; left: 580px; }
-      .printable_form#peatonal .campo_holgura { top: 866px; left: 835px; }
-      .printable_form#vallas .campo_ancho { top: 425px; left: 923px; }
-      .printable_form#vallas .campo_alto { top: 622px; left: 530px; }
-      .printable_form#abatible_una .campo_bisagra_izq,
-      .printable_form#abatible_dos .campo_primera_hoja_izq { top: 435px; left: 383px; }
-      .printable_form#abatible_una .campo_bisagra_der,
-      .printable_form#abatible_dos .campo_primera_hoja_der { top: 435px; left: 742px; }
-      .printable_form[id*="abatible"] .campo_altura_izq { top: 652px; left: 175px; }
-      .printable_form[id*="abatible"] .campo_altura_der { top: 652px; left: 860px; }
-      .printable_form[id*="abatible"] .campo_holgura { top: 854px; left: 580px; }
-      .printable_form[id*="abatible"] .campo_anchura { top: 982px; left: 580px; }
-      .printable_form#corredera .campo_altura { top: 406px; left: 595px; }
-      .printable_form#corredera .campo_apertura_izq { top: 404px; left: 302px; }
-      .printable_form#corredera .campo_apertura_der { top: 404px; left: 831px; }
-      .printable_form#corredera .campo_anchura_izq { top: 595px; left: 370px; }
-      .printable_form#corredera .campo_anchura_der { top: 595px; left: 815px; }
-      .printable_form#corredera .campo_carril_16 { top: 830px; left: 779px; }
-      .printable_form#corredera .campo_carril_20 { top: 830px; left: 964px; }
-      .printable_form#corredera .campo_montaje_A { top: 916px; left: 252px; }
-      .printable_form#corredera .campo_montaje_B { top: 916px; left: 875px; }
-      .printable_form .campo_nombre_instalador { top: 1067px; left: 810px; }
-      .printable_form .campo_observaciones { top: 1100px; left: 167px; max-width: 760px; }
-      .printable_form[id*="abatible"] .campo_nombre_instalador,
-      .printable_form#corredera .campo_nombre_instalador { top: 1144px; }
-      .printable_form[id*="abatible"] .campo_observaciones,
-      .printable_form#corredera .campo_observaciones { top: 1178px; }
-      @media print {
-        body { -webkit-print-color-adjust: exact; }
-      }
-    `;
-
-    const html = `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Formulario pedido ${doorTypeLabel}</title>
-  <style>${css}</style>
-</head>
-<body>
-  <div class="printable_form" id="${config.id}">
-    ${commonFields}
-    ${fieldsByType[doorType]}
-  </div>
-</body>
-</html>`;
-
-    w.document.write(html);
-    w.document.close();
-    w.focus();
-    w.print();
-  };
-
-  const handleWorkOrderPrint = () => {
-    if (!cutlistResult || !cutlistGenerated) return;
-    const w = window.open('', '_blank', 'width=900,height=700');
-    if (!w) return;
-    const rows = workOrderData.items.map(item => `
-      <tr>
-        <td>${item.description}</td>
-        <td>${item.units}x</td>
-        <td>${item.cutMeasure}</td>
-      </tr>
-    `).join('');
-
-    w.document.write(`<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Orden de trabajo ${workOrderData.workOrderNumber}</title>
-  <style>
-    body { font-family: Arial, sans-serif; color: #111827; margin: 24px; }
-    .row { display: flex; justify-content: space-between; gap: 24px; }
-    .small { font-size: 12px; color: #6b7280; }
-    .title { font-weight: 800; letter-spacing: 0.15em; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
-    th, td { border: 1px solid #e5e7eb; padding: 8px; vertical-align: top; }
-    th { background: #f9fafb; text-align: left; color: #6b7280; }
-    .block { margin-top: 16px; }
-  </style>
-</head>
-<body>
-  <div class="row">
-    <div>
-      <div class="title">ALUON</div>
-      <div class="small">ALUMINIO SOLDADO, S.L.</div>
-      <div class="small">Orden de trabajo</div>
-      <div class="small">${workOrderData.workOrderDate}</div>
-      <div class="small"><strong>${workOrderData.workOrderNumber}</strong></div>
-    </div>
-    <div>
-      <div class="title" style="background:#111827;color:#fff;padding:8px 12px;display:inline-block;">ALUON</div>
-      <div class="small">${workOrderData.customerName}</div>
-      <div class="small">${workOrderData.customerAddress}</div>
-      <div class="small">Telf. ${workOrderData.customerPhone}</div>
-    </div>
-  </div>
-  <div class="block small">
-    <strong>${workOrderData.modelLabel}</strong><br />
-    Referencia: ${workOrderData.modelReference || '—'}<br />
-    ${workOrderData.doorModelLabel} · ${workOrderData.doorTypeLabel}<br />
-    Medidas: ${workOrderData.widthMm} × ${workOrderData.heightMm} mm
-  </div>
-  <div class="block small">
-    Distribuidor: ${workOrderData.distributor || '—'} ·
-    Nº Presupuesto: ${workOrderData.budgetNumber || '—'} ·
-    Fecha: ${workOrderData.budgetDate || '—'} ·
-    Color: ${workOrderData.color || '—'} ·
-    Instalador: ${workOrderData.installerName || '—'}
-  </div>
-  <div class="block small">
-    Holgura suelo: ${workOrderData.groundClearanceMm ?? '—'} mm ·
-    Larguero: ${workOrderData.largueroMm ?? '—'} mm ·
-    Marco superior: ${workOrderData.topFrame ? 'Sí' : 'No'} ·
-    Bisagras: ${workOrderData.hingesSide === 'LEFT' ? 'Izquierda' : workOrderData.hingesSide === 'RIGHT' ? 'Derecha' : '—'} ·
-    Portero automático: ${workOrderData.porterAutomatic ? 'Sí' : 'No'} ·
-    Automatización: ${workOrderData.automationIncluded ? 'Sí' : 'No'} ·
-    Refuerzo automatización: ${workOrderData.automationReinforcement ? 'Sí' : 'No'}<br />
-    Primera hoja: ${workOrderData.openingSide === 'LEFT' ? 'Izquierda' : workOrderData.openingSide === 'RIGHT' ? 'Derecha' : '—'} ·
-    Altura izq: ${workOrderData.heightLeftMm ?? '—'} ·
-    Altura der: ${workOrderData.heightRightMm ?? '—'} ·
-    Anchura izq: ${workOrderData.widthLeftMm ?? '—'} ·
-    Anchura der: ${workOrderData.widthRightMm ?? '—'} ·
-    Carril: ${workOrderData.railType ?? '—'} ·
-    Montaje: ${workOrderData.mountingType ?? '—'} ·
-    Cola: ${workOrderData.tail ? 'Sí' : 'No'}
-  </div>
-  ${workOrderData.notes ? `<div class="block small">Notas: ${workOrderData.notes}</div>` : ''}
-  <table>
-    <thead>
-      <tr>
-        <th>Descripción</th>
-        <th>Unidades</th>
-        <th>Medida corte</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${rows}
-    </tbody>
-  </table>
-</body>
-</html>`);
-    w.document.close();
-    w.focus();
-    w.print();
-  };
-
-  return {
+  return buildWorkOrdersResult({
     customers,
-    requests,
-    customerId,
-    modelId,
-    modelReference,
-    modelImage,
-    m2,
-    googleView,
-    notes,
-    budgetGenerated,
-    accountingApproved,
-    adminApproved,
-    approverUserId,
-    developmentGenerated,
-    cutlistGenerated,
-    doorType,
-    doorModel,
-    widthMm,
-    heightMm,
-    groundClearanceMm,
-    largueroMm,
-    topFrame,
-    hingesSide,
-    porterAutomatic,
-    automationIncluded,
-    automationReinforcement,
-    openingSide,
-    railType,
-    mountingType,
-    tail,
-    cutlistResult,
-    cutlistError,
-    cutlistLoading,
-    cutlistImageIndex,
-    cutlistHoverIndex,
-    cutlistPinnedIndex,
-    cutlistDistributor,
-    cutlistBudgetNumber,
-    cutlistBudgetDate,
-    cutlistColor,
-    installerName,
-    heightLeftMm,
-    heightRightMm,
-    widthLeftMm,
-    widthRightMm,
-    prodCut,
-    prodFab,
-    prodLac,
-    prodLacControl,
-    finalized,
-    ready,
-    selectedRequestId,
-    tab,
-    showBudgetModal,
-    showRequestModal,
-    showWorkOrderModal,
+    base,
+    budget,
+    cutlist,
+    workflow,
     selectedModel,
     hasModelRef,
-    canGenerateBudget,
-    budget,
-    productionPct,
-    overallPct,
     canGenerateDevelopment,
-    needsGroundClearance,
-    needsLarguero,
-    needsTopFrame,
-    needsAutomation,
-    needsHingesSide,
-    needsPorterAutomatic,
-    needsOpeningSide,
-    needsLeftRightHeights,
-    needsLeftRightWidths,
-    needsRail,
-    needsMounting,
-    needsTail,
-    cutlistImages,
-    activeCutlistIndex,
-    canGenerateCutlist,
-    canStartProduction,
-    canFinalize,
-    pipelineSteps,
-    budgetData,
-    pendingBudgets,
-    budgetValidationError,
     workOrderData,
-    setRequests,
-    setCustomerId,
-    setModelId,
-    setModelReference,
-    setModelImage,
-    setM2,
-    setGoogleView,
-    setNotes,
-    setBudgetGenerated,
-    setDevelopmentGenerated,
-    setCutlistGenerated,
-    setDoorType,
-    setDoorModel,
-    setWidthMm,
-    setHeightMm,
-    setGroundClearanceMm,
-    setLargueroMm,
-    setTopFrame,
-    setHingesSide,
-    setPorterAutomatic,
-    setAutomationIncluded,
-    setAutomationReinforcement,
-    setOpeningSide,
-    setRailType,
-    setMountingType,
-    setTail,
-    setCutlistResult,
-    setCutlistError,
-    setCutlistLoading,
-    setCutlistImageIndex,
-    setCutlistHoverIndex,
-    setCutlistPinnedIndex,
-    setCutlistDistributor,
-    setCutlistBudgetNumber,
-    setCutlistBudgetDate,
-    setCutlistColor,
-    setInstallerName,
-    setHeightLeftMm,
-    setHeightRightMm,
-    setWidthLeftMm,
-    setWidthRightMm,
-    setProdCut,
-    setProdFab,
-    setProdLac,
-    setProdLacControl,
-    setFinalized,
-    setReady,
-    setSelectedRequestId,
-    setTab,
-    setShowBudgetModal,
-    setShowRequestModal,
-    setShowWorkOrderModal,
-    resetDownstream,
-    handleGenerateBudget,
-    handleToggleAccounting,
-    handleApproverUserIdChange,
-    handleApproveBudget,
-    handleGenerateCutlist,
-    handleCutlistFormPrint,
-    clearCutlist,
+    printing,
     applyRequest,
     createRequest,
-    handlePrint,
-    handleEmail,
-    handleWorkOrderPrint,
-  };
+    resetDownstream,
+  });
 };
