@@ -1,14 +1,14 @@
 import { DOOR_MODELS, DOOR_TYPES } from '../../constants';
 import type { CutlistDoorModel, CutlistDoorType, CutlistMountingType, CutlistRailType, HingesSide, OpeningSide } from '../../models';
 import { Field, FieldLabel, uiColors } from '../../components/ui';
-import type { DevelopmentActions, DevelopmentForm, DevelopmentNeeds, DevelopmentStatus } from './DevelopmentSection.types';
+import type { DevelopmentActions as DevelopmentActionsType, DevelopmentForm as DevelopmentFormType, DevelopmentNeeds, DevelopmentStatus } from './DevelopmentSection.types';
 
 type DevelopmentFormProps = {
-  form: DevelopmentForm;
+  form: DevelopmentFormType;
   needs: DevelopmentNeeds;
   status: DevelopmentStatus;
   actions: Pick<
-    DevelopmentActions,
+    DevelopmentActionsType,
     | 'onDistributorChange'
     | 'onBudgetNumberChange'
     | 'onBudgetDateChange'

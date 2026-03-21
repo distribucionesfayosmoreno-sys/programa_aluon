@@ -8,7 +8,8 @@ type CutlistTableProps = {
 };
 
 export const CutlistTable = ({ cutlist, actions }: CutlistTableProps) => {
-  if (!cutlist.cutlistResult) return null;
+  const result = cutlist.cutlistResult;
+  if (!result) return null;
 
   return (
     <div className="mt-6" id="cutlist-table">
@@ -27,11 +28,11 @@ export const CutlistTable = ({ cutlist, actions }: CutlistTableProps) => {
             </tr>
           </thead>
           <tbody>
-            {cutlist.cutlistResult.items.map((item, idx) => {
+            {result.items.map((item, idx) => {
               const { seccional, lateral } = resolveCutlistItemImages(item.description);
               return (
                 <tr
-                  key={`${cutlist.cutlistResult.id}-${idx}`}
+                  key={`${result.id}-${idx}`}
                   onMouseEnter={() => actions.onCutlistHoverChange(idx)}
                   onMouseLeave={() => actions.onCutlistHoverChange(null)}
                   onClick={() => actions.onCutlistPinnedChange(cutlist.cutlistPinnedIndex === idx ? null : idx)}

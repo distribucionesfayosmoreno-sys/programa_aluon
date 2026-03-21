@@ -1,12 +1,12 @@
 import { StatusPill } from '../../components/ui';
-import type { DevelopmentActions, DevelopmentStatus } from './DevelopmentSection.types';
+import type { DevelopmentActions as DevelopmentActionsType, DevelopmentStatus } from './DevelopmentSection.types';
 
 type DevelopmentActionsProps = {
   status: DevelopmentStatus;
-  actions: Pick<DevelopmentActions, 'onGenerateDevelopment' | 'onGenerateCutlist' | 'onPrintForm'>;
+  actions: Pick<DevelopmentActionsType, 'onGenerateDevelopment' | 'onGenerateCutlist' | 'onPrintForm'>;
 };
 
-export const DevelopmentActions = ({ status, actions }: DevelopmentActionsProps) => (
+export const DevelopmentActionsBar = ({ status, actions }: DevelopmentActionsProps) => (
   <div className="flex flex-wrap items-center gap-3">
     <button
       type="button"

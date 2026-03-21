@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
 
@@ -59,9 +59,9 @@ export const useWorkOrderRequests = ({
   budget,
   currentWorkflowStep,
 }: UseWorkOrderRequestsParams) => {
-  const updateRequestWorkflowStep = (requestId: string, workflowStep: TabKey) => {
+  const updateRequestWorkflowStep = useCallback((requestId: string, workflowStep: TabKey) => {
     setRequests(prev => prev.map(req => (req.id === requestId ? { ...req, workflowStep } : req)));
-  };
+  }, [setRequests]);
 
   const resolveCustomerId = (name: string) => {
     const match = customers.find(c => {
@@ -127,7 +127,7 @@ export const useWorkOrderRequests = ({
   useEffect(() => {
     if (!selectedRequestId) return;
     updateRequestWorkflowStep(selectedRequestId, currentWorkflowStep);
-  }, [selectedRequestId, currentWorkflowStep]);
+  }, [selectedRequestId, currentWorkflowStep, updateRequestWorkflowStep]);
 
   useEffect(() => {
     setRequests(prev => prev.map(req => {

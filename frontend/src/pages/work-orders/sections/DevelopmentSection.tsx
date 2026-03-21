@@ -1,5 +1,5 @@
 import { cardStyle, SectionTitle, uiColors } from '../components/ui';
-import { DevelopmentActions } from './development/DevelopmentActions';
+import { DevelopmentActionsBar } from './development/DevelopmentActions';
 import { DevelopmentForm } from './development/DevelopmentForm';
 import { CutlistPreview } from './development/CutlistPreview';
 import { CutlistTable } from './development/CutlistTable';
@@ -18,7 +18,7 @@ export const DevelopmentSection = ({
     style={cardStyle}
   >
     <SectionTitle n="04" label="Desarrollo automático" />
-    <DevelopmentActions status={status} actions={actions} />
+    <DevelopmentActionsBar status={status} actions={actions} />
     {!status.canGenerateCutlist && status.cutlistBlockingReasons.length > 0 && (
       <div className="mt-3 text-xs font-semibold" style={{ color: uiColors.dangerDark }}>
         <div className="uppercase tracking-widest text-[10px]" style={{ color: uiColors.dangerDark }}>

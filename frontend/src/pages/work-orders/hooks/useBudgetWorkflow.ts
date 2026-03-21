@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { BudgetData, PendingBudget, WorkOrderRequest } from '../models';
 import { MODELS } from '../constants';
@@ -58,11 +58,11 @@ export const useBudgetWorkflow = ({
 
   const selectedCustomerName = selectedCustomer?.nombreComercial || selectedCustomer?.razonSocial || '—';
 
-  const getBudgetStatus = (requestId: string | null) => (
+  const getBudgetStatus = useCallback((requestId: string | null) => (
     requestId ? (budgetStatusByRequestId[requestId] ?? emptyBudgetStatus) : emptyBudgetStatus
-  );
+  ), [budgetStatusByRequestId]);
 
-  const updateBudgetStatus = (requestId: string, patch: Partial<BudgetStatus>) => {
+  const updateBudgetStatus = useCallback((requestId: string, patch: Partial<BudgetStatus>) => {
     setBudgetStatusByRequestId(prev => ({
       ...prev,
       [requestId]: {
@@ -71,7 +71,7 @@ export const useBudgetWorkflow = ({
         ...patch,
       },
     }));
-  };
+  }, []);
 
   useEffect(() => {
     if (!selectedRequestId) return;
@@ -79,7 +79,7 @@ export const useBudgetWorkflow = ({
     setBudgetGenerated(status.budgetGenerated);
     setAccountingApproved(status.accountingApproved);
     setAdminApproved(status.adminApproved);
-  }, [selectedRequestId, budgetStatusByRequestId]);
+  }, [selectedRequestId, getBudgetStatus]);
 
   useEffect(() => {
     const loadPending = async () => {
@@ -123,7 +123,7 @@ export const useBudgetWorkflow = ({
   const budgetNumber = useMemo(() => {
     const status = getBudgetStatus(selectedRequestId);
     return status.budgetNumber ?? buildBudgetNumber(selectedRequestId);
-  }, [selectedRequestId, budgetStatusByRequestId]);
+  }, [selectedRequestId, getBudgetStatus]);
 
   const budgetDate = useMemo(() => formatLongDate(), []);
 
@@ -183,7 +183,7 @@ export const useBudgetWorkflow = ({
     });
 
     return pending;
-  }, [requests, budgetStatusByRequestId]);
+  }, [requests, budgetStatusByRequestId, getBudgetStatus]);
 
   const handleToggleAccounting = async () => {
     if (!budgetGenerated) return;
