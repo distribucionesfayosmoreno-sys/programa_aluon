@@ -178,6 +178,25 @@ export const useWorkOrders = ({
     return { base, total };
   }, [m2, selectedModel]);
 
+  const buildBudgetNumber = (requestId: string | null, date = new Date()) => {
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const ref = (requestId ?? 'GEN').replace('REQ-', '');
+    return `P-${yy}${mm}${dd}-${ref}`;
+  };
+
+  const budgetNumber = useMemo(() => {
+    const status = getBudgetStatus(selectedRequestId);
+    return status.budgetNumber ?? buildBudgetNumber(selectedRequestId);
+  }, [selectedRequestId, budgetStatusByRequestId]);
+
+  const budgetDate = useMemo(() => {
+    const date = new Date();
+    const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('es-ES', opts);
+  }, []);
+
   const productionSteps = [prodCut, prodFab, prodLac, prodLacControl];
   const productionPct = Math.round((productionSteps.filter(Boolean).length / productionSteps.length) * 100);
 
@@ -483,25 +502,6 @@ export const useWorkOrders = ({
     setTab('INBOX');
     updateBudgetStatus(nextId, emptyBudgetStatus);
   };
-
-  const buildBudgetNumber = (requestId: string | null, date = new Date()) => {
-    const yy = date.getFullYear().toString().slice(-2);
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const ref = (requestId ?? 'GEN').replace('REQ-', '');
-    return `P-${yy}${mm}${dd}-${ref}`;
-  };
-
-  const budgetNumber = useMemo(() => {
-    const status = getBudgetStatus(selectedRequestId);
-    return status.budgetNumber ?? buildBudgetNumber(selectedRequestId);
-  }, [selectedRequestId, budgetStatusByRequestId]);
-
-  const budgetDate = useMemo(() => {
-    const date = new Date();
-    const opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'long', year: 'numeric' };
-    return date.toLocaleDateString('es-ES', opts);
-  }, []);
 
   const workOrderNumber = useMemo(() => {
     const date = new Date();
