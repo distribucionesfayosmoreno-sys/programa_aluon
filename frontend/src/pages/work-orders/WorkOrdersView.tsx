@@ -152,7 +152,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
             </svg>
             Nueva orden
           </button>
-          <button className="btn-ghost" onClick={resetDownstream}>Reiniciar flujo</button>
+          <button className="btn-ghost" onClick={() => resetDownstream()}>Reiniciar flujo</button>
         </div>
       </div>
 
