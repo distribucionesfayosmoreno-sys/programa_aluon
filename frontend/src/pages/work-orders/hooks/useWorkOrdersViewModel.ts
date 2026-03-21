@@ -167,7 +167,7 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
     clearCutlist();
   }, [clearCutlist, setGroundClearanceMm]);
 
-  const handleLargueroChange = useCallback((value: number) => {
+  const handleLargueroChange = useCallback((value: 50 | 80) => {
     setLargueroMm(value);
     clearCutlist();
   }, [clearCutlist, setLargueroMm]);

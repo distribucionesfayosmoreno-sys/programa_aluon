@@ -24,11 +24,16 @@ type WorkOrderBaseState = {
   showWorkOrderModal: boolean;
 };
 
-type WorkOrderBaseAction<K extends keyof WorkOrderBaseState = keyof WorkOrderBaseState> = {
-  type: 'SET_FIELD';
-  field: K;
-  value: WorkOrderBaseState[K];
-};
+type WorkOrderBaseAction<K extends keyof WorkOrderBaseState = keyof WorkOrderBaseState> =
+  | {
+      type: 'SET_FIELD';
+      field: K;
+      value: WorkOrderBaseState[K];
+    }
+  | {
+      type: 'SET_REQUESTS';
+      value: WorkOrderRequest[] | ((prev: WorkOrderRequest[]) => WorkOrderRequest[]);
+    };
 
 const initialState: WorkOrderBaseState = {
   requests: MOCK_REQUESTS,
@@ -59,6 +64,13 @@ const reducer = (state: WorkOrderBaseState, action: WorkOrderBaseAction) => {
     }
     return { ...state, [action.field]: action.value };
   }
+  if (action.type === 'SET_REQUESTS') {
+    const nextValue = typeof action.value === 'function' ? action.value(state.requests) : action.value;
+    if (state.requests === nextValue) {
+      return state;
+    }
+    return { ...state, requests: nextValue };
+  }
   return state;
 };
 
@@ -74,7 +86,9 @@ export const useWorkOrderBaseState = () => {
 
   return {
     requests: state.requests,
-    setRequests: (value: WorkOrderRequest[]) => setField('requests', value),
+    setRequests: (value: WorkOrderRequest[] | ((prev: WorkOrderRequest[]) => WorkOrderRequest[])) => {
+      dispatch({ type: 'SET_REQUESTS', value });
+    },
     customerId: state.customerId,
     setCustomerId: (value: string) => setField('customerId', value),
     modelId: state.modelId,
