@@ -11,6 +11,7 @@ import { ProductionSection } from './sections/ProductionSection';
 import { FinalSection } from './sections/FinalSection';
 import { SidebarSummary } from './sections/SidebarSummary';
 import { SidebarWorkflow } from './sections/SidebarWorkflow';
+import { SidebarCutlistMenu } from './sections/SidebarCutlistMenu';
 
 export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
   const {
@@ -34,7 +35,11 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     groundClearanceMm,
     largueroMm,
     topFrame,
+    hingesSide,
+    porterAutomatic,
+    automationIncluded,
     automationReinforcement,
+    openingSide,
     railType,
     mountingType,
     tail,
@@ -43,6 +48,10 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     cutlistLoading,
     cutlistImageIndex,
     cutlistPinnedIndex,
+    cutlistDistributor,
+    cutlistBudgetNumber,
+    cutlistBudgetDate,
+    cutlistColor,
     prodCut,
     prodFab,
     prodLac,
@@ -68,6 +77,9 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     needsLarguero,
     needsTopFrame,
     needsAutomation,
+    needsHingesSide,
+    needsPorterAutomatic,
+    needsOpeningSide,
     needsRail,
     needsMounting,
     needsTail,
@@ -94,13 +106,21 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     setGroundClearanceMm,
     setLargueroMm,
     setTopFrame,
+    setHingesSide,
+    setPorterAutomatic,
+    setAutomationIncluded,
     setAutomationReinforcement,
+    setOpeningSide,
     setRailType,
     setMountingType,
     setTail,
     setCutlistImageIndex,
     setCutlistHoverIndex,
     setCutlistPinnedIndex,
+    setCutlistDistributor,
+    setCutlistBudgetNumber,
+    setCutlistBudgetDate,
+    setCutlistColor,
     setProdCut,
     setProdFab,
     setProdLac,
@@ -252,6 +272,10 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               canGenerateCutlist={canGenerateCutlist}
               cutlistLoading={cutlistLoading}
               cutlistError={cutlistError}
+              distributor={cutlistDistributor}
+              budgetNumber={cutlistBudgetNumber}
+              budgetDate={cutlistBudgetDate}
+              color={cutlistColor}
               doorType={doorType}
               doorModel={doorModel}
               widthMm={widthMm}
@@ -259,7 +283,11 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               groundClearanceMm={groundClearanceMm}
               largueroMm={largueroMm}
               topFrame={topFrame}
+              hingesSide={hingesSide}
+              porterAutomatic={porterAutomatic}
+              automationIncluded={automationIncluded}
               automationReinforcement={automationReinforcement}
+              openingSide={openingSide}
               railType={railType}
               mountingType={mountingType}
               tail={tail}
@@ -267,6 +295,9 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               needsLarguero={needsLarguero}
               needsTopFrame={needsTopFrame}
               needsAutomation={needsAutomation}
+              needsHingesSide={needsHingesSide}
+              needsPorterAutomatic={needsPorterAutomatic}
+              needsOpeningSide={needsOpeningSide}
               needsRail={needsRail}
               needsMounting={needsMounting}
               needsTail={needsTail}
@@ -277,6 +308,10 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               cutlistPinnedIndex={cutlistPinnedIndex}
               onGenerateDevelopment={() => setDevelopmentGenerated(true)}
               onGenerateCutlist={handleGenerateCutlist}
+              onDistributorChange={value => setCutlistDistributor(value)}
+              onBudgetNumberChange={value => setCutlistBudgetNumber(value)}
+              onBudgetDateChange={value => setCutlistBudgetDate(value)}
+              onColorChange={value => setCutlistColor(value)}
               onDoorTypeChange={value => { setDoorType(value); clearCutlist(); }}
               onDoorModelChange={value => { setDoorModel(value); clearCutlist(); }}
               onWidthChange={value => { setWidthMm(value); clearCutlist(); }}
@@ -284,7 +319,11 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               onGroundClearanceChange={value => { setGroundClearanceMm(value); clearCutlist(); }}
               onLargueroChange={value => { setLargueroMm(value); clearCutlist(); }}
               onTopFrameChange={value => { setTopFrame(value); clearCutlist(); }}
+              onHingesSideChange={value => { setHingesSide(value); clearCutlist(); }}
+              onPorterAutomaticChange={value => { setPorterAutomatic(value); clearCutlist(); }}
+              onAutomationIncludedChange={value => { setAutomationIncluded(value); clearCutlist(); }}
               onAutomationChange={value => { setAutomationReinforcement(value); clearCutlist(); }}
+              onOpeningSideChange={value => { setOpeningSide(value); clearCutlist(); }}
               onRailTypeChange={value => { setRailType(value); clearCutlist(); }}
               onMountingTypeChange={value => { setMountingType(value); clearCutlist(); }}
               onTailChange={value => { setTail(value); clearCutlist(); }}
@@ -334,6 +373,8 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
             adminApproved={adminApproved}
             googleView={googleView}
           />
+
+          <SidebarCutlistMenu />
 
           <SidebarWorkflow
             customerReady={Boolean(customerId) && m2 > 0 && hasModelRef}

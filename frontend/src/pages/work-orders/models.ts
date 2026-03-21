@@ -59,6 +59,8 @@ export type CutlistDoorType = 'PEATONAL' | 'ABATIBLE_UNA' | 'ABATIBLE_DOS' | 'CO
 export type CutlistDoorModel = 'PREMIUM' | 'CLASSIC' | 'INOX' | 'VENECIANA';
 export type CutlistRailType = 'CARRIL_16' | 'CARRIL_20';
 export type CutlistMountingType = 'A' | 'B';
+export type HingesSide = 'LEFT' | 'RIGHT';
+export type OpeningSide = 'LEFT' | 'RIGHT';
 
 export type CutlistImage = {
   src: string;
@@ -67,6 +69,10 @@ export type CutlistImage = {
 };
 
 export type CutlistRequest = {
+  distributor?: string;
+  budgetNumber?: string;
+  budgetDate?: string;
+  color?: string;
   doorType: CutlistDoorType;
   model: CutlistDoorModel;
   widthMm: number;
@@ -74,7 +80,11 @@ export type CutlistRequest = {
   groundClearanceMm?: number;
   largueroMm?: number;
   topFrame?: boolean;
+  hingesSide?: HingesSide;
+  porterAutomatic?: boolean;
+  automationIncluded?: boolean;
   automationReinforcement?: boolean;
+  openingSide?: OpeningSide;
   railType?: CutlistRailType;
   mountingType?: CutlistMountingType;
   tail?: boolean;
@@ -89,6 +99,10 @@ export type CutlistItem = {
 
 export type CutlistResponse = {
   id: string;
+  distributor?: string | null;
+  budgetNumber?: string | null;
+  budgetDate?: string | null;
+  color?: string | null;
   doorType: CutlistDoorType;
   model: CutlistDoorModel;
   widthMm: number;
@@ -104,6 +118,10 @@ export type WorkOrderData = {
   customerPhone: string;
   modelLabel: string;
   modelReference: string;
+  distributor?: string;
+  budgetNumber?: string;
+  budgetDate?: string;
+  color?: string;
   doorModelLabel: string;
   doorTypeLabel: string;
   widthMm: number;
@@ -111,7 +129,11 @@ export type WorkOrderData = {
   groundClearanceMm?: number;
   largueroMm?: number;
   topFrame?: boolean;
+  hingesSide?: HingesSide;
+  porterAutomatic?: boolean;
+  automationIncluded?: boolean;
   automationReinforcement?: boolean;
+  openingSide?: OpeningSide;
   railType?: CutlistRailType;
   mountingType?: CutlistMountingType;
   tail?: boolean;

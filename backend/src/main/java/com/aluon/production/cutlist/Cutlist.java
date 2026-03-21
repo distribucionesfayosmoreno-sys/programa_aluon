@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.TenantId;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,18 @@ public class Cutlist {
     @Column(name = "height_mm", nullable = false)
     private Integer heightMm;
 
+    @Column(name = "distributor")
+    private String distributor;
+
+    @Column(name = "budget_number")
+    private String budgetNumber;
+
+    @Column(name = "budget_date")
+    private LocalDate budgetDate;
+
+    @Column(name = "color")
+    private String color;
+
     @Column(name = "ground_clearance_mm")
     private Integer groundClearanceMm;
 
@@ -49,8 +62,22 @@ public class Cutlist {
     @Column(name = "top_frame")
     private Boolean topFrame;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "hinges_side")
+    private HingesSide hingesSide;
+
+    @Column(name = "porter_automatic")
+    private Boolean porterAutomatic;
+
+    @Column(name = "automation_included")
+    private Boolean automationIncluded;
+
     @Column(name = "automation_reinforcement")
     private Boolean automationReinforcement;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "opening_side")
+    private OpeningSide openingSide;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rail_type")

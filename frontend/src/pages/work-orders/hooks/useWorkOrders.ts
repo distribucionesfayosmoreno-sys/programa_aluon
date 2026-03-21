@@ -5,6 +5,8 @@ import type {
   BudgetData,
   CutlistDoorModel,
   CutlistDoorType,
+  HingesSide,
+  OpeningSide,
   CutlistMountingType,
   CutlistRailType,
   CutlistRequest,
@@ -74,7 +76,11 @@ export const useWorkOrders = ({
   const [groundClearanceMm, setGroundClearanceMm] = useState(0);
   const [largueroMm, setLargueroMm] = useState<50 | 80>(50);
   const [topFrame, setTopFrame] = useState(true);
+  const [hingesSide, setHingesSide] = useState<HingesSide>('LEFT');
+  const [porterAutomatic, setPorterAutomatic] = useState(false);
+  const [automationIncluded, setAutomationIncluded] = useState(false);
   const [automationReinforcement, setAutomationReinforcement] = useState(false);
+  const [openingSide, setOpeningSide] = useState<OpeningSide>('LEFT');
   const [railType, setRailType] = useState<CutlistRailType>('CARRIL_16');
   const [mountingType, setMountingType] = useState<CutlistMountingType>('A');
   const [tail, setTail] = useState(false);
@@ -84,6 +90,10 @@ export const useWorkOrders = ({
   const [cutlistImageIndex, setCutlistImageIndex] = useState(0);
   const [cutlistHoverIndex, setCutlistHoverIndex] = useState<number | null>(null);
   const [cutlistPinnedIndex, setCutlistPinnedIndex] = useState<number | null>(null);
+  const [cutlistDistributor, setCutlistDistributor] = useState('');
+  const [cutlistBudgetNumber, setCutlistBudgetNumber] = useState('');
+  const [cutlistBudgetDate, setCutlistBudgetDate] = useState('');
+  const [cutlistColor, setCutlistColor] = useState('');
 
   const [prodCut, setProdCut] = useState(false);
   const [prodFab, setProdFab] = useState(false);
@@ -253,7 +263,10 @@ export const useWorkOrders = ({
   const needsGroundClearance = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
   const needsLarguero = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
   const needsTopFrame = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
+  const needsHingesSide = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA';
+  const needsPorterAutomatic = doorType === 'PEATONAL';
   const needsAutomation = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
+  const needsOpeningSide = doorType === 'ABATIBLE_DOS';
   const needsRail = doorType === 'CORREDERA';
   const needsMounting = doorType === 'CORREDERA';
   const needsTail = doorType === 'CORREDERA';
@@ -270,20 +283,54 @@ export const useWorkOrders = ({
     setCutlistPinnedIndex(null);
   }, [doorModel, doorType, cutlistResult]);
 
+  useEffect(() => {
+    if (automationIncluded) {
+      setAutomationReinforcement(true);
+    }
+  }, [automationIncluded]);
+
+  useEffect(() => {
+    if (!cutlistBudgetNumber.trim()) {
+      setCutlistBudgetNumber(budgetNumber);
+    }
+  }, [budgetNumber, cutlistBudgetNumber]);
+
+  useEffect(() => {
+    if (!cutlistBudgetDate.trim()) {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      setCutlistBudgetDate(`${yyyy}-${mm}-${dd}`);
+    }
+  }, [cutlistBudgetDate]);
+
   const activeCutlistIndex = cutlistPinnedIndex ?? cutlistHoverIndex;
 
   const canGenerateCutlist = canGenerateDevelopment
     && widthMm > 0
     && heightMm > 0
+    && cutlistDistributor.trim().length > 0
+    && cutlistBudgetNumber.trim().length > 0
+    && cutlistBudgetDate.trim().length > 0
+    && cutlistColor.trim().length > 0
     && (!needsGroundClearance || groundClearanceMm >= 0)
     && (!needsLarguero || (largueroMm === 50 || largueroMm === 80))
     && (!needsTopFrame || typeof topFrame === 'boolean')
+    && (!needsHingesSide || Boolean(hingesSide))
+    && (!needsPorterAutomatic || typeof porterAutomatic === 'boolean')
+    && (!needsAutomation || typeof automationIncluded === 'boolean')
     && (!needsAutomation || typeof automationReinforcement === 'boolean')
+    && (!needsOpeningSide || Boolean(openingSide))
     && (!needsRail || Boolean(railType))
     && (!needsMounting || Boolean(mountingType))
     && (!needsTail || typeof tail === 'boolean');
 
   const buildCutlistPayload = (): CutlistRequest => ({
+    distributor: cutlistDistributor.trim(),
+    budgetNumber: cutlistBudgetNumber.trim(),
+    budgetDate: cutlistBudgetDate.trim(),
+    color: cutlistColor.trim(),
     doorType,
     model: doorModel,
     widthMm,
@@ -291,7 +338,11 @@ export const useWorkOrders = ({
     groundClearanceMm: needsGroundClearance ? groundClearanceMm : undefined,
     largueroMm: needsLarguero ? largueroMm : undefined,
     topFrame: needsTopFrame ? topFrame : undefined,
+    hingesSide: needsHingesSide ? hingesSide : undefined,
+    porterAutomatic: needsPorterAutomatic ? porterAutomatic : undefined,
+    automationIncluded: needsAutomation ? automationIncluded : undefined,
     automationReinforcement: needsAutomation ? automationReinforcement : undefined,
+    openingSide: needsOpeningSide ? openingSide : undefined,
     railType: needsRail ? railType : undefined,
     mountingType: needsMounting ? mountingType : undefined,
     tail: needsTail ? tail : undefined,
@@ -498,6 +549,10 @@ export const useWorkOrders = ({
     customerPhone: selectedCustomer?.telefono || '—',
     modelLabel: selectedModel.label,
     modelReference: modelReference,
+    distributor: cutlistDistributor,
+    budgetNumber: cutlistBudgetNumber,
+    budgetDate: cutlistBudgetDate,
+    color: cutlistColor,
     doorModelLabel,
     doorTypeLabel,
     widthMm,
@@ -505,7 +560,11 @@ export const useWorkOrders = ({
     groundClearanceMm,
     largueroMm,
     topFrame,
+    hingesSide,
+    porterAutomatic,
+    automationIncluded,
     automationReinforcement,
+    openingSide,
     railType,
     mountingType,
     tail,
@@ -754,10 +813,20 @@ export const useWorkOrders = ({
     Medidas: ${workOrderData.widthMm} × ${workOrderData.heightMm} mm
   </div>
   <div class="block small">
+    Distribuidor: ${workOrderData.distributor || '—'} ·
+    Nº Presupuesto: ${workOrderData.budgetNumber || '—'} ·
+    Fecha: ${workOrderData.budgetDate || '—'} ·
+    Color: ${workOrderData.color || '—'}
+  </div>
+  <div class="block small">
     Holgura suelo: ${workOrderData.groundClearanceMm ?? '—'} mm ·
     Larguero: ${workOrderData.largueroMm ?? '—'} mm ·
     Marco superior: ${workOrderData.topFrame ? 'Sí' : 'No'} ·
+    Bisagras: ${workOrderData.hingesSide === 'LEFT' ? 'Izquierda' : workOrderData.hingesSide === 'RIGHT' ? 'Derecha' : '—'} ·
+    Portero automático: ${workOrderData.porterAutomatic ? 'Sí' : 'No'} ·
+    Automatización: ${workOrderData.automationIncluded ? 'Sí' : 'No'} ·
     Refuerzo automatización: ${workOrderData.automationReinforcement ? 'Sí' : 'No'}<br />
+    Primera hoja: ${workOrderData.openingSide === 'LEFT' ? 'Izquierda' : workOrderData.openingSide === 'RIGHT' ? 'Derecha' : '—'} ·
     Carril: ${workOrderData.railType ?? '—'} ·
     Montaje: ${workOrderData.mountingType ?? '—'} ·
     Cola: ${workOrderData.tail ? 'Sí' : 'No'}
@@ -805,7 +874,11 @@ export const useWorkOrders = ({
     groundClearanceMm,
     largueroMm,
     topFrame,
+    hingesSide,
+    porterAutomatic,
+    automationIncluded,
     automationReinforcement,
+    openingSide,
     railType,
     mountingType,
     tail,
@@ -815,6 +888,10 @@ export const useWorkOrders = ({
     cutlistImageIndex,
     cutlistHoverIndex,
     cutlistPinnedIndex,
+    cutlistDistributor,
+    cutlistBudgetNumber,
+    cutlistBudgetDate,
+    cutlistColor,
     prodCut,
     prodFab,
     prodLac,
@@ -837,6 +914,9 @@ export const useWorkOrders = ({
     needsLarguero,
     needsTopFrame,
     needsAutomation,
+    needsHingesSide,
+    needsPorterAutomatic,
+    needsOpeningSide,
     needsRail,
     needsMounting,
     needsTail,
@@ -868,7 +948,11 @@ export const useWorkOrders = ({
     setGroundClearanceMm,
     setLargueroMm,
     setTopFrame,
+    setHingesSide,
+    setPorterAutomatic,
+    setAutomationIncluded,
     setAutomationReinforcement,
+    setOpeningSide,
     setRailType,
     setMountingType,
     setTail,
@@ -878,6 +962,10 @@ export const useWorkOrders = ({
     setCutlistImageIndex,
     setCutlistHoverIndex,
     setCutlistPinnedIndex,
+    setCutlistDistributor,
+    setCutlistBudgetNumber,
+    setCutlistBudgetDate,
+    setCutlistColor,
     setProdCut,
     setProdFab,
     setProdLac,

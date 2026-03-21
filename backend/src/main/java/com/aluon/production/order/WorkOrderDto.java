@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,10 @@ public class WorkOrderDto {
     private Integer anchoMm;
     private Integer altoMm;
     private UUID cutlistId;
+    private String distributor;
+    private String budgetNumber;
+    private LocalDate budgetDate;
+    private String color;
     private DoorType doorType;
     private DoorModel doorModel;
     private Integer widthMm;
@@ -37,7 +42,11 @@ public class WorkOrderDto {
     private Integer groundClearanceMm;
     private Integer largueroMm;
     private Boolean topFrame;
+    private com.aluon.production.cutlist.HingesSide hingesSide;
+    private Boolean porterAutomatic;
+    private Boolean automationIncluded;
     private Boolean automationReinforcement;
+    private com.aluon.production.cutlist.OpeningSide openingSide;
     private RailType railType;
     private MountingType mountingType;
     private Boolean tail;

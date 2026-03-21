@@ -26,6 +26,10 @@ public class CutlistService {
         }
 
         Cutlist cutlist = Cutlist.builder()
+                .distributor(normalize(request.getDistributor()))
+                .budgetNumber(normalize(request.getBudgetNumber()))
+                .budgetDate(request.getBudgetDate())
+                .color(normalize(request.getColor()))
                 .doorType(request.getDoorType())
                 .doorModel(request.getModel())
                 .widthMm(request.getWidthMm())
@@ -33,7 +37,11 @@ public class CutlistService {
                 .groundClearanceMm(request.getGroundClearanceMm())
                 .largueroMm(request.getLargueroMm())
                 .topFrame(request.getTopFrame())
+                .hingesSide(request.getHingesSide())
+                .porterAutomatic(request.getPorterAutomatic())
+                .automationIncluded(request.getAutomationIncluded())
                 .automationReinforcement(request.getAutomationReinforcement())
+                .openingSide(request.getOpeningSide())
                 .railType(request.getRailType())
                 .mountingType(request.getMountingType())
                 .tail(request.getTail())
@@ -76,6 +84,10 @@ public class CutlistService {
 
         return CutlistResponseDto.builder()
                 .id(cutlist.getId())
+                .distributor(cutlist.getDistributor())
+                .budgetNumber(cutlist.getBudgetNumber())
+                .budgetDate(cutlist.getBudgetDate())
+                .color(cutlist.getColor())
                 .doorType(cutlist.getDoorType())
                 .model(cutlist.getDoorModel())
                 .widthMm(cutlist.getWidthMm())
@@ -83,7 +95,11 @@ public class CutlistService {
                 .groundClearanceMm(cutlist.getGroundClearanceMm())
                 .largueroMm(cutlist.getLargueroMm())
                 .topFrame(cutlist.getTopFrame())
+                .hingesSide(cutlist.getHingesSide())
+                .porterAutomatic(cutlist.getPorterAutomatic())
+                .automationIncluded(cutlist.getAutomationIncluded())
                 .automationReinforcement(cutlist.getAutomationReinforcement())
+                .openingSide(cutlist.getOpeningSide())
                 .railType(cutlist.getRailType())
                 .mountingType(cutlist.getMountingType())
                 .tail(cutlist.getTail())
@@ -109,6 +125,15 @@ public class CutlistService {
         if (request.getHeightMm() == null || request.getHeightMm() <= 0) {
             throw new IllegalArgumentException("La altura debe ser mayor que 0");
         }
+        if (request.getDistributor() != null && request.getDistributor().isBlank()) {
+            throw new IllegalArgumentException("El distribuidor no puede estar vacío");
+        }
+        if (request.getBudgetNumber() != null && request.getBudgetNumber().isBlank()) {
+            throw new IllegalArgumentException("El nº de presupuesto no puede estar vacío");
+        }
+        if (request.getColor() != null && request.getColor().isBlank()) {
+            throw new IllegalArgumentException("El color no puede estar vacío");
+        }
 
         switch (request.getDoorType()) {
             case PEATONAL, ABATIBLE_UNA, ABATIBLE_DOS -> {
@@ -122,6 +147,7 @@ public class CutlistService {
                     throw new IllegalArgumentException("Debe indicar si lleva marco superior");
                 }
                 if ((request.getDoorType() == DoorType.ABATIBLE_UNA || request.getDoorType() == DoorType.ABATIBLE_DOS)
+                        && request.getAutomationIncluded() != null
                         && request.getAutomationReinforcement() == null) {
                     throw new IllegalArgumentException("Debe indicar si lleva refuerzo de automatización");
                 }
@@ -144,5 +170,13 @@ public class CutlistService {
                 // No fields adicionales
             }
         }
+    }
+
+    private String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

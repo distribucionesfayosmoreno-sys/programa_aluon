@@ -87,13 +87,29 @@ export const WorkOrderModal = ({
 
           <div className="rounded-xl p-5" style={{ border: '1px solid #e8eaed', background: '#ffffff' }}>
             <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+              Datos de despiece
+            </div>
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs" style={{ color: '#6b7280' }}>
+              <div>Distribuidor: {data.distributor || '—'}</div>
+              <div>Nº Presupuesto: {data.budgetNumber || '—'}</div>
+              <div>Fecha: {data.budgetDate || '—'}</div>
+              <div>Color: {data.color || '—'}</div>
+            </div>
+          </div>
+
+          <div className="rounded-xl p-5" style={{ border: '1px solid #e8eaed', background: '#ffffff' }}>
+            <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
               Parámetros técnicos
             </div>
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs" style={{ color: '#6b7280' }}>
               <div>Holgura suelo: {data.groundClearanceMm ?? '—'} mm</div>
               <div>Larguero: {data.largueroMm ?? '—'} mm</div>
               <div>Marco superior: {data.topFrame ? 'Sí' : 'No'}</div>
+              <div>Bisagras: {data.hingesSide === 'LEFT' ? 'Izquierda' : data.hingesSide === 'RIGHT' ? 'Derecha' : '—'}</div>
+              <div>Portero automático: {data.porterAutomatic ? 'Sí' : 'No'}</div>
+              <div>Automatización: {data.automationIncluded ? 'Sí' : 'No'}</div>
               <div>Refuerzo automatización: {data.automationReinforcement ? 'Sí' : 'No'}</div>
+              <div>Primera hoja: {data.openingSide === 'LEFT' ? 'Izquierda' : data.openingSide === 'RIGHT' ? 'Derecha' : '—'}</div>
               <div>Carril: {data.railType ?? '—'}</div>
               <div>Montaje: {data.mountingType ?? '—'}</div>
               <div>Cola: {data.tail ? 'Sí' : 'No'}</div>

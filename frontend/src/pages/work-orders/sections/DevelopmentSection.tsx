@@ -1,5 +1,6 @@
 import { DOOR_MODELS, DOOR_TYPES } from '../constants';
-import type { CutlistDoorModel, CutlistDoorType, CutlistMountingType, CutlistRailType, CutlistResponse } from '../models';
+import { resolveCutlistItemImages } from '../cutlistItemImages';
+import type { CutlistDoorModel, CutlistDoorType, CutlistMountingType, CutlistRailType, CutlistResponse, HingesSide, OpeningSide } from '../models';
 import { Field, FieldLabel, SectionTitle, StatusPill } from '../components/ui';
 
 export const DevelopmentSection = ({
@@ -9,6 +10,10 @@ export const DevelopmentSection = ({
   canGenerateCutlist,
   cutlistLoading,
   cutlistError,
+  distributor,
+  budgetNumber,
+  budgetDate,
+  color,
   doorType,
   doorModel,
   widthMm,
@@ -16,7 +21,11 @@ export const DevelopmentSection = ({
   groundClearanceMm,
   largueroMm,
   topFrame,
+  hingesSide,
+  porterAutomatic,
+  automationIncluded,
   automationReinforcement,
+  openingSide,
   railType,
   mountingType,
   tail,
@@ -24,6 +33,9 @@ export const DevelopmentSection = ({
   needsLarguero,
   needsTopFrame,
   needsAutomation,
+  needsHingesSide,
+  needsPorterAutomatic,
+  needsOpeningSide,
   needsRail,
   needsMounting,
   needsTail,
@@ -34,6 +46,10 @@ export const DevelopmentSection = ({
   cutlistPinnedIndex,
   onGenerateDevelopment,
   onGenerateCutlist,
+  onDistributorChange,
+  onBudgetNumberChange,
+  onBudgetDateChange,
+  onColorChange,
   onDoorTypeChange,
   onDoorModelChange,
   onWidthChange,
@@ -41,7 +57,11 @@ export const DevelopmentSection = ({
   onGroundClearanceChange,
   onLargueroChange,
   onTopFrameChange,
+  onHingesSideChange,
+  onPorterAutomaticChange,
+  onAutomationIncludedChange,
   onAutomationChange,
+  onOpeningSideChange,
   onRailTypeChange,
   onMountingTypeChange,
   onTailChange,
@@ -55,6 +75,10 @@ export const DevelopmentSection = ({
   canGenerateCutlist: boolean;
   cutlistLoading: boolean;
   cutlistError: string;
+  distributor: string;
+  budgetNumber: string;
+  budgetDate: string;
+  color: string;
   doorType: CutlistDoorType;
   doorModel: CutlistDoorModel;
   widthMm: number;
@@ -62,7 +86,11 @@ export const DevelopmentSection = ({
   groundClearanceMm: number;
   largueroMm: number;
   topFrame: boolean;
+  hingesSide: HingesSide;
+  porterAutomatic: boolean;
+  automationIncluded: boolean;
   automationReinforcement: boolean;
+  openingSide: OpeningSide;
   railType: CutlistRailType;
   mountingType: CutlistMountingType;
   tail: boolean;
@@ -70,6 +98,9 @@ export const DevelopmentSection = ({
   needsLarguero: boolean;
   needsTopFrame: boolean;
   needsAutomation: boolean;
+  needsHingesSide: boolean;
+  needsPorterAutomatic: boolean;
+  needsOpeningSide: boolean;
   needsRail: boolean;
   needsMounting: boolean;
   needsTail: boolean;
@@ -80,6 +111,10 @@ export const DevelopmentSection = ({
   cutlistPinnedIndex: number | null;
   onGenerateDevelopment: () => void;
   onGenerateCutlist: () => void;
+  onDistributorChange: (value: string) => void;
+  onBudgetNumberChange: (value: string) => void;
+  onBudgetDateChange: (value: string) => void;
+  onColorChange: (value: string) => void;
   onDoorTypeChange: (value: CutlistDoorType) => void;
   onDoorModelChange: (value: CutlistDoorModel) => void;
   onWidthChange: (value: number) => void;
@@ -87,7 +122,11 @@ export const DevelopmentSection = ({
   onGroundClearanceChange: (value: number) => void;
   onLargueroChange: (value: 50 | 80) => void;
   onTopFrameChange: (value: boolean) => void;
+  onHingesSideChange: (value: HingesSide) => void;
+  onPorterAutomaticChange: (value: boolean) => void;
+  onAutomationIncludedChange: (value: boolean) => void;
   onAutomationChange: (value: boolean) => void;
+  onOpeningSideChange: (value: OpeningSide) => void;
   onRailTypeChange: (value: CutlistRailType) => void;
   onMountingTypeChange: (value: CutlistMountingType) => void;
   onTailChange: (value: boolean) => void;
@@ -95,7 +134,11 @@ export const DevelopmentSection = ({
   onCutlistHoverChange: (value: number | null) => void;
   onCutlistPinnedChange: (value: number | null) => void;
 }) => (
-  <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+  <section
+    id="cutlist-form"
+    className="p-6 rounded-2xl"
+    style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+  >
     <SectionTitle n="04" label="Desarrollo automático" />
     <div className="flex flex-wrap items-center gap-3">
       <button
@@ -120,6 +163,22 @@ export const DevelopmentSection = ({
       <StatusPill label="Despiece generado" ok={cutlistGenerated} />
     </div>
     <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <FieldLabel>Distribuidor</FieldLabel>
+        <Field value={distributor} onChange={e => onDistributorChange(e.target.value)} />
+      </div>
+      <div>
+        <FieldLabel>Nº Presupuesto</FieldLabel>
+        <Field value={budgetNumber} onChange={e => onBudgetNumberChange(e.target.value)} />
+      </div>
+      <div>
+        <FieldLabel>Fecha</FieldLabel>
+        <Field type="date" value={budgetDate} onChange={e => onBudgetDateChange(e.target.value)} />
+      </div>
+      <div>
+        <FieldLabel>Color</FieldLabel>
+        <Field value={color} onChange={e => onColorChange(e.target.value)} />
+      </div>
       <div>
         <FieldLabel>Tipo de puerta</FieldLabel>
         <select
@@ -199,6 +258,45 @@ export const DevelopmentSection = ({
           </select>
         </div>
       )}
+      {needsHingesSide && (
+        <div>
+          <FieldLabel>Bisagras</FieldLabel>
+          <select
+            className="field"
+            value={hingesSide}
+            onChange={e => onHingesSideChange(e.target.value as HingesSide)}
+          >
+            <option value="LEFT">Izquierda</option>
+            <option value="RIGHT">Derecha</option>
+          </select>
+        </div>
+      )}
+      {needsPorterAutomatic && (
+        <div>
+          <FieldLabel>Portero automático</FieldLabel>
+          <select
+            className="field"
+            value={porterAutomatic ? 'yes' : 'no'}
+            onChange={e => onPorterAutomaticChange(e.target.value === 'yes')}
+          >
+            <option value="yes">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      )}
+      {needsAutomation && (
+        <div>
+          <FieldLabel>Incluir automatización</FieldLabel>
+          <select
+            className="field"
+            value={automationIncluded ? 'yes' : 'no'}
+            onChange={e => onAutomationIncludedChange(e.target.value === 'yes')}
+          >
+            <option value="yes">Sí</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+      )}
       {needsAutomation && (
         <div>
           <FieldLabel>Refuerzo automatización</FieldLabel>
@@ -206,9 +304,23 @@ export const DevelopmentSection = ({
             className="field"
             value={automationReinforcement ? 'yes' : 'no'}
             onChange={e => onAutomationChange(e.target.value === 'yes')}
+            disabled={automationIncluded}
           >
             <option value="yes">Sí</option>
             <option value="no">No</option>
+          </select>
+        </div>
+      )}
+      {needsOpeningSide && (
+        <div>
+          <FieldLabel>Primera hoja apertura</FieldLabel>
+          <select
+            className="field"
+            value={openingSide}
+            onChange={e => onOpeningSideChange(e.target.value as OpeningSide)}
+          >
+            <option value="LEFT">Izquierda</option>
+            <option value="RIGHT">Derecha</option>
           </select>
         </div>
       )}
@@ -258,6 +370,7 @@ export const DevelopmentSection = ({
       </p>
     )}
     <div
+      id="cutlist-visual"
       className="mt-6 rounded-2xl p-4"
       style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
     >
@@ -359,7 +472,7 @@ export const DevelopmentSection = ({
       </div>
     </div>
     {cutlistResult && (
-      <div className="mt-6">
+      <div className="mt-6" id="cutlist-table">
         <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
           Resultado despiece
         </div>
@@ -367,37 +480,48 @@ export const DevelopmentSection = ({
           <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#f9fafb', color: '#6b7280' }}>
+                <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Img seccional</th>
                 <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Descripción</th>
+                <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Img lateral</th>
                 <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Unidades</th>
                 <th className="text-left px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>Medida corte</th>
               </tr>
             </thead>
             <tbody>
-              {cutlistResult.items.map((item, idx) => (
-                <tr
-                  key={`${cutlistResult.id}-${idx}`}
-                  onMouseEnter={() => onCutlistHoverChange(idx)}
-                  onMouseLeave={() => onCutlistHoverChange(null)}
-                  onClick={() => onCutlistPinnedChange(cutlistPinnedIndex === idx ? null : idx)}
-                  style={{
-                    background: activeCutlistIndex === idx ? 'rgba(229,83,75,0.08)' : '#ffffff',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>
-                    <div className="flex items-center gap-2">
-                      <span>{item.description}</span>
-                      {activeCutlistIndex === idx && (
-                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e5534b' }}>
-                          Activa
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.units}x</td>
-                  <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.cutMeasure}</td>
-                </tr>
-              ))}
+              {cutlistResult.items.map((item, idx) => {
+                const { seccional, lateral } = resolveCutlistItemImages(item.description);
+                return (
+                  <tr
+                    key={`${cutlistResult.id}-${idx}`}
+                    onMouseEnter={() => onCutlistHoverChange(idx)}
+                    onMouseLeave={() => onCutlistHoverChange(null)}
+                    onClick={() => onCutlistPinnedChange(cutlistPinnedIndex === idx ? null : idx)}
+                    style={{
+                      background: activeCutlistIndex === idx ? 'rgba(229,83,75,0.08)' : '#ffffff',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>
+                      <img src={seccional.src} alt={seccional.alt} className="w-10 h-10 object-cover rounded-md border" style={{ borderColor: '#e5e7eb' }} />
+                    </td>
+                    <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>
+                      <div className="flex items-center gap-2">
+                        <span>{item.description}</span>
+                        {activeCutlistIndex === idx && (
+                          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#e5534b' }}>
+                            Activa
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>
+                      <img src={lateral.src} alt={lateral.alt} className="w-10 h-10 object-cover rounded-md border" style={{ borderColor: '#e5e7eb' }} />
+                    </td>
+                    <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.units}x</td>
+                    <td className="px-3 py-2" style={{ border: '1px solid #e5e7eb' }}>{item.cutMeasure}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
