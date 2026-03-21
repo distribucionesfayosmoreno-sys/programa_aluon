@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './pages/CustomerManagement';
+import Dashboard from './pages/Dashboard';
 import WorkOrders from './pages/WorkOrders';
 
 const App = () => {
@@ -101,12 +102,7 @@ const App = () => {
                 onNewRequestHandled={() => setOpenNewRequest(false)}
               />
             )}
-            {activeModule === 'dashboard' && (
-              <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
-                <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Dashboard</h2>
-                <p className="text-xs mt-2" style={{ color: '#9ca3af' }}>Módulo en preparación.</p>
-              </div>
-            )}
+            {activeModule === 'dashboard' && <Dashboard />}
             {activeModule === 'ajustes' && (
               <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
                 <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Ajustes</h2>
