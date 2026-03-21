@@ -1,4 +1,3 @@
-import React from 'react';
 import type { WorkOrderRequest } from '../models';
 import { MODELS } from '../constants';
 import { SectionTitle } from '../components/ui';

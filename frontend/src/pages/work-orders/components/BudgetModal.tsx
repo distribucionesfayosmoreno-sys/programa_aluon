@@ -1,4 +1,3 @@
-import React from 'react';
 import type { BudgetData } from '../models';
 
 export const BudgetModal = ({

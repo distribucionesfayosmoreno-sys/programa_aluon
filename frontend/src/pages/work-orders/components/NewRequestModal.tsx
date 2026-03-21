@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CustomerOption, NewRequestData } from '../models';
 import { MODELS } from '../constants';
 import { Field, FieldLabel, TextArea } from './ui';

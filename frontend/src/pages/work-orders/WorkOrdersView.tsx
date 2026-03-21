@@ -1,4 +1,3 @@
-import React from 'react';
 import type { UseWorkOrdersResult } from './hooks/useWorkOrders';
 import { BudgetModal } from './components/BudgetModal';
 import { NewRequestModal } from './components/NewRequestModal';

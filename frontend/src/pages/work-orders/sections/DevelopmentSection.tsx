@@ -1,4 +1,3 @@
-import React from 'react';
 import { DOOR_MODELS, DOOR_TYPES } from '../constants';
 import type { CutlistDoorModel, CutlistDoorType, CutlistMountingType, CutlistRailType, CutlistResponse } from '../models';
 import { Field, FieldLabel, SectionTitle, StatusPill } from '../components/ui';

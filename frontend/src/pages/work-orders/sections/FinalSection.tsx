@@ -1,4 +1,3 @@
-import React from 'react';
 import { SectionTitle } from '../components/ui';
 
 export const FinalSection = ({

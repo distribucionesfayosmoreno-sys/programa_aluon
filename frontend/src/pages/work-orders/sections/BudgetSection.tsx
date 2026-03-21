@@ -1,4 +1,3 @@
-import React from 'react';
 import { Field, FieldLabel, SectionTitle, StatusPill } from '../components/ui';
 
 export const BudgetSection = ({

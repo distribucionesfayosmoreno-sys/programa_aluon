@@ -1,4 +1,3 @@
-import React from 'react';
 import type { CustomerOption } from '../models';
 import { MODELS } from '../constants';
 import { Field, FieldLabel, SectionTitle, TextArea } from '../components/ui';
