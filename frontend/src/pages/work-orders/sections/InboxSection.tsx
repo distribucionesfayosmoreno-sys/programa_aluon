@@ -1,5 +1,5 @@
 import type { WorkOrderRequest } from '../models';
-import { MODELS } from '../constants';
+import { MODELS, WORKFLOW_STEP_LABELS } from '../constants';
 import { SectionTitle } from '../components/ui';
 
 export const InboxSection = ({
@@ -36,6 +36,15 @@ export const InboxSection = ({
               </div>
               <div className="text-xs mt-1" style={{ color: '#9ca3af' }}>
                 Ref: {req.reference} · {req.googleView ? 'Google view' : 'Sin Google view'}
+              </div>
+              <div className="text-xs mt-2 flex items-center gap-2" style={{ color: '#6b7280' }}>
+                <span className="font-semibold">Estado</span>
+                <span
+                  className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase"
+                  style={{ background: '#fff1f0', color: '#e5534b' }}
+                >
+                  {WORKFLOW_STEP_LABELS[req.workflowStep]}
+                </span>
               </div>
             </div>
             <button type="button" className="btn-ghost" onClick={() => onApplyRequest(req)}>

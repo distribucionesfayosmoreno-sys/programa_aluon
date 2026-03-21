@@ -18,6 +18,20 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
 
+    public List<OrderStatusDto> listOrderStatuses() {
+        return orderRepository.findAllByOrderByCodigoOrdenDesc().stream()
+                .map(order -> OrderStatusDto.builder()
+                        .id(order.getId())
+                        .codigoOrden(order.getCodigoOrden())
+                        .estado(order.getEstado())
+                        .workflowStep(order.getWorkflowStep())
+                        .customerName(order.getCustomer().getNombreComercial() != null
+                                ? order.getCustomer().getNombreComercial()
+                                : order.getCustomer().getRazonSocial())
+                        .build())
+                .toList();
+    }
+
     public WorkOrderDto getWorkOrder(UUID id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada"));
@@ -56,6 +70,7 @@ public class OrderService {
                 .id(order.getId())
                 .codigoOrden(order.getCodigoOrden())
                 .estado(order.getEstado())
+                .workflowStep(order.getWorkflowStep())
                 .customerId(customer.getId())
                 .customerName(customer.getNombreComercial() != null ? customer.getNombreComercial() : customer.getRazonSocial())
                 .customerAddress(address)

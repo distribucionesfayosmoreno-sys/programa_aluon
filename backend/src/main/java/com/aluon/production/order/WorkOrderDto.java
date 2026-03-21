@@ -21,6 +21,7 @@ public class WorkOrderDto {
     private UUID id;
     private String codigoOrden;
     private OrderStatus estado;
+    private OrderWorkflowStep workflowStep;
     private UUID customerId;
     private String customerName;
     private String customerAddress;

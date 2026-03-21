@@ -117,6 +117,10 @@ export const useWorkOrders = ({
     }));
   };
 
+  const updateRequestWorkflowStep = (requestId: string, workflowStep: TabKey) => {
+    setRequests(prev => prev.map(req => (req.id === requestId ? { ...req, workflowStep } : req)));
+  };
+
   useEffect(() => {
     if (!selectedRequestId) return;
     const status = getBudgetStatus(selectedRequestId);
@@ -320,6 +324,16 @@ export const useWorkOrders = ({
   const canStartProduction = canGenerateDevelopment && developmentGenerated && cutlistGenerated;
   const canFinalize = canStartProduction && prodCut && prodFab && prodLac && prodLacControl;
 
+  const resolveWorkflowStep = () => {
+    if (finalized && ready !== '') return 'FINAL';
+    if (prodCut && prodFab && prodLac && prodLacControl) return 'PROD';
+    if (developmentGenerated && cutlistGenerated) return 'DEV';
+    if (adminApproved) return 'VALIDATION';
+    if (budgetGenerated && accountingApproved) return 'BUDGET';
+    if (Boolean(customerId) && m2 > 0 && hasModelRef) return 'REQUEST';
+    return 'INBOX';
+  };
+
   const pipelineSteps: Array<{ key: TabKey; label: string; done: boolean }> = [
     { key: 'INBOX', label: 'Solicitudes', done: selectedRequestId !== null },
     { key: 'REQUEST', label: 'Solicitud', done: Boolean(customerId) && m2 > 0 && hasModelRef },
@@ -362,6 +376,38 @@ export const useWorkOrders = ({
     }
   }, [openNewRequest, onNewRequestHandled]);
 
+  useEffect(() => {
+    if (!selectedRequestId) return;
+    updateRequestWorkflowStep(selectedRequestId, resolveWorkflowStep());
+  }, [
+    selectedRequestId,
+    budgetGenerated,
+    accountingApproved,
+    adminApproved,
+    developmentGenerated,
+    cutlistGenerated,
+    prodCut,
+    prodFab,
+    prodLac,
+    prodLacControl,
+    finalized,
+    ready,
+    customerId,
+    m2,
+    hasModelRef,
+  ]);
+
+  useEffect(() => {
+    setRequests(prev => prev.map(req => {
+      const status = budgetStatusByRequestId[req.id];
+      if (!status) return req;
+      const nextStep = status.adminApproved
+        ? 'VALIDATION'
+        : (status.budgetGenerated && status.accountingApproved ? 'BUDGET' : req.workflowStep);
+      return nextStep === req.workflowStep ? req : { ...req, workflowStep: nextStep };
+    }));
+  }, [budgetStatusByRequestId]);
+
   const createRequest = (data: NewRequestData) => {
     const lastId = requests
       .map(r => Number(r.id.replace('REQ-', '')))
@@ -377,6 +423,7 @@ export const useWorkOrders = ({
         reference: data.reference,
         googleView: data.googleView,
         notes: data.notes,
+        workflowStep: 'INBOX',
       },
       ...prev,
     ]));

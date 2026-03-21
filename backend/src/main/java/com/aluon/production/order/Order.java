@@ -45,6 +45,11 @@ public class Order {
     @Column(nullable = false)
     private OrderStatus estado;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "workflow_step", nullable = false)
+    private OrderWorkflowStep workflowStep = OrderWorkflowStep.INBOX;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cutlist_id")
     private Cutlist cutlist;
@@ -52,4 +57,8 @@ public class Order {
 
 enum OrderStatus {
     PENDIENTE_MATERIAL, EN_PRODUCCION, LISTO_MONTAJE, INSTALADA, FACTURADA
+}
+
+enum OrderWorkflowStep {
+    INBOX, REQUEST, BUDGET, VALIDATION, DEV, PROD, FINAL
 }

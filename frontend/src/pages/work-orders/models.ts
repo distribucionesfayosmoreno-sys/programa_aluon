@@ -1,6 +1,7 @@
 import type { Customer } from '../../hooks/useCustomers';
 
 export type TabKey = 'INBOX' | 'REQUEST' | 'BUDGET' | 'VALIDATION' | 'DEV' | 'PROD' | 'FINAL';
+export type WorkOrderStage = TabKey;
 
 export type PendingBudget = {
   validationId: string;
@@ -126,6 +127,7 @@ export type WorkOrderRequest = {
   reference: string;
   googleView: boolean;
   notes: string;
+  workflowStep: WorkOrderStage;
 };
 
 export type CustomerOption = Customer;

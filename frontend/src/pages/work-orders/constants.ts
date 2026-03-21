@@ -5,7 +5,7 @@ import aluonVenecianaImg from '../../assets/cutlist/aluonVeneciana.jpg';
 import corte45Img from '../../assets/cutlist/corte45.jpg';
 import corte90Img from '../../assets/cutlist/corte90.jpg';
 import corte45y90Img from '../../assets/cutlist/corte45y90.jpg';
-import type { CutlistDoorModel, CutlistDoorType, CutlistImage, WorkOrderRequest } from './models';
+import type { CutlistDoorModel, CutlistDoorType, CutlistImage, WorkOrderRequest, WorkOrderStage } from './models';
 
 export const MODELS = [
   { id: 'CLASSIC', label: 'ALUON Classic', pricePerM2: 140 },
@@ -37,6 +37,7 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
     reference: 'MOD-PR-442',
     googleView: true,
     notes: 'Acabado satinado. Entrega urgente.',
+    workflowStep: 'BUDGET',
   },
   {
     id: 'REQ-002',
@@ -46,6 +47,7 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
     reference: 'MOD-CL-107',
     googleView: false,
     notes: 'Medidas especiales en esquinas.',
+    workflowStep: 'REQUEST',
   },
   {
     id: 'REQ-003',
@@ -55,8 +57,19 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
     reference: 'MOD-LX-880',
     googleView: true,
     notes: 'Necesita simulación en tienda.',
+    workflowStep: 'INBOX',
   },
 ];
+
+export const WORKFLOW_STEP_LABELS: Record<WorkOrderStage, string> = {
+  INBOX: 'Solicitud recibida',
+  REQUEST: 'Solicitud en curso',
+  BUDGET: 'Presupuesto',
+  VALIDATION: 'Validación',
+  DEV: 'Desarrollo',
+  PROD: 'Producción',
+  FINAL: 'Finalización',
+};
 
 export const CUTLIST_MODEL_IMAGES: Record<CutlistDoorModel, CutlistImage> = {
   PREMIUM: { src: aluonPremiumImg, alt: 'ALUON Premium', label: 'Modelo Premium' },
