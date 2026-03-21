@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useCustomers } from '../../../hooks/useCustomers';
 import { CUTLIST_MODEL_IMAGES, CUTLIST_TYPE_IMAGES, DOOR_MODELS, DOOR_TYPES, MODELS, MOCK_REQUESTS } from '../constants';
+import formPeatonalImg from '../../../assets/cutlist/forms/form-peatonal.jpg';
+import formVallasImg from '../../../assets/cutlist/forms/form-vallas.jpg';
+import formAbatibleUnaImg from '../../../assets/cutlist/forms/form-abatible-una.jpg';
+import formAbatibleDosImg from '../../../assets/cutlist/forms/form-abatible-dos.jpg';
+import formCorrederaImg from '../../../assets/cutlist/forms/form-corredera.jpg';
 import type {
   BudgetData,
   CutlistDoorModel,

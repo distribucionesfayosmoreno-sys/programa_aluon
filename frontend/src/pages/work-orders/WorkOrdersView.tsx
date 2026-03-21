@@ -10,8 +10,6 @@ import { DevelopmentSection } from './sections/DevelopmentSection';
 import { ProductionSection } from './sections/ProductionSection';
 import { FinalSection } from './sections/FinalSection';
 import { SidebarSummary } from './sections/SidebarSummary';
-import { SidebarWorkflow } from './sections/SidebarWorkflow';
-import { SidebarCutlistMenu } from './sections/SidebarCutlistMenu';
 
 export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
   const {
@@ -374,19 +372,9 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
             googleView={googleView}
           />
 
-          <SidebarCutlistMenu />
-
-          <SidebarWorkflow
-            customerReady={Boolean(customerId) && m2 > 0 && hasModelRef}
-            budgetGenerated={budgetGenerated}
-            accountingApproved={accountingApproved}
-            adminApproved={adminApproved}
-            developmentGenerated={developmentGenerated}
-            cutlistGenerated={cutlistGenerated}
-            productionReady={prodCut && prodFab && prodLac && prodLacControl}
-            finalized={finalized}
-            ready={ready !== ''}
-          />
+          {/*
+            SidebarCutlistMenu and SidebarWorkflow removed per request.
+          */}
         </aside>
       </div>
 
