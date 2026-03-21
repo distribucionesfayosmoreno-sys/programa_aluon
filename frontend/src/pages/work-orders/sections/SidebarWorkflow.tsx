@@ -1,4 +1,4 @@
-import { StatusPill } from '../components/ui';
+import { cardStyle, StatusPill, uiColors } from '../components/ui';
 
 export const SidebarWorkflow = ({
   customerReady,
@@ -21,8 +21,8 @@ export const SidebarWorkflow = ({
   finalized: boolean;
   ready: boolean;
 }) => (
-  <div className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
-    <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+  <div className="p-6 rounded-2xl" style={cardStyle}>
+    <div className="text-xs font-black uppercase tracking-widest" style={{ color: uiColors.textSubtle }}>
       Estado del workflow
     </div>
     <div className="mt-4 space-y-2">

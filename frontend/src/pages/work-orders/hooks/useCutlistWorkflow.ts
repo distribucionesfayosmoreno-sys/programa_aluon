@@ -92,6 +92,8 @@ export const useCutlistWorkflow = ({ budgetNumber, canGenerateDevelopment, notes
   useEffect(() => {
     if (automationIncluded) {
       setAutomationReinforcement(true);
+    } else {
+      setAutomationReinforcement(false);
     }
   }, [automationIncluded]);
 
@@ -107,8 +109,6 @@ export const useCutlistWorkflow = ({ budgetNumber, canGenerateDevelopment, notes
     }
   }, [cutlistBudgetDate]);
 
-  const activeCutlistIndex = cutlistPinnedIndex ?? cutlistHoverIndex;
-
   const canGenerateCutlist = canGenerateDevelopment
     && widthMm > 0
     && heightMm > 0
@@ -116,6 +116,8 @@ export const useCutlistWorkflow = ({ budgetNumber, canGenerateDevelopment, notes
     && cutlistBudgetNumber.trim().length > 0
     && cutlistBudgetDate.trim().length > 0
     && cutlistColor.trim().length > 0
+    && (!needsLeftRightHeights || (heightLeftMm !== null && heightLeftMm > 0 && heightRightMm !== null && heightRightMm > 0))
+    && (!needsLeftRightWidths || (widthLeftMm !== null && widthLeftMm > 0 && widthRightMm !== null && widthRightMm > 0))
     && (!needsGroundClearance || groundClearanceMm >= 0)
     && (!needsLarguero || (largueroMm === 50 || largueroMm === 80))
     && (!needsTopFrame || typeof topFrame === 'boolean')
@@ -127,6 +129,55 @@ export const useCutlistWorkflow = ({ budgetNumber, canGenerateDevelopment, notes
     && (!needsRail || Boolean(railType))
     && (!needsMounting || Boolean(mountingType))
     && (!needsTail || typeof tail === 'boolean');
+
+  const activeCutlistIndex = cutlistPinnedIndex ?? cutlistHoverIndex;
+
+  const cutlistBlockingReasons = useMemo(() => {
+    if (canGenerateCutlist) {
+      return [];
+    }
+    const reasons: string[] = [];
+    if (!canGenerateDevelopment) {
+      reasons.push('Completa la aprobación del presupuesto antes de generar el despiece.');
+    }
+    if (widthMm <= 0 || heightMm <= 0) {
+      reasons.push('Introduce anchura y altura válidas.');
+    }
+    if (needsLeftRightHeights && (heightLeftMm === null || heightLeftMm <= 0 || heightRightMm === null || heightRightMm <= 0)) {
+      reasons.push('Completa las alturas izquierda y derecha.');
+    }
+    if (needsLeftRightWidths && (widthLeftMm === null || widthLeftMm <= 0 || widthRightMm === null || widthRightMm <= 0)) {
+      reasons.push('Completa las anchuras izquierda y derecha.');
+    }
+    if (!cutlistDistributor.trim()) {
+      reasons.push('Indica el distribuidor.');
+    }
+    if (!cutlistBudgetNumber.trim()) {
+      reasons.push('Indica el número de presupuesto.');
+    }
+    if (!cutlistBudgetDate.trim()) {
+      reasons.push('Indica la fecha del presupuesto.');
+    }
+    if (!cutlistColor.trim()) {
+      reasons.push('Indica el color.');
+    }
+    return reasons;
+  }, [
+    canGenerateCutlist,
+    canGenerateDevelopment,
+    widthMm,
+    heightMm,
+    needsLeftRightHeights,
+    heightLeftMm,
+    heightRightMm,
+    needsLeftRightWidths,
+    widthLeftMm,
+    widthRightMm,
+    cutlistDistributor,
+    cutlistBudgetNumber,
+    cutlistBudgetDate,
+    cutlistColor,
+  ]);
 
   const buildCutlistPayload = (): CutlistRequest => ({
     distributor: cutlistDistributor.trim(),
@@ -228,6 +279,7 @@ export const useCutlistWorkflow = ({ budgetNumber, canGenerateDevelopment, notes
     needsTail,
     cutlistImages,
     activeCutlistIndex,
+    cutlistBlockingReasons,
     canGenerateCutlist,
     doorTypeLabel,
     doorModelLabel,

@@ -66,17 +66,87 @@ export const useWorkOrders = ({
 
   const workOrderNumber = useMemo(() => buildWorkOrderNumber(selectedRequestId), [selectedRequestId]);
   const workOrderDate = useMemo(() => formatLongDate(), []);
-  const cutlistSnapshot = { doorType: cutlist.doorType, cutlistDistributor: cutlist.cutlistDistributor, cutlistBudgetNumber: cutlist.cutlistBudgetNumber, cutlistBudgetDate: cutlist.cutlistBudgetDate, cutlistColor: cutlist.cutlistColor, installerName: cutlist.installerName, doorModelLabel: cutlist.doorModelLabel, doorTypeLabel: cutlist.doorTypeLabel, widthMm: cutlist.widthMm, heightMm: cutlist.heightMm, heightLeftMm: cutlist.heightLeftMm, heightRightMm: cutlist.heightRightMm, widthLeftMm: cutlist.widthLeftMm, widthRightMm: cutlist.widthRightMm, groundClearanceMm: cutlist.groundClearanceMm, largueroMm: cutlist.largueroMm, topFrame: cutlist.topFrame, hingesSide: cutlist.hingesSide, porterAutomatic: cutlist.porterAutomatic, automationIncluded: cutlist.automationIncluded, automationReinforcement: cutlist.automationReinforcement, openingSide: cutlist.openingSide, railType: cutlist.railType, mountingType: cutlist.mountingType, tail: cutlist.tail, cutlistResult: cutlist.cutlistResult };
+  const cutlistSnapshot = useMemo(() => ({
+    doorType: cutlist.doorType,
+    cutlistDistributor: cutlist.cutlistDistributor,
+    cutlistBudgetNumber: cutlist.cutlistBudgetNumber,
+    cutlistBudgetDate: cutlist.cutlistBudgetDate,
+    cutlistColor: cutlist.cutlistColor,
+    installerName: cutlist.installerName,
+    doorModelLabel: cutlist.doorModelLabel,
+    doorTypeLabel: cutlist.doorTypeLabel,
+    widthMm: cutlist.widthMm,
+    heightMm: cutlist.heightMm,
+    heightLeftMm: cutlist.heightLeftMm,
+    heightRightMm: cutlist.heightRightMm,
+    widthLeftMm: cutlist.widthLeftMm,
+    widthRightMm: cutlist.widthRightMm,
+    groundClearanceMm: cutlist.groundClearanceMm,
+    largueroMm: cutlist.largueroMm,
+    topFrame: cutlist.topFrame,
+    hingesSide: cutlist.hingesSide,
+    porterAutomatic: cutlist.porterAutomatic,
+    automationIncluded: cutlist.automationIncluded,
+    automationReinforcement: cutlist.automationReinforcement,
+    openingSide: cutlist.openingSide,
+    railType: cutlist.railType,
+    mountingType: cutlist.mountingType,
+    tail: cutlist.tail,
+    cutlistResult: cutlist.cutlistResult,
+  }), [
+    cutlist.doorType,
+    cutlist.cutlistDistributor,
+    cutlist.cutlistBudgetNumber,
+    cutlist.cutlistBudgetDate,
+    cutlist.cutlistColor,
+    cutlist.installerName,
+    cutlist.doorModelLabel,
+    cutlist.doorTypeLabel,
+    cutlist.widthMm,
+    cutlist.heightMm,
+    cutlist.heightLeftMm,
+    cutlist.heightRightMm,
+    cutlist.widthLeftMm,
+    cutlist.widthRightMm,
+    cutlist.groundClearanceMm,
+    cutlist.largueroMm,
+    cutlist.topFrame,
+    cutlist.hingesSide,
+    cutlist.porterAutomatic,
+    cutlist.automationIncluded,
+    cutlist.automationReinforcement,
+    cutlist.openingSide,
+    cutlist.railType,
+    cutlist.mountingType,
+    cutlist.tail,
+    cutlist.cutlistResult,
+  ]);
 
-  const workOrderData = buildWorkOrderData({
-    customer: selectedCustomer,
-    model: selectedModel,
-    modelReference,
-    notes,
-    workOrderNumber,
-    workOrderDate,
-    cutlist: cutlistSnapshot,
-  });
+  const workOrderData = useMemo(
+    () => buildWorkOrderData({
+      customer: selectedCustomer,
+      model: selectedModel,
+      modelReference,
+      notes,
+      workOrderNumber,
+      workOrderDate,
+      cutlist: cutlistSnapshot,
+    }),
+    [
+      selectedCustomer,
+      selectedModel,
+      modelReference,
+      notes,
+      workOrderNumber,
+      workOrderDate,
+      cutlistSnapshot,
+    ],
+  );
+
+  const cutlistFormPayload = useMemo(
+    () => buildCutlistFormPayload({ cutlist: cutlistSnapshot, notes }),
+    [cutlistSnapshot, notes],
+  );
 
   const printing = useWorkOrderPrinting({
     budgetData: budget.budgetData,
@@ -86,7 +156,7 @@ export const useWorkOrders = ({
     canGenerateCutlist: cutlist.canGenerateCutlist,
     cutlistGenerated: cutlist.cutlistGenerated,
     cutlistResult: cutlist.cutlistResult,
-    cutlistForm: buildCutlistFormPayload({ cutlist: cutlistSnapshot, notes }),
+    cutlistForm: cutlistFormPayload,
   });
 
   const resetDownstream = ({ keepBudget }: { keepBudget?: boolean } = {}) => {

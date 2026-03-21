@@ -1,6 +1,6 @@
 import type { CustomerOption } from '../models';
 import { MODELS } from '../constants';
-import { Field, FieldLabel, SectionTitle, TextArea } from '../components/ui';
+import { cardStyle, Field, FieldLabel, SectionTitle, TextArea, uiColors } from '../components/ui';
 
 export const RequestSection = ({
   customers,
@@ -35,7 +35,7 @@ export const RequestSection = ({
   onGoogleViewChange: (value: boolean) => void;
   onNotesChange: (value: string) => void;
 }) => (
-  <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+  <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="01" label="Solicitud del cliente" />
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -97,9 +97,9 @@ export const RequestSection = ({
           type="checkbox"
           checked={googleView}
           onChange={e => onGoogleViewChange(e.target.checked)}
-          style={{ accentColor: '#e5534b', width: 16, height: 16 }}
+          style={{ accentColor: uiColors.accent, width: 16, height: 16 }}
         />
-        <span className="text-xs font-semibold uppercase" style={{ color: '#8b949e', letterSpacing: '0.08em' }}>
+        <span className="text-xs font-semibold uppercase" style={{ color: uiColors.textSubtle, letterSpacing: '0.08em' }}>
           Visualización en Google (apoyo en tienda)
         </span>
       </div>
@@ -113,7 +113,7 @@ export const RequestSection = ({
       </div>
     </div>
     {!hasModelRef && (
-      <p className="text-xs font-semibold mt-3" style={{ color: '#dc2626' }}>
+      <p className="text-xs font-semibold mt-3" style={{ color: uiColors.danger }}>
         Debe incluir imagen o referencia del modelo.
       </p>
     )}

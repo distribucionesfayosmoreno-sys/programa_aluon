@@ -1,4 +1,4 @@
-import { SectionTitle } from '../components/ui';
+import { cardStyle, SectionTitle, uiColors } from '../components/ui';
 
 export const FinalSection = ({
   finalized,
@@ -13,7 +13,7 @@ export const FinalSection = ({
   onFinalizedChange: (value: boolean) => void;
   onReadyChange: (value: 'PICKUP' | 'SHIPPING' | '') => void;
 }) => (
-  <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+  <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="06" label="Finalización" />
     <div className="flex items-center gap-4">
       <label className="flex items-center gap-3">
@@ -22,9 +22,9 @@ export const FinalSection = ({
           checked={finalized}
           onChange={e => onFinalizedChange(e.target.checked)}
           disabled={!canFinalize}
-          style={{ accentColor: '#e5534b', width: 16, height: 16 }}
+          style={{ accentColor: uiColors.accent, width: 16, height: 16 }}
         />
-        <span className="text-xs font-bold uppercase" style={{ color: '#0d1117' }}>Producto finalizado</span>
+        <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Producto finalizado</span>
       </label>
       <select
         className="field"
@@ -39,7 +39,7 @@ export const FinalSection = ({
       </select>
     </div>
     {!canFinalize && (
-      <p className="text-xs mt-3" style={{ color: '#9ca3af' }}>
+      <p className="text-xs mt-3" style={{ color: uiColors.textGhost }}>
         Finalización disponible al completar producción.
       </p>
     )}

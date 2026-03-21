@@ -1,4 +1,4 @@
-import { Field, FieldLabel, SectionTitle, StatusPill } from '../components/ui';
+import { cardStyle, Field, FieldLabel, SectionTitle, StatusPill, uiColors } from '../components/ui';
 
 export const BudgetSection = ({
   pricePerM2,
@@ -21,7 +21,7 @@ export const BudgetSection = ({
   onGenerateBudget: () => void;
   onToggleAccounting: () => void;
 }) => (
-  <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+  <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="02" label="Presupuesto" />
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div>
@@ -61,7 +61,7 @@ export const BudgetSection = ({
       </button>
     </div>
     {validationError && (
-      <div className="text-xs font-semibold mt-3" style={{ color: '#b42318' }}>
+      <div className="text-xs font-semibold mt-3" style={{ color: uiColors.dangerDark }}>
         {validationError}
       </div>
     )}

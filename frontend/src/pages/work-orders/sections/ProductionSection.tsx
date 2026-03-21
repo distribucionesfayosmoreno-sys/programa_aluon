@@ -1,4 +1,4 @@
-import { SectionTitle } from '../components/ui';
+import { cardStyle, SectionTitle, uiColors } from '../components/ui';
 
 export const ProductionSection = ({
   productionPct,
@@ -29,58 +29,58 @@ export const ProductionSection = ({
   onProdLacControlChange: (value: boolean) => void;
   onOpenWorkOrderModal: () => void;
 }) => (
-  <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+  <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="05" label="Producción" />
     <div className="flex items-center gap-3 mb-4">
-      <div className="h-2 w-40 rounded-full" style={{ background: '#e8eaed', overflow: 'hidden' }}>
-        <div className="h-full" style={{ width: `${productionPct}%`, background: '#e5534b' }} />
+      <div className="h-2 w-40 rounded-full" style={{ background: uiColors.border, overflow: 'hidden' }}>
+        <div className="h-full" style={{ width: `${productionPct}%`, background: uiColors.accent }} />
       </div>
-      <span className="text-xs font-bold" style={{ color: '#8b949e' }}>{productionPct}%</span>
+      <span className="text-xs font-bold" style={{ color: uiColors.textSubtle }}>{productionPct}%</span>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: '1px solid #e8eaed', background: '#f9fafb' }}>
+      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
         <input
           type="checkbox"
           checked={prodCut}
           onChange={e => onProdCutChange(e.target.checked)}
           disabled={!canStartProduction}
-          style={{ accentColor: '#e5534b', width: 16, height: 16 }}
+          style={{ accentColor: uiColors.accent, width: 16, height: 16 }}
         />
-        <span className="text-xs font-bold uppercase" style={{ color: '#0d1117' }}>Corte</span>
+        <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Corte</span>
       </label>
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: '1px solid #e8eaed', background: '#f9fafb' }}>
+      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
         <input
           type="checkbox"
           checked={prodFab}
           onChange={e => onProdFabChange(e.target.checked)}
           disabled={!canStartProduction}
-          style={{ accentColor: '#e5534b', width: 16, height: 16 }}
+          style={{ accentColor: uiColors.accent, width: 16, height: 16 }}
         />
-        <span className="text-xs font-bold uppercase" style={{ color: '#0d1117' }}>Fabricación</span>
+        <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Fabricación</span>
       </label>
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: '1px solid #e8eaed', background: '#f9fafb' }}>
+      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
         <input
           type="checkbox"
           checked={prodLac}
           onChange={e => onProdLacChange(e.target.checked)}
           disabled={!canStartProduction}
-          style={{ accentColor: '#e5534b', width: 16, height: 16 }}
+          style={{ accentColor: uiColors.accent, width: 16, height: 16 }}
         />
-        <span className="text-xs font-bold uppercase" style={{ color: '#0d1117' }}>Lacado</span>
+        <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Lacado</span>
       </label>
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: '1px solid #e8eaed', background: '#f9fafb' }}>
+      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
         <input
           type="checkbox"
           checked={prodLacControl}
           onChange={e => onProdLacControlChange(e.target.checked)}
           disabled={!canStartProduction}
-          style={{ accentColor: '#e5534b', width: 16, height: 16 }}
+          style={{ accentColor: uiColors.accent, width: 16, height: 16 }}
         />
-        <span className="text-xs font-bold uppercase" style={{ color: '#0d1117' }}>Control paso lacado</span>
+        <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Control paso lacado</span>
       </label>
     </div>
     {!canStartProduction && (
-      <p className="text-xs mt-3" style={{ color: '#9ca3af' }}>
+      <p className="text-xs mt-3" style={{ color: uiColors.textGhost }}>
         Producción habilitada tras aprobación y desarrollo.
       </p>
     )}
@@ -95,7 +95,7 @@ export const ProductionSection = ({
         Imprimir orden de trabajo
       </button>
       {!cutlistGenerated && (
-        <span className="text-xs font-semibold" style={{ color: '#9ca3af' }}>
+        <span className="text-xs font-semibold" style={{ color: uiColors.textGhost }}>
           Genera el despiece para habilitar la impresión.
         </span>
       )}

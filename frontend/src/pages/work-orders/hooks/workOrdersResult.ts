@@ -114,6 +114,7 @@ export const buildWorkOrdersResult = ({
   needsTail: cutlist.needsTail,
   cutlistImages: cutlist.cutlistImages,
   activeCutlistIndex: cutlist.activeCutlistIndex,
+  cutlistBlockingReasons: cutlist.cutlistBlockingReasons,
   canGenerateCutlist: cutlist.canGenerateCutlist,
   canStartProduction: workflow.canStartProduction,
   canFinalize: workflow.canFinalize,

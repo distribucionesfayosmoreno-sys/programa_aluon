@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { CustomerOption, NewRequestData } from '../models';
 import { MODELS } from '../constants';
-import { Field, FieldLabel, TextArea } from './ui';
+import { Field, FieldLabel, TextArea, uiColors } from './ui';
 
 export const NewRequestModal = ({
   open,
@@ -56,22 +56,22 @@ export const NewRequestModal = ({
       >
         <div
           className="flex items-center justify-between px-7 py-5"
-          style={{ background: '#0d1117', borderBottom: '1px solid #21262d' }}
+          style={{ background: uiColors.surfaceDark, borderBottom: '1px solid #21262d' }}
         >
           <div>
             <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               Nueva solicitud
             </h2>
-            <p style={{ fontSize: 10, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
+            <p style={{ fontSize: 10, fontWeight: 600, color: uiColors.textSubtle, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
               Bandeja de solicitudes
             </p>
           </div>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
-            style={{ color: '#8b949e' }}
+            style={{ color: uiColors.textSubtle }}
             onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = uiColors.textSubtle; }}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -139,9 +139,9 @@ export const NewRequestModal = ({
                 type="checkbox"
                 checked={googleView}
                 onChange={e => setGoogleView(e.target.checked)}
-                style={{ accentColor: '#e5534b', width: 16, height: 16 }}
+                style={{ accentColor: uiColors.accent, width: 16, height: 16 }}
               />
-              <span className="text-xs font-semibold uppercase" style={{ color: '#8b949e', letterSpacing: '0.08em' }}>
+              <span className="text-xs font-semibold uppercase" style={{ color: uiColors.textSubtle, letterSpacing: '0.08em' }}>
                 Visualización en Google (apoyo en tienda)
               </span>
             </div>
@@ -158,7 +158,7 @@ export const NewRequestModal = ({
 
         <div
           className="flex items-center justify-between gap-4 px-7 py-5"
-          style={{ borderTop: '1px solid #e8eaed', background: '#f8f9fb' }}
+          style={{ borderTop: `1px solid ${uiColors.border}`, background: '#f8f9fb' }}
         >
           <button type="button" onClick={onClose} className="btn-ghost">Cancelar</button>
           <button

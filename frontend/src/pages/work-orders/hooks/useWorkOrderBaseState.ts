@@ -1,71 +1,116 @@
-import { useState } from 'react';
+import { useCallback, useReducer } from 'react';
 import { MODELS, MOCK_REQUESTS } from '../constants';
 import type { TabKey, WorkOrderRequest } from '../models';
 
+type WorkOrderBaseState = {
+  requests: WorkOrderRequest[];
+  customerId: string;
+  modelId: string;
+  modelReference: string;
+  modelImage: File | null;
+  m2: number;
+  googleView: boolean;
+  notes: string;
+  developmentGenerated: boolean;
+  prodCut: boolean;
+  prodFab: boolean;
+  prodLac: boolean;
+  prodLacControl: boolean;
+  finalized: boolean;
+  ready: 'PICKUP' | 'SHIPPING' | '';
+  selectedRequestId: string | null;
+  tab: TabKey;
+  showRequestModal: boolean;
+  showWorkOrderModal: boolean;
+};
+
+type WorkOrderBaseAction<K extends keyof WorkOrderBaseState = keyof WorkOrderBaseState> = {
+  type: 'SET_FIELD';
+  field: K;
+  value: WorkOrderBaseState[K];
+};
+
+const initialState: WorkOrderBaseState = {
+  requests: MOCK_REQUESTS,
+  customerId: '',
+  modelId: MODELS[0].id,
+  modelReference: '',
+  modelImage: null,
+  m2: 0,
+  googleView: false,
+  notes: '',
+  developmentGenerated: false,
+  prodCut: false,
+  prodFab: false,
+  prodLac: false,
+  prodLacControl: false,
+  finalized: false,
+  ready: '',
+  selectedRequestId: null,
+  tab: 'INBOX',
+  showRequestModal: false,
+  showWorkOrderModal: false,
+};
+
+const reducer = (state: WorkOrderBaseState, action: WorkOrderBaseAction) => {
+  if (action.type === 'SET_FIELD') {
+    if (state[action.field] === action.value) {
+      return state;
+    }
+    return { ...state, [action.field]: action.value };
+  }
+  return state;
+};
+
 export const useWorkOrderBaseState = () => {
-  const [requests, setRequests] = useState<WorkOrderRequest[]>(MOCK_REQUESTS);
-  const [customerId, setCustomerId] = useState('');
-  const [modelId, setModelId] = useState(MODELS[0].id);
-  const [modelReference, setModelReference] = useState('');
-  const [modelImage, setModelImage] = useState<File | null>(null);
-  const [m2, setM2] = useState(0);
-  const [googleView, setGoogleView] = useState(false);
-  const [notes, setNotes] = useState('');
+  const [state, dispatch] = useReducer(reducer, initialState);
 
-  const [developmentGenerated, setDevelopmentGenerated] = useState(false);
-
-  const [prodCut, setProdCut] = useState(false);
-  const [prodFab, setProdFab] = useState(false);
-  const [prodLac, setProdLac] = useState(false);
-  const [prodLacControl, setProdLacControl] = useState(false);
-
-  const [finalized, setFinalized] = useState(false);
-  const [ready, setReady] = useState<'PICKUP' | 'SHIPPING' | ''>('');
-  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-  const [tab, setTab] = useState<TabKey>('INBOX');
-
-  const [showRequestModal, setShowRequestModal] = useState(false);
-  const [showWorkOrderModal, setShowWorkOrderModal] = useState(false);
+  const setField = useCallback(
+    <K extends keyof WorkOrderBaseState>(field: K, value: WorkOrderBaseState[K]) => {
+      dispatch({ type: 'SET_FIELD', field, value });
+    },
+    [],
+  );
 
   return {
-    requests,
-    setRequests,
-    customerId,
-    setCustomerId,
-    modelId,
-    setModelId,
-    modelReference,
-    setModelReference,
-    modelImage,
-    setModelImage,
-    m2,
-    setM2,
-    googleView,
-    setGoogleView,
-    notes,
-    setNotes,
-    developmentGenerated,
-    setDevelopmentGenerated,
-    prodCut,
-    setProdCut,
-    prodFab,
-    setProdFab,
-    prodLac,
-    setProdLac,
-    prodLacControl,
-    setProdLacControl,
-    finalized,
-    setFinalized,
-    ready,
-    setReady,
-    selectedRequestId,
-    setSelectedRequestId,
-    tab,
-    setTab,
-    showRequestModal,
-    setShowRequestModal,
-    showWorkOrderModal,
-    setShowWorkOrderModal,
+    requests: state.requests,
+    setRequests: (value: WorkOrderRequest[]) => setField('requests', value),
+    customerId: state.customerId,
+    setCustomerId: (value: string) => setField('customerId', value),
+    modelId: state.modelId,
+    setModelId: (value: string) => setField('modelId', value),
+    modelReference: state.modelReference,
+    setModelReference: (value: string) => setField('modelReference', value),
+    modelImage: state.modelImage,
+    setModelImage: (value: File | null) => setField('modelImage', value),
+    m2: state.m2,
+    setM2: (value: number) => setField('m2', value),
+    googleView: state.googleView,
+    setGoogleView: (value: boolean) => setField('googleView', value),
+    notes: state.notes,
+    setNotes: (value: string) => setField('notes', value),
+    developmentGenerated: state.developmentGenerated,
+    setDevelopmentGenerated: (value: boolean) => setField('developmentGenerated', value),
+    prodCut: state.prodCut,
+    setProdCut: (value: boolean) => setField('prodCut', value),
+    prodFab: state.prodFab,
+    setProdFab: (value: boolean) => setField('prodFab', value),
+    prodLac: state.prodLac,
+    setProdLac: (value: boolean) => setField('prodLac', value),
+    prodLacControl: state.prodLacControl,
+    setProdLacControl: (value: boolean) => setField('prodLacControl', value),
+    finalized: state.finalized,
+    setFinalized: (value: boolean) => setField('finalized', value),
+    ready: state.ready,
+    setReady: (value: 'PICKUP' | 'SHIPPING' | '') => setField('ready', value),
+    selectedRequestId: state.selectedRequestId,
+    setSelectedRequestId: (value: string | null) => setField('selectedRequestId', value),
+    tab: state.tab,
+    setTab: (value: TabKey) => setField('tab', value),
+    showRequestModal: state.showRequestModal,
+    setShowRequestModal: (value: boolean) => setField('showRequestModal', value),
+    showWorkOrderModal: state.showWorkOrderModal,
+    setShowWorkOrderModal: (value: boolean) => setField('showWorkOrderModal', value),
   };
 };
 

@@ -1,4 +1,4 @@
-import { SectionTitle, StatusPill, Field, FieldLabel } from '../components/ui';
+import { cardStyle, SectionTitle, StatusPill, Field, FieldLabel, uiColors } from '../components/ui';
 import type { PendingBudget } from '../models';
 
 export const ValidationSection = ({
@@ -17,7 +17,7 @@ export const ValidationSection = ({
   const canApprove = Boolean(approverUserId.trim());
 
   return (
-    <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+    <section className="p-6 rounded-2xl" style={cardStyle}>
       <SectionTitle n="03" label="Validación ptos" />
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] items-end gap-3 mb-4">
         <div>
@@ -34,20 +34,20 @@ export const ValidationSection = ({
       </div>
 
       {pendingBudgets.length === 0 ? (
-        <div className="text-sm" style={{ color: '#6b7280' }}>
+        <div className="text-sm" style={{ color: uiColors.textMuted }}>
           No hay presupuestos pendientes de validación.
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm" style={{ borderCollapse: 'collapse' }}>
             <thead>
-              <tr style={{ textAlign: 'left', color: '#6b7280', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                <th style={{ padding: '10px 8px', borderBottom: '1px solid #e8eaed' }}>Presupuesto</th>
-                <th style={{ padding: '10px 8px', borderBottom: '1px solid #e8eaed' }}>Cliente</th>
-                <th style={{ padding: '10px 8px', borderBottom: '1px solid #e8eaed' }}>Modelo</th>
-                <th style={{ padding: '10px 8px', borderBottom: '1px solid #e8eaed' }}>m²</th>
-                <th style={{ padding: '10px 8px', borderBottom: '1px solid #e8eaed' }}>Total</th>
-                <th style={{ padding: '10px 8px', borderBottom: '1px solid #e8eaed' }}>Acción</th>
+              <tr style={{ textAlign: 'left', color: uiColors.textMuted, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                <th style={{ padding: '10px 8px', borderBottom: `1px solid ${uiColors.border}` }}>Presupuesto</th>
+                <th style={{ padding: '10px 8px', borderBottom: `1px solid ${uiColors.border}` }}>Cliente</th>
+                <th style={{ padding: '10px 8px', borderBottom: `1px solid ${uiColors.border}` }}>Modelo</th>
+                <th style={{ padding: '10px 8px', borderBottom: `1px solid ${uiColors.border}` }}>m²</th>
+                <th style={{ padding: '10px 8px', borderBottom: `1px solid ${uiColors.border}` }}>Total</th>
+                <th style={{ padding: '10px 8px', borderBottom: `1px solid ${uiColors.border}` }}>Acción</th>
               </tr>
             </thead>
             <tbody>
@@ -76,7 +76,7 @@ export const ValidationSection = ({
         </div>
       )}
       {error && (
-        <div className="text-xs font-semibold mt-3" style={{ color: '#b42318' }}>
+        <div className="text-xs font-semibold mt-3" style={{ color: uiColors.dangerDark }}>
           {error}
         </div>
       )}
