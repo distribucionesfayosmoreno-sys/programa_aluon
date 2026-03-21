@@ -73,10 +73,15 @@ export type CutlistRequest = {
   budgetNumber?: string;
   budgetDate?: string;
   color?: string;
+  installerName?: string;
   doorType: CutlistDoorType;
   model: CutlistDoorModel;
   widthMm: number;
   heightMm: number;
+  heightLeftMm?: number | null;
+  heightRightMm?: number | null;
+  widthLeftMm?: number | null;
+  widthRightMm?: number | null;
   groundClearanceMm?: number;
   largueroMm?: number;
   topFrame?: boolean;
@@ -91,6 +96,14 @@ export type CutlistRequest = {
   notes?: string;
 };
 
+export type PrintOverrides = {
+  installerName?: string;
+  heightLeftMm?: number | null;
+  heightRightMm?: number | null;
+  widthLeftMm?: number | null;
+  widthRightMm?: number | null;
+};
+
 export type CutlistItem = {
   description: string;
   units: number;
@@ -103,10 +116,15 @@ export type CutlistResponse = {
   budgetNumber?: string | null;
   budgetDate?: string | null;
   color?: string | null;
+  installerName?: string | null;
   doorType: CutlistDoorType;
   model: CutlistDoorModel;
   widthMm: number;
   heightMm: number;
+  heightLeftMm?: number | null;
+  heightRightMm?: number | null;
+  widthLeftMm?: number | null;
+  widthRightMm?: number | null;
   items: CutlistItem[];
 };
 
@@ -122,10 +140,15 @@ export type WorkOrderData = {
   budgetNumber?: string;
   budgetDate?: string;
   color?: string;
+  installerName?: string;
   doorModelLabel: string;
   doorTypeLabel: string;
   widthMm: number;
   heightMm: number;
+  heightLeftMm?: number | null;
+  heightRightMm?: number | null;
+  widthLeftMm?: number | null;
+  widthRightMm?: number | null;
   groundClearanceMm?: number;
   largueroMm?: number;
   topFrame?: boolean;

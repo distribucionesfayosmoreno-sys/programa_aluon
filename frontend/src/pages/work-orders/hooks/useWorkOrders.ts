@@ -95,6 +95,11 @@ export const useWorkOrders = ({
   const [cutlistImageIndex, setCutlistImageIndex] = useState(0);
   const [cutlistHoverIndex, setCutlistHoverIndex] = useState<number | null>(null);
   const [cutlistPinnedIndex, setCutlistPinnedIndex] = useState<number | null>(null);
+  const [installerName, setInstallerName] = useState('');
+  const [heightLeftMm, setHeightLeftMm] = useState<number | null>(null);
+  const [heightRightMm, setHeightRightMm] = useState<number | null>(null);
+  const [widthLeftMm, setWidthLeftMm] = useState<number | null>(null);
+  const [widthRightMm, setWidthRightMm] = useState<number | null>(null);
   const [cutlistDistributor, setCutlistDistributor] = useState('');
   const [cutlistBudgetNumber, setCutlistBudgetNumber] = useState('');
   const [cutlistBudgetDate, setCutlistBudgetDate] = useState('');
@@ -290,7 +295,9 @@ export const useWorkOrders = ({
   const needsHingesSide = doorType === 'PEATONAL' || doorType === 'ABATIBLE_UNA';
   const needsPorterAutomatic = doorType === 'PEATONAL';
   const needsAutomation = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
-  const needsOpeningSide = doorType === 'ABATIBLE_DOS';
+  const needsOpeningSide = doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
+  const needsLeftRightHeights = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
+  const needsLeftRightWidths = doorType === 'CORREDERA';
   const needsRail = doorType === 'CORREDERA';
   const needsMounting = doorType === 'CORREDERA';
   const needsTail = doorType === 'CORREDERA';
@@ -306,6 +313,17 @@ export const useWorkOrders = ({
     setCutlistHoverIndex(null);
     setCutlistPinnedIndex(null);
   }, [doorModel, doorType, cutlistResult]);
+
+  useEffect(() => {
+    if (!needsLeftRightHeights) {
+      setHeightLeftMm(null);
+      setHeightRightMm(null);
+    }
+    if (!needsLeftRightWidths) {
+      setWidthLeftMm(null);
+      setWidthRightMm(null);
+    }
+  }, [needsLeftRightHeights, needsLeftRightWidths]);
 
   useEffect(() => {
     if (automationIncluded) {
@@ -791,7 +809,7 @@ export const useWorkOrders = ({
       <div class="campo_modelo">${text(doorModelLabel)}</div>
       <div class="campo_color">${text(cutlistColor)}</div>
       <div class="campo_acabado">${text(doorTypeLabel)}</div>
-      <div class="campo_nombre_instalador"></div>
+      <div class="campo_nombre_instalador">${text(installerName)}</div>
     `;
 
     const peatonalFields = `
@@ -811,11 +829,16 @@ export const useWorkOrders = ({
       <div class="campo_observaciones">${text(notes)}</div>
     `;
 
+    const heightLeft = heightLeftMm ?? heightMm;
+    const heightRight = heightRightMm ?? heightMm;
+    const widthLeft = widthLeftMm ?? Math.round(widthMm / 2);
+    const widthRight = widthRightMm ?? Math.round(widthMm / 2);
+
     const abatibleCommon = `
       <div class="campo_automatizacion_si">${x(automationIncluded)}</div>
       <div class="campo_automatizacion_no">${x(!automationIncluded)}</div>
-      <div class="campo_altura_izq">${text(heightMm)}</div>
-      <div class="campo_altura_der">${text(heightMm)}</div>
+      <div class="campo_altura_izq">${text(heightLeft)}</div>
+      <div class="campo_altura_der">${text(heightRight)}</div>
       <div class="campo_holgura">${text(groundClearanceMm)}</div>
       <div class="campo_anchura">${text(widthMm)}</div>
       <div class="campo_observaciones">${text(notes)}</div>
@@ -839,8 +862,8 @@ export const useWorkOrders = ({
       <div class="campo_automatizacion_no">${x(!automationIncluded)}</div>
       <div class="campo_apertura_izq">${x(openingSide === 'LEFT')}</div>
       <div class="campo_apertura_der">${x(openingSide === 'RIGHT')}</div>
-      <div class="campo_anchura_izq">${text(Math.round(widthMm / 2))}</div>
-      <div class="campo_anchura_der">${text(Math.round(widthMm / 2))}</div>
+      <div class="campo_anchura_izq">${text(widthLeft)}</div>
+      <div class="campo_anchura_der">${text(widthRight)}</div>
       <div class="campo_altura">${text(heightMm)}</div>
       <div class="campo_carril_16">${x(railType === 'CARRIL_16')}</div>
       <div class="campo_carril_20">${x(railType === 'CARRIL_20')}</div>
@@ -1072,6 +1095,11 @@ export const useWorkOrders = ({
     cutlistBudgetNumber,
     cutlistBudgetDate,
     cutlistColor,
+    installerName,
+    heightLeftMm,
+    heightRightMm,
+    widthLeftMm,
+    widthRightMm,
     prodCut,
     prodFab,
     prodLac,
@@ -1097,6 +1125,8 @@ export const useWorkOrders = ({
     needsHingesSide,
     needsPorterAutomatic,
     needsOpeningSide,
+    needsLeftRightHeights,
+    needsLeftRightWidths,
     needsRail,
     needsMounting,
     needsTail,
@@ -1146,6 +1176,11 @@ export const useWorkOrders = ({
     setCutlistBudgetNumber,
     setCutlistBudgetDate,
     setCutlistColor,
+    setInstallerName,
+    setHeightLeftMm,
+    setHeightRightMm,
+    setWidthLeftMm,
+    setWidthRightMm,
     setProdCut,
     setProdFab,
     setProdLac,

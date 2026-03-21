@@ -14,6 +14,11 @@ export const DevelopmentSection = ({
   budgetNumber,
   budgetDate,
   color,
+  installerName,
+  heightLeftMm,
+  heightRightMm,
+  widthLeftMm,
+  widthRightMm,
   doorType,
   doorModel,
   widthMm,
@@ -36,6 +41,8 @@ export const DevelopmentSection = ({
   needsHingesSide,
   needsPorterAutomatic,
   needsOpeningSide,
+  needsLeftRightHeights,
+  needsLeftRightWidths,
   needsRail,
   needsMounting,
   needsTail,
@@ -51,6 +58,11 @@ export const DevelopmentSection = ({
   onBudgetNumberChange,
   onBudgetDateChange,
   onColorChange,
+  onInstallerNameChange,
+  onHeightLeftChange,
+  onHeightRightChange,
+  onWidthLeftChange,
+  onWidthRightChange,
   onDoorTypeChange,
   onDoorModelChange,
   onWidthChange,
@@ -80,6 +92,11 @@ export const DevelopmentSection = ({
   budgetNumber: string;
   budgetDate: string;
   color: string;
+  installerName: string;
+  heightLeftMm: number | null;
+  heightRightMm: number | null;
+  widthLeftMm: number | null;
+  widthRightMm: number | null;
   doorType: CutlistDoorType;
   doorModel: CutlistDoorModel;
   widthMm: number;
@@ -102,6 +119,8 @@ export const DevelopmentSection = ({
   needsHingesSide: boolean;
   needsPorterAutomatic: boolean;
   needsOpeningSide: boolean;
+  needsLeftRightHeights: boolean;
+  needsLeftRightWidths: boolean;
   needsRail: boolean;
   needsMounting: boolean;
   needsTail: boolean;
@@ -117,6 +136,11 @@ export const DevelopmentSection = ({
   onBudgetNumberChange: (value: string) => void;
   onBudgetDateChange: (value: string) => void;
   onColorChange: (value: string) => void;
+  onInstallerNameChange: (value: string) => void;
+  onHeightLeftChange: (value: number | null) => void;
+  onHeightRightChange: (value: number | null) => void;
+  onWidthLeftChange: (value: number | null) => void;
+  onWidthRightChange: (value: number | null) => void;
   onDoorTypeChange: (value: CutlistDoorType) => void;
   onDoorModelChange: (value: CutlistDoorModel) => void;
   onWidthChange: (value: number) => void;
@@ -191,6 +215,10 @@ export const DevelopmentSection = ({
         <Field value={color} onChange={e => onColorChange(e.target.value)} />
       </div>
       <div>
+        <FieldLabel>Nombre instalador</FieldLabel>
+        <Field value={installerName} onChange={e => onInstallerNameChange(e.target.value)} />
+      </div>
+      <div>
         <FieldLabel>Tipo de puerta</FieldLabel>
         <select
           className="field"
@@ -232,6 +260,28 @@ export const DevelopmentSection = ({
           onChange={e => onHeightChange(Number(e.target.value || 0))}
         />
       </div>
+      {needsLeftRightHeights && (
+        <>
+          <div>
+            <FieldLabel>Altura izquierda (mm)</FieldLabel>
+            <Field
+              type="number"
+              min={0}
+              value={heightLeftMm ?? ''}
+              onChange={e => onHeightLeftChange(e.target.value === '' ? null : Number(e.target.value))}
+            />
+          </div>
+          <div>
+            <FieldLabel>Altura derecha (mm)</FieldLabel>
+            <Field
+              type="number"
+              min={0}
+              value={heightRightMm ?? ''}
+              onChange={e => onHeightRightChange(e.target.value === '' ? null : Number(e.target.value))}
+            />
+          </div>
+        </>
+      )}
       {needsGroundClearance && (
         <div>
           <FieldLabel>Holgura suelo (mm)</FieldLabel>
@@ -324,7 +374,7 @@ export const DevelopmentSection = ({
       )}
       {needsOpeningSide && (
         <div>
-          <FieldLabel>Primera hoja apertura</FieldLabel>
+          <FieldLabel>{doorType === 'CORREDERA' ? 'Apertura' : 'Primera hoja apertura'}</FieldLabel>
           <select
             className="field"
             value={openingSide}
@@ -334,6 +384,28 @@ export const DevelopmentSection = ({
             <option value="RIGHT">Derecha</option>
           </select>
         </div>
+      )}
+      {needsLeftRightWidths && (
+        <>
+          <div>
+            <FieldLabel>Anchura izquierda (mm)</FieldLabel>
+            <Field
+              type="number"
+              min={0}
+              value={widthLeftMm ?? ''}
+              onChange={e => onWidthLeftChange(e.target.value === '' ? null : Number(e.target.value))}
+            />
+          </div>
+          <div>
+            <FieldLabel>Anchura derecha (mm)</FieldLabel>
+            <Field
+              type="number"
+              min={0}
+              value={widthRightMm ?? ''}
+              onChange={e => onWidthRightChange(e.target.value === '' ? null : Number(e.target.value))}
+            />
+          </div>
+        </>
       )}
       {needsRail && (
         <div>

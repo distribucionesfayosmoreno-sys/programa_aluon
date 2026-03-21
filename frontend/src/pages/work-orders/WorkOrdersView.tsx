@@ -50,6 +50,11 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     cutlistBudgetNumber,
     cutlistBudgetDate,
     cutlistColor,
+    installerName,
+    heightLeftMm,
+    heightRightMm,
+    widthLeftMm,
+    widthRightMm,
     prodCut,
     prodFab,
     prodLac,
@@ -78,6 +83,8 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     needsHingesSide,
     needsPorterAutomatic,
     needsOpeningSide,
+    needsLeftRightHeights,
+    needsLeftRightWidths,
     needsRail,
     needsMounting,
     needsTail,
@@ -119,6 +126,11 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     setCutlistBudgetNumber,
     setCutlistBudgetDate,
     setCutlistColor,
+    setInstallerName,
+    setHeightLeftMm,
+    setHeightRightMm,
+    setWidthLeftMm,
+    setWidthRightMm,
     setProdCut,
     setProdFab,
     setProdLac,
@@ -275,6 +287,11 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               budgetNumber={cutlistBudgetNumber}
               budgetDate={cutlistBudgetDate}
               color={cutlistColor}
+              installerName={installerName}
+              heightLeftMm={heightLeftMm}
+              heightRightMm={heightRightMm}
+              widthLeftMm={widthLeftMm}
+              widthRightMm={widthRightMm}
               doorType={doorType}
               doorModel={doorModel}
               widthMm={widthMm}
@@ -297,6 +314,8 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               needsHingesSide={needsHingesSide}
               needsPorterAutomatic={needsPorterAutomatic}
               needsOpeningSide={needsOpeningSide}
+              needsLeftRightHeights={needsLeftRightHeights}
+              needsLeftRightWidths={needsLeftRightWidths}
               needsRail={needsRail}
               needsMounting={needsMounting}
               needsTail={needsTail}
@@ -312,6 +331,11 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               onBudgetNumberChange={value => setCutlistBudgetNumber(value)}
               onBudgetDateChange={value => setCutlistBudgetDate(value)}
               onColorChange={value => setCutlistColor(value)}
+              onInstallerNameChange={value => setInstallerName(value)}
+              onHeightLeftChange={value => { setHeightLeftMm(value); }}
+              onHeightRightChange={value => { setHeightRightMm(value); }}
+              onWidthLeftChange={value => { setWidthLeftMm(value); }}
+              onWidthRightChange={value => { setWidthRightMm(value); }}
               onDoorTypeChange={value => { setDoorType(value); clearCutlist(); }}
               onDoorModelChange={value => { setDoorModel(value); clearCutlist(); }}
               onWidthChange={value => { setWidthMm(value); clearCutlist(); }}
