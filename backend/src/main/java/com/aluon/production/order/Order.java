@@ -1,6 +1,7 @@
 package com.aluon.production.order;
 
 import com.aluon.crm.customer.Customer;
+import com.aluon.production.cutlist.Cutlist;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.TenantId;
@@ -43,6 +44,10 @@ public class Order {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus estado;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cutlist_id")
+    private Cutlist cutlist;
 }
 
 enum OrderStatus {
