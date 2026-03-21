@@ -22,8 +22,14 @@ public class BudgetValidationService {
     public BudgetValidationDto create(BudgetValidationCreateRequest request) {
         validateCreate(request);
 
+        String budgetNumber = request.getBudgetNumber().trim();
+        BudgetValidation existing = budgetValidationRepository.findByBudgetNumber(budgetNumber).orElse(null);
+        if (existing != null) {
+            return toDto(existing);
+        }
+
         BudgetValidation budget = BudgetValidation.builder()
-                .budgetNumber(request.getBudgetNumber().trim())
+                .budgetNumber(budgetNumber)
                 .requestId(request.getRequestId().trim())
                 .customerName(request.getCustomerName().trim())
                 .modelLabel(request.getModelLabel())
