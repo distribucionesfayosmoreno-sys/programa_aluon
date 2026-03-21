@@ -96,7 +96,7 @@ export const DevelopmentSection = ({
   onCutlistPinnedChange: (value: number | null) => void;
 }) => (
   <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
-    <SectionTitle n="03" label="Desarrollo automático" />
+    <SectionTitle n="04" label="Desarrollo automático" />
     <div className="flex flex-wrap items-center gap-3">
       <button
         type="button"

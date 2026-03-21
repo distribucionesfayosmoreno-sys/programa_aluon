@@ -29,7 +29,7 @@ export const SidebarWorkflow = ({
       <StatusPill label="Solicitud completa" ok={customerReady} />
       <StatusPill label="Presupuesto generado" ok={budgetGenerated} />
       <StatusPill label="Contabilidad" ok={accountingApproved} />
-      <StatusPill label="Admin/Dios" ok={adminApproved} />
+      <StatusPill label="Validación ptos" ok={adminApproved} />
       <StatusPill label="Desarrollo" ok={developmentGenerated} />
       <StatusPill label="Despiece" ok={cutlistGenerated} />
       <StatusPill label="Producción" ok={productionReady} />

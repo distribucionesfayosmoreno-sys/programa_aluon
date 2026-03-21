@@ -33,7 +33,3 @@ public class User {
     @Column(nullable = false)
     private Role rol;
 }
-
-enum Role {
-    SUPERADMIN, ADMIN, CONTABILIDAD, RRHH, ALMACEN, SOLDADOR, CONDUCTOR, MONTADOR
-}

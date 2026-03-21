@@ -1,6 +1,34 @@
 import type { Customer } from '../../hooks/useCustomers';
 
-export type TabKey = 'INBOX' | 'REQUEST' | 'BUDGET' | 'DEV' | 'PROD' | 'FINAL';
+export type TabKey = 'INBOX' | 'REQUEST' | 'BUDGET' | 'VALIDATION' | 'DEV' | 'PROD' | 'FINAL';
+
+export type PendingBudget = {
+  validationId: string;
+  requestId: string;
+  budgetNumber: string;
+  customerName: string;
+  modelLabel: string;
+  m2: number;
+  total: number;
+};
+
+export type BudgetValidationStatus = 'PENDIENTE' | 'APROBADO';
+
+export type BudgetValidationRecord = {
+  id: string;
+  budgetNumber: string;
+  requestId: string;
+  customerName: string;
+  modelLabel: string | null;
+  m2: number | null;
+  total: number;
+  status: BudgetValidationStatus;
+  createdAt: string;
+  approvedAt?: string | null;
+  approvedByUserId?: string | null;
+  approvedByUsername?: string | null;
+  approvedByRole?: 'ADMIN' | 'DIOS' | 'SUPERADMIN' | 'CONTABILIDAD' | 'RRHH' | 'ALMACEN' | 'SOLDADOR' | 'CONDUCTOR' | 'MONTADOR' | null;
+};
 
 export type BudgetData = {
   budgetNumber: string;

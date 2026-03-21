@@ -7,9 +7,9 @@ export const BudgetSection = ({
   budgetGenerated,
   accountingApproved,
   adminApproved,
+  validationError,
   onGenerateBudget,
   onToggleAccounting,
-  onToggleAdmin,
 }: {
   pricePerM2: number;
   total: number;
@@ -17,9 +17,9 @@ export const BudgetSection = ({
   budgetGenerated: boolean;
   accountingApproved: boolean;
   adminApproved: boolean;
+  validationError: string;
   onGenerateBudget: () => void;
   onToggleAccounting: () => void;
-  onToggleAdmin: () => void;
 }) => (
   <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
     <SectionTitle n="02" label="Presupuesto" />
@@ -47,7 +47,7 @@ export const BudgetSection = ({
     <div className="flex items-center gap-2 mt-4">
       <StatusPill label="Presupuesto generado" ok={budgetGenerated} />
       <StatusPill label="Confirmado contabilidad" ok={accountingApproved} />
-      <StatusPill label="Autorizado superior" ok={adminApproved} />
+      <StatusPill label="Validación ptos" ok={adminApproved} />
     </div>
     <div className="flex items-center gap-3 mt-4">
       <button
@@ -59,15 +59,11 @@ export const BudgetSection = ({
       >
         Confirmar (Contabilidad)
       </button>
-      <button
-        type="button"
-        className="btn-ghost"
-        onClick={onToggleAdmin}
-        disabled={!budgetGenerated}
-        style={{ opacity: budgetGenerated ? 1 : 0.5, cursor: budgetGenerated ? 'pointer' : 'not-allowed' }}
-      >
-        Autorizar (Admin/Dios)
-      </button>
     </div>
+    {validationError && (
+      <div className="text-xs font-semibold mt-3" style={{ color: '#b42318' }}>
+        {validationError}
+      </div>
+    )}
   </section>
 );

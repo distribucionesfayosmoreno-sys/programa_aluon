@@ -5,6 +5,7 @@ import { WorkOrderModal } from './components/WorkOrderModal';
 import { InboxSection } from './sections/InboxSection';
 import { RequestSection } from './sections/RequestSection';
 import { BudgetSection } from './sections/BudgetSection';
+import { ValidationSection } from './sections/ValidationSection';
 import { DevelopmentSection } from './sections/DevelopmentSection';
 import { ProductionSection } from './sections/ProductionSection';
 import { FinalSection } from './sections/FinalSection';
@@ -60,6 +61,9 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     productionPct,
     overallPct,
     canGenerateDevelopment,
+    pendingBudgets,
+    budgetValidationError,
+    approverUserId,
     needsGroundClearance,
     needsLarguero,
     needsTopFrame,
@@ -82,8 +86,6 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     setM2,
     setGoogleView,
     setNotes,
-    setAccountingApproved,
-    setAdminApproved,
     setDevelopmentGenerated,
     setDoorType,
     setDoorModel,
@@ -111,6 +113,9 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     setShowWorkOrderModal,
     resetDownstream,
     handleGenerateBudget,
+    handleToggleAccounting,
+    handleApproverUserIdChange,
+    handleApproveBudget,
     handleGenerateCutlist,
     clearCutlist,
     applyRequest,
@@ -223,9 +228,19 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               budgetGenerated={budgetGenerated}
               accountingApproved={accountingApproved}
               adminApproved={adminApproved}
+              validationError={budgetValidationError}
               onGenerateBudget={handleGenerateBudget}
-              onToggleAccounting={() => setAccountingApproved(v => !v)}
-              onToggleAdmin={() => setAdminApproved(v => !v)}
+              onToggleAccounting={handleToggleAccounting}
+            />
+          )}
+
+          {tab === 'VALIDATION' && (
+            <ValidationSection
+              pendingBudgets={pendingBudgets}
+              approverUserId={approverUserId}
+              onApproverUserIdChange={handleApproverUserIdChange}
+              onApproveBudget={handleApproveBudget}
+              error={budgetValidationError}
             />
           )}
 

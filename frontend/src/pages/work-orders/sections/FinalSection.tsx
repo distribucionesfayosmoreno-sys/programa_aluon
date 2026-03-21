@@ -14,7 +14,7 @@ export const FinalSection = ({
   onReadyChange: (value: 'PICKUP' | 'SHIPPING' | '') => void;
 }) => (
   <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
-    <SectionTitle n="05" label="Finalización" />
+    <SectionTitle n="06" label="Finalización" />
     <div className="flex items-center gap-4">
       <label className="flex items-center gap-3">
         <input

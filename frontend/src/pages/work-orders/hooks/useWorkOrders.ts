@@ -10,13 +10,35 @@ import type {
   CutlistRequest,
   CutlistResponse,
   NewRequestData,
+  PendingBudget,
   TabKey,
   WorkOrderData,
   WorkOrderRequest,
 } from '../models';
 import { generateCutlist } from '../services/cutlistApi';
+import { approveBudgetValidation, createBudgetValidation, listPendingBudgetValidations } from '../services/budgetValidationApi';
 
 export type UseWorkOrdersResult = ReturnType<typeof useWorkOrders>;
+
+type BudgetStatus = {
+  budgetGenerated: boolean;
+  accountingApproved: boolean;
+  adminApproved: boolean;
+  budgetNumber?: string;
+  validationId?: string;
+  customerName?: string;
+  modelLabel?: string;
+  m2?: number;
+  total?: number;
+  approvedAt?: string;
+  createdAt?: string;
+};
+
+const emptyBudgetStatus: BudgetStatus = {
+  budgetGenerated: false,
+  accountingApproved: false,
+  adminApproved: false,
+};
 
 export const useWorkOrders = ({
   openNewRequest,
@@ -38,6 +60,9 @@ export const useWorkOrders = ({
   const [budgetGenerated, setBudgetGenerated] = useState(false);
   const [accountingApproved, setAccountingApproved] = useState(false);
   const [adminApproved, setAdminApproved] = useState(false);
+  const [budgetStatusByRequestId, setBudgetStatusByRequestId] = useState<Record<string, BudgetStatus>>({});
+  const [approverUserId, setApproverUserId] = useState('');
+  const [budgetValidationError, setBudgetValidationError] = useState('');
 
   const [developmentGenerated, setDevelopmentGenerated] = useState(false);
   const [cutlistGenerated, setCutlistGenerated] = useState(false);
@@ -77,6 +102,62 @@ export const useWorkOrders = ({
   const hasModelRef = Boolean(modelReference.trim()) || Boolean(modelImage);
   const canGenerateBudget = Boolean(customerId) && m2 > 0 && hasModelRef;
 
+  const getBudgetStatus = (requestId: string | null) => (
+    requestId ? (budgetStatusByRequestId[requestId] ?? emptyBudgetStatus) : emptyBudgetStatus
+  );
+
+  const updateBudgetStatus = (requestId: string, patch: Partial<BudgetStatus>) => {
+    setBudgetStatusByRequestId(prev => ({
+      ...prev,
+      [requestId]: {
+        ...emptyBudgetStatus,
+        ...prev[requestId],
+        ...patch,
+      },
+    }));
+  };
+
+  useEffect(() => {
+    if (!selectedRequestId) return;
+    const status = getBudgetStatus(selectedRequestId);
+    setBudgetGenerated(status.budgetGenerated);
+    setAccountingApproved(status.accountingApproved);
+    setAdminApproved(status.adminApproved);
+  }, [selectedRequestId, budgetStatusByRequestId]);
+
+  useEffect(() => {
+    const loadPending = async () => {
+      try {
+        const records = await listPendingBudgetValidations();
+        setBudgetStatusByRequestId(prev => {
+          const next = { ...prev };
+          records.forEach(record => {
+            next[record.requestId] = {
+              ...emptyBudgetStatus,
+              ...next[record.requestId],
+              budgetGenerated: true,
+              accountingApproved: true,
+              adminApproved: false,
+              validationId: record.id,
+              budgetNumber: record.budgetNumber,
+              customerName: record.customerName,
+              modelLabel: record.modelLabel ?? undefined,
+              m2: record.m2 ?? undefined,
+              total: record.total,
+              createdAt: record.createdAt,
+            };
+          });
+          return next;
+        });
+        setBudgetValidationError('');
+      } catch (error) {
+        setBudgetValidationError(error instanceof Error ? error.message : 'Error al cargar validaciones pendientes');
+      }
+    };
+
+    loadPending();
+  }, []);
+
   const budget = useMemo(() => {
     const base = selectedModel.pricePerM2;
     const total = Math.round(m2 * base * 100) / 100;
@@ -110,6 +191,7 @@ export const useWorkOrders = ({
     budgetGenerated,
     accountingApproved,
     adminApproved,
+    approverUserId,
     developmentGenerated,
     cutlistGenerated,
     prodCut,
@@ -120,7 +202,7 @@ export const useWorkOrders = ({
     ready,
   ]);
 
-  const resetDownstream = () => {
+  const resetDownstream = ({ keepBudget }: { keepBudget?: boolean } = {}) => {
     setBudgetGenerated(false);
     setAccountingApproved(false);
     setAdminApproved(false);
@@ -135,12 +217,31 @@ export const useWorkOrders = ({
     setProdLacControl(false);
     setFinalized(false);
     setReady('');
+    if (selectedRequestId && !keepBudget) {
+      updateBudgetStatus(selectedRequestId, {
+        budgetGenerated: false,
+        accountingApproved: false,
+        adminApproved: false,
+        approvedAt: undefined,
+      });
+    }
   };
 
   const handleGenerateBudget = () => {
     if (!canGenerateBudget) return;
     setBudgetGenerated(true);
     setShowBudgetModal(true);
+    if (selectedRequestId) {
+      updateBudgetStatus(selectedRequestId, {
+        budgetGenerated: true,
+        budgetNumber: buildBudgetNumber(selectedRequestId),
+        createdAt: new Date().toISOString(),
+        customerName: selectedCustomerName,
+        modelLabel: selectedModel.label,
+        m2,
+        total: budget.total,
+      });
+    }
   };
 
   const canGenerateDevelopment = budgetGenerated && accountingApproved && adminApproved;
@@ -222,7 +323,8 @@ export const useWorkOrders = ({
   const pipelineSteps: Array<{ key: TabKey; label: string; done: boolean }> = [
     { key: 'INBOX', label: 'Solicitudes', done: selectedRequestId !== null },
     { key: 'REQUEST', label: 'Solicitud', done: Boolean(customerId) && m2 > 0 && hasModelRef },
-    { key: 'BUDGET', label: 'Presupuesto', done: budgetGenerated && accountingApproved && adminApproved },
+    { key: 'BUDGET', label: 'Presupuesto', done: budgetGenerated && accountingApproved },
+    { key: 'VALIDATION', label: 'Validación ptos', done: adminApproved },
     { key: 'DEV', label: 'Desarrollo', done: developmentGenerated && cutlistGenerated },
     { key: 'PROD', label: 'Producción', done: prodCut && prodFab && prodLac && prodLacControl },
     { key: 'FINAL', label: 'Finalización', done: finalized && ready !== '' },
@@ -237,7 +339,7 @@ export const useWorkOrders = ({
   };
 
   const applyRequest = (req: WorkOrderRequest) => {
-    resetDownstream();
+    resetDownstream({ keepBudget: true });
     setSelectedRequestId(req.id);
     setCustomerId(resolveCustomerId(req.customerName));
     setModelId(req.modelId);
@@ -247,6 +349,10 @@ export const useWorkOrders = ({
     setNotes(req.notes);
     setModelImage(null);
     setTab('REQUEST');
+    const status = getBudgetStatus(req.id);
+    setBudgetGenerated(status.budgetGenerated);
+    setAccountingApproved(status.accountingApproved);
+    setAdminApproved(status.adminApproved);
   };
 
   useEffect(() => {
@@ -277,16 +383,21 @@ export const useWorkOrders = ({
     setSelectedRequestId(nextId);
     setShowRequestModal(false);
     setTab('INBOX');
+    updateBudgetStatus(nextId, emptyBudgetStatus);
   };
 
-  const budgetNumber = useMemo(() => {
-    const date = new Date();
+  const buildBudgetNumber = (requestId: string | null, date = new Date()) => {
     const yy = date.getFullYear().toString().slice(-2);
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const dd = String(date.getDate()).padStart(2, '0');
-    const ref = (selectedRequestId ?? 'GEN').replace('REQ-', '');
+    const ref = (requestId ?? 'GEN').replace('REQ-', '');
     return `P-${yy}${mm}${dd}-${ref}`;
-  }, [selectedRequestId]);
+  };
+
+  const budgetNumber = useMemo(() => {
+    const status = getBudgetStatus(selectedRequestId);
+    return status.budgetNumber ?? buildBudgetNumber(selectedRequestId);
+  }, [selectedRequestId, budgetStatusByRequestId]);
 
   const budgetDate = useMemo(() => {
     const date = new Date();
@@ -310,10 +421,11 @@ export const useWorkOrders = ({
   }, []);
 
   const selectedCustomer = customers.find(c => c.id === customerId);
+  const selectedCustomerName = selectedCustomer?.nombreComercial || selectedCustomer?.razonSocial || '—';
   const budgetData: BudgetData = {
     budgetNumber,
     budgetDate,
-    customerName: selectedCustomer?.nombreComercial || selectedCustomer?.razonSocial || '—',
+    customerName: selectedCustomerName,
     customerAddress: [selectedCustomer?.direccion, selectedCustomer?.cp, selectedCustomer?.poblacion, selectedCustomer?.provincia]
       .filter(Boolean)
       .join(' · '),
@@ -352,6 +464,106 @@ export const useWorkOrders = ({
     tail,
     notes,
     items: cutlistResult?.items ?? [],
+  };
+
+  const pendingBudgets: PendingBudget[] = useMemo(() => {
+    const pending: PendingBudget[] = [];
+    const handled = new Set<string>();
+
+    requests.forEach(req => {
+      const status = getBudgetStatus(req.id);
+      if (!status.validationId || !status.budgetGenerated || !status.accountingApproved || status.adminApproved) return;
+      const model = MODELS.find(m => m.id === req.modelId) ?? MODELS[0];
+      const total = status.total ?? Math.round(req.m2 * model.pricePerM2 * 100) / 100;
+      pending.push({
+        validationId: status.validationId,
+        requestId: req.id,
+        budgetNumber: status.budgetNumber ?? buildBudgetNumber(req.id),
+        customerName: status.customerName ?? req.customerName,
+        modelLabel: status.modelLabel ?? model.label,
+        m2: status.m2 ?? req.m2,
+        total,
+      });
+      handled.add(req.id);
+    });
+
+    Object.entries(budgetStatusByRequestId).forEach(([requestId, status]) => {
+      if (handled.has(requestId)) return;
+      if (!status.validationId || !status.budgetGenerated || !status.accountingApproved || status.adminApproved) return;
+      if (!status.customerName || !status.modelLabel || status.m2 == null || status.total == null) return;
+      pending.push({
+        validationId: status.validationId,
+        requestId,
+        budgetNumber: status.budgetNumber ?? buildBudgetNumber(requestId),
+        customerName: status.customerName,
+        modelLabel: status.modelLabel,
+        m2: status.m2,
+        total: status.total,
+      });
+    });
+
+    return pending;
+  }, [requests, budgetStatusByRequestId]);
+
+  const handleToggleAccounting = async () => {
+    if (!budgetGenerated) return;
+    const nextValue = !accountingApproved;
+    setAccountingApproved(nextValue);
+    if (selectedRequestId) {
+      updateBudgetStatus(selectedRequestId, { accountingApproved: nextValue });
+    }
+    if (!nextValue || !selectedRequestId) return;
+
+    const status = getBudgetStatus(selectedRequestId);
+    if (status.validationId) return;
+
+    try {
+      const record = await createBudgetValidation({
+        budgetNumber: status.budgetNumber ?? buildBudgetNumber(selectedRequestId),
+        requestId: selectedRequestId,
+        customerName: selectedCustomerName,
+        modelLabel: selectedModel.label,
+        m2,
+        total: budget.total,
+      });
+      updateBudgetStatus(selectedRequestId, {
+        validationId: record.id,
+        budgetNumber: record.budgetNumber,
+        customerName: record.customerName,
+        modelLabel: record.modelLabel ?? undefined,
+        m2: record.m2 ?? undefined,
+        total: record.total,
+        createdAt: record.createdAt,
+      });
+      setBudgetValidationError('');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al crear validación del presupuesto';
+      setBudgetValidationError(message);
+      setAccountingApproved(false);
+      updateBudgetStatus(selectedRequestId, { accountingApproved: false });
+    }
+  };
+
+  const handleApproverUserIdChange = (value: string) => {
+    setApproverUserId(value);
+  };
+
+  const handleApproveBudget = async (validationId: string) => {
+    if (!approverUserId.trim()) return;
+    try {
+      const record = await approveBudgetValidation(validationId, approverUserId.trim());
+      updateBudgetStatus(record.requestId, {
+        adminApproved: true,
+        approvedAt: record.approvedAt ?? new Date().toISOString(),
+      });
+      if (selectedRequestId === record.requestId) {
+        setAdminApproved(true);
+      }
+      setBudgetValidationError('');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Error al aprobar el presupuesto';
+      setBudgetValidationError(message);
+    }
   };
 
   const handlePrint = () => {
@@ -536,6 +748,7 @@ export const useWorkOrders = ({
     budgetGenerated,
     accountingApproved,
     adminApproved,
+    approverUserId,
     developmentGenerated,
     cutlistGenerated,
     doorType,
@@ -587,6 +800,8 @@ export const useWorkOrders = ({
     canFinalize,
     pipelineSteps,
     budgetData,
+    pendingBudgets,
+    budgetValidationError,
     workOrderData,
     setRequests,
     setCustomerId,
@@ -597,8 +812,6 @@ export const useWorkOrders = ({
     setGoogleView,
     setNotes,
     setBudgetGenerated,
-    setAccountingApproved,
-    setAdminApproved,
     setDevelopmentGenerated,
     setCutlistGenerated,
     setDoorType,
@@ -631,6 +844,9 @@ export const useWorkOrders = ({
     setShowWorkOrderModal,
     resetDownstream,
     handleGenerateBudget,
+    handleToggleAccounting,
+    handleApproverUserIdChange,
+    handleApproveBudget,
     handleGenerateCutlist,
     clearCutlist,
     applyRequest,

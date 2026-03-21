@@ -44,9 +44,10 @@ export const SidebarSummary = ({
           <div className="text-sm font-bold">{total} €</div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <StatusPill label="Presupuesto" ok={budgetGenerated} />
-        <StatusPill label="Aprobado" ok={accountingApproved && adminApproved} />
+        <StatusPill label="Contabilidad" ok={accountingApproved} />
+        <StatusPill label="Validación ptos" ok={adminApproved} />
       </div>
       <div className="pt-2 text-xs" style={{ color: '#8b949e' }}>
         {googleView ? 'Incluye visualización Google.' : 'Sin visualización Google.'}

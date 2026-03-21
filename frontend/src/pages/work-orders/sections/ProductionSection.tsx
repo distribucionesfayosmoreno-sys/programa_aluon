@@ -30,7 +30,7 @@ export const ProductionSection = ({
   onOpenWorkOrderModal: () => void;
 }) => (
   <section className="p-6 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
-    <SectionTitle n="04" label="Producción" />
+    <SectionTitle n="05" label="Producción" />
     <div className="flex items-center gap-3 mb-4">
       <div className="h-2 w-40 rounded-full" style={{ background: '#e8eaed', overflow: 'hidden' }}>
         <div className="h-full" style={{ width: `${productionPct}%`, background: '#e5534b' }} />
