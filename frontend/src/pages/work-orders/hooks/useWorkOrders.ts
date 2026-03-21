@@ -767,6 +767,181 @@ export const useWorkOrders = ({
     window.location.href = mail;
   };
 
+  const handleCutlistFormPrint = () => {
+    if (!canGenerateCutlist) return;
+    const w = window.open('', '_blank', 'width=1200,height=900');
+    if (!w) return;
+
+    const formConfig = {
+      PEATONAL: { id: 'peatonal', bg: formPeatonalImg },
+      VALLA: { id: 'vallas', bg: formVallasImg },
+      ABATIBLE_UNA: { id: 'abatible_una', bg: formAbatibleUnaImg },
+      ABATIBLE_DOS: { id: 'abatible_dos', bg: formAbatibleDosImg },
+      CORREDERA: { id: 'corredera', bg: formCorrederaImg },
+    } as const;
+
+    const config = formConfig[doorType];
+    const x = (value: boolean) => (value ? 'X' : '');
+    const text = (value: string | number | null | undefined) => (value == null || value === '' ? '' : String(value));
+
+    const commonFields = `
+      <div class="campo_distribuidor">${text(cutlistDistributor)}</div>
+      <div class="campo_num_presupuesto">${text(cutlistBudgetNumber)}</div>
+      <div class="campo_fecha">${text(cutlistBudgetDate)}</div>
+      <div class="campo_modelo">${text(doorModelLabel)}</div>
+      <div class="campo_color">${text(cutlistColor)}</div>
+      <div class="campo_acabado">${text(doorTypeLabel)}</div>
+      <div class="campo_nombre_instalador"></div>
+    `;
+
+    const peatonalFields = `
+      <div class="campo_portero_si">${x(porterAutomatic)}</div>
+      <div class="campo_portero_no">${x(!porterAutomatic)}</div>
+      <div class="campo_bisagra_izq">${x(hingesSide === 'LEFT')}</div>
+      <div class="campo_bisagra_der">${x(hingesSide === 'RIGHT')}</div>
+      <div class="campo_altura">${text(heightMm)}</div>
+      <div class="campo_anchura">${text(widthMm)}</div>
+      <div class="campo_holgura">${text(groundClearanceMm)}</div>
+      <div class="campo_observaciones">${text(notes)}</div>
+    `;
+
+    const vallaFields = `
+      <div class="campo_ancho">${text(widthMm)}</div>
+      <div class="campo_alto">${text(heightMm)}</div>
+      <div class="campo_observaciones">${text(notes)}</div>
+    `;
+
+    const abatibleCommon = `
+      <div class="campo_automatizacion_si">${x(automationIncluded)}</div>
+      <div class="campo_automatizacion_no">${x(!automationIncluded)}</div>
+      <div class="campo_altura_izq">${text(heightMm)}</div>
+      <div class="campo_altura_der">${text(heightMm)}</div>
+      <div class="campo_holgura">${text(groundClearanceMm)}</div>
+      <div class="campo_anchura">${text(widthMm)}</div>
+      <div class="campo_observaciones">${text(notes)}</div>
+    `;
+
+    const abatibleUnaFields = `
+      <div class="campo_bisagra_izq">${x(hingesSide === 'LEFT')}</div>
+      <div class="campo_bisagra_der">${x(hingesSide === 'RIGHT')}</div>
+      ${abatibleCommon}
+    `;
+
+    const abatibleDosFields = `
+      <div class="campo_primera_hoja_izq">${x(openingSide === 'LEFT')}</div>
+      <div class="campo_primera_hoja_der">${x(openingSide === 'RIGHT')}</div>
+      <div class="campo_observaciones_abatible_dos_hojas">${text(notes)}</div>
+      ${abatibleCommon}
+    `;
+
+    const correderaFields = `
+      <div class="campo_automatizacion_si">${x(automationIncluded)}</div>
+      <div class="campo_automatizacion_no">${x(!automationIncluded)}</div>
+      <div class="campo_apertura_izq">${x(openingSide === 'LEFT')}</div>
+      <div class="campo_apertura_der">${x(openingSide === 'RIGHT')}</div>
+      <div class="campo_anchura_izq">${text(Math.round(widthMm / 2))}</div>
+      <div class="campo_anchura_der">${text(Math.round(widthMm / 2))}</div>
+      <div class="campo_altura">${text(heightMm)}</div>
+      <div class="campo_carril_16">${x(railType === 'CARRIL_16')}</div>
+      <div class="campo_carril_20">${x(railType === 'CARRIL_20')}</div>
+      <div class="campo_montaje_A">${x(mountingType === 'A')}</div>
+      <div class="campo_montaje_B">${x(mountingType === 'B')}</div>
+      <div class="campo_observaciones">${text(notes)}</div>
+    `;
+
+    const fieldsByType: Record<typeof doorType, string> = {
+      PEATONAL: peatonalFields,
+      VALLA: vallaFields,
+      ABATIBLE_UNA: abatibleUnaFields,
+      ABATIBLE_DOS: abatibleDosFields,
+      CORREDERA: correderaFields,
+    };
+
+    const css = `
+      body { margin: 0; font-family: Arial, sans-serif; }
+      .printable_form {
+        position: relative;
+        height: 1250px;
+        width: 1140px;
+        max-width: 1140px;
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      .printable_form div[class*="campo"] { position: absolute; font-size: 14px; font-weight: 600; }
+      .printable_form#peatonal { background-image: url('${config.bg}'); }
+      .printable_form#vallas { background-image: url('${config.bg}'); }
+      .printable_form#abatible_una { background-image: url('${config.bg}'); }
+      .printable_form#abatible_dos { background-image: url('${config.bg}'); }
+      .printable_form#corredera { background-image: url('${config.bg}'); }
+      .printable_form .campo_distribuidor { top: 112px; left: 165px; }
+      .printable_form .campo_num_presupuesto { top: 112px; left: 605px; }
+      .printable_form .campo_fecha { top: 112px; left: 805px; }
+      .printable_form .campo_modelo { top: 170px; left: 165px; }
+      .printable_form .campo_color { top: 170px; left: 605px; }
+      .printable_form .campo_acabado { top: 170px; left: 805px; }
+      .printable_form .campo_automatizacion_si { top: 308px; left: 334px; }
+      .printable_form .campo_automatizacion_no { top: 308px; left: 433px; }
+      .printable_form#peatonal .campo_portero_si { top: 258px; left: 868px; }
+      .printable_form#peatonal .campo_portero_no { top: 258px; left: 965px; }
+      .printable_form#peatonal .campo_bisagra_izq { top: 372px; left: 439px; }
+      .printable_form#peatonal .campo_bisagra_der { top: 372px; left: 698px; }
+      .printable_form#peatonal .campo_altura { top: 626px; left: 290px; }
+      .printable_form#peatonal .campo_anchura { top: 988px; left: 580px; }
+      .printable_form#peatonal .campo_holgura { top: 866px; left: 835px; }
+      .printable_form#vallas .campo_ancho { top: 425px; left: 923px; }
+      .printable_form#vallas .campo_alto { top: 622px; left: 530px; }
+      .printable_form#abatible_una .campo_bisagra_izq,
+      .printable_form#abatible_dos .campo_primera_hoja_izq { top: 435px; left: 383px; }
+      .printable_form#abatible_una .campo_bisagra_der,
+      .printable_form#abatible_dos .campo_primera_hoja_der { top: 435px; left: 742px; }
+      .printable_form[id*="abatible"] .campo_altura_izq { top: 652px; left: 175px; }
+      .printable_form[id*="abatible"] .campo_altura_der { top: 652px; left: 860px; }
+      .printable_form[id*="abatible"] .campo_holgura { top: 854px; left: 580px; }
+      .printable_form[id*="abatible"] .campo_anchura { top: 982px; left: 580px; }
+      .printable_form#corredera .campo_altura { top: 406px; left: 595px; }
+      .printable_form#corredera .campo_apertura_izq { top: 404px; left: 302px; }
+      .printable_form#corredera .campo_apertura_der { top: 404px; left: 831px; }
+      .printable_form#corredera .campo_anchura_izq { top: 595px; left: 370px; }
+      .printable_form#corredera .campo_anchura_der { top: 595px; left: 815px; }
+      .printable_form#corredera .campo_carril_16 { top: 830px; left: 779px; }
+      .printable_form#corredera .campo_carril_20 { top: 830px; left: 964px; }
+      .printable_form#corredera .campo_montaje_A { top: 916px; left: 252px; }
+      .printable_form#corredera .campo_montaje_B { top: 916px; left: 875px; }
+      .printable_form .campo_nombre_instalador { top: 1067px; left: 810px; }
+      .printable_form .campo_observaciones { top: 1100px; left: 167px; max-width: 760px; }
+      .printable_form[id*="abatible"] .campo_nombre_instalador,
+      .printable_form#corredera .campo_nombre_instalador { top: 1144px; }
+      .printable_form[id*="abatible"] .campo_observaciones,
+      .printable_form#corredera .campo_observaciones { top: 1178px; }
+      @media print {
+        body { -webkit-print-color-adjust: exact; }
+      }
+    `;
+
+    const html = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Formulario pedido ${doorTypeLabel}</title>
+  <style>${css}</style>
+</head>
+<body>
+  <div class="printable_form" id="${config.id}">
+    ${commonFields}
+    ${fieldsByType[doorType]}
+  </div>
+</body>
+</html>`;
+
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+    w.print();
+  };
+
   const handleWorkOrderPrint = () => {
     if (!cutlistResult || !cutlistGenerated) return;
     const w = window.open('', '_blank', 'width=900,height=700');
@@ -988,6 +1163,7 @@ export const useWorkOrders = ({
     handleApproverUserIdChange,
     handleApproveBudget,
     handleGenerateCutlist,
+    handleCutlistFormPrint,
     clearCutlist,
     applyRequest,
     createRequest,

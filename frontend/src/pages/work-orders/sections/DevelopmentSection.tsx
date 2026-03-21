@@ -46,6 +46,7 @@ export const DevelopmentSection = ({
   cutlistPinnedIndex,
   onGenerateDevelopment,
   onGenerateCutlist,
+  onPrintForm,
   onDistributorChange,
   onBudgetNumberChange,
   onBudgetDateChange,
@@ -111,6 +112,7 @@ export const DevelopmentSection = ({
   cutlistPinnedIndex: number | null;
   onGenerateDevelopment: () => void;
   onGenerateCutlist: () => void;
+  onPrintForm: () => void;
   onDistributorChange: (value: string) => void;
   onBudgetNumberChange: (value: string) => void;
   onBudgetDateChange: (value: string) => void;
@@ -158,6 +160,15 @@ export const DevelopmentSection = ({
         style={{ opacity: canGenerateCutlist && !cutlistLoading ? 1 : 0.5, cursor: canGenerateCutlist && !cutlistLoading ? 'pointer' : 'not-allowed' }}
       >
         {cutlistLoading ? 'Generando...' : 'Generar despiece'}
+      </button>
+      <button
+        type="button"
+        className="btn-ghost"
+        onClick={onPrintForm}
+        disabled={!canGenerateCutlist}
+        style={{ opacity: canGenerateCutlist ? 1 : 0.5, cursor: canGenerateCutlist ? 'pointer' : 'not-allowed' }}
+      >
+        Imprimir
       </button>
       <StatusPill label="Desarrollo generado" ok={developmentGenerated} />
       <StatusPill label="Despiece generado" ok={cutlistGenerated} />

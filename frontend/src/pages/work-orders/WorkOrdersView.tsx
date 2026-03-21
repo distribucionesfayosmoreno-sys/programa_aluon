@@ -135,6 +135,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     handleApproverUserIdChange,
     handleApproveBudget,
     handleGenerateCutlist,
+    handleCutlistFormPrint,
     clearCutlist,
     applyRequest,
     createRequest,
@@ -306,6 +307,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
               cutlistPinnedIndex={cutlistPinnedIndex}
               onGenerateDevelopment={() => setDevelopmentGenerated(true)}
               onGenerateCutlist={handleGenerateCutlist}
+              onPrintForm={handleCutlistFormPrint}
               onDistributorChange={value => setCutlistDistributor(value)}
               onBudgetNumberChange={value => setCutlistBudgetNumber(value)}
               onBudgetDateChange={value => setCutlistBudgetDate(value)}
