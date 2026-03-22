@@ -59,9 +59,19 @@ export const useWorkOrderRequests = ({
   budget,
   currentWorkflowStep,
 }: UseWorkOrderRequestsParams) => {
+  const workflowOrder: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
+
+  const isWorkflowAdvance = useCallback((from: TabKey, to: TabKey) => (
+    workflowOrder.indexOf(to) > workflowOrder.indexOf(from)
+  ), [workflowOrder]);
+
   const updateRequestWorkflowStep = useCallback((requestId: string, workflowStep: TabKey) => {
-    setRequests(prev => prev.map(req => (req.id === requestId ? { ...req, workflowStep } : req)));
-  }, [setRequests]);
+    setRequests(prev => prev.map(req => {
+      if (req.id !== requestId) return req;
+      if (!isWorkflowAdvance(req.workflowStep, workflowStep)) return req;
+      return { ...req, workflowStep };
+    }));
+  }, [isWorkflowAdvance, setRequests]);
 
   const resolveCustomerId = (name: string) => {
     const match = customers.find(c => {
@@ -94,6 +104,7 @@ export const useWorkOrderRequests = ({
       .filter(n => !Number.isNaN(n))
       .sort((a, b) => b - a)[0] ?? 0;
     const nextId = `REQ-${String(lastId + 1).padStart(3, '0')}`;
+    const requestDate = new Date().toISOString().slice(0, 10);
     setRequests(prev => ([
       {
         id: nextId,
@@ -103,6 +114,7 @@ export const useWorkOrderRequests = ({
         reference: data.reference,
         googleView: data.googleView,
         notes: data.notes,
+        requestDate,
         workflowStep: 'INBOX',
       },
       ...prev,

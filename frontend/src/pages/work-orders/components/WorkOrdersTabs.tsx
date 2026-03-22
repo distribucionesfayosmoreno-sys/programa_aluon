@@ -7,9 +7,10 @@ type WorkOrdersTabsProps = {
   steps: PipelineStep[];
   activeTab: TabKey;
   onTabChange: (key: TabKey) => void;
+  onOpenNewRequest: () => void;
 };
 
-export const WorkOrdersTabs = ({ steps, activeTab, onTabChange }: WorkOrdersTabsProps) => (
+export const WorkOrdersTabs = ({ steps, activeTab, onTabChange, onOpenNewRequest }: WorkOrdersTabsProps) => (
   <div className="flex items-center gap-3 mb-6 overflow-x-auto">
     {steps.map((step, idx) => (
       <button
@@ -41,5 +42,11 @@ export const WorkOrdersTabs = ({ steps, activeTab, onTabChange }: WorkOrdersTabs
         )}
       </button>
     ))}
+    <button className="btn-primary h-10 px-3 py-2" onClick={onOpenNewRequest}>
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+      </svg>
+      Nueva orden
+    </button>
   </div>
 );

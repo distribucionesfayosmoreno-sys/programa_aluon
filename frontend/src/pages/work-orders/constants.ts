@@ -37,6 +37,7 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
     reference: 'MOD-PR-442',
     googleView: true,
     notes: 'Acabado satinado. Entrega urgente.',
+    requestDate: '2026-03-20',
     workflowStep: 'BUDGET',
   },
   {
@@ -47,6 +48,7 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
     reference: 'MOD-CL-107',
     googleView: false,
     notes: 'Medidas especiales en esquinas.',
+    requestDate: '2026-03-18',
     workflowStep: 'REQUEST',
   },
   {
@@ -57,6 +59,7 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
     reference: 'MOD-LX-880',
     googleView: true,
     notes: 'Necesita simulación en tienda.',
+    requestDate: '2026-03-16',
     workflowStep: 'INBOX',
   },
 ];

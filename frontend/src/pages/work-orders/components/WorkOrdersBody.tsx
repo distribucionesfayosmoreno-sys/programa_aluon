@@ -67,6 +67,7 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
     setProdLacControl,
     setFinalized,
     setReady,
+    setSelectedRequestId,
     setShowBudgetModal,
     setShowRequestModal,
     setShowWorkOrderModal,
@@ -81,17 +82,20 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
     handleEmail,
     handleWorkOrderPrint,
   } = ctx;
+  const isInbox = tab === 'INBOX';
+  const showSummary = !isInbox;
 
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-8">
+        <div className={`${isInbox ? 'lg:col-span-3' : 'lg:col-span-2'} space-y-8`}>
           {tab === 'INBOX' && (
             <InboxSection
               requests={requests}
               selectedRequestId={selectedRequestId}
               customerId={customerId}
               onApplyRequest={applyRequest}
+              onSelectRequest={setSelectedRequestId}
             />
           )}
 
@@ -172,18 +176,20 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
           )}
         </div>
 
-        <aside className="space-y-6">
-          <SidebarSummary
-            customerName={customers.find(c => c.id === customerId)?.nombreComercial || '—'}
-            modelLabel={selectedModel.label}
-            m2={m2}
-            total={budget.total}
-            budgetGenerated={budgetGenerated}
-            accountingApproved={accountingApproved}
-            adminApproved={adminApproved}
-            googleView={googleView}
-          />
-        </aside>
+        {showSummary && (
+          <aside className="space-y-6">
+            <SidebarSummary
+              customerName={customers.find(c => c.id === customerId)?.nombreComercial || '—'}
+              modelLabel={selectedModel.label}
+              m2={m2}
+              total={budget.total}
+              budgetGenerated={budgetGenerated}
+              accountingApproved={accountingApproved}
+              adminApproved={adminApproved}
+              googleView={googleView}
+            />
+          </aside>
+        )}
       </div>
 
       <BudgetModal

@@ -172,6 +172,7 @@ export type WorkOrderRequest = {
   reference: string;
   googleView: boolean;
   notes: string;
+  requestDate: string;
   workflowStep: WorkOrderStage;
 };
 

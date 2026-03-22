@@ -32,7 +32,7 @@ export const SectionTitle = ({ n, label }: { n: string; label: string }) => (
 
 export const StatusPill = ({ label, ok }: { label: string; ok: boolean }) => (
   <span
-    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
+    className="inline-flex items-center justify-center px-2 py-0.5 rounded text-xs font-bold text-center"
     style={{
       fontSize: 10,
       background: ok ? '#ecfdf3' : '#f3f4f6',

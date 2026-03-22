@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useCustomers } from '../../../hooks/useCustomers';
 import { MODELS } from '../constants';
 import { buildWorkOrderNumber, formatLongDate } from '../utils/workOrderNumbers';
@@ -23,11 +23,15 @@ export const useWorkOrders = ({
   const { customers } = useCustomers();
   const base = useWorkOrderBaseState();
 
-  const { requests, setRequests, customerId, setCustomerId, modelId, setModelId, modelReference, setModelReference, modelImage, setModelImage, m2, setM2, setGoogleView, notes, setNotes, developmentGenerated, setDevelopmentGenerated, prodCut, setProdCut, prodFab, setProdFab, prodLac, setProdLac, prodLacControl, setProdLacControl, finalized, setFinalized, ready, setReady, selectedRequestId, setSelectedRequestId, setTab, setShowRequestModal } = base;
+  const { requests, setRequests, customerId, setCustomerId, modelId, setModelId, modelReference, setModelReference, modelImage, setModelImage, m2, setM2, googleView, setGoogleView, notes, setNotes, developmentGenerated, setDevelopmentGenerated, prodCut, setProdCut, prodFab, setProdFab, prodLac, setProdLac, prodLacControl, setProdLacControl, finalized, setFinalized, ready, setReady, selectedRequestId, setSelectedRequestId, setTab, setShowRequestModal } = base;
 
   const selectedModel = useMemo(() => MODELS.find(m => m.id === modelId) ?? MODELS[0], [modelId]);
   const hasModelRef = Boolean(modelReference.trim()) || Boolean(modelImage);
   const selectedCustomer = useMemo(() => customers.find(c => c.id === customerId), [customers, customerId]);
+  const resolvedCustomerName = useMemo(
+    () => selectedCustomer?.nombreComercial || selectedCustomer?.razonSocial || '',
+    [selectedCustomer],
+  );
 
   const budget = useBudgetWorkflow({
     selectedRequestId,
@@ -189,6 +193,32 @@ export const useWorkOrders = ({
     budget: { budgetStatusByRequestId: budget.budgetStatusByRequestId, getBudgetStatus: budget.getBudgetStatus, setBudgetGenerated: budget.setBudgetGenerated, setAccountingApproved: budget.setAccountingApproved, setAdminApproved: budget.setAdminApproved, updateBudgetStatus: budget.updateBudgetStatus },
     currentWorkflowStep,
   });
+
+  useEffect(() => {
+    if (!selectedRequestId) return;
+    setRequests(prev => prev.map(req => {
+      if (req.id !== selectedRequestId) return req;
+      const nextCustomerName = resolvedCustomerName || req.customerName;
+      return {
+        ...req,
+        customerName: nextCustomerName,
+        modelId,
+        m2,
+        reference: modelReference,
+        googleView,
+        notes,
+      };
+    }));
+  }, [
+    selectedRequestId,
+    setRequests,
+    resolvedCustomerName,
+    modelId,
+    m2,
+    modelReference,
+    googleView,
+    notes,
+  ]);
 
   return buildWorkOrdersResult({
     customers,
