@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useState } from 'react';
 import type { CustomerOption, NewRequestData } from '../models';
 import { MODELS } from '../constants';
@@ -43,10 +44,15 @@ export const NewRequestModal = ({
 
   if (!open) return null;
 
-  return (
+  const portalTarget =
+    typeof document !== 'undefined' ? document.getElementById('main-layout') : null;
+
+  const content = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="absolute inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       style={{ background: 'rgba(13,17,23,0.70)', backdropFilter: 'blur(6px)' }}
+      role="dialog"
+      aria-modal="true"
     >
       <div className="absolute inset-0" onClick={onClose} />
 
@@ -181,4 +187,6 @@ export const NewRequestModal = ({
       </div>
     </div>
   );
+
+  return portalTarget ? createPortal(content, portalTarget) : content;
 };

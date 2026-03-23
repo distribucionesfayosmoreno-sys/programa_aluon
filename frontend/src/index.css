@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html { -webkit-font-smoothing: antialiased; }
-  body { background-color: #f8f9fb; color: #0d1117; font-family: 'Inter', system-ui, sans-serif; }
+  body { background-color: #f8f9fb; color: #0d1117; font-family: 'Montserrat', 'Inter', system-ui, sans-serif; }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background-color: #e8eaed; border-radius: 9999px; }

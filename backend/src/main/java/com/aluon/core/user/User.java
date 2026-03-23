@@ -14,8 +14,8 @@ import java.util.UUID;
 @Builder
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     // Multitenancy: AISLAMIENTO SAAS por Cliente
     // Hibernate inyectará el Tenant ID automáticamente basado en el contexto.
@@ -32,4 +32,27 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role rol;
+
+    @Column(nullable = false)
+    private String nombre;
+
+    @Column(nullable = false)
+    private String apellidos;
+
+    @Column(nullable = false)
+    private String email;
+
+    @Column
+    private Integer telefono;
+
+    @Column
+    private String horario;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_contrato", nullable = false)
+    private ContractType tipoContrato;
+
+    @Lob
+    @Column
+    private byte[] foto;
 }

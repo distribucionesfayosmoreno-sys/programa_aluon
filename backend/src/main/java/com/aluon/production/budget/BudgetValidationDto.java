@@ -7,7 +7,6 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
-
 @Data
 @Builder
 public class BudgetValidationDto {
@@ -21,7 +20,7 @@ public class BudgetValidationDto {
     private BudgetValidationStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime approvedAt;
-    private UUID approvedByUserId;
+    private Long approvedByUserId;
     private String approvedByUsername;
     private Role approvedByRole;
 }
