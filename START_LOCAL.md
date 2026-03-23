@@ -43,8 +43,8 @@ npm run dev
 2) En el servidor DEV2, sincroniza y reconstruye:
 ```powershell
 ssh root@192.168.99.14 "cd /opt/aluon && git fetch --all && git reset --hard origin/DEV2"
-ssh root@192.168.99.14 "cd /opt/aluon && DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker compose --env-file infra/.env.dev -f infra/docker-compose.yml build"
-ssh root@192.168.99.14 "cd /opt/aluon && docker compose --env-file infra/.env.dev -f infra/docker-compose.yml up -d"
+ssh root@192.168.99.14 "cd /opt/aluon/infra && DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker compose --env-file .env.dev -f docker-compose.yml build"
+ssh root@192.168.99.14 "cd /opt/aluon/infra && docker compose --env-file .env.dev -f docker-compose.yml up -d"
 ```
 
 ### Script para Git Bash
