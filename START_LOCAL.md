@@ -40,9 +40,9 @@ npm run dev
 
 ## Subir cambios a DEV2
 1) En tu repo local, asegúrate de tener los cambios en el remoto (push).
-2) En el servidor DEV2, actualiza y reconstruye:
+2) En el servidor DEV2, sincroniza y reconstruye:
 ```powershell
-ssh root@192.168.99.14 "cd /opt/aluon && git pull"
+ssh root@192.168.99.14 "cd /opt/aluon && git fetch --all && git reset --hard origin/DEV2"
 ssh root@192.168.99.14 "cd /opt/aluon && DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 docker compose --env-file infra/.env.dev -f infra/docker-compose.yml build"
 ssh root@192.168.99.14 "cd /opt/aluon && docker compose --env-file infra/.env.dev -f infra/docker-compose.yml up -d"
 ```

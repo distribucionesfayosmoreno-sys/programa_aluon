@@ -19,8 +19,8 @@ COMPOSE="docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE}"
 echo "Deploying to DEV2 (${REMOTE})..."
 
 if [[ $PULL -eq 1 ]]; then
-  echo "Pulling latest changes..."
-  ssh "${REMOTE}" "${BASE} && git pull"
+  echo "Syncing to origin/DEV2 (hard reset)..."
+  ssh "${REMOTE}" "${BASE} && git fetch --all && git reset --hard origin/DEV2"
 fi
 
 echo "Building images..."
