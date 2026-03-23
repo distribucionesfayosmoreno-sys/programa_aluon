@@ -26,7 +26,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
     container_name: aluon-backend-${ENV_NAME:-local}
     environment:
@@ -45,7 +45,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
     container_name: aluon-frontend-${ENV_NAME:-local}
     ports:
