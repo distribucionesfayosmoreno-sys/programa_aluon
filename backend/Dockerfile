@@ -2,6 +2,8 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
+# Ensure wrapper is executable in Linux image
+RUN chmod +x mvnw
 # Resolve dependencies to cache them
 RUN ./mvnw dependency:go-offline
 
