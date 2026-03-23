@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './pages/CustomerManagement';
+import AdminManagement from './pages/AdminManagement';
 import WorkOrders from './pages/WorkOrders';
 
 const App = () => {
@@ -15,6 +16,8 @@ const App = () => {
         return 'Dashboard';
       case 'ajustes':
         return 'Ajustes';
+      case 'administracion':
+        return 'Administración';
       case 'clientes':
       default:
         return 'Clientes (CRM)';
@@ -113,6 +116,7 @@ const App = () => {
                 <p className="text-xs mt-2" style={{ color: '#9ca3af' }}>Configuración en preparación.</p>
               </div>
             )}
+            {activeModule === 'administracion' && <AdminManagement />}
           </div>
         </main>
       </div>
