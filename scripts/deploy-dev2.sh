@@ -4,8 +4,8 @@ set -euo pipefail
 SERVER_HOST="${SERVER_HOST:-192.168.99.14}"
 USER="${DEPLOY_USER:-root}"
 REMOTE_PATH="${REMOTE_PATH:-/opt/aluon}"
-COMPOSE_FILE="${COMPOSE_FILE:-infra/docker-compose.dev2.yml}"
-ENV_FILE="${ENV_FILE:-infra/.env.dev2}"
+COMPOSE_FILE="${COMPOSE_FILE:-infra/docker-compose.yml}"
+ENV_FILE="${ENV_FILE:-infra/.env.dev}"
 
 PULL=0
 if [[ "${1:-}" == "-Pull" || "${1:-}" == "--pull" ]]; then
