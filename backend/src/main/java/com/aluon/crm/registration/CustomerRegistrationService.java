@@ -3,12 +3,15 @@ package com.aluon.crm.registration;
 import com.aluon.crm.customer.Customer;
 import com.aluon.crm.customer.CustomerRepository;
 import com.aluon.crm.pricing.TariffService;
+import com.aluon.core.mail.EmailTemplateService;
+import com.aluon.core.mail.MailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -18,6 +21,7 @@ public class CustomerRegistrationService {
     private final CustomerRegistrationRepository registrationRepository;
     private final CustomerRepository customerRepository;
     private final TariffService tariffService;
+    private final MailService mailService;
 
     @Transactional
     public CustomerRegistrationResponse register(CustomerRegistrationRequest request) {
@@ -40,6 +44,16 @@ public class CustomerRegistrationService {
                 .build();
 
         CustomerRegistration saved = registrationRepository.save(registration);
+
+        mailService.sendTemplate(
+                EmailTemplateService.KEY_REGISTRATION_CONFIRMATION,
+                saved.getEmail(),
+                Map.of(
+                        "nombreComercial", saved.getNombreComercial(),
+                        "email", saved.getEmail(),
+                        "telefono", saved.getTelefonoWhatsapp()
+                )
+        );
 
         return CustomerRegistrationResponse.builder()
                 .registrationId(saved.getId())
@@ -119,6 +133,16 @@ public class CustomerRegistrationService {
         registration.setReviewedAt(LocalDateTime.now());
 
         registrationRepository.save(registration);
+
+        mailService.sendTemplate(
+                EmailTemplateService.KEY_REGISTRATION_APPROVED,
+                registration.getEmail(),
+                Map.of(
+                        "nombreComercial", registration.getNombreComercial(),
+                        "email", registration.getEmail(),
+                        "telefono", registration.getTelefonoWhatsapp()
+                )
+        );
 
         return toDto(registration);
     }

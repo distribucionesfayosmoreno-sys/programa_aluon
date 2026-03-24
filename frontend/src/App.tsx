@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import AdminManagement from './pages/AdminManagement';
 import WorkOrders from './pages/WorkOrders';
 import RegistrationRequests from './pages/RegistrationRequests';
+import Settings from './pages/Settings';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
@@ -151,12 +152,7 @@ const App = () => {
               />
             )}
             {activeModule === 'dashboard' && <Dashboard />}
-            {activeModule === 'ajustes' && (
-              <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
-                <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Ajustes</h2>
-                <p className="text-xs mt-2" style={{ color: '#9ca3af' }}>Configuración en preparación.</p>
-              </div>
-            )}
+            {activeModule === 'ajustes' && <Settings />}
             {activeModule === 'administracion' && <AdminManagement />}
           </div>
         </main>
