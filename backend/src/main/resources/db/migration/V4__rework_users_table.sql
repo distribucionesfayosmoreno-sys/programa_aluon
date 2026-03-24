@@ -31,27 +31,37 @@ SELECT
     NULL
 FROM users;
 
--- Migrar FK de budget_validations -> users
-ALTER TABLE budget_validations
-    ADD COLUMN IF NOT EXISTS approved_by_user_id_new BIGINT;
+-- Migrar FK de budget_validations -> users (si existe tabla)
+DO $$
+BEGIN
+    IF to_regclass('public.budget_validations') IS NOT NULL THEN
+        ALTER TABLE budget_validations
+            ADD COLUMN IF NOT EXISTS approved_by_user_id_new BIGINT;
 
-UPDATE budget_validations b
-SET approved_by_user_id_new = u.id
-FROM users_new u
-WHERE b.approved_by_user_id = u.legacy_uuid;
+        UPDATE budget_validations b
+        SET approved_by_user_id_new = u.id
+        FROM users_new u
+        WHERE b.approved_by_user_id = u.legacy_uuid;
 
-ALTER TABLE budget_validations
-    DROP CONSTRAINT IF EXISTS fk3agu7xm6u77pluw72orpe7ybx;
+        ALTER TABLE budget_validations
+            DROP CONSTRAINT IF EXISTS fk3agu7xm6u77pluw72orpe7ybx;
 
-ALTER TABLE budget_validations
-    DROP COLUMN IF EXISTS approved_by_user_id;
+        ALTER TABLE budget_validations
+            DROP COLUMN IF EXISTS approved_by_user_id;
 
-ALTER TABLE budget_validations
-    RENAME COLUMN approved_by_user_id_new TO approved_by_user_id;
+        ALTER TABLE budget_validations
+            RENAME COLUMN approved_by_user_id_new TO approved_by_user_id;
+    END IF;
+END $$;
 
 DROP TABLE users;
 ALTER TABLE users_new RENAME TO users;
 
-ALTER TABLE budget_validations
-    ADD CONSTRAINT fk_budget_validations_users
-    FOREIGN KEY (approved_by_user_id) REFERENCES users(id);
+DO $$
+BEGIN
+    IF to_regclass('public.budget_validations') IS NOT NULL THEN
+        ALTER TABLE budget_validations
+            ADD CONSTRAINT fk_budget_validations_users
+            FOREIGN KEY (approved_by_user_id) REFERENCES users(id);
+    END IF;
+END $$;
