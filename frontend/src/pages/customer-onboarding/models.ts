@@ -71,6 +71,14 @@ export type QuoteResponse = {
   items: QuoteItemResponse[];
 };
 
+export type ErpBudgetStatusResponse = {
+  quoteNumber: string;
+  status: QuoteStatus;
+  createdAt?: string | null;
+  validatedAt?: string | null;
+  sentAt?: string | null;
+};
+
 export type CatalogCard = {
   id: DoorModel;
   label: string;

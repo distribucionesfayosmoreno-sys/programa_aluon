@@ -38,7 +38,7 @@ export const useCustomers = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch('/api/customers');
+      const response = await fetch('/api/erp/customers');
       const data = await response.json();
       if (Array.isArray(data)) {
         setCustomers(data);
@@ -55,7 +55,7 @@ export const useCustomers = () => {
 
   const saveCustomer = async (customer: Customer) => {
     const method = customer.id ? 'PUT' : 'POST';
-    const url = customer.id ? `/api/customers/${customer.id}` : '/api/customers';
+    const url = customer.id ? `/api/erp/customers/${customer.id}` : '/api/erp/customers';
     
     const response = await fetch(url, {
       method,
@@ -69,7 +69,7 @@ export const useCustomers = () => {
   };
 
   const deleteCustomer = async (id: string) => {
-    const response = await fetch(`/api/customers/${id}`, { method: 'DELETE' });
+    const response = await fetch(`/api/erp/customers/${id}`, { method: 'DELETE' });
     if (response.ok) {
       fetchCustomers();
     }

@@ -4,6 +4,7 @@ import type {
   CatalogCard,
   DoorModel,
   DoorType,
+  ErpBudgetStatusResponse,
   ProductTypeCard,
   QuoteChannel,
   QuoteItemDraft,
@@ -11,6 +12,7 @@ import type {
   RegistrationRequest,
   RegistrationResponse,
 } from './models';
+import { getErpBudgetStatus, syncErpBudgetStatus } from '../../services/erpBudgetApi';
 
 const emptyRegistration: RegistrationRequest = {
   nombreComercial: '',
@@ -59,6 +61,7 @@ const CustomerOnboarding = () => {
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const selectedModelCard = useMemo(
     () => CATALOG_MODELS.find(model => model.id === selectedModel) ?? null,
@@ -178,6 +181,48 @@ const CustomerOnboarding = () => {
       setError(message);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const applyBudgetStatus = (payload: ErpBudgetStatusResponse) => {
+    setQuote(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        status: payload.status,
+        validatedAt: payload.validatedAt ?? prev.validatedAt,
+        sentAt: payload.sentAt ?? prev.sentAt,
+      };
+    });
+  };
+
+  const refreshQuoteStatus = async () => {
+    if (!quote) return;
+    setStatusLoading(true);
+    setError('');
+    try {
+      const data = await getErpBudgetStatus(quote.quoteNumber);
+      applyBudgetStatus(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al consultar el estado del presupuesto';
+      setError(message);
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  const syncQuoteStatus = async () => {
+    if (!quote) return;
+    setStatusLoading(true);
+    setError('');
+    try {
+      const data = await syncErpBudgetStatus({ quoteNumber: quote.quoteNumber, status: quote.status });
+      applyBudgetStatus(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al sincronizar el presupuesto';
+      setError(message);
+    } finally {
+      setStatusLoading(false);
     }
   };
 
@@ -556,6 +601,12 @@ const CustomerOnboarding = () => {
               setSelectedType(null);
               setStep('CATALOGO');
             }}>Nueva oferta</button>
+            <button className="btn-ghost" onClick={refreshQuoteStatus} disabled={statusLoading}>
+              {statusLoading ? 'Consultando...' : 'Actualizar estado'}
+            </button>
+            <button className="btn-ghost" onClick={syncQuoteStatus} disabled={statusLoading}>
+              {statusLoading ? 'Sincronizando...' : 'Sincronizar ERP'}
+            </button>
             <button className="btn-ghost" onClick={() => setStep('CONFIRMADO')}>Volver</button>
           </div>
         </section>
