@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './pages/CustomerManagement';
+import CustomerOnboarding from './pages/customer-onboarding/CustomerOnboarding';
 import Dashboard from './pages/Dashboard';
 import AdminManagement from './pages/AdminManagement';
 import WorkOrders from './pages/WorkOrders';
@@ -15,6 +16,8 @@ const App = () => {
         return 'Órdenes de trabajo';
       case 'dashboard':
         return 'Dashboard';
+      case 'registro':
+        return 'Registro de Clientes';
       case 'ajustes':
         return 'Ajustes';
       case 'administracion':
@@ -99,6 +102,7 @@ const App = () => {
         <main className="flex-1 p-8 overflow-y-auto">
           <div className="max-w-screen-xl mx-auto animate-fade-up">
             {activeModule === 'clientes' && <CustomerManagement />}
+            {activeModule === 'registro' && <CustomerOnboarding />}
             {activeModule === 'ordenes' && (
               <WorkOrders
                 openNewRequest={openNewRequest}
