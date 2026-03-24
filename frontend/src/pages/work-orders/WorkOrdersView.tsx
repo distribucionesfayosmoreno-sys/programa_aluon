@@ -2,6 +2,7 @@ import type { UseWorkOrdersResult } from './hooks/useWorkOrders';
 import { WorkOrdersTabs } from './components/WorkOrdersTabs';
 import { WorkOrdersBody } from './components/WorkOrdersBody';
 import { useWorkOrdersViewModel } from './hooks/useWorkOrdersViewModel';
+import { LegacyCutlistSection } from './sections/LegacyCutlistSection';
 
 export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
   const { dev, onOpenNewRequest } = useWorkOrdersViewModel(ctx);
@@ -24,6 +25,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         onOpenNewRequest={onOpenNewRequest}
       />
       <WorkOrdersBody ctx={ctx} dev={dev} />
+      <LegacyCutlistSection />
     </div>
   );
 };
