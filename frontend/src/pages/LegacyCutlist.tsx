@@ -15,7 +15,6 @@ const LegacyCutlist = () => (
     >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-2">
-          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300/80">Legacy</div>
           <h1 className="text-2xl sm:text-3xl font-black">Programa de despiece</h1>
           <p className="text-sm sm:text-base font-semibold text-slate-300/90 max-w-2xl">
             Módulo histórico integrado sin alterar su funcionamiento original, ahora dentro del nuevo panel.
