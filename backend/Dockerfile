@@ -5,6 +5,7 @@ COPY mvnw pom.xml ./
 # Ensure wrapper is executable in Linux image
 RUN chmod +x mvnw
 # Resolve dependencies to cache them
+RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline
 
 COPY src ./src

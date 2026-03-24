@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './pages/CustomerManagement';
+import Dashboard from './pages/Dashboard';
 import AdminManagement from './pages/AdminManagement';
 import WorkOrders from './pages/WorkOrders';
 
@@ -35,7 +36,7 @@ const App = () => {
         }}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div id="main-layout" className="flex-1 flex flex-col min-w-0 relative">
         {/* Topbar */}
         <header
           className="h-16 flex-shrink-0 flex items-center justify-between px-8 sticky top-0 z-30"
@@ -104,12 +105,7 @@ const App = () => {
                 onNewRequestHandled={() => setOpenNewRequest(false)}
               />
             )}
-            {activeModule === 'dashboard' && (
-              <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
-                <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Dashboard</h2>
-                <p className="text-xs mt-2" style={{ color: '#9ca3af' }}>Módulo en preparación.</p>
-              </div>
-            )}
+            {activeModule === 'dashboard' && <Dashboard />}
             {activeModule === 'ajustes' && (
               <div className="p-10 rounded-2xl" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
                 <h2 className="text-lg font-black uppercase" style={{ color: '#0d1117' }}>Ajustes</h2>

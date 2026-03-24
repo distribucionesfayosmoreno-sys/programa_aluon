@@ -1,0 +1,69 @@
+import { cardStyle, Field, FieldLabel, SectionTitle, StatusPill, uiColors } from '../components/ui';
+
+export const BudgetSection = ({
+  pricePerM2,
+  total,
+  canGenerateBudget,
+  budgetGenerated,
+  accountingApproved,
+  adminApproved,
+  validationError,
+  onGenerateBudget,
+  onToggleAccounting,
+}: {
+  pricePerM2: number;
+  total: number;
+  canGenerateBudget: boolean;
+  budgetGenerated: boolean;
+  accountingApproved: boolean;
+  adminApproved: boolean;
+  validationError: string;
+  onGenerateBudget: () => void;
+  onToggleAccounting: () => void;
+}) => (
+  <section className="p-6 rounded-2xl" style={cardStyle}>
+    <SectionTitle n="02" label="Presupuesto" />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <FieldLabel>Precio €/m²</FieldLabel>
+        <Field value={pricePerM2} readOnly />
+      </div>
+      <div>
+        <FieldLabel>Total estimado</FieldLabel>
+        <Field value={`${total} €`} readOnly />
+      </div>
+      <div className="flex items-end">
+        <button
+          type="button"
+          className="btn-primary w-full justify-center"
+          onClick={onGenerateBudget}
+          disabled={!canGenerateBudget}
+          style={{ opacity: canGenerateBudget ? 1 : 0.5, cursor: canGenerateBudget ? 'pointer' : 'not-allowed' }}
+        >
+          Generar presupuesto
+        </button>
+      </div>
+    </div>
+    <div className="flex items-center gap-2 mt-4">
+      <StatusPill label="Presupuesto generado" ok={budgetGenerated} />
+      <StatusPill label="Confirmado contabilidad" ok={accountingApproved} />
+      <StatusPill label="Validación ptos" ok={adminApproved} />
+    </div>
+    <div className="flex items-center gap-3 mt-4">
+      <button
+        type="button"
+        className="btn-ghost"
+        onClick={onToggleAccounting}
+        disabled={!budgetGenerated}
+        style={{ opacity: budgetGenerated ? 1 : 0.5, cursor: budgetGenerated ? 'pointer' : 'not-allowed' }}
+      >
+        Confirmar (Contabilidad)
+      </button>
+    </div>
+    {validationError && (
+      <div className="text-xs font-semibold mt-3" style={{ color: uiColors.dangerDark }}>
+        {validationError}
+      </div>
+    )}
+  </section>
+);

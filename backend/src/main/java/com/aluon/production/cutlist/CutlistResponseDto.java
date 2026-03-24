@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -15,14 +16,27 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CutlistResponseDto {
     private UUID id;
+    private String distributor;
+    private String budgetNumber;
+    private LocalDate budgetDate;
+    private String color;
+    private String installerName;
     private DoorType doorType;
     private DoorModel model;
     private Integer widthMm;
     private Integer heightMm;
+    private Integer heightLeftMm;
+    private Integer heightRightMm;
+    private Integer widthLeftMm;
+    private Integer widthRightMm;
     private Integer groundClearanceMm;
     private Integer largueroMm;
     private Boolean topFrame;
+    private HingesSide hingesSide;
+    private Boolean porterAutomatic;
+    private Boolean automationIncluded;
     private Boolean automationReinforcement;
+    private OpeningSide openingSide;
     private RailType railType;
     private MountingType mountingType;
     private Boolean tail;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Customer, DeliveryAddress } from '../hooks/useCustomers';
 
 interface Props {
@@ -69,10 +70,15 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
 
   const isEdit = Boolean(customer?.id);
 
-  return (
+  const portalTarget =
+    typeof document !== 'undefined' ? document.getElementById('main-layout') : null;
+
+  const content = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+      className="absolute inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
       style={{ background: 'rgba(13,17,23,0.70)', backdropFilter: 'blur(6px)' }}
+      role="dialog"
+      aria-modal="true"
     >
       <div className="absolute inset-0" onClick={onClose} />
 
@@ -103,17 +109,25 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
-            style={{ color: '#8b949e' }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-2">
+            <button type="submit" form="cm-form" className="btn-primary">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+              {isEdit ? 'Guardar cambios' : 'Crear cliente'}
+            </button>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
+              style={{ color: '#8b949e' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -294,6 +308,8 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
       </div>
     </div>
   );
+
+  return portalTarget ? createPortal(content, portalTarget) : content;
 };
 
 export default CustomerModal;
