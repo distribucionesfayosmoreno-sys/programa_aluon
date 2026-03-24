@@ -7,6 +7,7 @@ import AdminManagement from './pages/AdminManagement';
 import WorkOrders from './pages/WorkOrders';
 import RegistrationRequests from './pages/RegistrationRequests';
 import Settings from './pages/Settings';
+import LegacyCutlist from './pages/LegacyCutlist';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
@@ -43,6 +44,8 @@ const App = () => {
         return 'Órdenes de trabajo';
       case 'dashboard':
         return 'Dashboard';
+      case 'despiece':
+        return 'Despiece (Legacy)';
       case 'registro':
         return 'Registro de Clientes';
       case 'inscripciones':
@@ -151,6 +154,7 @@ const App = () => {
                 onNewRequestHandled={() => setOpenNewRequest(false)}
               />
             )}
+            {activeModule === 'despiece' && <LegacyCutlist />}
             {activeModule === 'dashboard' && <Dashboard />}
             {activeModule === 'ajustes' && <Settings />}
             {activeModule === 'administracion' && <AdminManagement />}
