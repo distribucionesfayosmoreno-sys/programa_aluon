@@ -103,6 +103,29 @@ const CustomerOnboarding = () => {
     }
   };
 
+  const refreshRegistrationStatus = async () => {
+    if (!registrationResponse) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const response = await fetch(`/api/registrations/${registrationResponse.registrationId}`);
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Error al consultar el estado');
+      }
+      const data: RegistrationResponse = await response.json();
+      setRegistrationResponse(data);
+      if (data.status === 'APROBADO') {
+        setStep('CONFIRMADO');
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al consultar el estado';
+      setError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const addItem = () => {
     if (!selectedModel || !selectedType) {
       setError('Selecciona un modelo y tipo de producto.');
@@ -123,7 +146,10 @@ const CustomerOnboarding = () => {
   };
 
   const finalizeQuote = async () => {
-    if (!registrationResponse) return;
+    if (!registrationResponse?.customerId) {
+      setError('Tu registro aún no está aprobado.');
+      return;
+    }
     if (items.length === 0) {
       setError('Añade al menos un producto antes de finalizar.');
       return;
@@ -314,19 +340,50 @@ const CustomerOnboarding = () => {
         </div>
       )}
 
-      {step === 'CONFIRMADO' && registrationResponse && (
+      {step === 'CONFIRMADO' && registrationResponse?.status === 'APROBADO' && (
         <div className="rounded-2xl p-6" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <h2 className="text-sm font-black uppercase" style={{ color: '#0d1117' }}>Registro confirmado</h2>
-              <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>
-                Tarifa asignada: <strong>{registrationResponse.tarifa || 'BASE'}</strong>
-              </p>
               <p className="text-xs" style={{ color: '#9ca3af' }}>Cliente: {registrationResponse.nombreComercial}</p>
             </div>
             <div className="flex gap-2">
               <button className="btn-primary" onClick={() => setStep('CATALOGO')}>Pedir presupuesto</button>
               <button className="btn-ghost" onClick={() => setError('Funcionalidad de gestión en preparación.')}>Gestionar pedido</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {step === 'CONFIRMADO' && registrationResponse?.status === 'PENDIENTE' && (
+        <div className="rounded-2xl p-6" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-sm font-black uppercase" style={{ color: '#0d1117' }}>Solicitud enviada</h2>
+              <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>
+                Estamos validando tu inscripción. Te avisaremos cuando esté aprobada.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button className="btn-primary" onClick={refreshRegistrationStatus} disabled={submitting}>
+                {submitting ? 'Consultando...' : 'Revisar estado'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {step === 'CONFIRMADO' && registrationResponse?.status === 'RECHAZADO' && (
+        <div className="rounded-2xl p-6" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h2 className="text-sm font-black uppercase" style={{ color: '#0d1117' }}>Inscripción rechazada</h2>
+              <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>
+                Contacta con nuestro equipo para revisar la solicitud.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button className="btn-ghost" onClick={() => setStep('REGISTRO')}>Enviar nueva solicitud</button>
             </div>
           </div>
         </div>

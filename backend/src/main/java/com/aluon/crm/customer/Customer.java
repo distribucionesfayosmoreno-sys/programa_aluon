@@ -71,6 +71,9 @@ public class Customer {
     @Column(name = "DIAS_VENCIMIENTO")
     private Integer diasVencimiento;
 
+    @Column(name = "AUTO_APPROVE_QUOTES", nullable = false)
+    private boolean autoApproveQuotes;
+
     @Column(name = "REMANENTE", precision = 19, scale = 4)
     private BigDecimal remanente;
 

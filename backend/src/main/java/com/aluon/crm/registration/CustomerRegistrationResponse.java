@@ -9,10 +9,11 @@ import java.util.UUID;
 @Getter
 @Builder
 public class CustomerRegistrationResponse {
+    private UUID registrationId;
     private UUID customerId;
     private String nombreComercial;
     private String email;
     private String telefonoWhatsapp;
-    private String tarifa;
-    private LocalDateTime confirmedAt;
+    private CustomerRegistrationStatus status;
+    private LocalDateTime createdAt;
 }

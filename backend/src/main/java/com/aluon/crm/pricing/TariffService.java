@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,5 +34,14 @@ public class TariffService {
         return tariffPriceRepository.findByTariffAndDoorModelAndDoorType(tariff, doorModel, doorType)
                 .map(TariffPrice::getPricePerM2)
                 .orElseThrow(() -> new IllegalArgumentException("No hay precio configurado para el modelo " + doorModel + " y tipo " + doorType));
+    }
+
+    public List<TariffDto> listTariffs() {
+        return tariffRepository.findAll().stream()
+                .map(tariff -> TariffDto.builder()
+                        .code(tariff.getCode())
+                        .label(tariff.getLabel())
+                        .build())
+                .toList();
     }
 }

@@ -19,12 +19,15 @@ export type RegistrationRequest = {
 };
 
 export type RegistrationResponse = {
-  customerId: string;
+  registrationId: string;
+  customerId?: string | null;
   nombreComercial: string;
   email: string;
   telefonoWhatsapp: string;
-  tarifa: string;
-  confirmedAt: string;
+  status: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
+  createdAt: string;
+  tariffCode?: string | null;
+  autoApproveQuotes?: boolean;
 };
 
 export type QuoteItemDraft = {

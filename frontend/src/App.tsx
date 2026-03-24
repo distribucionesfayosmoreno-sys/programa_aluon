@@ -5,6 +5,7 @@ import CustomerOnboarding from './pages/customer-onboarding/CustomerOnboarding';
 import Dashboard from './pages/Dashboard';
 import AdminManagement from './pages/AdminManagement';
 import WorkOrders from './pages/WorkOrders';
+import RegistrationRequests from './pages/RegistrationRequests';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
@@ -18,6 +19,8 @@ const App = () => {
         return 'Dashboard';
       case 'registro':
         return 'Registro de Clientes';
+      case 'inscripciones':
+        return 'Inscripciones Pendientes';
       case 'ajustes':
         return 'Ajustes';
       case 'administracion':
@@ -103,6 +106,7 @@ const App = () => {
           <div className="max-w-screen-xl mx-auto animate-fade-up">
             {activeModule === 'clientes' && <CustomerManagement />}
             {activeModule === 'registro' && <CustomerOnboarding />}
+            {activeModule === 'inscripciones' && <RegistrationRequests />}
             {activeModule === 'ordenes' && (
               <WorkOrders
                 openNewRequest={openNewRequest}

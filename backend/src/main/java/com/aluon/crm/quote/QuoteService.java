@@ -36,7 +36,7 @@ public class QuoteService {
 
         Tariff tariff = tariffService.getTariffByCode(customer.getTarifa());
 
-        QuoteValidationMode validationMode = tariff.isAutoApproval() ? QuoteValidationMode.AUTO : QuoteValidationMode.MANUAL;
+        QuoteValidationMode validationMode = customer.isAutoApproveQuotes() ? QuoteValidationMode.AUTO : QuoteValidationMode.MANUAL;
         QuoteChannel channel = request.getChannel() == null ? QuoteChannel.BOTH : request.getChannel();
 
         QuoteRequest quote = QuoteRequest.builder()
