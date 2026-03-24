@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,8 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnClass(JavaMailSender.class)
+@ConditionalOnBean(JavaMailSender.class)
 public class MailService {
 
     private static final Logger logger = LoggerFactory.getLogger(MailService.class);

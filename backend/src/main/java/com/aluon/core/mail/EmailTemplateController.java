@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -13,7 +14,7 @@ import java.util.UUID;
 public class EmailTemplateController {
 
     private final EmailTemplateService service;
-    private final MailService mailService;
+    private final Optional<MailService> mailService;
 
     @GetMapping
     public List<EmailTemplateDto> getAll() {
@@ -49,11 +50,12 @@ public class EmailTemplateController {
         if (request.getTemplateKey() == null || request.getTemplateKey().isBlank()) {
             throw new IllegalArgumentException("La clave de plantilla es obligatoria");
         }
+        MailService service = mailService.orElseThrow(() -> new IllegalStateException("Servicio de email no configurado"));
         java.util.Map<String, String> variables = new java.util.HashMap<>();
         variables.put("nombreComercial", request.getNombreComercial());
         variables.put("email", request.getEmail());
         variables.put("telefono", request.getTelefono());
-        mailService.sendTemplate(request.getTemplateKey(), request.getTo(), variables);
+        service.sendTemplate(request.getTemplateKey(), request.getTo(), variables);
         return ResponseEntity.noContent().build();
     }
 }

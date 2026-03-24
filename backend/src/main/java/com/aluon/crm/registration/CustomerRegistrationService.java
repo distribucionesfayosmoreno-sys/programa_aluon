@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -21,7 +22,7 @@ public class CustomerRegistrationService {
     private final CustomerRegistrationRepository registrationRepository;
     private final CustomerRepository customerRepository;
     private final TariffService tariffService;
-    private final MailService mailService;
+    private final Optional<MailService> mailService;
 
     @Transactional
     public CustomerRegistrationResponse register(CustomerRegistrationRequest request) {
@@ -45,7 +46,7 @@ public class CustomerRegistrationService {
 
         CustomerRegistration saved = registrationRepository.save(registration);
 
-        mailService.sendTemplate(
+        mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_REGISTRATION_CONFIRMATION,
                 saved.getEmail(),
                 Map.of(
@@ -53,7 +54,7 @@ public class CustomerRegistrationService {
                         "email", saved.getEmail(),
                         "telefono", saved.getTelefonoWhatsapp()
                 )
-        );
+        ));
 
         return CustomerRegistrationResponse.builder()
                 .registrationId(saved.getId())
@@ -134,7 +135,7 @@ public class CustomerRegistrationService {
 
         registrationRepository.save(registration);
 
-        mailService.sendTemplate(
+        mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_REGISTRATION_APPROVED,
                 registration.getEmail(),
                 Map.of(
@@ -142,7 +143,7 @@ public class CustomerRegistrationService {
                         "email", registration.getEmail(),
                         "telefono", registration.getTelefonoWhatsapp()
                 )
-        );
+        ));
 
         return toDto(registration);
     }
