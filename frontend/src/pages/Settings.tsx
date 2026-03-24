@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type FC } from 'react';
 import type { EmailSignature, EmailSignatureForm, EmailTemplate } from './settings/models';
 
 const DEFAULT_FORM: EmailSignatureForm = {
@@ -14,7 +14,7 @@ const DEFAULT_FORM: EmailSignatureForm = {
 
 type SettingsTab = 'signatures' | 'templates';
 
-const Settings = () => {
+const Settings: FC = () => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('signatures');
   const [signatures, setSignatures] = useState<EmailSignature[]>([]);
   const [loading, setLoading] = useState(false);
@@ -74,11 +74,14 @@ const Settings = () => {
     fetchTemplates();
   }, []);
 
-  const handleInputChange = (field: keyof EmailSignatureForm) => (event: ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [field]: event.target.value }));
-  };
+  const handleInputChange = useCallback(
+    (field: keyof EmailSignatureForm) => (event: ChangeEvent<HTMLInputElement>) => {
+      setForm(prev => ({ ...prev, [field]: event.target.value }));
+    },
+    [],
+  );
 
-  const handleSubmit = async (event: FormEvent) => {
+  const handleSubmit = useCallback(async (event: FormEvent) => {
     event.preventDefault();
     setStatusMessage(null);
 
@@ -111,9 +114,9 @@ const Settings = () => {
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : 'Error al generar firma');
     }
-  };
+  }, [form]);
 
-  const handleCopyHtml = async () => {
+  const handleCopyHtml = useCallback(async () => {
     if (!selectedSignature?.html) return;
     try {
       await navigator.clipboard.writeText(selectedSignature.html);
@@ -121,20 +124,23 @@ const Settings = () => {
     } catch {
       setStatusMessage('No se pudo copiar el HTML.');
     }
-  };
+  }, [selectedSignature]);
 
-  const handleUseSignature = (signature: EmailSignature) => {
+  const handleUseSignature = useCallback((signature: EmailSignature) => {
     setSelectedSignature(signature);
-  };
+  }, []);
 
-  const handleTemplateSelect = (event: ChangeEvent<HTMLSelectElement>) => {
-    const selected = templates.find(template => template.id === event.target.value) ?? null;
-    setSelectedTemplate(selected);
-    setTemplateSubject(selected?.subject ?? '');
-    setTemplateBody(selected?.bodyHtml ?? '');
-  };
+  const handleTemplateSelect = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      const selected = templates.find(template => template.id === event.target.value) ?? null;
+      setSelectedTemplate(selected);
+      setTemplateSubject(selected?.subject ?? '');
+      setTemplateBody(selected?.bodyHtml ?? '');
+    },
+    [templates],
+  );
 
-  const handleTemplateSave = async () => {
+  const handleTemplateSave = useCallback(async () => {
     if (!selectedTemplate) return;
     try {
       const response = await fetch(`/api/settings/email-templates/${selectedTemplate.id}`, {
@@ -156,9 +162,9 @@ const Settings = () => {
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : 'Error al guardar plantilla');
     }
-  };
+  }, [selectedTemplate, templateBody, templateSubject]);
 
-  const handleSendTest = async () => {
+  const handleSendTest = useCallback(async () => {
     if (!selectedTemplate) return;
     try {
       const response = await fetch('/api/settings/email-templates/test', {
@@ -179,7 +185,34 @@ const Settings = () => {
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : 'Error al enviar prueba');
     }
-  };
+  }, [selectedTemplate, testEmail, testNombre, testTelefono]);
+
+  const moduleCards = useMemo(() => ([
+    {
+      key: 'signatures' as const,
+      title: 'Firmas de email',
+      description: 'Genera firmas HTML con logo corporativo y datos de contacto.',
+      accent: '#e5534b',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 7h18M5 7V5a2 2 0 012-2h10a2 2 0 012 2v2M5 7v12a2 2 0 002 2h10a2 2 0 002-2V7" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7 11h10M7 15h6" />
+        </svg>
+      ),
+    },
+    {
+      key: 'templates' as const,
+      title: 'Plantillas de email',
+      description: 'Personaliza asuntos y contenidos para inscripción y validación.',
+      accent: '#2563eb',
+      icon: (
+        <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16v12H4z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 7l8 6 8-6" />
+        </svg>
+      ),
+    },
+  ]), []);
 
   return (
     <div className="flex flex-col gap-6" style={{ minHeight: 540 }}>
@@ -195,29 +228,41 @@ const Settings = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
-        <aside
-          className="rounded-2xl p-4"
-          style={{ border: '1px solid #e5e7eb', background: '#fff', height: 'fit-content' }}
-        >
-          <div className="text-xs font-bold uppercase tracking-widest" style={{ color: '#9ca3af' }}>
-            Menú de ajustes
-          </div>
-          <button
-            className={`nav-item mt-3 ${activeTab === 'signatures' ? 'nav-item-active' : ''}`}
-            onClick={() => setActiveTab('signatures')}
-            type="button"
-          >
-            Firmas de email
-          </button>
-          <button
-            className={`nav-item mt-2 ${activeTab === 'templates' ? 'nav-item-active' : ''}`}
-            onClick={() => setActiveTab('templates')}
-            type="button"
-          >
-            Plantillas de email
-          </button>
-        </aside>
+      <div className="space-y-6">
+        <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {moduleCards.map(card => (
+            <button
+              key={card.key}
+              type="button"
+              onClick={() => setActiveTab(card.key)}
+              className="text-left rounded-2xl p-6 transition-all duration-150"
+              style={{
+                background: '#ffffff',
+                border: activeTab === card.key ? `1px solid ${card.accent}40` : '1px solid #e5e7eb',
+                boxShadow: activeTab === card.key ? `0 18px 35px -25px ${card.accent}` : '0 8px 20px -18px rgba(15,23,42,0.3)',
+              }}
+            >
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{ border: '1px solid #eef2f7', color: card.accent, background: '#f9fafb' }}
+              >
+                {card.icon}
+              </div>
+              <div className="mt-5 text-sm font-black uppercase" style={{ color: '#0d1117' }}>
+                {card.title}
+              </div>
+              <p className="text-xs mt-2" style={{ color: '#6b7280' }}>
+                {card.description}
+              </p>
+              <div className="mt-4 text-[10px] font-bold uppercase tracking-widest" style={{ color: '#9ca3af' }}>
+                Configurar módulo
+              </div>
+              <div className="mt-2 h-1 rounded-full" style={{ background: `${card.accent}22` }}>
+                <div className="h-1 rounded-full" style={{ width: activeTab === card.key ? '40%' : '18%', background: card.accent }} />
+              </div>
+            </button>
+          ))}
+        </section>
 
         <section
           className="rounded-2xl p-6 space-y-6"
