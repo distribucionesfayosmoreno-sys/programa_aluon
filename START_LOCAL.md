@@ -52,3 +52,9 @@ ssh root@192.168.99.14 "cd /opt/aluon && docker compose --env-file infra/.env.de
 cd /c/proyectos/PROGRAMA-ALUON
 bash ./scripts/deploy-dev2.sh -Pull
 ```
+
+### Fast deploy (cache build)
+```bash
+cd /c/proyectos/PROGRAMA-ALUON
+bash ./scripts/deploy-dev2-fast.sh
+```

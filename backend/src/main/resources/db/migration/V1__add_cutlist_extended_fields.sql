@@ -1,3 +1,35 @@
+-- Ensure base table exists before applying alterations
+CREATE TABLE IF NOT EXISTS cutlists (
+  id UUID PRIMARY KEY,
+  tenant_id UUID NOT NULL,
+  door_type VARCHAR(20) NOT NULL,
+  door_model VARCHAR(20) NOT NULL,
+  width_mm INTEGER NOT NULL,
+  height_mm INTEGER NOT NULL,
+  distributor VARCHAR(120),
+  budget_number VARCHAR(50),
+  budget_date DATE,
+  color VARCHAR(80),
+  installer_name VARCHAR(120),
+  ground_clearance_mm INTEGER,
+  height_left_mm INTEGER,
+  height_right_mm INTEGER,
+  width_left_mm INTEGER,
+  width_right_mm INTEGER,
+  larguero_mm INTEGER,
+  top_frame BOOLEAN,
+  hinges_side VARCHAR(10),
+  porter_automatic BOOLEAN,
+  automation_included BOOLEAN,
+  automation_reinforcement BOOLEAN,
+  opening_side VARCHAR(10),
+  rail_type VARCHAR(20),
+  mounting_type VARCHAR(20),
+  tail BOOLEAN,
+  notes TEXT,
+  created_at TIMESTAMP NOT NULL
+);
+
 ALTER TABLE cutlists
   ADD COLUMN IF NOT EXISTS distributor VARCHAR(120),
   ADD COLUMN IF NOT EXISTS budget_number VARCHAR(50),
