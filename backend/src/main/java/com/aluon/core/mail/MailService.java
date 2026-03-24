@@ -6,9 +6,8 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -18,13 +17,11 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-@ConditionalOnClass(JavaMailSender.class)
-@ConditionalOnBean(JavaMailSender.class)
 public class MailService {
 
     private static final Logger logger = LoggerFactory.getLogger(MailService.class);
 
-    private final JavaMailSender mailSender;
+    private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final EmailTemplateService templateService;
     private final EmailSignatureService signatureService;
 
@@ -37,6 +34,12 @@ public class MailService {
         String signatureHtml = signatureService.findLatestHtml();
         String subject = applyVariables(template.getSubject(), variables, signatureHtml);
         String bodyHtml = applyVariables(template.getBodyHtml(), variables, signatureHtml);
+
+        JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
+        if (mailSender == null) {
+            logger.warn("JavaMailSender no configurado. No se enviará email a {}.", to);
+            return;
+        }
 
         try {
             MimeMessage message = mailSender.createMimeMessage();
