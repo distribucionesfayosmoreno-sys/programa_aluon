@@ -37,7 +37,7 @@ export const CutlistTable = ({ cutlist, actions }: CutlistTableProps) => {
                   onMouseLeave={() => actions.onCutlistHoverChange(null)}
                   onClick={() => actions.onCutlistPinnedChange(cutlist.cutlistPinnedIndex === idx ? null : idx)}
                   style={{
-                    background: cutlist.activeCutlistIndex === idx ? 'rgba(229,83,75,0.08)' : '#ffffff',
+                    background: cutlist.activeCutlistIndex === idx ? 'var(--accent-shadow-soft-2)' : '#ffffff',
                     cursor: 'pointer',
                   }}
                 >

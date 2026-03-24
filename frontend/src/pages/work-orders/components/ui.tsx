@@ -7,7 +7,7 @@ export const cardStyle = {
 } as const;
 
 export const uiColors = {
-  accent: '#e5534b',
+  accent: 'var(--accent)',
   border: '#e8eaed',
   borderLight: '#e5e7eb',
   surfaceDark: '#0d1117',
@@ -17,8 +17,8 @@ export const uiColors = {
   textGhost: '#9ca3af',
   textOnDark: '#e5e7eb',
   success: '#15803d',
-  danger: '#dc2626',
-  dangerDark: '#b42318',
+  danger: 'var(--danger)',
+  dangerDark: 'var(--danger-dark)',
 } as const;
 
 export const SectionTitle = ({ n, label }: { n: string; label: string }) => (

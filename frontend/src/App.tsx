@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './pages/CustomerManagement';
 import CustomerOnboarding from './pages/customer-onboarding/CustomerOnboarding';
@@ -10,6 +10,31 @@ import RegistrationRequests from './pages/RegistrationRequests';
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
   const [openNewRequest, setOpenNewRequest] = useState(false);
+  const [theme, setTheme] = useState<'red' | 'blue'>('red');
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('aluon-theme');
+      if (stored === 'red' || stored === 'blue') {
+        setTheme(stored);
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  useEffect(() => {
+    if (theme === 'blue') {
+      document.documentElement.setAttribute('data-theme', 'blue');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    try {
+      window.localStorage.setItem('aluon-theme', theme);
+    } catch {
+      // ignore storage errors
+    }
+  }, [theme]);
 
   const breadcrumb = useMemo(() => {
     switch (activeModule) {
@@ -57,6 +82,18 @@ const App = () => {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          <label className="theme-toggle" title="Cambiar tema">
+            <input
+              type="checkbox"
+              checked={theme === 'blue'}
+              onChange={event => setTheme(event.target.checked ? 'blue' : 'red')}
+              aria-label={theme === 'blue' ? 'Cambiar a tema rojo' : 'Cambiar a tema azul'}
+            />
+            <span className="theme-toggle-track">
+              <span className="theme-toggle-thumb" />
+            </span>
+            <span>Azul</span>
+          </label>
           <button
             aria-label="Notificaciones"
             className="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
@@ -86,7 +123,7 @@ const App = () => {
           >
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-black"
-              style={{ backgroundColor: '#e5534b', boxShadow: '0 2px 8px rgba(229,83,75,0.30)' }}
+              style={{ backgroundColor: 'var(--accent)', boxShadow: '0 2px 8px var(--accent-shadow-soft)' }}
             >
               RA
             </div>

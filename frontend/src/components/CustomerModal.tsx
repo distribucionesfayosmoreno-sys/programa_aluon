@@ -32,7 +32,7 @@ const FI = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
 
 const SectionTitle = ({ n, label }: { n: string; label: string }) => (
   <div className="flex items-center gap-3 mb-5">
-    <span style={{ fontSize: 9, fontWeight: 900, color: '#e5534b', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
+    <span style={{ fontSize: 9, fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
       {n} · {label}
     </span>
     <div className="flex-1 h-px" style={{ backgroundColor: '#e8eaed' }} />
@@ -94,9 +94,9 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
           <div className="flex items-center gap-3.5">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(229,83,75,0.15)' }}
+              style={{ background: 'var(--accent-shadow-light)' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#e5534b' }}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--accent)' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
@@ -140,8 +140,8 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
               className="flex items-center gap-2 px-6 py-3.5 cursor-pointer transition-all duration-200"
               style={{
                 fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.07em',
-                borderBottom: `2px solid ${tab === t ? '#e5534b' : 'transparent'}`,
-                color: tab === t ? '#e5534b' : '#8b949e',
+                borderBottom: `2px solid ${tab === t ? 'var(--accent)' : 'transparent'}`,
+                color: tab === t ? 'var(--accent)' : '#8b949e',
                 background: tab === t ? '#ffffff' : 'transparent',
               }}
             >
@@ -149,7 +149,7 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
               {t === 'ADDRESSES' && (
                 <span style={{
                   fontSize: 9, fontWeight: 900, padding: '2px 6px', borderRadius: 4,
-                  background: tab === 'ADDRESSES' ? '#e5534b' : '#e8eaed',
+                  background: tab === 'ADDRESSES' ? 'var(--accent)' : '#e8eaed',
                   color: tab === 'ADDRESSES' ? '#fff' : '#8b949e'
                 }}>
                   {form.direccionesEntrega.length}
@@ -250,7 +250,7 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
                       key={i}
                       className="flex items-center justify-between gap-4 px-5 py-4 rounded-xl group transition-colors duration-200 cursor-default"
                       style={{ background: '#ffffff', border: '1px solid #e8eaed' }}
-                      onMouseEnter={e => (e.currentTarget.style.borderColor = '#c7392f')}
+                      onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--accent-dark)')}
                       onMouseLeave={e => (e.currentTarget.style.borderColor = '#e8eaed')}
                     >
                       <div className="flex items-center gap-3">
@@ -274,7 +274,7 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
                         onClick={() => removeAddr(i)}
                         className="w-7 h-7 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 cursor-pointer transition-all duration-200"
                         style={{ color: '#8b949e' }}
-                        onMouseEnter={e => { e.currentTarget.style.color = '#dc2626'; e.currentTarget.style.backgroundColor = '#fef2f2'; }}
+                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.backgroundColor = 'var(--danger-bg)'; }}
                         onMouseLeave={e => { e.currentTarget.style.color = '#8b949e'; e.currentTarget.style.backgroundColor = 'transparent'; }}
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

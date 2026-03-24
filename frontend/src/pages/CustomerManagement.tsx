@@ -175,7 +175,7 @@ const CustomerManagement: React.FC = () => {
           {selected.size > 0 && (
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold"
-              style={{ background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }}
+              style={{ background: 'var(--notice-bg)', color: 'var(--notice-text)', border: '1px solid var(--notice-border)' }}
             >
               {selected.size} seleccionado{selected.size > 1 ? 's' : ''}
               <button
@@ -222,7 +222,7 @@ const CustomerManagement: React.FC = () => {
                     checked={allSelected}
                     onChange={toggleAll}
                     className="rounded cursor-pointer"
-                    style={{ accentColor: '#e5534b', width: 14, height: 14 }}
+                    style={{ accentColor: 'var(--accent)', width: 14, height: 14 }}
                   />
                 </th>
                 <TH label="Nombre" />
@@ -253,11 +253,11 @@ const CustomerManagement: React.FC = () => {
                         className="group transition-colors duration-100"
                         style={{
                           borderBottom: '1px solid #f3f4f6',
-                          background: isChecked ? '#fff7f7' : 'transparent',
+                          background: isChecked ? 'var(--accent-soft)' : 'transparent',
                           cursor: 'default',
                         }}
                         onMouseEnter={e => { if (!isChecked) e.currentTarget.style.background = '#f9fafb'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = isChecked ? '#fff7f7' : 'transparent'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = isChecked ? 'var(--accent-soft)' : 'transparent'; }}
                       >
                         {/* Checkbox */}
                         <td className="px-3 py-2">
@@ -266,7 +266,7 @@ const CustomerManagement: React.FC = () => {
                             checked={isChecked}
                             onChange={() => toggleRow(id)}
                             className="rounded cursor-pointer"
-                            style={{ accentColor: '#e5534b', width: 14, height: 14 }}
+                            style={{ accentColor: 'var(--accent)', width: 14, height: 14 }}
                           />
                         </td>
 
@@ -274,7 +274,7 @@ const CustomerManagement: React.FC = () => {
                         <td className="px-3 py-2.5">
                           <div className="flex items-center gap-2">
                             {isChecked && (
-                              <div className="w-0.5 h-4 rounded-full flex-shrink-0" style={{ background: '#e5534b' }} />
+                              <div className="w-0.5 h-4 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
                             )}
                             <span
                               className="font-semibold hover:text-brand cursor-pointer transition-colors"
@@ -342,7 +342,7 @@ const CustomerManagement: React.FC = () => {
                               title="Editar"
                               className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer"
                               style={{ color: '#9ca3af' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = '#e5534b'; }}
+                              onMouseEnter={e => { e.currentTarget.style.background = '#f3f4f6'; e.currentTarget.style.color = 'var(--accent)'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9ca3af'; }}
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,7 +354,7 @@ const CustomerManagement: React.FC = () => {
                               title="Eliminar"
                               className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer"
                               style={{ color: '#9ca3af' }}
-                              onMouseEnter={e => { e.currentTarget.style.background = '#fef2f2'; e.currentTarget.style.color = '#dc2626'; }}
+                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--danger-bg)'; e.currentTarget.style.color = 'var(--danger)'; }}
                               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#9ca3af'; }}
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -381,7 +381,7 @@ const CustomerManagement: React.FC = () => {
               <strong style={{ color: '#111827' }}>{customers.length}</strong> clientes
             </span>
             {selected.size > 0 && (
-              <span style={{ color: '#e5534b', fontWeight: 700 }}>
+              <span style={{ color: 'var(--accent)', fontWeight: 700 }}>
                 {selected.size} seleccionado{selected.size > 1 ? 's' : ''}
               </span>
             )}
@@ -400,7 +400,7 @@ const CustomerManagement: React.FC = () => {
               <button className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white border border-transparent hover:border-gray-200 transition-all" style={{ color: '#9ca3af' }}>
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <span className="px-2 py-1 rounded text-xs font-bold" style={{ background: '#e5534b', color: '#fff', minWidth: 24, textAlign: 'center' }}>1</span>
+              <span className="px-2 py-1 rounded text-xs font-bold" style={{ background: 'var(--accent)', color: '#fff', minWidth: 24, textAlign: 'center' }}>1</span>
               <button className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-white border border-transparent hover:border-gray-200 transition-all" style={{ color: '#9ca3af' }}>
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
               </button>

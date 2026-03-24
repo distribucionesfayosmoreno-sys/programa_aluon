@@ -39,7 +39,7 @@ export const WorkOrderModal = ({
           <div className="flex items-center gap-3.5">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(229,83,75,0.15)' }}
+              style={{ background: 'var(--accent-shadow-light)' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: uiColors.accent }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 6h9M9 12h9M9 18h9M5 6h.01M5 12h.01M5 18h.01" />

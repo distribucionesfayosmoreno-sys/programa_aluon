@@ -20,7 +20,7 @@ export const WorkOrdersTabs = ({ steps, activeTab, onTabChange, onOpenNewRequest
         className="flex items-center gap-2 px-3 py-2 rounded-xl whitespace-nowrap"
         style={{
           border: `1px solid ${activeTab === step.key ? uiColors.accent : uiColors.border}`,
-          background: activeTab === step.key ? '#fff7f7' : '#ffffff',
+          background: activeTab === step.key ? 'var(--accent-soft)' : '#ffffff',
         }}
       >
         <span

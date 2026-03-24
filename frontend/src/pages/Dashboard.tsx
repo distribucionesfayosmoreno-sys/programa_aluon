@@ -6,8 +6,8 @@ import { useDashboardAlerts } from './dashboard/hooks/useDashboardAlerts';
 const toneStyles: Record<'neutral' | 'success' | 'warning' | 'danger', { bg: string; text: string; pill: string }> = {
   neutral: { bg: '#f8f9fb', text: '#0d1117', pill: '#e8eaed' },
   success: { bg: '#ecfdf3', text: '#0f5132', pill: '#b7ebc6' },
-  warning: { bg: '#fff6e5', text: '#8a5b13', pill: '#f6d7a7' },
-  danger: { bg: '#fff1f2', text: '#991b1b', pill: '#fecdd3' },
+  warning: { bg: 'var(--notice-bg)', text: 'var(--notice-text)', pill: 'var(--notice-border)' },
+  danger: { bg: 'var(--danger-bg)', text: 'var(--danger-text)', pill: 'var(--danger-pill)' },
 };
 
 const Dashboard: FC = () => {
@@ -23,7 +23,7 @@ const Dashboard: FC = () => {
       <header
         className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-5 rounded-2xl border"
         style={{
-          background: 'linear-gradient(135deg, rgba(229,83,75,0.08), rgba(248,249,251,0.9))',
+          background: 'linear-gradient(135deg, var(--accent-shadow-soft-2), rgba(248,249,251,0.9))',
           borderColor: '#e8eaed',
         }}
       >
@@ -38,7 +38,7 @@ const Dashboard: FC = () => {
         <div className="flex items-center gap-3">
           <span
             className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full"
-            style={{ backgroundColor: status === 'error' ? '#fecdd3' : '#e8eaed', color: '#57606a' }}
+            style={{ backgroundColor: status === 'error' ? 'var(--danger-pill)' : '#e8eaed', color: '#57606a' }}
           >
             {status === 'error' ? 'Offline' : 'Live'}
           </span>
@@ -109,7 +109,7 @@ const Dashboard: FC = () => {
               <li
                 key={alert.title}
                 className="p-3 rounded-xl"
-                style={{ backgroundColor: alert.tone === 'danger' ? '#fff1f2' : '#f8f9fb' }}
+                style={{ backgroundColor: alert.tone === 'danger' ? 'var(--danger-bg)' : '#f8f9fb' }}
               >
                 <div className="text-xs font-black uppercase" style={{ color: '#0d1117' }}>{alert.title}</div>
                 <div className="text-xs mt-1" style={{ color: '#8b949e' }}>{alert.detail}</div>

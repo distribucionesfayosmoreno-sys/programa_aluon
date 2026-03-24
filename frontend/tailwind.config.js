@@ -10,8 +10,8 @@ export default {
         sans:    ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        brand:     '#e5534b',
-        brandDark: '#c7392f',
+        brand:     'var(--accent)',
+        brandDark: 'var(--accent-dark)',
       },
       animation: {
         'fade-up': 'fadeUp 0.35s ease-out both',

@@ -215,7 +215,7 @@ const CustomerOnboarding = () => {
       </div>
 
       {error && (
-        <div className="px-4 py-3 rounded-xl text-xs font-bold" style={{ background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa' }}>
+        <div className="px-4 py-3 rounded-xl text-xs font-bold" style={{ background: 'var(--notice-bg)', color: 'var(--notice-text)', border: '1px solid var(--notice-border)' }}>
           {error}
         </div>
       )}

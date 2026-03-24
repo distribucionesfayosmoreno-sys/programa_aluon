@@ -4,12 +4,12 @@ import { MODELS, WORKFLOW_STEP_LABELS } from '../constants';
 import { cardStyle, SectionTitle, uiColors } from '../components/ui';
 
 const statusStyles: Record<string, { background: string; color: string; border: string }> = {
-  INBOX: { background: '#fff1f0', color: uiColors.accent, border: '#ffc9c5' },
-  REQUEST: { background: '#fff7ed', color: '#c2410c', border: '#fed7aa' },
+  INBOX: { background: 'var(--accent-soft-2)', color: uiColors.accent, border: 'var(--accent-border)' },
+  REQUEST: { background: 'var(--accent-soft-2)', color: 'var(--accent-dark)', border: 'var(--accent-border)' },
   BUDGET: { background: '#fefce8', color: '#a16207', border: '#fde68a' },
   VALIDATION: { background: '#ecfdf3', color: uiColors.success, border: '#bbf7d0' },
   DEV: { background: '#f3f4f6', color: uiColors.textMuted, border: uiColors.borderLight },
-  PROD: { background: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
+  PROD: { background: 'var(--accent-soft-2)', color: 'var(--accent-dark)', border: 'var(--accent-border)' },
   FINAL: { background: '#ecfeff', color: '#0e7490', border: '#a5f3fc' },
 };
 
@@ -131,8 +131,14 @@ export const InboxSection = ({
                   key={req.id}
                   className={[
                     'grid grid-cols-[0.9fr_1.6fr_1fr_1fr_0.8fr_1.1fr_1.4fr_0.9fr_auto] items-center gap-3 px-4 py-3 text-xs transition-colors cursor-pointer hover:bg-[#f8f9fb]',
-                    active ? 'bg-[#fff7f7] shadow-[inset_0_0_0_1px_rgba(229,83,75,0.35)] border-l-4 border-[#e5534b] pl-3' : 'bg-white',
+                    active ? 'bg-white' : 'bg-white',
                   ].join(' ')}
+                  style={{
+                    background: active ? 'var(--accent-soft)' : '#ffffff',
+                    boxShadow: active ? 'inset 0 0 0 1px var(--accent-shadow-strong)' : 'none',
+                    borderLeft: active ? '4px solid var(--accent)' : '4px solid transparent',
+                    paddingLeft: active ? '0.75rem' : undefined,
+                  }}
                   onClick={() => {
                     const el = document.activeElement;
                     if (el instanceof HTMLElement) {
@@ -194,7 +200,7 @@ export const InboxSection = ({
                       style={{
                         color: uiColors.textPrimary,
                         borderColor: active ? uiColors.accent : uiColors.border,
-                        background: active ? '#fff1f0' : '#f9fafb',
+                        background: active ? 'var(--accent-soft-2)' : '#f9fafb',
                       }}
                       onClick={event => {
                         event.stopPropagation();

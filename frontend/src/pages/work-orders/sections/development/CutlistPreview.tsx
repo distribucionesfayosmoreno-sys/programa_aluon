@@ -55,7 +55,7 @@ export const CutlistPreview = ({ form, cutlist, status, actions }: CutlistPrevie
               className="rounded-xl px-4 py-3 text-xs font-semibold"
               style={{ background: 'rgba(17,24,39,0.85)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.2)' }}
             >
-              <div className="text-[10px] uppercase tracking-widest" style={{ color: '#fca5a5' }}>
+              <div className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
                 Pieza seleccionada
               </div>
               <div className="mt-1 font-bold">
@@ -96,9 +96,9 @@ export const CutlistPreview = ({ form, cutlist, status, actions }: CutlistPrevie
               onClick={() => actions.onCutlistImageChange(index)}
               className="w-full flex items-center gap-3 rounded-xl border p-2 text-left transition"
               style={{
-                background: active ? 'rgba(229,83,75,0.08)' : '#ffffff',
+                background: active ? 'var(--accent-shadow-soft-2)' : '#ffffff',
                 borderColor: active ? uiColors.accent : uiColors.borderLight,
-                boxShadow: active ? '0 6px 18px rgba(229,83,75,0.15)' : 'none',
+                boxShadow: active ? '0 6px 18px var(--accent-shadow-light)' : 'none',
               }}
             >
               <img src={image.src} alt={image.alt} className="w-16 h-16 rounded-lg object-cover border" style={{ borderColor: uiColors.borderLight }} />
