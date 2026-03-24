@@ -145,12 +145,12 @@ public class EmailSignatureService {
                 .append("      <img src=\"").append(escapeHtml(logo)).append("\" alt=\"ALUON\" width=\"120\" style=\"display:block;max-width:120px;\"/>\n")
                 .append("    </td>\n")
                 .append("    <td style=\"border-left:2px solid ").append(escapeHtml(accent)).append(";padding-left:16px;vertical-align:top;\">\n")
-                .append("      <div style=\"font-size:14px;font-weight:700;color:#0d1117;\">\")
+                .append("      <div style=\"font-size:14px;font-weight:700;color:#0d1117;\">")
                 .append(escapeHtml(signature.getFullName()))
                 .append("</div>\n");
 
         if (hasText(signature.getRole())) {
-            html.append("      <div style=\"font-size:12px;color:#57606a;margin-top:2px;\">\")
+            html.append("      <div style=\"font-size:12px;color:#57606a;margin-top:2px;\">")
                     .append(escapeHtml(signature.getRole()))
                     .append("</div>\n");
         }
