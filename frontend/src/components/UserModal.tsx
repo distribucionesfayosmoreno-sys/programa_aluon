@@ -93,7 +93,7 @@ const UserModal: React.FC<Props> = ({ user, roles, contractTypes, onClose, onSav
             </div>
             <div>
               <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {isEdit ? 'Editar usuario' : 'Nuevo usuario'}
+                {isEdit ? 'Editar usuario' : 'Nuevo empleado'}
               </h2>
               <p style={{ fontSize: 10, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
                 {isEdit ? [form.nombre, form.apellidos].filter(Boolean).join(' ') : 'Completa los datos del usuario'}
