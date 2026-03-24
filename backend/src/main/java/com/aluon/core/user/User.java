@@ -2,7 +2,9 @@ package com.aluon.core.user;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.TenantId;
+import org.hibernate.type.SqlTypes;
 import java.util.UUID;
 
 @Entity
@@ -52,7 +54,7 @@ public class User {
     @Column(name = "tipo_contrato", nullable = false)
     private ContractType tipoContrato;
 
-    @Lob
-    @Column
+    @JdbcTypeCode(SqlTypes.BINARY)
+    @Column(columnDefinition = "bytea")
     private byte[] foto;
 }
