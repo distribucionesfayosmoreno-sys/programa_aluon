@@ -62,6 +62,9 @@ const UserModal: React.FC<Props> = ({ user, roles, contractTypes, onClose, onSav
   };
 
   const isEdit = Boolean(user?.id);
+  const displayName = [form.nombre, form.apellidos].filter(Boolean).join(' ') || 'Nuevo empleado';
+  const roleLabel = (form.role || 'Empleado').toString();
+  const avatarSrc = form.fotoBase64 ? `data:image/*;base64,${form.fotoBase64}` : null;
   const portalTarget =
     typeof document !== 'undefined' ? document.getElementById('main-layout') : null;
 
@@ -80,7 +83,7 @@ const UserModal: React.FC<Props> = ({ user, roles, contractTypes, onClose, onSav
       >
         <div
           className="flex items-center justify-between px-7 py-5"
-          style={{ background: '#0d1117', borderBottom: '1px solid #21262d' }}
+          style={{ background: 'linear-gradient(135deg, var(--accent-shadow-soft-2), #ffffff 65%)', borderBottom: '1px solid #e8eaed' }}
         >
           <div className="flex items-center gap-3.5">
             <div
@@ -92,11 +95,19 @@ const UserModal: React.FC<Props> = ({ user, roles, contractTypes, onClose, onSav
               </svg>
             </div>
             <div>
-              <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {isEdit ? 'Editar usuario' : 'Nuevo empleado'}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 style={{ fontSize: 13, fontWeight: 900, color: '#0d1117', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {isEdit ? 'Editar usuario' : 'Nuevo empleado'}
+                </h2>
+                <span
+                  className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest"
+                  style={{ background: 'var(--accent-soft-2)', color: 'var(--accent)', border: '1px solid var(--accent-border)' }}
+                >
+                  {roleLabel}
+                </span>
+              </div>
               <p style={{ fontSize: 10, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
-                {isEdit ? [form.nombre, form.apellidos].filter(Boolean).join(' ') : 'Completa los datos del usuario'}
+                {isEdit ? displayName : 'Completa los datos del usuario'}
               </p>
             </div>
           </div>
@@ -111,7 +122,7 @@ const UserModal: React.FC<Props> = ({ user, roles, contractTypes, onClose, onSav
               onClick={onClose}
               className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
               style={{ color: '#8b949e' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--accent-soft-2)'; e.currentTarget.style.color = 'var(--accent)'; }}
               onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -122,8 +133,40 @@ const UserModal: React.FC<Props> = ({ user, roles, contractTypes, onClose, onSav
         </div>
 
         <form id="um-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7 space-y-6">
+          <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Perfil del empleado</div>
+              <div className="text-xl font-black tracking-tight" style={{ color: '#0d1117' }}>{displayName}</div>
+              <div className="text-xs font-semibold uppercase tracking-wide mt-1" style={{ color: '#8b949e' }}>
+                {isEdit ? 'Datos existentes' : 'Alta nueva'}
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center"
+                style={{ background: 'var(--accent-soft-2)', border: '1px solid var(--accent-border)' }}
+              >
+                {avatarSrc ? (
+                  <img src={avatarSrc} alt="Foto de empleado" className="w-full h-full object-cover" />
+                ) : (
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--accent)' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                )}
+              </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Rol</div>
+                <div className="text-sm font-bold" style={{ color: '#0d1117' }}>{roleLabel}</div>
+              </div>
+            </div>
+          </section>
+
           <section>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+            <div className="rounded-2xl p-6" style={{ background: '#f8f9fb', border: '1px solid #e8eaed' }}>
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] mb-4" style={{ color: '#8b949e' }}>
+                Información básica
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               <div>
                 <label className="field-label">Nombre *</label>
                 <input className="field" name="nombre" value={form.nombre} onChange={handleChange} required />
@@ -163,6 +206,7 @@ const UserModal: React.FC<Props> = ({ user, roles, contractTypes, onClose, onSav
               <div className="md:col-span-2">
                 <label className="field-label">Foto</label>
                 <input type="file" accept="image/*" onChange={handleFileChange} />
+              </div>
               </div>
             </div>
           </section>
