@@ -10,6 +10,8 @@ import type {
   RailType,
 } from './models';
 import { generateCutlist } from '../../services/cutlistApi';
+import { getCustomers } from '../../services/customersApi';
+import type { CustomerSummary } from '../../services/customersApi';
 
 const MODEL_OPTIONS: Array<{ value: DoorModel; label: string; image: string }> = [
   { value: 'PREMIUM', label: 'ALUON Premium', image: '/legacy/aluon/images/aluonPremium.jpg' },
@@ -32,8 +34,7 @@ const BOOLEAN_OPTIONS = [
 ];
 
 type FormState = {
-  distributor: string;
-  budgetNumber: string;
+  customerId: string;
   budgetDate: string;
   model: '' | DoorModel;
   doorType: '' | DoorType;
@@ -56,8 +57,7 @@ type FormState = {
 };
 
 const emptyForm: FormState = {
-  distributor: '',
-  budgetNumber: '',
+  customerId: '',
   budgetDate: '',
   model: '',
   doorType: '',
@@ -108,10 +108,18 @@ const formatDoorType = (value?: DoorType | null) => {
 
 const CutlistPage = () => {
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [customers, setCustomers] = useState<CustomerSummary[]>([]);
+  const [customersLoading, setCustomersLoading] = useState(true);
+  const [customersError, setCustomersError] = useState('');
   const [cutlist, setCutlist] = useState<CutlistResponse | null>(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [locked, setLocked] = useState(false);
+
+  const selectedCustomer = useMemo(
+    () => customers.find(customer => customer.id === form.customerId) ?? null,
+    [customers, form.customerId]
+  );
 
   const selectedModel = form.model || null;
   const selectedDoorType = form.doorType || null;
@@ -128,6 +136,31 @@ const CutlistPage = () => {
       setForm(prev => ({ ...prev, automationReinforcement: 'true' }));
     }
   }, [automationReinforcementLocked]);
+
+  useEffect(() => {
+    let active = true;
+    const loadCustomers = async () => {
+      try {
+        setCustomersLoading(true);
+        const data = await getCustomers();
+        if (!active) return;
+        setCustomers(data);
+        setCustomersError('');
+      } catch (err) {
+        if (!active) return;
+        const message = err instanceof Error ? err.message : 'No se pudieron cargar los clientes.';
+        setCustomersError(message);
+      } finally {
+        if (active) {
+          setCustomersLoading(false);
+        }
+      }
+    };
+    loadCustomers();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const updateField = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -149,8 +182,9 @@ const CutlistPage = () => {
       if (allowZero && parsed < 0) throw new Error(`"${label}" no puede ser negativo.`);
     };
 
-    requiredString(form.distributor, 'Distribuidor');
-    requiredString(form.budgetNumber, 'Nº presupuesto');
+    if (!form.customerId) {
+      throw new Error('Selecciona un distribuidor (cliente).');
+    }
     requiredString(form.budgetDate, 'Fecha');
     requiredSelect(form.model, 'Modelo');
     requiredSelect(form.doorType, 'Tipo de puerta');
@@ -202,8 +236,8 @@ const CutlistPage = () => {
     }
 
     return {
-      distributor: form.distributor.trim(),
-      budgetNumber: form.budgetNumber.trim(),
+      distributor: selectedCustomer?.nombreComercial ?? '',
+      budgetNumber: null,
       budgetDate: form.budgetDate,
       color: form.color.trim(),
       installerName: form.installerName.trim() || undefined,
@@ -250,9 +284,216 @@ const CutlistPage = () => {
     setError('');
   };
 
+  const handlePrint = () => {
+    if (!cutlist) {
+      setError('Genera el despiece antes de imprimir.');
+      return;
+    }
+    window.print();
+  };
+
+  const exportPdf = async () => {
+    if (!cutlist) {
+      setError('Genera el despiece antes de exportar.');
+      return;
+    }
+    try {
+      const { jsPDF } = await import('jspdf');
+      const autoTableModule = await import('jspdf-autotable');
+      const autoTable = autoTableModule.default;
+      const imageCatalog: Record<string, string> = {
+        logo: '/legacy/aluon/images/logo.png',
+        marco1: '/legacy/aluon/images/marco1.jpg',
+        marco2: '/legacy/aluon/images/marco2.jpg',
+        marco2ConPestania: '/legacy/aluon/images/marco2conPestania.jpg',
+        marco2ConPestaniaInox: '/legacy/aluon/images/marco2conPestaniaInox.jpg',
+        marco3: '/legacy/aluon/images/marco3.jpg',
+        marcoInox: '/legacy/aluon/images/marcoInox.jpg',
+        corte45: '/legacy/aluon/images/corte45.jpg',
+        corte45y90: '/legacy/aluon/images/corte45y90.jpg',
+        corte90: '/legacy/aluon/images/corte90.jpg',
+        lama200: '/legacy/aluon/images/lama.jpg',
+        lama100: '/legacy/aluon/images/lama100.jpg',
+        lamaAvion: '/legacy/aluon/images/lamaAvion.jpg',
+        lamaInox: '/legacy/aluon/images/lamaInox200.jpg',
+        perfilRuedas: '/legacy/aluon/images/perfilRuedasCorredera.jpg',
+        posteCierreA: '/legacy/aluon/images/posteDeCierrePuertaCorrederaMontajeA.jpg',
+        posteCierreB: '/legacy/aluon/images/posteDeCierrePuertaCorrederaMontajeB.jpg',
+        tubo80x50: '/legacy/aluon/images/tubo80x50.jpg',
+        tuboInox: '/legacy/aluon/images/tuboInoxidable.jpg',
+      };
+
+      const normalizeText = (value: string) => value.toLowerCase();
+
+      const resolveSectionalImage = (description: string) => {
+        const text = normalizeText(description);
+        if (text.includes('perfil ruedas')) return 'perfilRuedas';
+        if (text.includes('poste de cierre') && text.includes('montaje a')) return 'posteCierreA';
+        if (text.includes('poste de cierre') && text.includes('montaje b')) return 'posteCierreB';
+        if (text.includes('tubo inoxidable')) return 'tuboInox';
+        if (text.includes('tubo 80x50') || text.includes('cola')) return 'tubo80x50';
+        if (text.includes('lama 200x26')) return 'lamaInox';
+        if (text.includes('lama 200x20')) return 'lama200';
+        if (text.includes('lama 100x20')) return 'lama100';
+        if (text.includes('lama 100 avión')) return 'lamaAvion';
+        if (text.includes('larguero 50x50')) return 'marco1';
+        if (text.includes('larguero 50x80') && text.includes('pestaña') && text.includes('inox')) return 'marco2ConPestaniaInox';
+        if (text.includes('larguero 50x80') && text.includes('pestaña')) return 'marco2ConPestania';
+        if (text.includes('larguero 50x80')) return 'marco2';
+        if (text.includes('marco') && text.includes('inox')) return 'marcoInox';
+        if (text.includes('marco') && text.includes('80x50')) return 'marco3';
+        if (text.includes('marco') && text.includes('50x50')) return 'marco1';
+        return null;
+      };
+
+      const resolveLateralImage = (description: string) => {
+        const text = normalizeText(description);
+        if (text.includes('recto') && text.includes('inglete 45')) return 'corte45y90';
+        if (text.includes('inglete 45')) return 'corte45';
+        if (text.includes('corte recto') || text.includes('recto')) return 'corte90';
+        return null;
+      };
+
+      const getImageFormat = (key: string) => {
+        const path = imageCatalog[key];
+        if (!path) return 'JPEG';
+        return path.toLowerCase().endsWith('.png') ? 'PNG' : 'JPEG';
+      };
+
+      const loadImageAsDataUrl = async (path: string) => {
+        const response = await fetch(path);
+        if (!response.ok) {
+          throw new Error(`No se pudo cargar la imagen: ${path}`);
+        }
+        const blob = await response.blob();
+        return await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error(`No se pudo leer la imagen: ${path}`));
+          reader.readAsDataURL(blob);
+        });
+      };
+
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const marginX = 14;
+      let cursorY = 16;
+
+      const imageKeys = new Set<string>();
+      imageKeys.add('logo');
+      const rows = cutlist.items.map(item => {
+        const seccional = resolveSectionalImage(item.description);
+        const lateral = resolveLateralImage(item.description);
+        if (seccional) imageKeys.add(seccional);
+        if (lateral) imageKeys.add(lateral);
+        return {
+          imgSeccional: seccional ?? '',
+          description: item.description,
+          imgLateral: lateral ?? '',
+          units: String(item.units),
+          cutMeasure: item.cutMeasure,
+        };
+      });
+
+      const imageData: Record<string, string> = {};
+      await Promise.all(
+        Array.from(imageKeys).map(async key => {
+          const path = imageCatalog[key];
+          if (!path) return;
+          imageData[key] = await loadImageAsDataUrl(path);
+        })
+      );
+
+      const logo = imageData.logo;
+      if (logo) {
+        doc.addImage(logo, 'PNG', marginX, cursorY - 6, 22, 12);
+      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text('Despiece ALUON', marginX + 28, cursorY);
+      cursorY += 8;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const metaRows = [
+        `Distribuidor: ${selectedCustomer?.nombreComercial ?? '-'}`,
+        `Presupuesto: ${cutlist.budgetNumber ?? '-'}`,
+        `Fecha: ${formatDate(cutlist.budgetDate ?? form.budgetDate)}`,
+        `Modelo: ${formatModel(cutlist.model ?? selectedModel)}`,
+        `Tipo: ${formatDoorType(cutlist.doorType ?? selectedDoorType)}`,
+        `Color: ${cutlist.color ?? form.color}`,
+      ];
+      metaRows.forEach(row => {
+        doc.text(row, marginX, cursorY);
+        cursorY += 5;
+      });
+
+      autoTable(doc, {
+        startY: cursorY + 4,
+        columns: [
+          { header: 'Img Seccional', dataKey: 'imgSeccional' },
+          { header: 'Descripción', dataKey: 'description' },
+          { header: 'Img Lateral', dataKey: 'imgLateral' },
+          { header: 'Unidades', dataKey: 'units' },
+          { header: 'Medida corte', dataKey: 'cutMeasure' },
+        ],
+        body: rows,
+        styles: { fontSize: 9, cellPadding: 2, minCellHeight: 14 },
+        headStyles: { fillColor: [229, 83, 75] },
+        columnStyles: {
+          imgSeccional: { cellWidth: 18 },
+          imgLateral: { cellWidth: 18 },
+          units: { cellWidth: 16 },
+          cutMeasure: { cellWidth: 28 },
+        },
+        margin: { left: marginX, right: marginX },
+        didDrawCell: data => {
+          if (data.section !== 'body') return;
+          if (data.column.dataKey !== 'imgSeccional' && data.column.dataKey !== 'imgLateral') return;
+          const key = String(data.cell.raw || '');
+          const img = imageData[key];
+          if (!img) return;
+          const format = getImageFormat(key);
+          const imgSize = 12;
+          const x = data.cell.x + (data.cell.width - imgSize) / 2;
+          const y = data.cell.y + (data.cell.height - imgSize) / 2;
+          doc.addImage(img, format, x, y, imgSize, imgSize);
+        },
+      });
+
+      doc.save(`despiece-${cutlist.id.slice(0, 8)}.pdf`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'No se pudo exportar el PDF.';
+      setError(message);
+    }
+  };
+
+  const exportCsv = () => {
+    if (!cutlist) {
+      setError('Genera el despiece antes de exportar.');
+      return;
+    }
+    const header = ['Descripcion', 'Unidades', 'Medida corte'];
+    const rows = cutlist.items.map(item => ([
+      item.description.replaceAll('"', '""'),
+      String(item.units),
+      item.cutMeasure.replaceAll('"', '""'),
+    ]));
+    const csv = [header, ...rows]
+      .map(row => row.map(value => `"${value}"`).join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `despiece-${cutlist.id.slice(0, 8)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+      <div className="space-y-6 print-hide">
+        <div className="relative overflow-hidden rounded-3xl bg-white border border-slate-200 shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(circle at 20% 20%, rgba(229,83,75,0.12), transparent 55%)' }} />
         <div className="relative z-10 grid lg:grid-cols-[1.1fr_0.9fr] gap-8 p-8">
           <div className="space-y-4">
@@ -290,9 +531,10 @@ const CutlistPage = () => {
             </div>
           </div>
         </div>
+        </div>
       </div>
 
-      <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
+      <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6">
         <div className="space-y-6">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_12px_26px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
@@ -304,24 +546,31 @@ const CutlistPage = () => {
             </div>
             <div className="grid md:grid-cols-2 gap-4 mt-6">
               <div>
-                <label className="field-label">Distribuidor</label>
-                <input
+                <label className="field-label">Distribuidor (cliente)</label>
+                <select
                   className="field"
-                  value={form.distributor}
-                  onChange={event => updateField('distributor', event.target.value)}
-                  disabled={locked}
-                  placeholder="Distribuidor"
-                />
+                  value={form.customerId}
+                  onChange={event => updateField('customerId', event.target.value)}
+                  disabled={locked || customersLoading}
+                >
+                  <option value="">
+                    {customersLoading ? 'Cargando clientes...' : 'Selecciona un cliente'}
+                  </option>
+                  {customers.map(customer => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.nombreComercial}
+                    </option>
+                  ))}
+                </select>
+                {customersError && (
+                  <div className="mt-2 text-xs font-semibold text-rose-600">{customersError}</div>
+                )}
               </div>
               <div>
                 <label className="field-label">Nº Presupuesto</label>
-                <input
-                  className="field"
-                  value={form.budgetNumber}
-                  onChange={event => updateField('budgetNumber', event.target.value)}
-                  disabled={locked}
-                  placeholder="Presupuesto"
-                />
+                <div className="field bg-slate-50 text-slate-500">
+                  Autogenerado al guardar
+                </div>
               </div>
               <div>
                 <label className="field-label">Fecha</label>
@@ -394,6 +643,35 @@ const CutlistPage = () => {
             </div>
           </section>
 
+          {error && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 font-semibold">
+              {error}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3">
+            <button className="btn-primary" onClick={onSubmit} disabled={submitting}>
+              {submitting ? 'Generando...' : 'Generar despiece'}
+            </button>
+            <button className="btn-ghost" onClick={handlePrint} disabled={!cutlist}>
+              Imprimir
+            </button>
+            <button className="btn-ghost" onClick={exportPdf} disabled={!cutlist}>
+              Exportar PDF
+            </button>
+            <button className="btn-ghost" onClick={exportCsv} disabled={!cutlist}>
+              Exportar CSV
+            </button>
+            <button className="btn-ghost" onClick={() => setLocked(false)} disabled={!locked}>
+              Editar
+            </button>
+            <button className="btn-ghost" onClick={resetAll}>
+              Reiniciar
+            </button>
+          </div>
+        </div>
+
+        <aside className="space-y-6">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_12px_26px_rgba(15,23,42,0.06)]">
             <div className="flex items-center justify-between">
               <div>
@@ -648,71 +926,6 @@ const CutlistPage = () => {
               Nota: todas las medidas están en milímetros (mm).
             </div>
           </section>
-
-          {error && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 font-semibold">
-              {error}
-            </div>
-          )}
-
-          <div className="flex flex-wrap items-center gap-3">
-            <button className="btn-primary" onClick={onSubmit} disabled={submitting}>
-              {submitting ? 'Generando...' : 'Generar despiece'}
-            </button>
-            <button className="btn-ghost" onClick={() => setLocked(false)} disabled={!locked}>
-              Editar
-            </button>
-            <button className="btn-ghost" onClick={resetAll}>
-              Reiniciar
-            </button>
-          </div>
-        </div>
-
-        <aside className="space-y-6">
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_12px_26px_rgba(15,23,42,0.06)]">
-            <h3 className="text-lg font-black text-slate-900">Resumen</h3>
-            <div className="grid gap-3 mt-4 text-xs text-slate-500">
-              <div className="flex justify-between">
-                <span className="font-semibold">Modelo</span>
-                <span>{formatModel(selectedModel)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Tipo</span>
-                <span>{formatDoorType(selectedDoorType)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Fecha</span>
-                <span>{formatDate(form.budgetDate)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-semibold">Distribuidor</span>
-                <span>{form.distributor || '-'}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_12px_26px_rgba(15,23,42,0.06)]">
-            <h3 className="text-lg font-black text-slate-900">Resultado</h3>
-            <p className="text-xs text-slate-500 mt-2">El motor de cálculo de producción generará el desglose final.</p>
-            <div className="mt-4">
-              {cutlist ? (
-                <div className="space-y-3 text-xs text-slate-600">
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
-                    <div className="font-semibold text-slate-500">Despiece #{cutlist.id.slice(0, 8)}</div>
-                    <div className="text-slate-700 font-bold mt-1">{cutlist.items.length} elementos</div>
-                  </div>
-                  <div className="rounded-2xl border border-slate-100 px-4 py-3">
-                    <div className="text-slate-400 uppercase font-bold tracking-widest">Creado</div>
-                    <div className="text-slate-700 font-semibold mt-1">{formatDate(cutlist.createdAt)}</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-6 text-center text-xs text-slate-400">
-                  Completa los datos y genera el despiece.
-                </div>
-              )}
-            </div>
-          </div>
         </aside>
       </div>
 
@@ -753,6 +966,39 @@ const CutlistPage = () => {
             </tbody>
           </table>
         </div>
+      </section>
+      </div>
+
+      <section className="print-only">
+        <div className="print-header">
+          <div className="print-title">Despiece ALUON</div>
+          <div className="print-meta">
+            <div><strong>Distribuidor:</strong> {selectedCustomer?.nombreComercial ?? '-'}</div>
+            <div><strong>Presupuesto:</strong> {cutlist?.budgetNumber ?? '-'}</div>
+            <div><strong>Fecha:</strong> {formatDate(cutlist?.budgetDate ?? form.budgetDate)}</div>
+            <div><strong>Modelo:</strong> {formatModel(cutlist?.model ?? selectedModel)}</div>
+            <div><strong>Tipo:</strong> {formatDoorType(cutlist?.doorType ?? selectedDoorType)}</div>
+            <div><strong>Color:</strong> {cutlist?.color ?? form.color}</div>
+          </div>
+        </div>
+        <table className="print-table">
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Unidades</th>
+              <th>Medida corte</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cutlist?.items.map((item, index) => (
+              <tr key={`${item.description}-print-${index}`}>
+                <td>{item.description}</td>
+                <td>{item.units}</td>
+                <td>{item.cutMeasure}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
     </div>
   );

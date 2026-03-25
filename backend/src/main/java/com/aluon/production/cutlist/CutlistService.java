@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 @Service
@@ -25,9 +28,14 @@ public class CutlistService {
             throw new IllegalArgumentException("No se pudo generar el despiece con los parámetros indicados");
         }
 
+        String budgetNumber = normalize(request.getBudgetNumber());
+        if (budgetNumber == null) {
+            budgetNumber = generateBudgetNumber(request.getBudgetDate());
+        }
+
         Cutlist cutlist = Cutlist.builder()
                 .distributor(normalize(request.getDistributor()))
-                .budgetNumber(normalize(request.getBudgetNumber()))
+                .budgetNumber(budgetNumber)
                 .budgetDate(request.getBudgetDate())
                 .color(normalize(request.getColor()))
                 .installerName(normalize(request.getInstallerName()))
@@ -180,6 +188,13 @@ public class CutlistService {
                 // No fields adicionales
             }
         }
+    }
+
+    private String generateBudgetNumber(LocalDate budgetDate) {
+        LocalDate date = budgetDate != null ? budgetDate : LocalDate.now();
+        String datePart = date.format(DateTimeFormatter.BASIC_ISO_DATE);
+        int suffix = ThreadLocalRandom.current().nextInt(1000, 10000);
+        return "P-" + datePart + "-" + suffix;
     }
 
     private String normalize(String value) {

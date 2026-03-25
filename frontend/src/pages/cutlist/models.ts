@@ -8,7 +8,7 @@ export type MountingType = 'A' | 'B';
 
 export type CutlistRequest = {
   distributor: string;
-  budgetNumber: string;
+  budgetNumber?: string | null;
   budgetDate: string;
   color: string;
   installerName?: string;

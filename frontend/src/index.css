@@ -204,3 +204,16 @@
     outline-offset: 2px;
   }
 }
+
+.print-only { display: none; }
+
+@media print {
+  body { background: #ffffff; color: #0d1117; }
+  .print-hide { display: none !important; }
+  .print-only { display: block !important; }
+  .print-header { margin-bottom: 16px; }
+  .print-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .print-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 16px; font-size: 12px; }
+  .print-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .print-table th, .print-table td { border: 1px solid #e5e7eb; padding: 6px; text-align: left; }
+}
