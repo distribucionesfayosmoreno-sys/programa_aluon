@@ -63,6 +63,32 @@ const App = () => {
     }
   }, [activeModule]);
 
+  const openSidebar = () => {
+    if (sidebarCloseTimer.current) {
+      window.clearTimeout(sidebarCloseTimer.current);
+      sidebarCloseTimer.current = null;
+    }
+    if (sidebarOpenTimer.current) {
+      window.clearTimeout(sidebarOpenTimer.current);
+    }
+    sidebarOpenTimer.current = window.setTimeout(() => {
+      setSidebarOpen(true);
+    }, 60);
+  };
+
+  const closeSidebar = () => {
+    if (sidebarOpenTimer.current) {
+      window.clearTimeout(sidebarOpenTimer.current);
+      sidebarOpenTimer.current = null;
+    }
+    if (sidebarCloseTimer.current) {
+      window.clearTimeout(sidebarCloseTimer.current);
+    }
+    sidebarCloseTimer.current = window.setTimeout(() => {
+      setSidebarOpen(false);
+    }, 140);
+  };
+
   return (
     <div className="flex min-h-screen font-sans" style={{ backgroundColor: '#f8f9fb' }}>
       <Sidebar
@@ -176,28 +202,3 @@ const App = () => {
 };
 
 export default App;
-  const openSidebar = () => {
-    if (sidebarCloseTimer.current) {
-      window.clearTimeout(sidebarCloseTimer.current);
-      sidebarCloseTimer.current = null;
-    }
-    if (sidebarOpenTimer.current) {
-      window.clearTimeout(sidebarOpenTimer.current);
-    }
-    sidebarOpenTimer.current = window.setTimeout(() => {
-      setSidebarOpen(true);
-    }, 60);
-  };
-
-  const closeSidebar = () => {
-    if (sidebarOpenTimer.current) {
-      window.clearTimeout(sidebarOpenTimer.current);
-      sidebarOpenTimer.current = null;
-    }
-    if (sidebarCloseTimer.current) {
-      window.clearTimeout(sidebarCloseTimer.current);
-    }
-    sidebarCloseTimer.current = window.setTimeout(() => {
-      setSidebarOpen(false);
-    }, 140);
-  };
