@@ -106,6 +106,21 @@ const formatDoorType = (value?: DoorType | null) => {
   return DOOR_TYPES.find(option => option.value === value)?.label ?? value;
 };
 
+const formatMm = (value?: string | null) => {
+  if (!value?.trim()) return '-';
+  return `${value} mm`;
+};
+
+const formatYesNo = (value: boolean | null) => {
+  if (value === null) return 'Sí [ ]  No [ ]';
+  return value ? 'Sí [X]  No [ ]' : 'Sí [ ]  No [X]';
+};
+
+const formatSide = (value: string | null, leftLabel = 'Izq', rightLabel = 'Der') => {
+  if (!value) return `${leftLabel} [ ]  ${rightLabel} [ ]`;
+  return value === 'LEFT' ? `${leftLabel} [X]  ${rightLabel} [ ]` : `${leftLabel} [ ]  ${rightLabel} [X]`;
+};
+
 const CutlistPage = () => {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [customers, setCustomers] = useState<CustomerSummary[]>([]);
@@ -130,6 +145,11 @@ const CutlistPage = () => {
   }, [selectedModel]);
 
   const automationReinforcementLocked = form.automationIncluded === 'true';
+  const automationIncludedValue = parseBoolean(form.automationIncluded);
+  const automationReinforcementValue = parseBoolean(form.automationReinforcement);
+  const porterAutomaticValue = parseBoolean(form.porterAutomatic);
+  const topFrameValue = parseBoolean(form.topFrame);
+  const tailValue = parseBoolean(form.tail);
 
   useEffect(() => {
     if (automationReinforcementLocked) {
@@ -429,11 +449,71 @@ const CutlistPage = () => {
         `Modelo: ${formatModel(cutlist.model ?? selectedModel)}`,
         `Tipo: ${formatDoorType(cutlist.doorType ?? selectedDoorType)}`,
         `Color: ${cutlist.color ?? form.color}`,
+        `Acabado: ${formatDoorType(cutlist.doorType ?? selectedDoorType)}`,
       ];
       metaRows.forEach(row => {
         doc.text(row, marginX, cursorY);
         cursorY += 5;
       });
+      if (selectedDoorType === 'PEATONAL') {
+        const detailRows = [
+          `Altura: ${formatMm(form.heightMm)}`,
+          `Anchura: ${formatMm(form.widthMm)}`,
+          `Holgura: ${formatMm(form.groundClearanceMm)}`,
+          `Bisagras: ${formatSide(form.hingesSide || null)}`,
+          `Portero automático: ${formatYesNo(porterAutomaticValue)}`,
+          `Larguero: ${form.largueroMm ? `${form.largueroMm} mm` : '-'}`,
+          `Marco superior: ${formatYesNo(topFrameValue)}`,
+        ];
+        detailRows.forEach(row => {
+          doc.text(row, marginX, cursorY);
+          cursorY += 5;
+        });
+      }
+      if (selectedDoorType === 'ABATIBLE_UNA' || selectedDoorType === 'ABATIBLE_DOS') {
+        const detailRows = [
+          `Altura izq: ${formatMm(form.heightMm)}`,
+          `Altura der: ${formatMm(form.heightMm)}`,
+          `Anchura: ${formatMm(form.widthMm)}`,
+          `Holgura: ${formatMm(form.groundClearanceMm)}`,
+          `Bisagras: ${formatSide(form.hingesSide || null)}`,
+          `Automatización: ${formatYesNo(automationIncludedValue)}`,
+          `Refuerzo automatización: ${formatYesNo(automationReinforcementValue)}`,
+          `Larguero: ${form.largueroMm ? `${form.largueroMm} mm` : '-'}`,
+          `Marco superior: ${formatYesNo(topFrameValue)}`,
+        ];
+        detailRows.forEach(row => {
+          doc.text(row, marginX, cursorY);
+          cursorY += 5;
+        });
+      }
+      if (selectedDoorType === 'CORREDERA') {
+        const detailRows = [
+          `Altura: ${formatMm(form.heightMm)}`,
+          `Anchura izq: ${formatMm(form.widthMm)}`,
+          `Anchura der: ${formatMm(form.widthMm)}`,
+          `Apertura: ${formatSide(form.openingSide || null)}`,
+          `Carril: 16 [${form.railType === 'CARRIL_16' ? 'X' : ' '}]  20 [${form.railType === 'CARRIL_20' ? 'X' : ' '}]`,
+          `Montaje: A [${form.mountingType === 'A' ? 'X' : ' '}]  B [${form.mountingType === 'B' ? 'X' : ' '}]`,
+          `Cola: ${formatYesNo(tailValue)}`,
+          `Automatización: ${formatYesNo(automationIncludedValue)}`,
+          `Refuerzo automatización: ${formatYesNo(automationReinforcementValue)}`,
+        ];
+        detailRows.forEach(row => {
+          doc.text(row, marginX, cursorY);
+          cursorY += 5;
+        });
+      }
+      if (selectedDoorType === 'VALLA') {
+        const detailRows = [
+          `Altura: ${formatMm(form.heightMm)}`,
+          `Anchura: ${formatMm(form.widthMm)}`,
+        ];
+        detailRows.forEach(row => {
+          doc.text(row, marginX, cursorY);
+          cursorY += 5;
+        });
+      }
       cursorY += 4;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(12);
@@ -959,6 +1039,89 @@ const CutlistPage = () => {
             <div className="text-xs font-bold uppercase tracking-widest text-slate-400">{cutlist.items.length} filas</div>
           )}
         </div>
+        {cutlist && (
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-700">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-400">Distribuidor</div>
+                <div className="font-semibold">{selectedCustomer?.nombreComercial ?? '-'}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-400">Presupuesto</div>
+                <div className="font-semibold">{cutlist.budgetNumber ?? '-'}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-400">Fecha</div>
+                <div className="font-semibold">{formatDate(cutlist.budgetDate ?? form.budgetDate)}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-400">Modelo</div>
+                <div className="font-semibold">{formatModel(cutlist.model ?? selectedModel)}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-400">Acabado</div>
+                <div className="font-semibold">{formatDoorType(cutlist.doorType ?? selectedDoorType)}</div>
+              </div>
+              <div>
+                <div className="text-[10px] uppercase tracking-widest text-slate-400">Color</div>
+                <div className="font-semibold">{cutlist.color ?? form.color}</div>
+              </div>
+              <div className="md:col-span-3">
+                <div className="text-[10px] uppercase tracking-widest text-slate-400">Instalador / Observaciones</div>
+                <div className="font-semibold">
+                  {form.installerName || form.notes ? `${form.installerName || '-'} · ${form.notes || '-'}` : '-'}
+                </div>
+              </div>
+            </div>
+
+            {selectedDoorType === 'PEATONAL' && (
+              <div className="mt-4 grid md:grid-cols-3 gap-3">
+                <div><span className="font-semibold">Altura:</span> {formatMm(form.heightMm)}</div>
+                <div><span className="font-semibold">Anchura:</span> {formatMm(form.widthMm)}</div>
+                <div><span className="font-semibold">Holgura:</span> {formatMm(form.groundClearanceMm)}</div>
+                <div><span className="font-semibold">Bisagras:</span> {formatSide(form.hingesSide || null)}</div>
+                <div><span className="font-semibold">Portero automático:</span> {formatYesNo(porterAutomaticValue)}</div>
+                <div><span className="font-semibold">Larguero:</span> {form.largueroMm ? `${form.largueroMm} mm` : '-'}</div>
+                <div><span className="font-semibold">Marco superior:</span> {formatYesNo(topFrameValue)}</div>
+              </div>
+            )}
+
+            {(selectedDoorType === 'ABATIBLE_UNA' || selectedDoorType === 'ABATIBLE_DOS') && (
+              <div className="mt-4 grid md:grid-cols-3 gap-3">
+                <div><span className="font-semibold">Altura izq:</span> {formatMm(form.heightMm)}</div>
+                <div><span className="font-semibold">Altura der:</span> {formatMm(form.heightMm)}</div>
+                <div><span className="font-semibold">Anchura:</span> {formatMm(form.widthMm)}</div>
+                <div><span className="font-semibold">Holgura:</span> {formatMm(form.groundClearanceMm)}</div>
+                <div><span className="font-semibold">Bisagras:</span> {formatSide(form.hingesSide || null)}</div>
+                <div><span className="font-semibold">Automatización:</span> {formatYesNo(automationIncludedValue)}</div>
+                <div><span className="font-semibold">Refuerzo automatización:</span> {formatYesNo(automationReinforcementValue)}</div>
+                <div><span className="font-semibold">Larguero:</span> {form.largueroMm ? `${form.largueroMm} mm` : '-'}</div>
+                <div><span className="font-semibold">Marco superior:</span> {formatYesNo(topFrameValue)}</div>
+              </div>
+            )}
+
+            {selectedDoorType === 'CORREDERA' && (
+              <div className="mt-4 grid md:grid-cols-3 gap-3">
+                <div><span className="font-semibold">Altura:</span> {formatMm(form.heightMm)}</div>
+                <div><span className="font-semibold">Anchura izq:</span> {formatMm(form.widthMm)}</div>
+                <div><span className="font-semibold">Anchura der:</span> {formatMm(form.widthMm)}</div>
+                <div><span className="font-semibold">Apertura:</span> {formatSide(form.openingSide || null)}</div>
+                <div><span className="font-semibold">Carril:</span> 16 [{form.railType === 'CARRIL_16' ? 'X' : ' '}] 20 [{form.railType === 'CARRIL_20' ? 'X' : ' '}]</div>
+                <div><span className="font-semibold">Montaje:</span> A [{form.mountingType === 'A' ? 'X' : ' '}] B [{form.mountingType === 'B' ? 'X' : ' '}]</div>
+                <div><span className="font-semibold">Cola:</span> {formatYesNo(tailValue)}</div>
+                <div><span className="font-semibold">Automatización:</span> {formatYesNo(automationIncludedValue)}</div>
+                <div><span className="font-semibold">Refuerzo automatización:</span> {formatYesNo(automationReinforcementValue)}</div>
+              </div>
+            )}
+
+            {selectedDoorType === 'VALLA' && (
+              <div className="mt-4 grid md:grid-cols-3 gap-3">
+                <div><span className="font-semibold">Altura:</span> {formatMm(form.heightMm)}</div>
+                <div><span className="font-semibold">Anchura:</span> {formatMm(form.widthMm)}</div>
+              </div>
+            )}
+          </div>
+        )}
         <div className="mt-5 overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-xs uppercase tracking-wider text-slate-400 border-b">
@@ -998,6 +1161,52 @@ const CutlistPage = () => {
             <div><strong>Modelo:</strong> {formatModel(cutlist?.model ?? selectedModel)}</div>
             <div><strong>Tipo:</strong> {formatDoorType(cutlist?.doorType ?? selectedDoorType)}</div>
             <div><strong>Color:</strong> {cutlist?.color ?? form.color}</div>
+            <div><strong>Acabado:</strong> {formatDoorType(cutlist?.doorType ?? selectedDoorType)}</div>
+            <div><strong>Instalador:</strong> {form.installerName || '-'}</div>
+            <div><strong>Observaciones:</strong> {form.notes || '-'}</div>
+            {selectedDoorType === 'PEATONAL' && (
+              <>
+                <div><strong>Altura:</strong> {formatMm(form.heightMm)}</div>
+                <div><strong>Anchura:</strong> {formatMm(form.widthMm)}</div>
+                <div><strong>Holgura:</strong> {formatMm(form.groundClearanceMm)}</div>
+                <div><strong>Bisagras:</strong> {formatSide(form.hingesSide || null)}</div>
+                <div><strong>Portero automático:</strong> {formatYesNo(porterAutomaticValue)}</div>
+                <div><strong>Larguero:</strong> {form.largueroMm ? `${form.largueroMm} mm` : '-'}</div>
+                <div><strong>Marco superior:</strong> {formatYesNo(topFrameValue)}</div>
+              </>
+            )}
+            {(selectedDoorType === 'ABATIBLE_UNA' || selectedDoorType === 'ABATIBLE_DOS') && (
+              <>
+                <div><strong>Altura izq:</strong> {formatMm(form.heightMm)}</div>
+                <div><strong>Altura der:</strong> {formatMm(form.heightMm)}</div>
+                <div><strong>Anchura:</strong> {formatMm(form.widthMm)}</div>
+                <div><strong>Holgura:</strong> {formatMm(form.groundClearanceMm)}</div>
+                <div><strong>Bisagras:</strong> {formatSide(form.hingesSide || null)}</div>
+                <div><strong>Automatización:</strong> {formatYesNo(automationIncludedValue)}</div>
+                <div><strong>Refuerzo automatización:</strong> {formatYesNo(automationReinforcementValue)}</div>
+                <div><strong>Larguero:</strong> {form.largueroMm ? `${form.largueroMm} mm` : '-'}</div>
+                <div><strong>Marco superior:</strong> {formatYesNo(topFrameValue)}</div>
+              </>
+            )}
+            {selectedDoorType === 'CORREDERA' && (
+              <>
+                <div><strong>Altura:</strong> {formatMm(form.heightMm)}</div>
+                <div><strong>Anchura izq:</strong> {formatMm(form.widthMm)}</div>
+                <div><strong>Anchura der:</strong> {formatMm(form.widthMm)}</div>
+                <div><strong>Apertura:</strong> {formatSide(form.openingSide || null)}</div>
+                <div><strong>Carril:</strong> 16 [{form.railType === 'CARRIL_16' ? 'X' : ' '}] 20 [{form.railType === 'CARRIL_20' ? 'X' : ' '}]</div>
+                <div><strong>Montaje:</strong> A [{form.mountingType === 'A' ? 'X' : ' '}] B [{form.mountingType === 'B' ? 'X' : ' '}]</div>
+                <div><strong>Cola:</strong> {formatYesNo(tailValue)}</div>
+                <div><strong>Automatización:</strong> {formatYesNo(automationIncludedValue)}</div>
+                <div><strong>Refuerzo automatización:</strong> {formatYesNo(automationReinforcementValue)}</div>
+              </>
+            )}
+            {selectedDoorType === 'VALLA' && (
+              <>
+                <div><strong>Altura:</strong> {formatMm(form.heightMm)}</div>
+                <div><strong>Anchura:</strong> {formatMm(form.widthMm)}</div>
+              </>
+            )}
           </div>
         </div>
         <table className="print-table">
