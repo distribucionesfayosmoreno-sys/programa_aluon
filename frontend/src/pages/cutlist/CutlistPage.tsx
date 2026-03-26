@@ -219,6 +219,26 @@ const CutlistPage = () => {
   const topFrameValue = parseBoolean(form.topFrame);
   const tailValue = parseBoolean(form.tail);
 
+  const DoorDiagram = () => (
+    <svg viewBox="0 0 220 260" className="w-full max-w-[220px] text-slate-700">
+      <defs>
+        <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="currentColor" />
+        </marker>
+      </defs>
+      <rect x="70" y="30" width="80" height="150" fill="none" stroke="currentColor" strokeWidth="2" />
+      <line x1="50" y1="30" x2="50" y2="180" stroke="currentColor" strokeWidth="1" markerStart="url(#arrow)" markerEnd="url(#arrow)" />
+      <text x="8" y="110" fontSize="10">Altura total</text>
+      <text x="8" y="124" fontSize="10">{form.heightMm || '--'} mm</text>
+      <line x1="70" y1="205" x2="150" y2="205" stroke="currentColor" strokeWidth="1" markerStart="url(#arrow)" markerEnd="url(#arrow)" />
+      <text x="78" y="225" fontSize="10">Anchura total</text>
+      <text x="90" y="238" fontSize="10">{form.widthMm || '--'} mm</text>
+      <line x1="170" y1="150" x2="170" y2="180" stroke="currentColor" strokeWidth="1" markerStart="url(#arrow)" markerEnd="url(#arrow)" />
+      <text x="178" y="168" fontSize="10">Holgura</text>
+      <text x="178" y="182" fontSize="10">{form.groundClearanceMm || '--'} mm</text>
+    </svg>
+  );
+
   useEffect(() => {
     if (automationReinforcementLocked) {
       setForm(prev => ({ ...prev, automationReinforcement: 'true' }));
@@ -389,73 +409,6 @@ const CutlistPage = () => {
       const { jsPDF } = await import('jspdf');
       const autoTableModule = await import('jspdf-autotable');
       const autoTable = autoTableModule.default;
-      const imageCatalog: Record<string, string> = {
-        logo: '/legacy/aluon/images/logo.png',
-        larguero50x80ConPestania: '/legacy/aluon/images/larguero50x80conPestania.jpg',
-        marco1: '/legacy/aluon/images/marco1.jpg',
-        marco2: '/legacy/aluon/images/marco2.jpg',
-        marco2ConPestania: '/legacy/aluon/images/marco2conPestania.jpg',
-        marco2ConPestaniaInox: '/legacy/aluon/images/marco2conPestaniaInox.jpg',
-        marco3: '/legacy/aluon/images/marco3.jpg',
-        marcoInox: '/legacy/aluon/images/marcoInox.jpg',
-        corte45: '/legacy/aluon/images/corte45.jpg',
-        corte45y90: '/legacy/aluon/images/corte45y90.jpg',
-        corte90: '/legacy/aluon/images/corte90.jpg',
-        lama200: '/legacy/aluon/images/lama.jpg',
-        lama100: '/legacy/aluon/images/lama100.jpg',
-        lamaAvion: '/legacy/aluon/images/lamaAvion.jpg',
-        lamaInox: '/legacy/aluon/images/lamaInox200.jpg',
-        perfilRuedas: '/legacy/aluon/images/perfilRuedasCorredera.jpg',
-        posteCierreA: '/legacy/aluon/images/posteDeCierrePuertaCorrederaMontajeA.jpg',
-        posteCierreB: '/legacy/aluon/images/posteDeCierrePuertaCorrederaMontajeB.jpg',
-        tubo80x50: '/legacy/aluon/images/tubo80x50.jpg',
-        tuboInox: '/legacy/aluon/images/tuboInoxidable.jpg',
-        tuboRefuerzoMotor: '/legacy/aluon/images/tuboRefuerzoMotor.jpg',
-        tuboRefuerzoMotorInox: '/legacy/aluon/images/tuboRefuerzoMotorInox.jpg',
-      };
-
-      const normalizeText = (value: string) => value.toLowerCase();
-
-      const resolveSectionalImage = (description: string) => {
-        const text = normalizeText(description);
-        if (text.includes('refuerzo motor') && text.includes('inox')) return 'tuboRefuerzoMotorInox';
-        if (text.includes('refuerzo motor')) return 'tuboRefuerzoMotor';
-        if (text.includes('perfil ruedas')) return 'perfilRuedas';
-        if (text.includes('poste de cierre') && (text.includes('montaje a') || text.includes('sin pestañas'))) return 'posteCierreA';
-        if (text.includes('poste de cierre') && (text.includes('montaje b') || text.includes('con pestañas'))) return 'posteCierreB';
-        if (text.includes('tubo inoxidable')) return 'tuboInox';
-        if (text.includes('tubo 80x50') || text.includes('cola')) return 'tubo80x50';
-        if (text.includes('lama 200x26')) return 'lamaInox';
-        if (text.includes('lama 200x20')) return 'lama200';
-        if (text.includes('lama 100x20')) return 'lama100';
-        if (text.includes('lama 100 avión')) return 'lamaAvion';
-        if (text.includes('larguero 50x50')) return 'marco1';
-        if (text.includes('larguero 50x80') && text.includes('pestaña') && text.includes('inox')) return 'marco2ConPestaniaInox';
-        if (text.includes('larguero 50x80') && text.includes('pestaña')) return 'larguero50x80ConPestania';
-        if (text.includes('larguero 50x80')) return 'larguero50x80ConPestania';
-        if (text.includes('marco') && (text.includes('troquelado') || text.includes('veneciana') || text.includes('50x50'))) return 'tuboRefuerzoMotorInox';
-        if (text.includes('marco') && text.includes('80x50') && text.includes('pestaña') && text.includes('inox')) return 'marco2ConPestaniaInox';
-        if (text.includes('marco') && text.includes('80x50') && text.includes('pestaña')) return 'marco2ConPestania';
-        if (text.includes('marco') && text.includes('80x50') && text.includes('inox')) return 'marcoInox';
-        if (text.includes('marco') && text.includes('80x50')) return 'marco2';
-        if (text.includes('marco') && text.includes('50x50')) return 'marco1';
-        return null;
-      };
-
-      const resolveLateralImage = (description: string) => {
-        const text = normalizeText(description);
-        if (text.includes('recto') && text.includes('inglete 45')) return 'corte45y90';
-        if (text.includes('inglete 45')) return 'corte45';
-        if (text.includes('corte recto') || text.includes('recto')) return 'corte90';
-        return null;
-      };
-
-      const getImageFormat = (key: string) => {
-        const path = imageCatalog[key];
-        if (!path) return 'JPEG';
-        return path.toLowerCase().endsWith('.png') ? 'PNG' : 'JPEG';
-      };
-
       const loadImageAsDataUrl = async (path: string) => {
         const response = await fetch(path);
         if (!response.ok) {
@@ -474,7 +427,7 @@ const CutlistPage = () => {
       const marginX = 14;
       let cursorY = 16;
 
-      const imageKeys = new Set<string>();
+      const imageKeys = new Set<ImageKey>();
       imageKeys.add('logo');
       const rows = cutlist.items.map(item => {
         const seccional = resolveSectionalImage(item.description);
@@ -490,10 +443,10 @@ const CutlistPage = () => {
         };
       });
 
-      const imageData: Record<string, string> = {};
+      const imageData: Record<ImageKey, string> = {} as Record<ImageKey, string>;
       await Promise.all(
         Array.from(imageKeys).map(async key => {
-          const path = imageCatalog[key];
+          const path = IMAGE_CATALOG[key];
           if (!path) return;
           imageData[key] = await loadImageAsDataUrl(path);
         })
@@ -501,98 +454,76 @@ const CutlistPage = () => {
 
       const logo = imageData.logo;
       if (logo) {
-        doc.addImage(logo, 'PNG', marginX, cursorY - 6, 22, 12);
+        doc.addImage(logo, 'PNG', marginX, cursorY - 6, 24, 14);
       }
+      const doorTitle = formatDoorType(cutlist.doorType ?? selectedDoorType).toUpperCase();
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(16);
-      doc.text('Despiece ALUON', marginX + 28, cursorY);
-      cursorY += 8;
+      doc.text(doorTitle, marginX + 30, cursorY);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text('Formulario de pedido', 140, cursorY);
+      cursorY += 10;
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      const metaRows = [
-        `Distribuidor: ${selectedCustomer?.nombreComercial ?? '-'}`,
-        `Presupuesto: ${cutlist.budgetNumber ?? '-'}`,
-        `Fecha: ${formatDate(cutlist.budgetDate ?? form.budgetDate)}`,
-        `Modelo: ${formatModel(cutlist.model ?? selectedModel)}`,
-        `Tipo: ${formatDoorType(cutlist.doorType ?? selectedDoorType)}`,
-        `Color: ${cutlist.color ?? form.color}`,
-        `Acabado: ${formatDoorType(cutlist.doorType ?? selectedDoorType)}`,
-      ];
-      metaRows.forEach(row => {
-        doc.text(row, marginX, cursorY);
-        cursorY += 5;
-      });
+      doc.setFontSize(9);
+      const drawField = (label: string, value: string, x: number, y: number, w: number) => {
+        doc.text(label, x, y - 2);
+        doc.rect(x, y, w, 6);
+        doc.text(value || '-', x + 2, y + 4);
+      };
+      drawField('Distribuidor', selectedCustomer?.nombreComercial ?? '', marginX, cursorY, 70);
+      drawField('Nº Presupuesto', String(cutlist.budgetNumber ?? ''), marginX + 74, cursorY, 40);
+      drawField('Fecha', formatDate(cutlist.budgetDate ?? form.budgetDate), marginX + 118, cursorY, 34);
+      cursorY += 12;
+      drawField('Modelo Aluon', formatModel(cutlist.model ?? selectedModel), marginX, cursorY, 70);
+      drawField('Referencia Color', cutlist.color ?? form.color, marginX + 74, cursorY, 40);
+      drawField('Acabado', formatDoorType(cutlist.doorType ?? selectedDoorType), marginX + 118, cursorY, 34);
+      cursorY += 14;
+
+      const drawCheckbox = (label: string, checked: boolean | null, x: number, y: number) => {
+        doc.text(label, x, y + 4);
+        doc.rect(x + 28, y, 4, 4);
+        if (checked) {
+          doc.text('X', x + 29, y + 3.5);
+        }
+      };
+
       if (selectedDoorType === 'PEATONAL') {
-        const detailRows = [
-          `Altura: ${formatMm(form.heightMm)}`,
-          `Anchura: ${formatMm(form.widthMm)}`,
-          `Holgura: ${formatMm(form.groundClearanceMm)}`,
-          `Bisagras: ${formatSide(form.hingesSide || null)}`,
-          `Portero automático: ${formatYesNo(porterAutomaticValue)}`,
-          `Larguero: ${form.largueroMm ? `${form.largueroMm} mm` : '-'}`,
-          `Marco superior: ${formatYesNo(topFrameValue)}`,
-        ];
-        detailRows.forEach(row => {
-          doc.text(row, marginX, cursorY);
-          cursorY += 5;
-        });
+        drawCheckbox('Bisagra Izq', form.hingesSide === 'LEFT', marginX, cursorY);
+        drawCheckbox('Bisagra Der', form.hingesSide === 'RIGHT', marginX + 50, cursorY);
+        cursorY += 8;
+        drawCheckbox('Portero Sí', porterAutomaticValue === true, marginX, cursorY);
+        drawCheckbox('Portero No', porterAutomaticValue === false, marginX + 50, cursorY);
+        cursorY += 10;
+        doc.rect(marginX + 20, cursorY, 50, 90);
+        doc.text(`Altura total: ${formatMm(form.heightMm)}`, marginX + 78, cursorY + 10);
+        doc.text(`Anchura total: ${formatMm(form.widthMm)}`, marginX + 78, cursorY + 20);
+        doc.text(`Holgura: ${formatMm(form.groundClearanceMm)}`, marginX + 78, cursorY + 30);
+        cursorY += 100;
+      } else {
+        doc.text(`Altura total: ${formatMm(form.heightMm)}`, marginX, cursorY);
+        doc.text(`Anchura total: ${formatMm(form.widthMm)}`, marginX + 60, cursorY);
+        cursorY += 8;
       }
-      if (selectedDoorType === 'ABATIBLE_UNA' || selectedDoorType === 'ABATIBLE_DOS') {
-        const detailRows = [
-          `Altura izq: ${formatMm(form.heightMm)}`,
-          `Altura der: ${formatMm(form.heightMm)}`,
-          `Anchura: ${formatMm(form.widthMm)}`,
-          `Holgura: ${formatMm(form.groundClearanceMm)}`,
-          `Bisagras: ${formatSide(form.hingesSide || null)}`,
-          `Automatización: ${formatYesNo(automationIncludedValue)}`,
-          `Refuerzo automatización: ${formatYesNo(automationReinforcementValue)}`,
-          `Larguero: ${form.largueroMm ? `${form.largueroMm} mm` : '-'}`,
-          `Marco superior: ${formatYesNo(topFrameValue)}`,
-        ];
-        detailRows.forEach(row => {
-          doc.text(row, marginX, cursorY);
-          cursorY += 5;
-        });
-      }
-      if (selectedDoorType === 'CORREDERA') {
-        const detailRows = [
-          `Altura: ${formatMm(form.heightMm)}`,
-          `Anchura izq: ${formatMm(form.widthMm)}`,
-          `Anchura der: ${formatMm(form.widthMm)}`,
-          `Apertura: ${formatSide(form.openingSide || null)}`,
-          `Carril: 16 [${form.railType === 'CARRIL_16' ? 'X' : ' '}]  20 [${form.railType === 'CARRIL_20' ? 'X' : ' '}]`,
-          `Montaje: A [${form.mountingType === 'A' ? 'X' : ' '}]  B [${form.mountingType === 'B' ? 'X' : ' '}]`,
-          `Cola: ${formatYesNo(tailValue)}`,
-          `Automatización: ${formatYesNo(automationIncludedValue)}`,
-          `Refuerzo automatización: ${formatYesNo(automationReinforcementValue)}`,
-        ];
-        detailRows.forEach(row => {
-          doc.text(row, marginX, cursorY);
-          cursorY += 5;
-        });
-      }
-      if (selectedDoorType === 'VALLA') {
-        const detailRows = [
-          `Altura: ${formatMm(form.heightMm)}`,
-          `Anchura: ${formatMm(form.widthMm)}`,
-        ];
-        detailRows.forEach(row => {
-          doc.text(row, marginX, cursorY);
-          cursorY += 5;
-        });
-      }
-      cursorY += 4;
+
+      doc.text(`Observaciones: ${form.notes || '-'}`, marginX, cursorY);
+      cursorY += 6;
+      doc.text(`Nombre instalador: ${form.installerName || '-'}`, marginX, cursorY);
+
+      doc.addPage();
+      cursorY = 16;
+
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
+      doc.setFontSize(16);
       doc.text('DESGLOSE', marginX, cursorY);
-      cursorY += 5;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.text('Aluminio soldado', marginX, cursorY);
+      doc.text('Aluminio soldado', marginX, cursorY + 5);
+      cursorY += 12;
 
       autoTable(doc, {
-        startY: cursorY + 6,
+        startY: cursorY,
         columns: [
           { header: 'Img Seccional', dataKey: 'imgSeccional' },
           { header: 'Descripción', dataKey: 'description' },
@@ -601,26 +532,27 @@ const CutlistPage = () => {
           { header: 'Medida corte', dataKey: 'cutMeasure' },
         ],
         body: rows,
-        styles: { fontSize: 9, cellPadding: 2, minCellHeight: 14 },
-        headStyles: { fillColor: [229, 83, 75] },
+        styles: { fontSize: 9, cellPadding: 2, minCellHeight: 26, lineColor: [140, 140, 140], lineWidth: 0.1 },
+        headStyles: { fillColor: [255, 255, 255], textColor: 40, lineColor: [140, 140, 140], lineWidth: 0.1 },
         columnStyles: {
-          imgSeccional: { cellWidth: 18 },
-          imgLateral: { cellWidth: 18 },
-          units: { cellWidth: 16 },
-          cutMeasure: { cellWidth: 28 },
+          imgSeccional: { cellWidth: 28 },
+          imgLateral: { cellWidth: 28 },
+          units: { cellWidth: 16, halign: 'center' },
+          cutMeasure: { cellWidth: 26, halign: 'center' },
         },
         margin: { left: marginX, right: marginX },
         didDrawCell: data => {
           if (data.section !== 'body') return;
           if (data.column.dataKey !== 'imgSeccional' && data.column.dataKey !== 'imgLateral') return;
           const key = String(data.cell.raw || '');
-          const img = imageData[key];
+          const img = imageData[key as ImageKey];
           if (!img) return;
-          const format = getImageFormat(key);
-          const imgSize = 12;
-          const x = data.cell.x + (data.cell.width - imgSize) / 2;
-          const y = data.cell.y + (data.cell.height - imgSize) / 2;
-          doc.addImage(img, format, x, y, imgSize, imgSize);
+          const format = getImageFormat(key as ImageKey);
+          const imgWidth = data.cell.width - 6;
+          const imgHeight = data.cell.height - 6;
+          const x = data.cell.x + 3;
+          const y = data.cell.y + 3;
+          doc.addImage(img, format, x, y, imgWidth, imgHeight);
         },
       });
 
@@ -1108,108 +1040,113 @@ const CutlistPage = () => {
           )}
         </div>
         {cutlist && (
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-700">
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-400">Distribuidor</div>
+          <div className="mt-6 rounded-2xl border border-slate-300 p-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <img src={IMAGE_CATALOG.logo} alt="Aluon" className="h-10 w-auto" />
+                <div className="text-xs font-semibold uppercase text-slate-500">Aluminio Soldado</div>
+              </div>
+              <div className="text-sm font-black uppercase text-slate-900">
+                {formatDoorType(cutlist.doorType ?? selectedDoorType).toUpperCase()}
+              </div>
+              <div className="text-xs font-semibold uppercase text-slate-500">Formulario de pedido</div>
+            </div>
+
+            <div className="mt-4 grid md:grid-cols-3 gap-3 text-xs">
+              <div className="border border-slate-300 p-2">
+                <div className="text-[10px] uppercase text-slate-500">Distribuidor</div>
                 <div className="font-semibold">{selectedCustomer?.nombreComercial ?? '-'}</div>
               </div>
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-400">Presupuesto</div>
+              <div className="border border-slate-300 p-2">
+                <div className="text-[10px] uppercase text-slate-500">Nº Presupuesto</div>
                 <div className="font-semibold">{cutlist.budgetNumber ?? '-'}</div>
               </div>
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-400">Fecha</div>
+              <div className="border border-slate-300 p-2">
+                <div className="text-[10px] uppercase text-slate-500">Fecha</div>
                 <div className="font-semibold">{formatDate(cutlist.budgetDate ?? form.budgetDate)}</div>
               </div>
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-400">Modelo</div>
+              <div className="border border-slate-300 p-2">
+                <div className="text-[10px] uppercase text-slate-500">Modelo Aluon</div>
                 <div className="font-semibold">{formatModel(cutlist.model ?? selectedModel)}</div>
               </div>
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-400">Acabado</div>
-                <div className="font-semibold">{formatDoorType(cutlist.doorType ?? selectedDoorType)}</div>
-              </div>
-              <div>
-                <div className="text-[10px] uppercase tracking-widest text-slate-400">Color</div>
+              <div className="border border-slate-300 p-2">
+                <div className="text-[10px] uppercase text-slate-500">Referencia Color</div>
                 <div className="font-semibold">{cutlist.color ?? form.color}</div>
               </div>
-              <div className="md:col-span-3">
-                <div className="text-[10px] uppercase tracking-widest text-slate-400">Instalador / Observaciones</div>
-                <div className="font-semibold">
-                  {form.installerName || form.notes ? `${form.installerName || '-'} · ${form.notes || '-'}` : '-'}
-                </div>
+              <div className="border border-slate-300 p-2">
+                <div className="text-[10px] uppercase text-slate-500">Acabado</div>
+                <div className="font-semibold">{formatDoorType(cutlist.doorType ?? selectedDoorType)}</div>
               </div>
             </div>
 
-            {selectedDoorType === 'PEATONAL' && (
-              <div className="mt-4 grid md:grid-cols-3 gap-3">
-                <div><span className="font-semibold">Altura:</span> {formatMm(form.heightMm)}</div>
-                <div><span className="font-semibold">Anchura:</span> {formatMm(form.widthMm)}</div>
-                <div><span className="font-semibold">Holgura:</span> {formatMm(form.groundClearanceMm)}</div>
-                <div><span className="font-semibold">Bisagras:</span> {formatSide(form.hingesSide || null)}</div>
-                <div><span className="font-semibold">Portero automático:</span> {formatYesNo(porterAutomaticValue)}</div>
-                <div><span className="font-semibold">Larguero:</span> {form.largueroMm ? `${form.largueroMm} mm` : '-'}</div>
-                <div><span className="font-semibold">Marco superior:</span> {formatYesNo(topFrameValue)}</div>
+            <div className="mt-4 grid md:grid-cols-[1.1fr_0.9fr] gap-6">
+              <div className="border border-slate-300 p-4 flex flex-col items-center gap-3">
+                {selectedDoorType === 'PEATONAL' && (
+                  <div className="w-full flex justify-between text-xs font-semibold">
+                    <span>Bisagra Izquierda {form.hingesSide === 'LEFT' ? '[X]' : '[ ]'}</span>
+                    <span>Bisagra Derecha {form.hingesSide === 'RIGHT' ? '[X]' : '[ ]'}</span>
+                  </div>
+                )}
+                <DoorDiagram />
+                {selectedDoorType === 'PEATONAL' && (
+                  <div className="w-full text-xs font-semibold">
+                    Portero Automático: {formatYesNo(porterAutomaticValue)}
+                  </div>
+                )}
               </div>
-            )}
-
-            {(selectedDoorType === 'ABATIBLE_UNA' || selectedDoorType === 'ABATIBLE_DOS') && (
-              <div className="mt-4 grid md:grid-cols-3 gap-3">
-                <div><span className="font-semibold">Altura izq:</span> {formatMm(form.heightMm)}</div>
-                <div><span className="font-semibold">Altura der:</span> {formatMm(form.heightMm)}</div>
-                <div><span className="font-semibold">Anchura:</span> {formatMm(form.widthMm)}</div>
-                <div><span className="font-semibold">Holgura:</span> {formatMm(form.groundClearanceMm)}</div>
-                <div><span className="font-semibold">Bisagras:</span> {formatSide(form.hingesSide || null)}</div>
-                <div><span className="font-semibold">Automatización:</span> {formatYesNo(automationIncludedValue)}</div>
-                <div><span className="font-semibold">Refuerzo automatización:</span> {formatYesNo(automationReinforcementValue)}</div>
-                <div><span className="font-semibold">Larguero:</span> {form.largueroMm ? `${form.largueroMm} mm` : '-'}</div>
-                <div><span className="font-semibold">Marco superior:</span> {formatYesNo(topFrameValue)}</div>
+              <div className="border border-slate-300 p-4 text-xs">
+                <div className="font-semibold">Observaciones por parte del distribuidor</div>
+                <div className="mt-2 min-h-[72px] border border-slate-300 p-2">{form.notes || '-'}</div>
+                <div className="mt-4 font-semibold">Nombre (si lo hace el instalador)</div>
+                <div className="mt-2 border border-slate-300 p-2">{form.installerName || '-'}</div>
               </div>
-            )}
-
-            {selectedDoorType === 'CORREDERA' && (
-              <div className="mt-4 grid md:grid-cols-3 gap-3">
-                <div><span className="font-semibold">Altura:</span> {formatMm(form.heightMm)}</div>
-                <div><span className="font-semibold">Anchura izq:</span> {formatMm(form.widthMm)}</div>
-                <div><span className="font-semibold">Anchura der:</span> {formatMm(form.widthMm)}</div>
-                <div><span className="font-semibold">Apertura:</span> {formatSide(form.openingSide || null)}</div>
-                <div><span className="font-semibold">Carril:</span> 16 [{form.railType === 'CARRIL_16' ? 'X' : ' '}] 20 [{form.railType === 'CARRIL_20' ? 'X' : ' '}]</div>
-                <div><span className="font-semibold">Montaje:</span> A [{form.mountingType === 'A' ? 'X' : ' '}] B [{form.mountingType === 'B' ? 'X' : ' '}]</div>
-                <div><span className="font-semibold">Cola:</span> {formatYesNo(tailValue)}</div>
-                <div><span className="font-semibold">Automatización:</span> {formatYesNo(automationIncludedValue)}</div>
-                <div><span className="font-semibold">Refuerzo automatización:</span> {formatYesNo(automationReinforcementValue)}</div>
-              </div>
-            )}
-
-            {selectedDoorType === 'VALLA' && (
-              <div className="mt-4 grid md:grid-cols-3 gap-3">
-                <div><span className="font-semibold">Altura:</span> {formatMm(form.heightMm)}</div>
-                <div><span className="font-semibold">Anchura:</span> {formatMm(form.widthMm)}</div>
-              </div>
-            )}
+            </div>
           </div>
         )}
         <div className="mt-5 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="text-xs uppercase tracking-wider text-slate-400 border-b">
+          <div className="mb-3 text-sm font-black uppercase text-slate-900">DESGLOSE</div>
+          <div className="mb-4 text-xs text-slate-500">Aluminio soldado</div>
+          <table className="w-full text-sm border border-slate-300 border-collapse">
+            <thead className="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-300">
               <tr>
-                <th className="py-3 text-left">Descripción</th>
-                <th className="py-3 text-left">Unidades</th>
-                <th className="py-3 text-left">Medida de corte</th>
+                <th className="py-3 px-3 text-left border border-slate-300">Img Seccional</th>
+                <th className="py-3 px-3 text-left border border-slate-300">Descripción</th>
+                <th className="py-3 px-3 text-left border border-slate-300">Img Lateral</th>
+                <th className="py-3 px-3 text-center border border-slate-300">Unidades</th>
+                <th className="py-3 px-3 text-center border border-slate-300">Medida corte</th>
               </tr>
             </thead>
             <tbody>
               {cutlist?.items.map((item, index) => (
-                <tr key={`${item.description}-${index}`} className="border-b last:border-none">
-                  <td className="py-3 text-slate-900 font-semibold">{item.description}</td>
-                  <td className="py-3 text-slate-600">{item.units}</td>
-                  <td className="py-3 text-slate-600">{item.cutMeasure}</td>
+                <tr key={`${item.description}-${index}`} className="border-b border-slate-300">
+                  <td className="py-4 px-3 border border-slate-300">
+                    {(() => {
+                      const key = resolveSectionalImage(item.description);
+                      return key ? (
+                        <img src={IMAGE_CATALOG[key]} alt="" className="h-20 w-auto object-contain mx-auto" />
+                      ) : (
+                        <div className="h-20" />
+                      );
+                    })()}
+                  </td>
+                  <td className="py-4 px-3 text-slate-900 font-semibold border border-slate-300">{item.description}</td>
+                  <td className="py-4 px-3 border border-slate-300">
+                    {(() => {
+                      const key = resolveLateralImage(item.description);
+                      return key ? (
+                        <img src={IMAGE_CATALOG[key]} alt="" className="h-12 w-auto object-contain mx-auto" />
+                      ) : (
+                        <div className="h-12" />
+                      );
+                    })()}
+                  </td>
+                  <td className="py-4 px-3 text-center text-slate-700 border border-slate-300">{item.units}x</td>
+                  <td className="py-4 px-3 text-center text-slate-700 border border-slate-300">{item.cutMeasure}</td>
                 </tr>
               ))}
               {!cutlist && (
                 <tr>
-                  <td colSpan={3} className="py-8 text-center text-xs text-slate-400">
+                  <td colSpan={5} className="py-8 text-center text-xs text-slate-400">
                     Aún no hay datos para mostrar.
                   </td>
                 </tr>
@@ -1277,10 +1214,14 @@ const CutlistPage = () => {
             )}
           </div>
         </div>
+        <div className="print-title" style={{ fontSize: 16, fontWeight: 800, marginTop: 16 }}>DESGLOSE</div>
+        <div style={{ fontSize: 12, marginBottom: 8 }}>Aluminio soldado</div>
         <table className="print-table">
           <thead>
             <tr>
+              <th>Img Seccional</th>
               <th>Descripción</th>
+              <th>Img Lateral</th>
               <th>Unidades</th>
               <th>Medida corte</th>
             </tr>
@@ -1288,8 +1229,20 @@ const CutlistPage = () => {
           <tbody>
             {cutlist?.items.map((item, index) => (
               <tr key={`${item.description}-print-${index}`}>
+                <td>
+                  {(() => {
+                    const key = resolveSectionalImage(item.description);
+                    return key ? <img src={IMAGE_CATALOG[key]} alt="" style={{ height: 60 }} /> : null;
+                  })()}
+                </td>
                 <td>{item.description}</td>
-                <td>{item.units}</td>
+                <td>
+                  {(() => {
+                    const key = resolveLateralImage(item.description);
+                    return key ? <img src={IMAGE_CATALOG[key]} alt="" style={{ height: 36 }} /> : null;
+                  })()}
+                </td>
+                <td>{item.units}x</td>
                 <td>{item.cutMeasure}</td>
               </tr>
             ))}
