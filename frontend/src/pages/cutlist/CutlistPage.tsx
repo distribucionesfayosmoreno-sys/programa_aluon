@@ -33,6 +33,74 @@ const BOOLEAN_OPTIONS = [
   { value: 'false', label: 'No' },
 ];
 
+const IMAGE_CATALOG = {
+  logo: '/legacy/aluon/images/logo.png',
+  larguero50x80ConPestania: '/legacy/aluon/images/larguero50x80conPestania.jpg',
+  marco1: '/legacy/aluon/images/marco1.jpg',
+  marco2: '/legacy/aluon/images/marco2.jpg',
+  marco2ConPestania: '/legacy/aluon/images/marco2conPestania.jpg',
+  marco2ConPestaniaInox: '/legacy/aluon/images/marco2conPestaniaInox.jpg',
+  marco3: '/legacy/aluon/images/marco3.jpg',
+  marcoInox: '/legacy/aluon/images/marcoInox.jpg',
+  corte45: '/legacy/aluon/images/corte45.jpg',
+  corte45y90: '/legacy/aluon/images/corte45y90.jpg',
+  corte90: '/legacy/aluon/images/corte90.jpg',
+  lama200: '/legacy/aluon/images/lama.jpg',
+  lama100: '/legacy/aluon/images/lama100.jpg',
+  lamaAvion: '/legacy/aluon/images/lamaAvion.jpg',
+  lamaInox: '/legacy/aluon/images/lamaInox200.jpg',
+  perfilRuedas: '/legacy/aluon/images/perfilRuedasCorredera.jpg',
+  posteCierreA: '/legacy/aluon/images/posteDeCierrePuertaCorrederaMontajeA.jpg',
+  posteCierreB: '/legacy/aluon/images/posteDeCierrePuertaCorrederaMontajeB.jpg',
+  tubo80x50: '/legacy/aluon/images/tubo80x50.jpg',
+  tuboInox: '/legacy/aluon/images/tuboInoxidable.jpg',
+  tuboRefuerzoMotor: '/legacy/aluon/images/tuboRefuerzoMotor.jpg',
+  tuboRefuerzoMotorInox: '/legacy/aluon/images/tuboRefuerzoMotorInox.jpg',
+} as const;
+
+type ImageKey = keyof typeof IMAGE_CATALOG;
+
+const normalizeText = (value: string) => value.toLowerCase();
+
+const resolveSectionalImage = (description: string): ImageKey | null => {
+  const text = normalizeText(description);
+  if (text.includes('refuerzo motor') && text.includes('inox')) return 'tuboRefuerzoMotorInox';
+  if (text.includes('refuerzo motor')) return 'tuboRefuerzoMotor';
+  if (text.includes('perfil ruedas')) return 'perfilRuedas';
+  if (text.includes('poste de cierre') && (text.includes('montaje a') || text.includes('sin pestañas'))) return 'posteCierreA';
+  if (text.includes('poste de cierre') && (text.includes('montaje b') || text.includes('con pestañas'))) return 'posteCierreB';
+  if (text.includes('tubo inoxidable')) return 'tuboInox';
+  if (text.includes('tubo 80x50') || text.includes('cola')) return 'tubo80x50';
+  if (text.includes('lama 200x26')) return 'lamaInox';
+  if (text.includes('lama 200x20')) return 'lama200';
+  if (text.includes('lama 100x20')) return 'lama100';
+  if (text.includes('lama 100 avión')) return 'lamaAvion';
+  if (text.includes('larguero 50x50')) return 'marco1';
+  if (text.includes('larguero 50x80') && text.includes('pestaña') && text.includes('inox')) return 'marco2ConPestaniaInox';
+  if (text.includes('larguero 50x80') && text.includes('pestaña')) return 'larguero50x80ConPestania';
+  if (text.includes('larguero 50x80')) return 'larguero50x80ConPestania';
+  if (text.includes('marco') && (text.includes('troquelado') || text.includes('veneciana') || text.includes('50x50'))) return 'tuboRefuerzoMotorInox';
+  if (text.includes('marco') && text.includes('80x50') && text.includes('pestaña') && text.includes('inox')) return 'marco2ConPestaniaInox';
+  if (text.includes('marco') && text.includes('80x50') && text.includes('pestaña')) return 'marco2ConPestania';
+  if (text.includes('marco') && text.includes('80x50') && text.includes('inox')) return 'marcoInox';
+  if (text.includes('marco') && text.includes('80x50')) return 'marco2';
+  if (text.includes('marco') && text.includes('50x50')) return 'marco1';
+  return null;
+};
+
+const resolveLateralImage = (description: string): ImageKey | null => {
+  const text = normalizeText(description);
+  if (text.includes('recto') && text.includes('inglete 45')) return 'corte45y90';
+  if (text.includes('inglete 45')) return 'corte45';
+  if (text.includes('corte recto') || text.includes('recto')) return 'corte90';
+  return null;
+};
+
+const getImageFormat = (key: ImageKey) => {
+  const path = IMAGE_CATALOG[key];
+  return path.toLowerCase().endsWith('.png') ? 'PNG' : 'JPEG';
+};
+
 type FormState = {
   customerId: string;
   budgetDate: string;
