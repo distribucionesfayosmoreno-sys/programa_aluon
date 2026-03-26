@@ -474,9 +474,9 @@ const CutlistPage = () => {
     }
     const header = ['Descripcion', 'Unidades', 'Medida corte'];
     const rows = cutlist.items.map(item => ([
-      item.description.replaceAll('"', '""'),
+      item.description.replace(/"/g, '""'),
       String(item.units),
-      item.cutMeasure.replaceAll('"', '""'),
+      item.cutMeasure.replace(/"/g, '""'),
     ]));
     const csv = [header, ...rows]
       .map(row => row.map(value => `"${value}"`).join(','))
@@ -967,7 +967,6 @@ const CutlistPage = () => {
           </table>
         </div>
       </section>
-      </div>
 
       <section className="print-only">
         <div className="print-header">
