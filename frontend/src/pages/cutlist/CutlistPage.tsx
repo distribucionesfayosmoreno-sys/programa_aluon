@@ -545,8 +545,6 @@ const CutlistPage = () => {
         })
       );
 
-      const logo = imageData.logo;
-
       if (selectedDoorType) {
         const templatePath = FORM_TEMPLATES[selectedDoorType];
         const templateDataUrl = await loadImageAsDataUrl(templatePath);
