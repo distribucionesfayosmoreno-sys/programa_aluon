@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './pages/CustomerManagement';
 import CustomerOnboarding from './pages/customer-onboarding/CustomerOnboarding';
@@ -14,6 +14,8 @@ const App = () => {
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [theme, setTheme] = useState<'red' | 'blue'>('red');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarOpenTimer = useRef<number | null>(null);
+  const sidebarCloseTimer = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -71,14 +73,14 @@ const App = () => {
           setOpenNewRequest(true);
         }}
         isOpen={sidebarOpen}
-        onHoverChange={setSidebarOpen}
+        onHoverChange={open => (open ? openSidebar() : closeSidebar())}
       />
 
       <div id="main-layout" className="flex-1 flex flex-col min-w-0 relative">
         <div
           className="fixed left-0 top-0 h-full w-3 z-40"
-          onMouseEnter={() => setSidebarOpen(true)}
-          onMouseLeave={() => setSidebarOpen(false)}
+          onMouseEnter={openSidebar}
+          onMouseLeave={closeSidebar}
         />
         {/* Topbar */}
         <header
@@ -174,3 +176,28 @@ const App = () => {
 };
 
 export default App;
+  const openSidebar = () => {
+    if (sidebarCloseTimer.current) {
+      window.clearTimeout(sidebarCloseTimer.current);
+      sidebarCloseTimer.current = null;
+    }
+    if (sidebarOpenTimer.current) {
+      window.clearTimeout(sidebarOpenTimer.current);
+    }
+    sidebarOpenTimer.current = window.setTimeout(() => {
+      setSidebarOpen(true);
+    }, 60);
+  };
+
+  const closeSidebar = () => {
+    if (sidebarOpenTimer.current) {
+      window.clearTimeout(sidebarOpenTimer.current);
+      sidebarOpenTimer.current = null;
+    }
+    if (sidebarCloseTimer.current) {
+      window.clearTimeout(sidebarCloseTimer.current);
+    }
+    sidebarCloseTimer.current = window.setTimeout(() => {
+      setSidebarOpen(false);
+    }, 140);
+  };
