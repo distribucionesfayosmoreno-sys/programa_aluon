@@ -303,6 +303,7 @@ const CutlistPage = () => {
       const autoTable = autoTableModule.default;
       const imageCatalog: Record<string, string> = {
         logo: '/legacy/aluon/images/logo.png',
+        larguero50x80ConPestania: '/legacy/aluon/images/larguero50x80conPestania.jpg',
         marco1: '/legacy/aluon/images/marco1.jpg',
         marco2: '/legacy/aluon/images/marco2.jpg',
         marco2ConPestania: '/legacy/aluon/images/marco2conPestania.jpg',
@@ -321,15 +322,19 @@ const CutlistPage = () => {
         posteCierreB: '/legacy/aluon/images/posteDeCierrePuertaCorrederaMontajeB.jpg',
         tubo80x50: '/legacy/aluon/images/tubo80x50.jpg',
         tuboInox: '/legacy/aluon/images/tuboInoxidable.jpg',
+        tuboRefuerzoMotor: '/legacy/aluon/images/tuboRefuerzoMotor.jpg',
+        tuboRefuerzoMotorInox: '/legacy/aluon/images/tuboRefuerzoMotorInox.jpg',
       };
 
       const normalizeText = (value: string) => value.toLowerCase();
 
       const resolveSectionalImage = (description: string) => {
         const text = normalizeText(description);
+        if (text.includes('refuerzo motor') && text.includes('inox')) return 'tuboRefuerzoMotorInox';
+        if (text.includes('refuerzo motor')) return 'tuboRefuerzoMotor';
         if (text.includes('perfil ruedas')) return 'perfilRuedas';
-        if (text.includes('poste de cierre') && text.includes('montaje a')) return 'posteCierreA';
-        if (text.includes('poste de cierre') && text.includes('montaje b')) return 'posteCierreB';
+        if (text.includes('poste de cierre') && (text.includes('montaje a') || text.includes('sin pestañas'))) return 'posteCierreA';
+        if (text.includes('poste de cierre') && (text.includes('montaje b') || text.includes('con pestañas'))) return 'posteCierreB';
         if (text.includes('tubo inoxidable')) return 'tuboInox';
         if (text.includes('tubo 80x50') || text.includes('cola')) return 'tubo80x50';
         if (text.includes('lama 200x26')) return 'lamaInox';
@@ -338,10 +343,13 @@ const CutlistPage = () => {
         if (text.includes('lama 100 avión')) return 'lamaAvion';
         if (text.includes('larguero 50x50')) return 'marco1';
         if (text.includes('larguero 50x80') && text.includes('pestaña') && text.includes('inox')) return 'marco2ConPestaniaInox';
-        if (text.includes('larguero 50x80') && text.includes('pestaña')) return 'marco2ConPestania';
-        if (text.includes('larguero 50x80')) return 'marco2';
-        if (text.includes('marco') && text.includes('inox')) return 'marcoInox';
-        if (text.includes('marco') && text.includes('80x50')) return 'marco3';
+        if (text.includes('larguero 50x80') && text.includes('pestaña')) return 'larguero50x80ConPestania';
+        if (text.includes('larguero 50x80')) return 'larguero50x80ConPestania';
+        if (text.includes('marco') && (text.includes('troquelado') || text.includes('veneciana') || text.includes('50x50'))) return 'tuboRefuerzoMotorInox';
+        if (text.includes('marco') && text.includes('80x50') && text.includes('pestaña') && text.includes('inox')) return 'marco2ConPestaniaInox';
+        if (text.includes('marco') && text.includes('80x50') && text.includes('pestaña')) return 'marco2ConPestania';
+        if (text.includes('marco') && text.includes('80x50') && text.includes('inox')) return 'marcoInox';
+        if (text.includes('marco') && text.includes('80x50')) return 'marco2';
         if (text.includes('marco') && text.includes('50x50')) return 'marco1';
         return null;
       };
@@ -389,7 +397,7 @@ const CutlistPage = () => {
           imgSeccional: seccional ?? '',
           description: item.description,
           imgLateral: lateral ?? '',
-          units: String(item.units),
+          units: `${item.units}x`,
           cutMeasure: item.cutMeasure,
         };
       });
@@ -426,9 +434,17 @@ const CutlistPage = () => {
         doc.text(row, marginX, cursorY);
         cursorY += 5;
       });
+      cursorY += 4;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text('DESGLOSE', marginX, cursorY);
+      cursorY += 5;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text('Aluminio soldado', marginX, cursorY);
 
       autoTable(doc, {
-        startY: cursorY + 4,
+        startY: cursorY + 6,
         columns: [
           { header: 'Img Seccional', dataKey: 'imgSeccional' },
           { header: 'Descripción', dataKey: 'description' },
@@ -650,24 +666,28 @@ const CutlistPage = () => {
           )}
 
           <div className="flex flex-wrap items-center gap-3">
-            <button className="btn-primary" onClick={onSubmit} disabled={submitting}>
-              {submitting ? 'Generando...' : 'Generar despiece'}
-            </button>
-            <button className="btn-ghost" onClick={handlePrint} disabled={!cutlist}>
-              Imprimir
-            </button>
-            <button className="btn-ghost" onClick={exportPdf} disabled={!cutlist}>
-              Exportar PDF
-            </button>
-            <button className="btn-ghost" onClick={exportCsv} disabled={!cutlist}>
-              Exportar CSV
-            </button>
-            <button className="btn-ghost" onClick={() => setLocked(false)} disabled={!locked}>
-              Editar
-            </button>
-            <button className="btn-ghost" onClick={resetAll}>
-              Reiniciar
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <button className="btn-primary" onClick={onSubmit} disabled={submitting}>
+                {submitting ? 'Generando...' : 'Generar despiece'}
+              </button>
+              <button className="btn-ghost" onClick={handlePrint} disabled={!cutlist}>
+                Imprimir
+              </button>
+              <button className="btn-ghost" onClick={exportPdf} disabled={!cutlist}>
+                Exportar PDF
+              </button>
+              <button className="btn-ghost" onClick={exportCsv} disabled={!cutlist}>
+                Exportar CSV
+              </button>
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <button className="btn-ghost" onClick={() => setLocked(false)} disabled={!locked}>
+                Editar
+              </button>
+              <button className="btn-ghost" onClick={resetAll}>
+                Reiniciar
+              </button>
+            </div>
           </div>
         </div>
 

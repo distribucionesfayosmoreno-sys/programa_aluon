@@ -45,7 +45,7 @@ const App = () => {
       case 'dashboard':
         return 'Dashboard';
       case 'despiece':
-        return 'Despiece (Legacy)';
+        return 'Despiece';
       case 'registro':
         return 'Registro de Clientes';
       case 'inscripciones':
