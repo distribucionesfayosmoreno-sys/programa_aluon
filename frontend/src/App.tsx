@@ -13,6 +13,7 @@ const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [theme, setTheme] = useState<'red' | 'blue'>('red');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -69,9 +70,16 @@ const App = () => {
           setActiveModule('ordenes');
           setOpenNewRequest(true);
         }}
+        isOpen={sidebarOpen}
+        onHoverChange={setSidebarOpen}
       />
 
       <div id="main-layout" className="flex-1 flex flex-col min-w-0 relative">
+        <div
+          className="fixed left-0 top-0 h-full w-3 z-40"
+          onMouseEnter={() => setSidebarOpen(true)}
+          onMouseLeave={() => setSidebarOpen(false)}
+        />
         {/* Topbar */}
         <header
           className="h-16 flex-shrink-0 flex items-center justify-between px-8 sticky top-0 z-30"
