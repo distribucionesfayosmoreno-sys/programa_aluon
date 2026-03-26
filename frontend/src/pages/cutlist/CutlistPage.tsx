@@ -147,6 +147,28 @@ const emptyForm: FormState = {
   tail: '',
 };
 
+const FORM_TEMPLATES: Record<DoorType, string> = {
+  PEATONAL: '/legacy/aluon/formularios/peatonal.jpg',
+  ABATIBLE_UNA: '/legacy/aluon/formularios/abatible_una.jpg',
+  ABATIBLE_DOS: '/legacy/aluon/formularios/abatible_dos.jpg',
+  CORREDERA: '/legacy/aluon/formularios/corredera.jpg',
+  VALLA: '/legacy/aluon/formularios/vallas.jpg',
+};
+
+type OverlaySpec = {
+  text: string;
+  x: number; // percent
+  y: number; // percent
+  size?: number;
+  align?: 'left' | 'center' | 'right';
+};
+
+type CheckSpec = {
+  checked: boolean | null;
+  x: number;
+  y: number;
+};
+
 const parseBoolean = (value: '' | 'true' | 'false') => {
   if (value === 'true') return true;
   if (value === 'false') return false;
@@ -219,25 +241,96 @@ const CutlistPage = () => {
   const topFrameValue = parseBoolean(form.topFrame);
   const tailValue = parseBoolean(form.tail);
 
-  const DoorDiagram = () => (
-    <svg viewBox="0 0 220 260" className="w-full max-w-[220px] text-slate-700">
-      <defs>
-        <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-          <path d="M0,0 L6,3 L0,6 Z" fill="currentColor" />
-        </marker>
-      </defs>
-      <rect x="70" y="30" width="80" height="150" fill="none" stroke="currentColor" strokeWidth="2" />
-      <line x1="50" y1="30" x2="50" y2="180" stroke="currentColor" strokeWidth="1" markerStart="url(#arrow)" markerEnd="url(#arrow)" />
-      <text x="8" y="110" fontSize="10">Altura total</text>
-      <text x="8" y="124" fontSize="10">{form.heightMm || '--'} mm</text>
-      <line x1="70" y1="205" x2="150" y2="205" stroke="currentColor" strokeWidth="1" markerStart="url(#arrow)" markerEnd="url(#arrow)" />
-      <text x="78" y="225" fontSize="10">Anchura total</text>
-      <text x="90" y="238" fontSize="10">{form.widthMm || '--'} mm</text>
-      <line x1="170" y1="150" x2="170" y2="180" stroke="currentColor" strokeWidth="1" markerStart="url(#arrow)" markerEnd="url(#arrow)" />
-      <text x="178" y="168" fontSize="10">Holgura</text>
-      <text x="178" y="182" fontSize="10">{form.groundClearanceMm || '--'} mm</text>
-    </svg>
-  );
+  const heightCm = form.heightMm ? (Number(form.heightMm) / 10).toString() : '';
+  const widthCm = form.widthMm ? (Number(form.widthMm) / 10).toString() : '';
+
+  const buildFormOverlays = (): { overlays: OverlaySpec[]; checks: CheckSpec[] } => {
+    if (!selectedDoorType) return { overlays: [], checks: [] };
+    const baseOverlays: OverlaySpec[] = [
+      { text: selectedCustomer?.nombreComercial ?? '', x: 12, y: 20 },
+      { text: String(cutlist?.budgetNumber ?? ''), x: 56, y: 20 },
+      { text: formatDate(cutlist?.budgetDate ?? form.budgetDate), x: 78, y: 20 },
+      { text: formatModel(cutlist?.model ?? selectedModel), x: 12, y: 26 },
+      { text: cutlist?.color ?? form.color, x: 56, y: 26 },
+      { text: formatDoorType(cutlist?.doorType ?? selectedDoorType), x: 78, y: 26 },
+      { text: form.notes || '', x: 12, y: 90, size: 8 },
+      { text: form.installerName || '', x: 68, y: 90, size: 8 },
+    ];
+
+    const overlays: OverlaySpec[] = [...baseOverlays];
+    const checks: CheckSpec[] = [];
+
+    if (selectedDoorType === 'PEATONAL') {
+      overlays.push(
+        { text: heightCm, x: 19, y: 58, size: 8 },
+        { text: widthCm, x: 50, y: 80, size: 8 },
+        { text: form.groundClearanceMm || '', x: 81, y: 69, size: 8 }
+      );
+      checks.push(
+        { checked: form.hingesSide === 'LEFT', x: 49, y: 41.5 },
+        { checked: form.hingesSide === 'RIGHT', x: 70.5, y: 41.5 },
+        { checked: porterAutomaticValue === true, x: 80.5, y: 32.5 },
+        { checked: porterAutomaticValue === false, x: 86.5, y: 32.5 }
+      );
+    }
+
+    if (selectedDoorType === 'ABATIBLE_UNA') {
+      overlays.push(
+        { text: heightCm, x: 17.5, y: 62, size: 8 },
+        { text: heightCm, x: 82, y: 62, size: 8 },
+        { text: widthCm, x: 52, y: 79, size: 8 },
+        { text: form.groundClearanceMm || '', x: 50, y: 70, size: 8 }
+      );
+      checks.push(
+        { checked: automationIncludedValue === true, x: 38.5, y: 38.5 },
+        { checked: automationIncludedValue === false, x: 44.5, y: 38.5 },
+        { checked: form.hingesSide === 'LEFT', x: 42.5, y: 51.5 },
+        { checked: form.hingesSide === 'RIGHT', x: 67.5, y: 51.5 }
+      );
+    }
+
+    if (selectedDoorType === 'ABATIBLE_DOS') {
+      overlays.push(
+        { text: heightCm, x: 17.5, y: 62, size: 8 },
+        { text: heightCm, x: 82, y: 62, size: 8 },
+        { text: widthCm, x: 52, y: 79, size: 8 },
+        { text: form.groundClearanceMm || '', x: 50, y: 70, size: 8 }
+      );
+      checks.push(
+        { checked: automationIncludedValue === true, x: 38.5, y: 38.5 },
+        { checked: automationIncludedValue === false, x: 44.5, y: 38.5 },
+        { checked: form.openingSide === 'LEFT', x: 44, y: 51.5 },
+        { checked: form.openingSide === 'RIGHT', x: 66.5, y: 51.5 }
+      );
+    }
+
+    if (selectedDoorType === 'CORREDERA') {
+      overlays.push(
+        { text: heightCm, x: 52, y: 38.5, size: 8 },
+        { text: widthCm, x: 34, y: 54, size: 8 },
+        { text: widthCm, x: 73, y: 54, size: 8 }
+      );
+      checks.push(
+        { checked: automationIncludedValue === true, x: 38.5, y: 34.5 },
+        { checked: automationIncludedValue === false, x: 44.5, y: 34.5 },
+        { checked: form.openingSide === 'LEFT', x: 28, y: 45.5 },
+        { checked: form.openingSide === 'RIGHT', x: 78, y: 45.5 },
+        { checked: form.railType === 'CARRIL_16', x: 78, y: 66.5 },
+        { checked: form.railType === 'CARRIL_20', x: 86, y: 66.5 },
+        { checked: form.mountingType === 'A', x: 22, y: 73.5 },
+        { checked: form.mountingType === 'B', x: 78, y: 73.5 }
+      );
+    }
+
+    if (selectedDoorType === 'VALLA') {
+      overlays.push(
+        { text: heightCm, x: 84, y: 44.5, size: 8 },
+        { text: widthCm, x: 50, y: 62, size: 8 }
+      );
+    }
+
+    return { overlays, checks };
+  };
 
   useEffect(() => {
     if (automationReinforcementLocked) {
@@ -453,74 +546,37 @@ const CutlistPage = () => {
       );
 
       const logo = imageData.logo;
-      if (logo) {
-        doc.addImage(logo, 'PNG', marginX, cursorY - 6, 24, 14);
+
+      if (selectedDoorType) {
+        const templatePath = FORM_TEMPLATES[selectedDoorType];
+        const templateDataUrl = await loadImageAsDataUrl(templatePath);
+        doc.addImage(templateDataUrl, 'JPEG', 0, 0, 210, 297);
+        const { overlays, checks } = buildFormOverlays();
+        const toMmX = (percent: number) => (percent / 100) * 210;
+        const toMmY = (percent: number) => (percent / 100) * 297;
+        overlays.forEach(overlay => {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(overlay.size ?? 8);
+          const x = toMmX(overlay.x);
+          const y = toMmY(overlay.y);
+          doc.text(overlay.text || '-', x, y);
+        });
+        checks.forEach(check => {
+          if (!check.checked) return;
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.text('X', toMmX(check.x), toMmY(check.y));
+        });
+        doc.addPage();
+        cursorY = 16;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.text('DESGLOSE', marginX, cursorY);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.text('Aluminio soldado', marginX, cursorY + 5);
+        cursorY += 12;
       }
-      const doorTitle = formatDoorType(cutlist.doorType ?? selectedDoorType).toUpperCase();
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.text(doorTitle, marginX + 30, cursorY);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.text('Formulario de pedido', 140, cursorY);
-      cursorY += 10;
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      const drawField = (label: string, value: string, x: number, y: number, w: number) => {
-        doc.text(label, x, y - 2);
-        doc.rect(x, y, w, 6);
-        doc.text(value || '-', x + 2, y + 4);
-      };
-      drawField('Distribuidor', selectedCustomer?.nombreComercial ?? '', marginX, cursorY, 70);
-      drawField('Nº Presupuesto', String(cutlist.budgetNumber ?? ''), marginX + 74, cursorY, 40);
-      drawField('Fecha', formatDate(cutlist.budgetDate ?? form.budgetDate), marginX + 118, cursorY, 34);
-      cursorY += 12;
-      drawField('Modelo Aluon', formatModel(cutlist.model ?? selectedModel), marginX, cursorY, 70);
-      drawField('Referencia Color', cutlist.color ?? form.color, marginX + 74, cursorY, 40);
-      drawField('Acabado', formatDoorType(cutlist.doorType ?? selectedDoorType), marginX + 118, cursorY, 34);
-      cursorY += 14;
-
-      const drawCheckbox = (label: string, checked: boolean | null, x: number, y: number) => {
-        doc.text(label, x, y + 4);
-        doc.rect(x + 28, y, 4, 4);
-        if (checked) {
-          doc.text('X', x + 29, y + 3.5);
-        }
-      };
-
-      if (selectedDoorType === 'PEATONAL') {
-        drawCheckbox('Bisagra Izq', form.hingesSide === 'LEFT', marginX, cursorY);
-        drawCheckbox('Bisagra Der', form.hingesSide === 'RIGHT', marginX + 50, cursorY);
-        cursorY += 8;
-        drawCheckbox('Portero Sí', porterAutomaticValue === true, marginX, cursorY);
-        drawCheckbox('Portero No', porterAutomaticValue === false, marginX + 50, cursorY);
-        cursorY += 10;
-        doc.rect(marginX + 20, cursorY, 50, 90);
-        doc.text(`Altura total: ${formatMm(form.heightMm)}`, marginX + 78, cursorY + 10);
-        doc.text(`Anchura total: ${formatMm(form.widthMm)}`, marginX + 78, cursorY + 20);
-        doc.text(`Holgura: ${formatMm(form.groundClearanceMm)}`, marginX + 78, cursorY + 30);
-        cursorY += 100;
-      } else {
-        doc.text(`Altura total: ${formatMm(form.heightMm)}`, marginX, cursorY);
-        doc.text(`Anchura total: ${formatMm(form.widthMm)}`, marginX + 60, cursorY);
-        cursorY += 8;
-      }
-
-      doc.text(`Observaciones: ${form.notes || '-'}`, marginX, cursorY);
-      cursorY += 6;
-      doc.text(`Nombre instalador: ${form.installerName || '-'}`, marginX, cursorY);
-
-      doc.addPage();
-      cursorY = 16;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.text('DESGLOSE', marginX, cursorY);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text('Aluminio soldado', marginX, cursorY + 5);
-      cursorY += 12;
 
       autoTable(doc, {
         startY: cursorY,
@@ -1039,68 +1095,43 @@ const CutlistPage = () => {
             <div className="text-xs font-bold uppercase tracking-widest text-slate-400">{cutlist.items.length} filas</div>
           )}
         </div>
-        {cutlist && (
-          <div className="mt-6 rounded-2xl border border-slate-300 p-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <img src={IMAGE_CATALOG.logo} alt="Aluon" className="h-10 w-auto" />
-                <div className="text-xs font-semibold uppercase text-slate-500">Aluminio Soldado</div>
-              </div>
-              <div className="text-sm font-black uppercase text-slate-900">
-                {formatDoorType(cutlist.doorType ?? selectedDoorType).toUpperCase()}
-              </div>
-              <div className="text-xs font-semibold uppercase text-slate-500">Formulario de pedido</div>
-            </div>
-
-            <div className="mt-4 grid md:grid-cols-3 gap-3 text-xs">
-              <div className="border border-slate-300 p-2">
-                <div className="text-[10px] uppercase text-slate-500">Distribuidor</div>
-                <div className="font-semibold">{selectedCustomer?.nombreComercial ?? '-'}</div>
-              </div>
-              <div className="border border-slate-300 p-2">
-                <div className="text-[10px] uppercase text-slate-500">Nº Presupuesto</div>
-                <div className="font-semibold">{cutlist.budgetNumber ?? '-'}</div>
-              </div>
-              <div className="border border-slate-300 p-2">
-                <div className="text-[10px] uppercase text-slate-500">Fecha</div>
-                <div className="font-semibold">{formatDate(cutlist.budgetDate ?? form.budgetDate)}</div>
-              </div>
-              <div className="border border-slate-300 p-2">
-                <div className="text-[10px] uppercase text-slate-500">Modelo Aluon</div>
-                <div className="font-semibold">{formatModel(cutlist.model ?? selectedModel)}</div>
-              </div>
-              <div className="border border-slate-300 p-2">
-                <div className="text-[10px] uppercase text-slate-500">Referencia Color</div>
-                <div className="font-semibold">{cutlist.color ?? form.color}</div>
-              </div>
-              <div className="border border-slate-300 p-2">
-                <div className="text-[10px] uppercase text-slate-500">Acabado</div>
-                <div className="font-semibold">{formatDoorType(cutlist.doorType ?? selectedDoorType)}</div>
-              </div>
-            </div>
-
-            <div className="mt-4 grid md:grid-cols-[1.1fr_0.9fr] gap-6">
-              <div className="border border-slate-300 p-4 flex flex-col items-center gap-3">
-                {selectedDoorType === 'PEATONAL' && (
-                  <div className="w-full flex justify-between text-xs font-semibold">
-                    <span>Bisagra Izquierda {form.hingesSide === 'LEFT' ? '[X]' : '[ ]'}</span>
-                    <span>Bisagra Derecha {form.hingesSide === 'RIGHT' ? '[X]' : '[ ]'}</span>
-                  </div>
-                )}
-                <DoorDiagram />
-                {selectedDoorType === 'PEATONAL' && (
-                  <div className="w-full text-xs font-semibold">
-                    Portero Automático: {formatYesNo(porterAutomaticValue)}
-                  </div>
-                )}
-              </div>
-              <div className="border border-slate-300 p-4 text-xs">
-                <div className="font-semibold">Observaciones por parte del distribuidor</div>
-                <div className="mt-2 min-h-[72px] border border-slate-300 p-2">{form.notes || '-'}</div>
-                <div className="mt-4 font-semibold">Nombre (si lo hace el instalador)</div>
-                <div className="mt-2 border border-slate-300 p-2">{form.installerName || '-'}</div>
-              </div>
-            </div>
+        {cutlist && selectedDoorType && (
+          <div className="mt-6 rounded-2xl border border-slate-300 p-4">
+            {(() => {
+              const { overlays, checks } = buildFormOverlays();
+              const template = FORM_TEMPLATES[selectedDoorType];
+              return (
+                <div className="relative w-full max-w-[720px] mx-auto">
+                  <img src={template} alt="Formulario" className="w-full h-auto" />
+                  {overlays.map((overlay, index) => (
+                    <div
+                      key={`overlay-${index}`}
+                      className="absolute text-[10px] text-slate-800"
+                      style={{
+                        left: `${overlay.x}%`,
+                        top: `${overlay.y}%`,
+                        transform: overlay.align === 'center' ? 'translate(-50%, -50%)' : 'translate(0, -50%)',
+                        fontSize: overlay.size ? `${overlay.size}px` : undefined,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {overlay.text}
+                    </div>
+                  ))}
+                  {checks.map((check, index) => (
+                    check.checked ? (
+                      <div
+                        key={`check-${index}`}
+                        className="absolute text-[10px] font-bold text-slate-900"
+                        style={{ left: `${check.x}%`, top: `${check.y}%`, transform: 'translate(-50%, -50%)' }}
+                      >
+                        X
+                      </div>
+                    ) : null
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         )}
         <div className="mt-5 overflow-x-auto">
