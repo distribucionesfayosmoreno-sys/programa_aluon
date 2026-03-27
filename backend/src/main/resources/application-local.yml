@@ -12,7 +12,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        tenant_identifier_resolver: com.aluon.core.tenant.CurrentTenantIdentifierResolverImpl
+        tenant_identifier_resolver: com.aluon.core.tenant.service.CurrentTenantIdentifierResolverImpl
   h2:
     console:
       enabled: true
