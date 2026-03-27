@@ -13,26 +13,31 @@ import java.util.UUID;
 public class CustomerController {
 
     private final CustomerService customerService;
+    private final CustomerMapper customerMapper;
 
     @GetMapping
-    public List<Customer> getAll() {
-        return customerService.findAll();
+    public List<CustomerResponse> getAll() {
+        return customerService.findAll().stream()
+                .map(customerMapper::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(customerService.findById(id));
+    public ResponseEntity<CustomerResponse> getById(@PathVariable UUID id) {
+        Customer customer = customerService.findById(id);
+        return ResponseEntity.ok(customerMapper.toResponse(customer));
     }
 
     @PostMapping
-    public Customer create(@RequestBody Customer customer) {
-        return customerService.save(customer);
+    public CustomerResponse create(@RequestBody CustomerRequest request) {
+        Customer created = customerService.save(customerMapper.toEntity(request, null));
+        return customerMapper.toResponse(created);
     }
 
     @PutMapping("/{id}")
-    public Customer update(@PathVariable UUID id, @RequestBody Customer customer) {
-        customer.setId(id);
-        return customerService.save(customer);
+    public CustomerResponse update(@PathVariable UUID id, @RequestBody CustomerRequest request) {
+        Customer updated = customerService.save(customerMapper.toEntity(request, id));
+        return customerMapper.toResponse(updated);
     }
 
     @DeleteMapping("/{id}")
