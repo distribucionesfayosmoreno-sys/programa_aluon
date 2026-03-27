@@ -1,40 +1,66 @@
 ---
-description: Create a standard MVC project structure
+description: Create an MVC-aligned project structure for ALUON
 ---
 
-# Arquitectura del Proyecto (Patrón MVC)
+# Arquitectura del Proyecto (Patron MVC)
 
-## Backend (Java)
-Ruta base: `/backend/src/main/java/com/app/`
-Estructura de paquetes requerida:
-- `/models`: Entidades de dominio y transferencia de datos (DTOs).
-- `/views`: Plantillas de respuesta (o adaptadores JSON si es una API REST pura).
-- `/controllers`: Controladores que reciben las peticiones HTTP.
-- `/routes`: Configuración de enrutamiento y endpoints.
-- `/services`: Lógica de negocio independiente del controlador.
-- `/repositories`: Acceso y persistencia en la base de datos.
-# Reglas de Desarrollo: Spring Boot
+Este workflow adapta el patron MVC al repositorio actual y a las reglas activas del proyecto.
 
-1. **Inyección de Dependencias:** NO uses `@Autowired` en las propiedades. Usa siempre inyección por constructor (preferiblemente usando `@RequiredArgsConstructor` de Lombok si está disponible).
-2. **Arquitectura Limpia (MVC/API):** - Los `Controllers` solo deben manejar la capa web (rutas, validación de DTOs, códigos HTTP) y llamar a los `Services`.
-   - Los `Services` contienen TODA la lógica de negocio.
-   - Los `Repositories` (Spring Data JPA) solo se comunican con la base de datos.
-3. **Manejo de Datos:** Nunca expongas Entidades de la base de datos directamente en el Controlador. Usa siempre DTOs (Data Transfer Objects) para las respuestas y peticiones (`RequestDTO`, `ResponseDTO`).
-4. **Respuestas HTTP:** Retorna siempre objetos `ResponseEntity<T>` en los controladores para tener control absoluto sobre los códigos de estado HTTP (200, 201, 404, etc.).
-5. **Manejo de Errores:** Usa un `@RestControllerAdvice` global para capturar excepciones y devolver respuestas de error estandarizadas en JSON.
+## Backend (Java + Spring Boot)
+Ruta base: `/backend/src/main/java/com/aluon/`
 
-## Frontend (TypeScript)
+Estructura de paquetes requerida (por dominio, con MVC interno):
+- `com.aluon.<dominio>.controller` -> Controladores HTTP
+- `com.aluon.<dominio>.service` -> Logica de negocio
+- `com.aluon.<dominio>.repository` -> Acceso a datos (Spring Data JPA)
+- `com.aluon.<dominio>.model` -> Entidades JPA
+- `com.aluon.<dominio>.dto` -> Request/Response DTOs
+- `com.aluon.<dominio>.mapper` -> Mappers entre entidades y DTOs
+
+Ejemplo:
+- `com.aluon.crm.customer.controller.CustomerController`
+- `com.aluon.crm.customer.service.CustomerService`
+- `com.aluon.crm.customer.repository.CustomerRepository`
+- `com.aluon.crm.customer.model.Customer`
+- `com.aluon.crm.customer.dto.CustomerRequest`, `CustomerResponse`
+- `com.aluon.crm.customer.mapper.CustomerMapper`
+
+### Reglas de desarrollo (Backend)
+1. **Inyeccion por constructor:** NO uses `@Autowired` en campos. Usa `@RequiredArgsConstructor` o constructor explicito.
+2. **Separacion MVC estricta:**
+   - Controllers: solo capa web, validacion, codigos HTTP, delegan al Service.
+   - Services: toda la logica de negocio.
+   - Repositories: solo persistencia.
+3. **DTOs obligatorios:** Prohibido exponer `@Entity` en Controllers. Usa Request/Response DTOs.
+4. **ResponseEntity recomendado:** Usa `ResponseEntity<T>` cuando necesites controlar status. En respuestas simples puedes devolver DTOs directamente.
+5. **Errores globales:** Usa `@RestControllerAdvice` para respuestas de error estandarizadas.
+6. **Limite de lineas:** Ningun archivo debe superar 500 lineas.
+
+## Frontend (React + TypeScript)
 Ruta base: `/frontend/src/`
-Estructura de carpetas requerida:
-- `/models`: Interfaces, tipos de TypeScript y esquemas de datos.
-- `/views`: Componentes de la interfaz de usuario (UI) y páginas renderizadas.
-- `/controllers`: Hooks personalizados, gestores de estado y lógica de interacción.
-- `/routes`: Definición de rutas y navegación del cliente.
-- `/services`: Lógica para interactuar con la API del backend.
-# Reglas de Desarrollo: React + TypeScript
 
-1. **Componentes:** Escribe EXCLUSIVAMENTE componentes funcionales usando arrow functions (`const MiComponente = () => {}`). No uses componentes de clase.
-2. **Tipado:** Usa `interface` para definir modelos de datos y las `Props` de los componentes. El tipado debe ser estricto (evita usar `any`).
-3. **Gestión de Estado y Efectos:** Usa los Hooks nativos (`useState`, `useEffect`, `useContext`) para el estado local. Extrae la lógica compleja a Custom Hooks (`/controllers`).
-4. **Consumo de API:** Ubica todas las llamadas al backend (axios o fetch) en la carpeta `/services`. Los componentes nunca deben hacer fetch directamente; deben llamar a las funciones del servicio.
-5. **Estilizado:** (Añade aquí tu preferencia, ej: Usa Tailwind CSS para las clases / Usa CSS Modules para mantener los estilos aislados).
+Estructura MVC (por feature):
+- `features/<feature>/views/` -> Componentes UI y paginas
+- `features/<feature>/controllers/` -> Hooks y logica de interaccion
+- `features/<feature>/models/` -> Tipos e interfaces
+- `features/<feature>/services/` -> Acceso a API
+- `features/<feature>/routes/` -> Rutas locales de la feature (si aplica)
+
+Reglas adicionales para components grandes:
+- `Componente.tsx` (solo composicion UI)
+- `Componente.types.ts` (props y tipos)
+- `useComponente.ts` (hook con estado/negocio)
+
+### Reglas de desarrollo (Frontend)
+1. **Componentes funcionales:** Solo funciones flecha.
+2. **Tipado estricto:** Prohibido `any`. Usa `unknown` + type guards o genericos.
+3. **Fetch fuera de .tsx:** Todas las llamadas API en `/services`.
+4. **Separacion de logica:** UI en `views`, estado y reglas en `controllers`.
+5. **Limite de lineas:** Ningun archivo debe superar 500 lineas.
+
+## Pasos de trabajo (cuando se crea una nueva feature)
+1. Crear carpeta feature en backend con subpaquetes `controller/service/repository/model/dto/mapper`.
+2. Crear carpeta feature en frontend con `views/controllers/models/services`.
+3. Implementar DTOs y mappers antes de exponer endpoints.
+4. Validar que no haya `fetch` en `.tsx`.
+5. Verificar limite de 500 lineas por archivo.

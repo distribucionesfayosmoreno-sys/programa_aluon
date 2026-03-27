@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
-import CustomerManagement from './pages/CustomerManagement';
-import CustomerOnboarding from './pages/customer-onboarding/CustomerOnboarding';
-import Dashboard from './pages/Dashboard';
-import AdminManagement from './pages/AdminManagement';
-import WorkOrders from './pages/WorkOrders';
-import RegistrationRequests from './pages/RegistrationRequests';
-import Settings from './pages/Settings';
-import Cutlist from './pages/Cutlist';
+import CustomerManagement from './features/customer-management/CustomerManagement';
+import CustomerOnboarding from './features/customer-onboarding/CustomerOnboarding';
+import Dashboard from './features/dashboard/Dashboard';
+import AdminManagement from './features/admin-management/AdminManagement';
+import WorkOrders from './features/work-orders/WorkOrders';
+import RegistrationRequests from './features/registration-requests/RegistrationRequests';
+import Settings from './features/settings/Settings';
+import Cutlist from './features/cutlist/Cutlist';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
