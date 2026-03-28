@@ -168,6 +168,7 @@ export type WorkOrderRequest = {
   id: string;
   customerName: string;
   modelId: string;
+  modelLabel?: string;
   m2: number;
   reference: string;
   googleView: boolean;

@@ -1,5 +1,6 @@
-import { useCallback, useReducer } from 'react';
-import { MODELS, MOCK_REQUESTS } from '../constants';
+import { useCallback, useEffect, useReducer } from 'react';
+import { MODELS } from '../constants';
+import { fetchWorkOrderRequests } from '../services/requestsApi';
 import type { TabKey, WorkOrderRequest } from '../models';
 
 type WorkOrderBaseState = {
@@ -36,7 +37,7 @@ type WorkOrderBaseAction<K extends keyof WorkOrderBaseState = keyof WorkOrderBas
     };
 
 const initialState: WorkOrderBaseState = {
-  requests: MOCK_REQUESTS,
+  requests: [],
   customerId: '',
   modelId: MODELS[0].id,
   modelReference: '',
@@ -76,6 +77,24 @@ const reducer = (state: WorkOrderBaseState, action: WorkOrderBaseAction) => {
 
 export const useWorkOrderBaseState = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const requests = await fetchWorkOrderRequests();
+        if (active) {
+          dispatch({ type: 'SET_REQUESTS', value: requests });
+        }
+      } catch (error) {
+        console.error('[work-orders] Failed to load requests', error);
+      }
+    };
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const setField = useCallback(
     <K extends keyof WorkOrderBaseState>(field: K, value: WorkOrderBaseState[K]) => {

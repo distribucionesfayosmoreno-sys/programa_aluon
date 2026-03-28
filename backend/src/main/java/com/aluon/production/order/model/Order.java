@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.TenantId;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -45,6 +46,9 @@ public class Order {
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

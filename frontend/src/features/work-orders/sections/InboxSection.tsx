@@ -43,7 +43,7 @@ export const InboxSection = ({
   const filteredRequests = useMemo(() => {
     const query = filterText.trim().toLowerCase();
     return requests.filter(req => {
-      const modelLabel = MODELS.find(m => m.id === req.modelId)?.label ?? '';
+      const modelLabel = req.modelLabel ?? (MODELS.find(m => m.id === req.modelId)?.label ?? '');
       const matchesText = !query || [
         req.customerName,
         req.id,
@@ -123,7 +123,7 @@ export const InboxSection = ({
         <div className="divide-y" style={{ borderColor: uiColors.border }}>
           {filteredRequests.map(req => {
             const active = selectedRequestId === req.id;
-            const modelLabel = MODELS.find(m => m.id === req.modelId)?.label ?? '—';
+            const modelLabel = req.modelLabel ?? (MODELS.find(m => m.id === req.modelId)?.label ?? '—');
             const statusStyle = statusStyles[req.workflowStep] ?? statusStyles.INBOX;
             const progress = statusProgress[req.workflowStep] ?? 0;
               return (

@@ -46,6 +46,12 @@ public class OrderService {
                         .customerName(order.getCustomer().getNombreComercial() != null
                                 ? order.getCustomer().getNombreComercial()
                                 : order.getCustomer().getRazonSocial())
+                        .modeloPuerta(order.getModeloPuerta())
+                        .anchoMm(order.getAnchoMm())
+                        .altoMm(order.getAltoMm())
+                        .notes(order.getNotes())
+                        .requestDate(order.getCreatedAt() != null ? order.getCreatedAt().toLocalDate() : LocalDate.now())
+                        .m2(calculateM2(order.getAnchoMm(), order.getAltoMm()))
                         .build())
                 .toList();
     }
@@ -146,6 +152,7 @@ public class OrderService {
                 .anchoMm(request.getAnchoMm())
                 .altoMm(request.getAltoMm())
                 .notes(normalize(request.getNotes()))
+                .createdAt(LocalDateTime.now())
                 .estado(OrderStatus.PENDIENTE_MATERIAL)
                 .workflowStep(OrderWorkflowStep.INBOX)
                 .build();
@@ -214,5 +221,13 @@ public class OrderService {
         } catch (Exception ex) {
             throw new IllegalArgumentException("No se pudo leer el archivo adjunto");
         }
+    }
+
+    private Double calculateM2(Integer anchoMm, Integer altoMm) {
+        if (anchoMm == null || altoMm == null) {
+            return 0.0;
+        }
+        double value = (anchoMm.doubleValue() * altoMm.doubleValue()) / 1_000_000d;
+        return Math.round(value * 10d) / 10d;
     }
 }

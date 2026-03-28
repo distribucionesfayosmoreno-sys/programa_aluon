@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
+import java.time.LocalDate;
 import com.aluon.production.order.model.OrderStatus;
 import com.aluon.production.order.model.OrderWorkflowStep;
 
@@ -20,4 +21,10 @@ public class OrderStatusDto {
     private OrderStatus estado;
     private OrderWorkflowStep workflowStep;
     private String customerName;
+    private String modeloPuerta;
+    private Integer anchoMm;
+    private Integer altoMm;
+    private String notes;
+    private LocalDate requestDate;
+    private Double m2;
 }
