@@ -15,6 +15,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     @EntityGraph(attributePaths = "customer")
     List<Order> findAllByOrderByCodigoOrdenDesc();
 
+    boolean existsByCodigoOrden(String codigoOrden);
+
     long countByWorkflowStepIn(Collection<OrderWorkflowStep> steps);
 
     long countByEstado(OrderStatus estado);

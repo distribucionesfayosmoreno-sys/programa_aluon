@@ -1,20 +1,31 @@
 package com.aluon.production.order.service;
 
 import com.aluon.crm.customer.model.Customer;
+import com.aluon.crm.customer.service.CustomerService;
 import com.aluon.production.cutlist.model.Cutlist;
 import com.aluon.production.cutlist.model.CutlistItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import com.aluon.production.order.model.Order;
+import com.aluon.production.order.model.OrderAttachment;
+import com.aluon.production.order.model.OrderStatus;
+import com.aluon.production.order.model.OrderWorkflowStep;
 import com.aluon.production.order.repository.OrderRepository;
 import com.aluon.production.order.dto.OrderStatusDto;
 import com.aluon.production.order.dto.WorkOrderDto;
 import com.aluon.production.order.dto.WorkOrderItemDto;
+import com.aluon.production.order.dto.WorkOrderRequestDto;
+import com.aluon.production.order.dto.WorkOrderRequestResponseDto;
 
 
 @Service
@@ -23,6 +34,7 @@ import com.aluon.production.order.dto.WorkOrderItemDto;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final CustomerService customerService;
 
     public List<OrderStatusDto> listOrderStatuses() {
         return orderRepository.findAllByOrderByCodigoOrdenDesc().stream()
@@ -113,5 +125,94 @@ public class OrderService {
                 .createdAt(cutlist.getCreatedAt())
                 .items(items)
                 .build();
+    }
+
+    @Transactional
+    public WorkOrderRequestResponseDto createWorkOrderRequest(WorkOrderRequestDto request) {
+        validateRequest(request);
+
+        Customer customer = Customer.builder()
+                .nombreComercial(request.getCustomerName().trim())
+                .telefono(normalize(request.getCustomerPhone()))
+                .email(normalize(request.getCustomerEmail()))
+                .build();
+
+        Customer savedCustomer = customerService.save(customer);
+
+        Order order = Order.builder()
+                .customer(savedCustomer)
+                .codigoOrden(generateCodigoOrden())
+                .modeloPuerta(request.getModeloPuerta().trim())
+                .anchoMm(request.getAnchoMm())
+                .altoMm(request.getAltoMm())
+                .notes(normalize(request.getNotes()))
+                .estado(OrderStatus.PENDIENTE_MATERIAL)
+                .workflowStep(OrderWorkflowStep.INBOX)
+                .build();
+
+        List<MultipartFile> attachments = request.getAttachments();
+        if (attachments != null) {
+            attachments.stream()
+                    .filter(file -> !file.isEmpty())
+                    .forEach(file -> order.addAttachment(buildAttachment(file)));
+        }
+
+        Order savedOrder = orderRepository.save(order);
+        return WorkOrderRequestResponseDto.builder()
+                .id(savedOrder.getId())
+                .codigoOrden(savedOrder.getCodigoOrden())
+                .build();
+    }
+
+    private void validateRequest(WorkOrderRequestDto request) {
+        if (request == null) {
+            throw new IllegalArgumentException("La solicitud es obligatoria");
+        }
+        if (request.getCustomerName() == null || request.getCustomerName().isBlank()) {
+            throw new IllegalArgumentException("El cliente es obligatorio");
+        }
+        if (request.getModeloPuerta() == null || request.getModeloPuerta().isBlank()) {
+            throw new IllegalArgumentException("El modelo es obligatorio");
+        }
+        if (request.getAnchoMm() == null || request.getAnchoMm() <= 0) {
+            throw new IllegalArgumentException("La anchura debe ser mayor que 0");
+        }
+        if (request.getAltoMm() == null || request.getAltoMm() <= 0) {
+            throw new IllegalArgumentException("La altura debe ser mayor que 0");
+        }
+    }
+
+    private String generateCodigoOrden() {
+        String datePart = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        for (int attempt = 0; attempt < 10; attempt++) {
+            int random = ThreadLocalRandom.current().nextInt(1000, 9999);
+            String code = "OT-" + datePart + "-" + random;
+            if (!orderRepository.existsByCodigoOrden(code)) {
+                return code;
+            }
+        }
+        throw new IllegalStateException("No se pudo generar un código de orden");
+    }
+
+    private String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private OrderAttachment buildAttachment(MultipartFile file) {
+        try {
+            return OrderAttachment.builder()
+                    .fileName(file.getOriginalFilename() == null ? "archivo" : file.getOriginalFilename())
+                    .contentType(file.getContentType())
+                    .fileSize(file.getSize())
+                    .fileData(file.getBytes())
+                    .createdAt(LocalDateTime.now())
+                    .build();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("No se pudo leer el archivo adjunto");
+        }
     }
 }

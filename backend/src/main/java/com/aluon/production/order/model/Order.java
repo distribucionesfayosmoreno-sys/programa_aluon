@@ -5,6 +5,8 @@ import com.aluon.production.cutlist.model.Cutlist;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.TenantId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -41,6 +43,9 @@ public class Order {
     @Column(name = "alto_mm", nullable = false)
     private Integer altoMm;
 
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus estado;
@@ -53,4 +58,13 @@ public class Order {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cutlist_id")
     private Cutlist cutlist;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<OrderAttachment> attachments = new ArrayList<>();
+
+    public void addAttachment(OrderAttachment attachment) {
+        attachments.add(attachment);
+        attachment.setOrder(this);
+    }
 }
