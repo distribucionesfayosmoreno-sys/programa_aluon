@@ -122,6 +122,7 @@ public class EmailTemplateService {
             <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
               <p>Hola {{nombreComercial}},</p>
               <p>Hemos recibido tu solicitud de inscripción. Nuestro equipo la revisará en breve.</p>
+              <p>Te avisaremos por email con la aprobación o el rechazo. También podrás ver el estado desde la app web.</p>
               <p>Datos recibidos:</p>
               <ul>
                 <li>Email: {{email}}</li>
