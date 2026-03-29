@@ -58,15 +58,7 @@ public class CustomerRegistrationService {
 
         CustomerRegistration saved = registrationRepository.save(registration);
 
-        mailService.ifPresent(service -> service.sendTemplate(
-                EmailTemplateService.KEY_REGISTRATION_CONFIRMATION,
-                saved.getEmail(),
-                Map.of(
-                        "nombreComercial", saved.getNombreComercial(),
-                        "email", saved.getEmail(),
-                        "telefono", saved.getTelefonoWhatsapp()
-                )
-        ));
+        // No enviar email automático en el registro.
 
         return CustomerRegistrationResponse.builder()
                 .registrationId(saved.getId())
