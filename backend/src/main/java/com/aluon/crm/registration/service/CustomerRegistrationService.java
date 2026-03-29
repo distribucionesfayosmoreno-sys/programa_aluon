@@ -157,6 +157,8 @@ public class CustomerRegistrationService {
                 )
         ));
 
+        // Una vez aprobada y creada en customers, eliminar la solicitud
+        registrationRepository.deleteById(registration.getId());
         return toDto(registration);
     }
 
