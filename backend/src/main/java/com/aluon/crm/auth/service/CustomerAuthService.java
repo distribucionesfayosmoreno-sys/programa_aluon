@@ -35,34 +35,34 @@ public class CustomerAuthService {
     @Transactional(readOnly = true)
     public CustomerLoginResponse login(CustomerLoginRequest request) {
         if (request == null) {
-            throw new IllegalArgumentException("La solicitud es obligatoria");
+            throw new IllegalArgumentException("No se pudo procesar la solicitud. Inténtalo de nuevo.");
         }
         String email = request.getEmail() != null ? request.getEmail().trim() : "";
         String password = request.getPassword() != null ? request.getPassword().trim() : "";
 
         if (email.isBlank()) {
-            throw new IllegalArgumentException("El email es obligatorio");
+            throw new IllegalArgumentException("Escribe tu correo electrónico.");
         }
         if (password.isBlank()) {
-            throw new IllegalArgumentException("La contraseña es obligatoria");
+            throw new IllegalArgumentException("Escribe tu contraseña.");
         }
 
         CustomerRegistration registration = registrationRepository
                 .findFirstByEmailIgnoreCase(email)
-                .orElseThrow(() -> new IllegalArgumentException("Credenciales incorrectas"));
+                .orElseThrow(() -> new IllegalArgumentException("El correo o la contraseña no son correctos."));
 
         if (registration.getPasswordHash() == null || registration.getPasswordHash().isBlank()) {
-            throw new IllegalArgumentException("Contraseña no configurada. Contacta con soporte.");
+            throw new IllegalArgumentException("Tu cuenta no tiene contraseña. Usa \"Olvidé mi contraseña\" para crearla.");
         }
         if (!passwordEncoder.matches(password, registration.getPasswordHash())) {
-            throw new IllegalArgumentException("Credenciales incorrectas");
+            throw new IllegalArgumentException("El correo o la contraseña no son correctos.");
         }
 
         if (registration.getStatus() == com.aluon.crm.registration.model.CustomerRegistrationStatus.PENDIENTE) {
-            throw new IllegalArgumentException("Tu registro aún no está aprobado.");
+            throw new IllegalArgumentException("Tu solicitud aún está en revisión.");
         }
         if (registration.getStatus() == com.aluon.crm.registration.model.CustomerRegistrationStatus.RECHAZADO) {
-            throw new IllegalArgumentException("Tu registro fue rechazado. Contacta con soporte.");
+            throw new IllegalArgumentException("Tu solicitud fue rechazada. Contacta con soporte.");
         }
 
         return CustomerLoginResponse.builder()
@@ -78,7 +78,7 @@ public class CustomerAuthService {
     @Transactional
     public void requestPasswordReset(CustomerPasswordResetRequest request) {
         if (request == null || request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new IllegalArgumentException("El email es obligatorio");
+            throw new IllegalArgumentException("Escribe tu correo electrónico.");
         }
         String email = request.getEmail().trim();
         Optional<CustomerRegistration> registrationOpt = registrationRepository.findFirstByEmailIgnoreCase(email);
@@ -118,24 +118,24 @@ public class CustomerAuthService {
     @Transactional
     public void resetPassword(CustomerPasswordResetConfirmRequest request) {
         if (request == null) {
-            throw new IllegalArgumentException("La solicitud es obligatoria");
+            throw new IllegalArgumentException("No se pudo procesar la solicitud. Inténtalo de nuevo.");
         }
         String token = request.getToken() != null ? request.getToken().trim() : "";
         String password = request.getPassword() != null ? request.getPassword().trim() : "";
         if (token.isBlank()) {
-            throw new IllegalArgumentException("El código es obligatorio");
+            throw new IllegalArgumentException("Introduce el código que recibiste por email.");
         }
         if (password.isBlank()) {
-            throw new IllegalArgumentException("La contraseña es obligatoria");
+            throw new IllegalArgumentException("Escribe una nueva contraseña.");
         }
         if (password.length() < 8) {
-            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.");
         }
 
         String tokenHash = hashToken(token);
         CustomerPasswordReset reset = passwordResetRepository
                 .findFirstByTokenHashAndUsedAtIsNullAndExpiresAtAfter(tokenHash, LocalDateTime.now())
-                .orElseThrow(() -> new IllegalArgumentException("El código es inválido o ha caducado"));
+                .orElseThrow(() -> new IllegalArgumentException("El código es inválido o ha caducado."));
 
         CustomerRegistration registration = registrationRepository.findById(reset.getRegistrationId())
                 .orElseThrow(() -> new IllegalArgumentException("Registro no encontrado"));

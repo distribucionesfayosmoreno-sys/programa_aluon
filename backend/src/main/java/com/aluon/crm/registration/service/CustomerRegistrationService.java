@@ -179,22 +179,22 @@ public class CustomerRegistrationService {
 
     private void validate(CustomerRegistrationRequest request) {
         if (request == null) {
-            throw new IllegalArgumentException("La solicitud es obligatoria");
+            throw new IllegalArgumentException("No se pudo procesar la solicitud. Inténtalo de nuevo.");
         }
         if (request.getNombreComercial() == null || request.getNombreComercial().isBlank()) {
-            throw new IllegalArgumentException("El nombre comercial es obligatorio");
+            throw new IllegalArgumentException("Escribe el nombre comercial.");
         }
         if (request.getEmail() == null || request.getEmail().isBlank()) {
-            throw new IllegalArgumentException("El email es obligatorio");
+            throw new IllegalArgumentException("Escribe tu correo electrónico.");
         }
         if (request.getTelefonoWhatsapp() == null || request.getTelefonoWhatsapp().isBlank()) {
-            throw new IllegalArgumentException("El teléfono de WhatsApp es obligatorio");
+            throw new IllegalArgumentException("Escribe tu teléfono de WhatsApp.");
         }
         if (request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new IllegalArgumentException("La contraseña es obligatoria");
+            throw new IllegalArgumentException("Escribe una contraseña.");
         }
         if (request.getPassword().trim().length() < 8) {
-            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.");
         }
     }
 
