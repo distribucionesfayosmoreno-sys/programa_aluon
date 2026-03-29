@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class CustomerLoginRequest {
     private String email;
-    private String telefonoWhatsapp;
+    private String password;
 }

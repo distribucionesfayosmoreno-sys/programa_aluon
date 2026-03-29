@@ -6,6 +6,7 @@ import com.aluon.crm.pricing.service.TariffService;
 import com.aluon.core.mail.service.EmailTemplateService;
 import com.aluon.core.mail.service.MailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class CustomerRegistrationService {
     private final CustomerRepository customerRepository;
     private final TariffService tariffService;
     private final Optional<MailService> mailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public CustomerRegistrationResponse register(CustomerRegistrationRequest request) {
@@ -43,6 +45,7 @@ public class CustomerRegistrationService {
                 .personaContacto(normalize(request.getPersonaContacto()))
                 .email(request.getEmail().trim())
                 .telefonoWhatsapp(request.getTelefonoWhatsapp().trim())
+                .passwordHash(passwordEncoder.encode(request.getPassword().trim()))
                 .direccion(normalize(request.getDireccion()))
                 .cp(normalize(request.getCp()))
                 .poblacion(normalize(request.getPoblacion()))
@@ -186,6 +189,12 @@ public class CustomerRegistrationService {
         }
         if (request.getTelefonoWhatsapp() == null || request.getTelefonoWhatsapp().isBlank()) {
             throw new IllegalArgumentException("El teléfono de WhatsApp es obligatorio");
+        }
+        if (request.getPassword() == null || request.getPassword().isBlank()) {
+            throw new IllegalArgumentException("La contraseña es obligatoria");
+        }
+        if (request.getPassword().trim().length() < 8) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
         }
     }
 

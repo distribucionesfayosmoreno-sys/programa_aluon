@@ -11,6 +11,7 @@ public class CustomerRegistrationRequest {
     private String personaContacto;
     private String email;
     private String telefonoWhatsapp;
+    private String password;
     private String direccion;
     private String cp;
     private String poblacion;

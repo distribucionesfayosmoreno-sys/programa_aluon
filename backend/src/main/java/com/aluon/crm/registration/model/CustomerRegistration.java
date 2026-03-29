@@ -39,6 +39,9 @@ public class CustomerRegistration {
     @Column(name = "telefono_whatsapp", nullable = false)
     private String telefonoWhatsapp;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Column(name = "direccion")
     private String direccion;
 

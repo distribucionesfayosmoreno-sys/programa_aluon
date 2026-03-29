@@ -16,4 +16,6 @@ public interface CustomerRegistrationRepository extends JpaRepository<CustomerRe
             String email,
             String telefonoWhatsapp
     );
+
+    Optional<CustomerRegistration> findFirstByEmailIgnoreCase(String email);
 }

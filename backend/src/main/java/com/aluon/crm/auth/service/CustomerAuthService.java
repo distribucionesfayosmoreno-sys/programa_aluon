@@ -5,6 +5,7 @@ import com.aluon.crm.auth.dto.CustomerLoginResponse;
 import com.aluon.crm.registration.model.CustomerRegistration;
 import com.aluon.crm.registration.repository.CustomerRegistrationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomerAuthService {
 
     private final CustomerRegistrationRepository registrationRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public CustomerLoginResponse login(CustomerLoginRequest request) {
@@ -20,18 +22,25 @@ public class CustomerAuthService {
             throw new IllegalArgumentException("La solicitud es obligatoria");
         }
         String email = request.getEmail() != null ? request.getEmail().trim() : "";
-        String telefono = request.getTelefonoWhatsapp() != null ? request.getTelefonoWhatsapp().trim() : "";
+        String password = request.getPassword() != null ? request.getPassword().trim() : "";
 
         if (email.isBlank()) {
             throw new IllegalArgumentException("El email es obligatorio");
         }
-        if (telefono.isBlank()) {
-            throw new IllegalArgumentException("El teléfono de WhatsApp es obligatorio");
+        if (password.isBlank()) {
+            throw new IllegalArgumentException("La contraseña es obligatoria");
         }
 
         CustomerRegistration registration = registrationRepository
-                .findFirstByEmailIgnoreCaseAndTelefonoWhatsapp(email, telefono)
+                .findFirstByEmailIgnoreCase(email)
                 .orElseThrow(() -> new IllegalArgumentException("Credenciales incorrectas"));
+
+        if (registration.getPasswordHash() == null || registration.getPasswordHash().isBlank()) {
+            throw new IllegalArgumentException("Contraseña no configurada. Contacta con soporte.");
+        }
+        if (!passwordEncoder.matches(password, registration.getPasswordHash())) {
+            throw new IllegalArgumentException("Credenciales incorrectas");
+        }
 
         if (registration.getStatus() == com.aluon.crm.registration.model.CustomerRegistrationStatus.PENDIENTE) {
             throw new IllegalArgumentException("Tu registro aún no está aprobado.");
