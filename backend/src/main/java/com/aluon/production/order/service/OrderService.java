@@ -171,6 +171,13 @@ public class OrderService {
                 .build();
     }
 
+    @Transactional
+    public void deleteRequest(UUID id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
+        orderRepository.delete(order);
+    }
+
     private void validateRequest(WorkOrderRequestDto request) {
         if (request == null) {
             throw new IllegalArgumentException("La solicitud es obligatoria");

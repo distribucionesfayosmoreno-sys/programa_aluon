@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,5 +40,11 @@ public class OrderController {
     @PostMapping(value = "/requests", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<WorkOrderRequestResponseDto> createRequest(@ModelAttribute WorkOrderRequestDto request) {
         return ResponseEntity.ok(orderService.createWorkOrderRequest(request));
+    }
+
+    @DeleteMapping("/requests/{id}")
+    public ResponseEntity<Void> deleteRequest(@PathVariable UUID id) {
+        orderService.deleteRequest(id);
+        return ResponseEntity.noContent().build();
     }
 }
