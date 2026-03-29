@@ -16,10 +16,12 @@ COMPOSE="docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE}"
 echo "Fast deploy to DEV2 (${REMOTE})..."
 
 echo "Syncing to origin/DEV2 (hard reset)..."
-ssh "${REMOTE}" "${BASE} && git fetch --all && git reset --hard origin/DEV2 && \
-  if [ -f infra/.env.dev.secrets ]; then \
-    grep -v '^SPRING_MAIL_' infra/.env.dev > /tmp/aluon_env && cat infra/.env.dev.secrets >> /tmp/aluon_env && mv /tmp/aluon_env infra/.env.dev; \
-  fi"
+ssh "${REMOTE}" "${BASE} && git fetch --all && git reset --hard origin/DEV2"
+
+echo "Injecting secrets into env file (if present)..."
+ssh "${REMOTE}" "${BASE} && if [ -f infra/.env.dev.secrets ]; then \
+  grep -v '^SPRING_MAIL_' infra/.env.dev > /tmp/aluon_env && cat infra/.env.dev.secrets >> /tmp/aluon_env && mv /tmp/aluon_env infra/.env.dev; \
+fi"
 
 echo "Building images (cache, BuildKit)..."
 ssh "${REMOTE}" "${BASE} && DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 ${COMPOSE} build ${COMPOSE_BUILD_FLAGS}"
