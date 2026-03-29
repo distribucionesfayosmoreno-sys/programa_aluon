@@ -47,6 +47,9 @@ public class Customer {
     @Column(name = "EMAIL")
     private String email;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Column(name = "DIRECCION")
     private String direccion;
 

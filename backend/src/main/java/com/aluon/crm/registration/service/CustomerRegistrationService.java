@@ -24,7 +24,6 @@ import com.aluon.crm.registration.dto.CustomerRegistrationRequest;
 import com.aluon.crm.registration.dto.CustomerRegistrationResponse;
 import com.aluon.crm.registration.model.CustomerRegistrationStatus;
 
-
 @Service
 @RequiredArgsConstructor
 public class CustomerRegistrationService {
@@ -64,9 +63,7 @@ public class CustomerRegistrationService {
                 Map.of(
                         "nombreComercial", saved.getNombreComercial(),
                         "email", saved.getEmail(),
-                        "telefono", saved.getTelefonoWhatsapp()
-                )
-        ));
+                        "telefono", saved.getTelefonoWhatsapp())));
 
         return CustomerRegistrationResponse.builder()
                 .registrationId(saved.getId())
@@ -128,6 +125,7 @@ public class CustomerRegistrationService {
                 .personaContacto(registration.getPersonaContacto())
                 .email(registration.getEmail())
                 .telefono(registration.getTelefonoWhatsapp())
+                .passwordHash(registration.getPasswordHash())
                 .direccion(registration.getDireccion())
                 .cp(registration.getCp())
                 .poblacion(registration.getPoblacion())
@@ -153,9 +151,7 @@ public class CustomerRegistrationService {
                 Map.of(
                         "nombreComercial", registration.getNombreComercial(),
                         "email", registration.getEmail(),
-                        "telefono", registration.getTelefonoWhatsapp()
-                )
-        ));
+                        "telefono", registration.getTelefonoWhatsapp())));
 
         // Una vez aprobada y creada en customers, eliminar la solicitud
         registrationRepository.deleteById(registration.getId());
@@ -201,7 +197,8 @@ public class CustomerRegistrationService {
     }
 
     private String normalize(String value) {
-        if (value == null) return null;
+        if (value == null)
+            return null;
         String trimmed = value.trim();
         return trimmed.isBlank() ? null : trimmed;
     }

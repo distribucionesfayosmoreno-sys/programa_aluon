@@ -6,6 +6,8 @@ import com.aluon.crm.auth.dto.CustomerPasswordResetConfirmRequest;
 import com.aluon.crm.auth.dto.CustomerPasswordResetRequest;
 import com.aluon.crm.auth.model.CustomerPasswordReset;
 import com.aluon.crm.auth.repository.CustomerPasswordResetRepository;
+import com.aluon.crm.customer.model.Customer;
+import com.aluon.crm.customer.repository.CustomerRepository;
 import com.aluon.crm.registration.model.CustomerRegistration;
 import com.aluon.crm.registration.repository.CustomerRegistrationRepository;
 import com.aluon.core.mail.service.EmailTemplateService;
@@ -28,6 +30,7 @@ import java.util.Optional;
 public class CustomerAuthService {
 
     private final CustomerRegistrationRepository registrationRepository;
+    private final CustomerRepository customerRepository;
     private final CustomerPasswordResetRepository passwordResetRepository;
     private final Optional<MailService> mailService;
     private final PasswordEncoder passwordEncoder;
@@ -47,31 +50,38 @@ public class CustomerAuthService {
             throw new IllegalArgumentException("Escribe tu contraseña.");
         }
 
-        CustomerRegistration registration = registrationRepository
-                .findFirstByEmailIgnoreCase(email)
-                .orElseThrow(() -> new IllegalArgumentException("El correo o la contraseña no son correctos."));
+        Customer customer = customerRepository
+                .findFirstByEmailIgnoreCaseAndActiveTrue(email)
+                .orElse(null);
 
-        if (registration.getPasswordHash() == null || registration.getPasswordHash().isBlank()) {
-            throw new IllegalArgumentException("Tu cuenta no tiene contraseña. Usa \"Olvidé mi contraseña\" para crearla.");
-        }
-        if (!passwordEncoder.matches(password, registration.getPasswordHash())) {
+        if (customer == null) {
+            Optional<CustomerRegistration> registrationOpt = registrationRepository.findFirstByEmailIgnoreCase(email);
+            if (registrationOpt.isPresent()) {
+                CustomerRegistration registration = registrationOpt.get();
+                if (registration.getStatus() == com.aluon.crm.registration.model.CustomerRegistrationStatus.PENDIENTE) {
+                    throw new IllegalArgumentException("Tu solicitud aún está en revisión.");
+                }
+                if (registration.getStatus() == com.aluon.crm.registration.model.CustomerRegistrationStatus.RECHAZADO) {
+                    throw new IllegalArgumentException("Tu solicitud fue rechazada. Contacta con soporte.");
+                }
+            }
             throw new IllegalArgumentException("El correo o la contraseña no son correctos.");
         }
 
-        if (registration.getStatus() == com.aluon.crm.registration.model.CustomerRegistrationStatus.PENDIENTE) {
-            throw new IllegalArgumentException("Tu solicitud aún está en revisión.");
+        if (customer.getPasswordHash() == null || customer.getPasswordHash().isBlank()) {
+            throw new IllegalArgumentException("Tu cuenta no tiene contraseña. Usa \"Olvidé mi contraseña\" para crearla.");
         }
-        if (registration.getStatus() == com.aluon.crm.registration.model.CustomerRegistrationStatus.RECHAZADO) {
-            throw new IllegalArgumentException("Tu solicitud fue rechazada. Contacta con soporte.");
+        if (!passwordEncoder.matches(password, customer.getPasswordHash())) {
+            throw new IllegalArgumentException("El correo o la contraseña no son correctos.");
         }
 
         return CustomerLoginResponse.builder()
-                .registrationId(registration.getId())
-                .customerId(registration.getCustomerId())
-                .nombreComercial(registration.getNombreComercial())
-                .email(registration.getEmail())
-                .telefonoWhatsapp(registration.getTelefonoWhatsapp())
-                .status(registration.getStatus())
+                .registrationId(null)
+                .customerId(customer.getId())
+                .nombreComercial(customer.getNombreComercial())
+                .email(customer.getEmail())
+                .telefonoWhatsapp(customer.getTelefono())
+                .status(com.aluon.crm.registration.model.CustomerRegistrationStatus.APROBADO)
                 .build();
     }
 
@@ -81,23 +91,20 @@ public class CustomerAuthService {
             throw new IllegalArgumentException("Escribe tu correo electrónico.");
         }
         String email = request.getEmail().trim();
-        Optional<CustomerRegistration> registrationOpt = registrationRepository.findFirstByEmailIgnoreCase(email);
-        if (registrationOpt.isEmpty()) {
+        Optional<Customer> customerOpt = customerRepository.findFirstByEmailIgnoreCaseAndActiveTrue(email);
+        if (customerOpt.isEmpty()) {
             return;
         }
 
-        CustomerRegistration registration = registrationOpt.get();
-        if (registration.getPasswordHash() == null || registration.getPasswordHash().isBlank()) {
-            return;
-        }
+        Customer customer = customerOpt.get();
 
         String token = generateToken();
         String tokenHash = hashToken(token);
         LocalDateTime now = LocalDateTime.now();
 
         CustomerPasswordReset reset = CustomerPasswordReset.builder()
-                .registrationId(registration.getId())
-                .email(registration.getEmail())
+                .customerId(customer.getId())
+                .email(customer.getEmail())
                 .tokenHash(tokenHash)
                 .createdAt(now)
                 .expiresAt(now.plusMinutes(30))
@@ -107,7 +114,7 @@ public class CustomerAuthService {
 
         mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_PASSWORD_RESET,
-                registration.getEmail(),
+                customer.getEmail(),
                 Map.of(
                         "token", token,
                         "expiresMinutes", "30"
@@ -137,11 +144,11 @@ public class CustomerAuthService {
                 .findFirstByTokenHashAndUsedAtIsNullAndExpiresAtAfter(tokenHash, LocalDateTime.now())
                 .orElseThrow(() -> new IllegalArgumentException("El código es inválido o ha caducado."));
 
-        CustomerRegistration registration = registrationRepository.findById(reset.getRegistrationId())
-                .orElseThrow(() -> new IllegalArgumentException("Registro no encontrado"));
+        Customer customer = customerRepository.findById(reset.getCustomerId())
+                .orElseThrow(() -> new IllegalArgumentException("Cuenta no encontrada"));
 
-        registration.setPasswordHash(passwordEncoder.encode(password));
-        registrationRepository.save(registration);
+        customer.setPasswordHash(passwordEncoder.encode(password));
+        customerRepository.save(customer);
 
         reset.setUsedAt(LocalDateTime.now());
         passwordResetRepository.save(reset);

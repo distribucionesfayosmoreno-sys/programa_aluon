@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     List<Customer> findAllByActiveTrue();
     Optional<Customer> findByIdAndActiveTrue(UUID id);
+    Optional<Customer> findFirstByEmailIgnoreCaseAndActiveTrue(String email);
 }

@@ -24,8 +24,8 @@ public class CustomerPasswordReset {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Column(name = "registration_id", nullable = false)
-    private UUID registrationId;
+    @Column(name = "customer_id")
+    private UUID customerId;
 
     @Column(name = "email", nullable = false)
     private String email;
