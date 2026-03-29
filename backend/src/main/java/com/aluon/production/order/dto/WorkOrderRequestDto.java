@@ -7,12 +7,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkOrderRequestDto {
+    private UUID customerId;
     private String customerName;
     private String customerEmail;
     private String customerPhone;

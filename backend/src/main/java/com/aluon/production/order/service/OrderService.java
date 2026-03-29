@@ -137,13 +137,17 @@ public class OrderService {
     public WorkOrderRequestResponseDto createWorkOrderRequest(WorkOrderRequestDto request) {
         validateRequest(request);
 
-        Customer customer = Customer.builder()
-                .nombreComercial(request.getCustomerName().trim())
-                .telefono(normalize(request.getCustomerPhone()))
-                .email(normalize(request.getCustomerEmail()))
-                .build();
-
-        Customer savedCustomer = customerService.save(customer);
+        Customer savedCustomer;
+        if (request.getCustomerId() != null) {
+            savedCustomer = customerService.findById(request.getCustomerId());
+        } else {
+            Customer customer = Customer.builder()
+                    .nombreComercial(request.getCustomerName().trim())
+                    .telefono(normalize(request.getCustomerPhone()))
+                    .email(normalize(request.getCustomerEmail()))
+                    .build();
+            savedCustomer = customerService.save(customer);
+        }
 
         Order order = Order.builder()
                 .customer(savedCustomer)
@@ -182,7 +186,8 @@ public class OrderService {
         if (request == null) {
             throw new IllegalArgumentException("La solicitud es obligatoria");
         }
-        if (request.getCustomerName() == null || request.getCustomerName().isBlank()) {
+        if (request.getCustomerId() == null
+                && (request.getCustomerName() == null || request.getCustomerName().isBlank())) {
             throw new IllegalArgumentException("El cliente es obligatorio");
         }
         if (request.getModeloPuerta() == null || request.getModeloPuerta().isBlank()) {
