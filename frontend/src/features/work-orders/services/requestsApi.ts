@@ -62,3 +62,15 @@ export const deleteWorkOrderRequest = async (orderId: string): Promise<void> => 
     throw new Error(message || 'No se pudo eliminar la solicitud.');
   }
 };
+
+export const updateWorkOrderWorkflowStep = async (requestId: string, workflowStep: string): Promise<void> => {
+  const response = await fetch(`/api/orders/requests/${requestId}/workflow-step`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ workflowStep }),
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'No se pudo actualizar el estado.');
+  }
+};

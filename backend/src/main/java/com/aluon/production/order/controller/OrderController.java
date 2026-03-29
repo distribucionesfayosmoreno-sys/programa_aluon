@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import com.aluon.production.order.dto.OrderStatusDto;
 import com.aluon.production.order.dto.WorkOrderDto;
 import com.aluon.production.order.dto.WorkOrderRequestDto;
 import com.aluon.production.order.dto.WorkOrderRequestResponseDto;
+import com.aluon.production.order.dto.OrderWorkflowUpdateRequest;
 
 
 @RestController
@@ -45,6 +48,13 @@ public class OrderController {
     @DeleteMapping("/requests/{id}")
     public ResponseEntity<Void> deleteRequest(@PathVariable UUID id) {
         orderService.deleteRequest(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/requests/{requestId}/workflow-step")
+    public ResponseEntity<Void> updateWorkflowStep(@PathVariable String requestId,
+                                                   @RequestBody OrderWorkflowUpdateRequest request) {
+        orderService.updateWorkflowStep(requestId, request.getWorkflowStep());
         return ResponseEntity.noContent().build();
     }
 }

@@ -183,6 +183,35 @@ public class OrderService {
         orderRepository.delete(order);
     }
 
+    @Transactional
+    public void updateWorkflowStep(String requestId, OrderWorkflowStep workflowStep) {
+        if (requestId == null || requestId.isBlank()) {
+            throw new IllegalArgumentException("La solicitud es obligatoria");
+        }
+        if (workflowStep == null) {
+            throw new IllegalArgumentException("El estado es obligatorio");
+        }
+
+        Order order = resolveOrder(requestId.trim());
+        if (order == null) {
+            throw new IllegalArgumentException("Solicitud no encontrada");
+        }
+        if (order.getWorkflowStep() == workflowStep) {
+            return;
+        }
+        order.setWorkflowStep(workflowStep);
+        orderRepository.save(order);
+    }
+
+    private Order resolveOrder(String requestId) {
+        try {
+            UUID orderId = UUID.fromString(requestId);
+            return orderRepository.findById(orderId).orElse(null);
+        } catch (IllegalArgumentException ignored) {
+            return orderRepository.findByCodigoOrden(requestId).orElse(null);
+        }
+    }
+
     private void validateRequest(WorkOrderRequestDto request) {
         if (request == null) {
             throw new IllegalArgumentException("La solicitud es obligatoria");
