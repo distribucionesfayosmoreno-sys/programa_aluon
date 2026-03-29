@@ -85,7 +85,8 @@ export const useWorkOrderRequests = ({
   const applyRequest = (req: WorkOrderRequest) => {
     resetDownstream({ keepBudget: true });
     setSelectedRequestId(req.id);
-    setCustomerId(resolveCustomerId(req.customerName));
+    const resolvedCustomerId = req.customerId || resolveCustomerId(req.customerName);
+    setCustomerId(resolvedCustomerId);
     setModelId(req.modelId);
     setM2(req.m2);
     setModelReference(req.reference.toUpperCase());

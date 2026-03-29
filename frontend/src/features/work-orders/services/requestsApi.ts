@@ -2,6 +2,7 @@ import type { WorkOrderRequest } from '../models';
 
 type OrderStatusApi = {
   id: string;
+  customerId?: string | null;
   codigoOrden: string;
   estado: string;
   workflowStep: string;
@@ -39,6 +40,7 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
   return data.map(item => ({
     id: item.codigoOrden || item.id,
     orderId: item.id,
+    customerId: item.customerId ?? undefined,
     customerName: item.customerName,
     modelId: resolveModelId(item.modeloPuerta),
     modelLabel: item.modeloPuerta ?? '—',

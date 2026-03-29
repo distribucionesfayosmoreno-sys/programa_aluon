@@ -198,7 +198,7 @@ export const InboxSection = ({
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
-                      className="px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.14em] border transition-colors"
+                      className="w-10 h-10 rounded-xl border transition-colors inline-flex items-center justify-center"
                       style={{
                         color: uiColors.textPrimary,
                         borderColor: active ? uiColors.accent : uiColors.border,
@@ -208,12 +208,14 @@ export const InboxSection = ({
                         event.stopPropagation();
                         onApplyRequest(req);
                       }}
+                      aria-label="Cargar solicitud"
+                      title="Cargar"
                     >
-                      Cargar
+                      <span className="material-symbols-outlined text-lg">save</span>
                     </button>
                     <button
                       type="button"
-                      className="px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.14em] border transition-colors"
+                      className="w-10 h-10 rounded-xl border transition-colors inline-flex items-center justify-center"
                       style={{
                         color: uiColors.danger,
                         borderColor: uiColors.danger,
@@ -230,8 +232,10 @@ export const InboxSection = ({
                           alert(error instanceof Error ? error.message : 'No se pudo eliminar la solicitud.');
                         }
                       }}
+                      aria-label="Eliminar solicitud"
+                      title="Eliminar"
                     >
-                      Eliminar
+                      <span className="material-symbols-outlined text-lg">close</span>
                     </button>
                   </div>
                 </div>

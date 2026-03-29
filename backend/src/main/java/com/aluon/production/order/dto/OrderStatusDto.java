@@ -17,6 +17,7 @@ import com.aluon.production.order.model.OrderWorkflowStep;
 @AllArgsConstructor
 public class OrderStatusDto {
     private UUID id;
+    private UUID customerId;
     private String codigoOrden;
     private OrderStatus estado;
     private OrderWorkflowStep workflowStep;

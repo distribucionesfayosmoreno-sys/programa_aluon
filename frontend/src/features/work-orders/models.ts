@@ -167,6 +167,7 @@ export type WorkOrderData = {
 export type WorkOrderRequest = {
   id: string;
   orderId: string;
+  customerId?: string;
   customerName: string;
   modelId: string;
   modelLabel?: string;

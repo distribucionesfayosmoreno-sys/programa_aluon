@@ -40,6 +40,7 @@ public class OrderService {
         return orderRepository.findAllByOrderByCodigoOrdenDesc().stream()
                 .map(order -> OrderStatusDto.builder()
                         .id(order.getId())
+                        .customerId(order.getCustomer().getId())
                         .codigoOrden(order.getCodigoOrden())
                         .estado(order.getEstado())
                         .workflowStep(order.getWorkflowStep())
