@@ -31,6 +31,7 @@ export const DOOR_TYPES = [
 export const MOCK_REQUESTS: WorkOrderRequest[] = [
   {
     id: 'REQ-001',
+    orderId: 'REQ-001',
     customerName: 'Maderas Sierra Norte',
     modelId: 'PRO',
     m2: 42.5,
@@ -42,6 +43,7 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
   },
   {
     id: 'REQ-002',
+    orderId: 'REQ-002',
     customerName: 'Construcciones Lumbre',
     modelId: 'CLASSIC',
     m2: 18,
@@ -53,6 +55,7 @@ export const MOCK_REQUESTS: WorkOrderRequest[] = [
   },
   {
     id: 'REQ-003',
+    orderId: 'REQ-003',
     customerName: 'Grupo Arista',
     modelId: 'LUX',
     m2: 64,

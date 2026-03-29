@@ -109,6 +109,7 @@ export const useWorkOrderRequests = ({
     setRequests(prev => ([
       {
         id: nextId,
+        orderId: nextId,
         customerName: data.customerName,
         modelId: data.modelId,
         m2: data.m2,
@@ -157,7 +158,10 @@ export const useWorkOrderRequests = ({
     if (!req.orderId) {
       throw new Error('No se pudo identificar la solicitud.');
     }
-    await deleteWorkOrderRequest(req.orderId);
+    const isUuid = /^[0-9a-fA-F-]{36}$/.test(req.orderId);
+    if (isUuid) {
+      await deleteWorkOrderRequest(req.orderId);
+    }
     setRequests(prev => prev.filter(item => item.id !== req.id));
     if (selectedRequestId === req.id) {
       setSelectedRequestId(null);
