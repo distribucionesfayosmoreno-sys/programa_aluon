@@ -21,6 +21,7 @@ public class EmailTemplateService {
 
     public static final String KEY_REGISTRATION_CONFIRMATION = "REGISTRATION_CONFIRMATION";
     public static final String KEY_REGISTRATION_APPROVED = "REGISTRATION_APPROVED";
+    public static final String KEY_PASSWORD_RESET = "PASSWORD_RESET";
 
     private final EmailTemplateRepository repository;
 
@@ -102,6 +103,7 @@ public class EmailTemplateService {
         Map<String, EmailTemplateRequest> defaults = new LinkedHashMap<>();
         defaults.put(KEY_REGISTRATION_CONFIRMATION, defaultConfirmationTemplate());
         defaults.put(KEY_REGISTRATION_APPROVED, defaultApprovalTemplate());
+        defaults.put(KEY_PASSWORD_RESET, defaultPasswordResetTemplate());
 
         defaults.forEach((key, request) -> {
             repository.findByTemplateKey(key).orElseGet(() -> {
@@ -141,6 +143,23 @@ public class EmailTemplateService {
               <p>Hola {{nombreComercial}},</p>
               <p>Tu inscripción ha sido aprobada. Ya puedes operar con Aluon.</p>
               <p>Si necesitas ayuda, responde a este correo.</p>
+              <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
+            </div>
+            """);
+        return request;
+    }
+
+    private EmailTemplateRequest defaultPasswordResetTemplate() {
+        EmailTemplateRequest request = new EmailTemplateRequest();
+        request.setTemplateKey(KEY_PASSWORD_RESET);
+        request.setSubject("Código de recuperación de contraseña");
+        request.setBodyHtml("""
+            <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
+              <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+              <p>Tu código de recuperación es:</p>
+              <p style=\"font-size:18px;font-weight:700;letter-spacing:0.08em;\">{{token}}</p>
+              <p>Este código caduca en {{expiresMinutes}} minutos.</p>
+              <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
               <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
             </div>
             """);
