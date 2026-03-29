@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 import com.aluon.production.order.model.Order;
 import com.aluon.production.order.model.OrderStatus;
 import com.aluon.production.order.model.OrderWorkflowStep;
@@ -16,6 +17,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findAllByOrderByCodigoOrdenDesc();
 
     boolean existsByCodigoOrden(String codigoOrden);
+
+    Optional<Order> findByCodigoOrden(String codigoOrden);
 
     long countByWorkflowStepIn(Collection<OrderWorkflowStep> steps);
 

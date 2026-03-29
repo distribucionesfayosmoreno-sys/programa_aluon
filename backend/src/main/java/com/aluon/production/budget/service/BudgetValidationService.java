@@ -16,6 +16,9 @@ import com.aluon.production.budget.dto.BudgetValidationCreateRequest;
 import com.aluon.production.budget.dto.BudgetValidationDto;
 import com.aluon.production.budget.repository.BudgetValidationRepository;
 import com.aluon.production.budget.model.BudgetValidationStatus;
+import com.aluon.production.order.model.Order;
+import com.aluon.production.order.model.OrderWorkflowStep;
+import com.aluon.production.order.repository.OrderRepository;
 
 
 @Service
@@ -23,6 +26,7 @@ import com.aluon.production.budget.model.BudgetValidationStatus;
 public class BudgetValidationService {
 
     private final BudgetValidationRepository budgetValidationRepository;
+    private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -47,6 +51,7 @@ public class BudgetValidationService {
                 .build();
 
         BudgetValidation saved = budgetValidationRepository.save(budget);
+        updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.BUDGET);
         return toDto(saved);
     }
 
@@ -120,5 +125,29 @@ public class BudgetValidationService {
                 .approvedByUsername(approvedBy != null ? approvedBy.getUsername() : null)
                 .approvedByRole(approvedBy != null ? approvedBy.getRol() : null)
                 .build();
+    }
+
+    private void updateOrderWorkflowStep(String requestId, OrderWorkflowStep nextStep) {
+        if (requestId == null || requestId.isBlank()) {
+            return;
+        }
+        Order order = resolveOrder(requestId.trim());
+        if (order == null) {
+            return;
+        }
+        if (order.getWorkflowStep() == nextStep) {
+            return;
+        }
+        order.setWorkflowStep(nextStep);
+        orderRepository.save(order);
+    }
+
+    private Order resolveOrder(String requestId) {
+        try {
+            UUID orderId = UUID.fromString(requestId);
+            return orderRepository.findById(orderId).orElse(null);
+        } catch (IllegalArgumentException ignored) {
+            return orderRepository.findByCodigoOrden(requestId).orElse(null);
+        }
     }
 }
