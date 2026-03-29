@@ -350,7 +350,18 @@ const CustomerManagement: React.FC = () => {
                               </svg>
                             </button>
                             <button
-                              onClick={() => c.id && deleteCustomer(c.id)}
+                              onClick={async () => {
+                                if (!c.id) return;
+                                const ok = window.confirm(`¿Eliminar el cliente "${c.nombreComercial || 'Sin nombre'}"?`);
+                                if (!ok) return;
+                                try {
+                                  await deleteCustomer(c.id);
+                                } catch (error) {
+                                  console.error('Error eliminando cliente:', error);
+                                  const message = error instanceof Error ? error.message : 'No se pudo eliminar el cliente.';
+                                  window.alert(message);
+                                }
+                              }}
                               title="Eliminar"
                               className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer"
                               style={{ color: '#9ca3af' }}

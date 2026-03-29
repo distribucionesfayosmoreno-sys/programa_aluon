@@ -77,6 +77,10 @@ public class Customer {
     @Column(name = "REMANENTE", precision = 19, scale = 4)
     private BigDecimal remanente;
 
+    @Column(name = "ACTIVE", nullable = false)
+    @Builder.Default
+    private boolean active = true;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<DeliveryAddress> direccionesEntrega = new ArrayList<>();

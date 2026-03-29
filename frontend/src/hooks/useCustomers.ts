@@ -70,9 +70,14 @@ export const useCustomers = () => {
 
   const deleteCustomer = async (id: string) => {
     const response = await fetch(`/api/erp/customers/${id}`, { method: 'DELETE' });
-    if (response.ok) {
-      fetchCustomers();
+    if (!response.ok) {
+      const details = await response.text().catch(() => '');
+      const message = details?.trim() || `Error eliminando cliente (status ${response.status})`;
+      throw new Error(message);
     }
+    // Optimistic update; fallback to refresh to ensure consistency
+    setCustomers(prev => prev.filter(c => c.id !== id));
+    fetchCustomers();
   };
 
   useEffect(() => {

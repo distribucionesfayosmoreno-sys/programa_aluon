@@ -18,15 +18,18 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
 
     public List<Customer> findAll() {
-        return customerRepository.findAll();
+        return customerRepository.findAllByActiveTrue();
     }
 
     public Customer findById(UUID id) {
-        return customerRepository.findById(id)
+        return customerRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
     }
 
     public Customer save(Customer customer) {
+        if (customer.getId() == null) {
+            customer.setActive(true);
+        }
         // Asegurar la relación bidireccional en las direcciones al guardar
         if (customer.getDireccionesEntrega() != null) {
             customer.getDireccionesEntrega().forEach(dir -> dir.setCustomer(customer));
@@ -35,6 +38,11 @@ public class CustomerService {
     }
 
     public void deleteById(UUID id) {
-        customerRepository.deleteById(id);
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        if (customer.isActive()) {
+            customer.setActive(false);
+            customerRepository.save(customer);
+        }
     }
 }
