@@ -142,7 +142,7 @@ public class EmailTemplateService {
         request.setBodyHtml("""
             <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
               <p>Hola {{nombreComercial}},</p>
-              <p>Tu inscripción ha sido aprobada. Ya puedes operar con Aluon.</p>
+              <p>Tu solicitud ha sido aprobada. Ya puedes iniciar sesión en la app móvil.</p>
               <p>Si necesitas ayuda, responde a este correo.</p>
               <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
             </div>
