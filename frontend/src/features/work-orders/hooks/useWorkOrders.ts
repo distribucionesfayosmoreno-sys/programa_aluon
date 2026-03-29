@@ -188,7 +188,7 @@ export const useWorkOrders = ({
     }
   };
 
-  const { applyRequest, createRequest } = useWorkOrderRequests({
+  const { applyRequest, createRequest, deleteRequest } = useWorkOrderRequests({
     customers, requests, setRequests, selectedRequestId, setSelectedRequestId, setCustomerId, setModelId, setM2, setModelReference, setGoogleView, setNotes, setModelImage, setTab, setShowRequestModal, openNewRequest, onNewRequestHandled, resetDownstream,
     budget: { budgetStatusByRequestId: budget.budgetStatusByRequestId, getBudgetStatus: budget.getBudgetStatus, setBudgetGenerated: budget.setBudgetGenerated, setAccountingApproved: budget.setAccountingApproved, setAdminApproved: budget.setAdminApproved, updateBudgetStatus: budget.updateBudgetStatus },
     currentWorkflowStep,
@@ -233,6 +233,7 @@ export const useWorkOrders = ({
     printing,
     applyRequest,
     createRequest,
+    deleteRequest,
     resetDownstream,
   });
 };

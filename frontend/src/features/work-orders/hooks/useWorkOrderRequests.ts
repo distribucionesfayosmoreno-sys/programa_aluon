@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
+import { deleteWorkOrderRequest } from '../services/requestsApi';
 
 type BudgetControls = {
   budgetStatusByRequestId: Record<string, { adminApproved: boolean; budgetGenerated: boolean; accountingApproved: boolean }>;
@@ -152,7 +153,19 @@ export const useWorkOrderRequests = ({
     }));
   }, [budget.budgetStatusByRequestId, setRequests]);
 
-  return { applyRequest, createRequest };
+  const deleteRequest = useCallback(async (req: WorkOrderRequest) => {
+    if (!req.orderId) {
+      throw new Error('No se pudo identificar la solicitud.');
+    }
+    await deleteWorkOrderRequest(req.orderId);
+    setRequests(prev => prev.filter(item => item.id !== req.id));
+    if (selectedRequestId === req.id) {
+      setSelectedRequestId(null);
+      resetDownstream();
+    }
+  }, [resetDownstream, selectedRequestId, setRequests, setSelectedRequestId]);
+
+  return { applyRequest, createRequest, deleteRequest };
 };
 
 export type UseWorkOrderRequestsResult = ReturnType<typeof useWorkOrderRequests>;

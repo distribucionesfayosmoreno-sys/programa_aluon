@@ -19,6 +19,7 @@ type BuildWorkOrdersResultParams = {
   printing: UseWorkOrderPrintingResult;
   applyRequest: (req: UseWorkOrderBaseStateResult['requests'][number]) => void;
   createRequest: (data: { customerName: string; modelId: string; m2: number; reference: string; googleView: boolean; notes: string }) => void;
+  deleteRequest: (req: UseWorkOrderBaseStateResult['requests'][number]) => Promise<void>;
   resetDownstream: (options?: { keepBudget?: boolean }) => void;
 };
 
@@ -35,6 +36,7 @@ export const buildWorkOrdersResult = ({
   printing,
   applyRequest,
   createRequest,
+  deleteRequest,
   resetDownstream,
 }: BuildWorkOrdersResultParams) => ({
   customers,
@@ -185,6 +187,7 @@ export const buildWorkOrdersResult = ({
   clearCutlist: cutlist.clearCutlist,
   applyRequest,
   createRequest,
+  deleteRequest,
   handlePrint: printing.handlePrint,
   handleEmail: printing.handleEmail,
   handleWorkOrderPrint: printing.handleWorkOrderPrint,

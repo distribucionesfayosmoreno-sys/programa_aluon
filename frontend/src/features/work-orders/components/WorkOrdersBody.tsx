@@ -78,6 +78,7 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
     handleApproveBudget,
     applyRequest,
     createRequest,
+    deleteRequest,
     handlePrint,
     handleEmail,
     handleWorkOrderPrint,
@@ -95,6 +96,7 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               selectedRequestId={selectedRequestId}
               customerId={customerId}
               onApplyRequest={applyRequest}
+              onDeleteRequest={deleteRequest}
               onSelectRequest={setSelectedRequestId}
             />
           )}

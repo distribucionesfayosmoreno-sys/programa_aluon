@@ -28,12 +28,14 @@ export const InboxSection = ({
   selectedRequestId,
   customerId,
   onApplyRequest,
+  onDeleteRequest,
   onSelectRequest,
 }: {
   requests: WorkOrderRequest[];
   selectedRequestId: string | null;
   customerId: string;
   onApplyRequest: (req: WorkOrderRequest) => void;
+  onDeleteRequest: (req: WorkOrderRequest) => Promise<void>;
   onSelectRequest: (id: string) => void;
 }) => {
   const [filterText, setFilterText] = useState('');
@@ -193,7 +195,7 @@ export const InboxSection = ({
                     {WORKFLOW_STEP_LABELS[req.workflowStep]}
                   </span>
                 </div>
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-2">
                     <button
                       type="button"
                       className="px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.14em] border transition-colors"
@@ -208,6 +210,28 @@ export const InboxSection = ({
                       }}
                     >
                       Cargar
+                    </button>
+                    <button
+                      type="button"
+                      className="px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.14em] border transition-colors"
+                      style={{
+                        color: uiColors.danger,
+                        borderColor: uiColors.danger,
+                        background: '#fff5f5',
+                      }}
+                      onClick={async event => {
+                        event.stopPropagation();
+                        if (!window.confirm(`¿Eliminar la solicitud ${req.reference}?`)) {
+                          return;
+                        }
+                        try {
+                          await onDeleteRequest(req);
+                        } catch (error) {
+                          alert(error instanceof Error ? error.message : 'No se pudo eliminar la solicitud.');
+                        }
+                      }}
+                    >
+                      Eliminar
                     </button>
                   </div>
                 </div>

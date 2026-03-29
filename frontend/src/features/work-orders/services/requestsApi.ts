@@ -38,6 +38,7 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
   const data = (await response.json()) as OrderStatusApi[];
   return data.map(item => ({
     id: item.codigoOrden || item.id,
+    orderId: item.id,
     customerName: item.customerName,
     modelId: resolveModelId(item.modeloPuerta),
     modelLabel: item.modeloPuerta ?? '—',
@@ -48,4 +49,14 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
     requestDate: resolveRequestDate(item.requestDate),
     workflowStep: (item.workflowStep as WorkOrderRequest['workflowStep']) ?? 'INBOX',
   }));
+};
+
+export const deleteWorkOrderRequest = async (orderId: string): Promise<void> => {
+  const response = await fetch(`/api/orders/requests/${orderId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'No se pudo eliminar la solicitud.');
+  }
 };
