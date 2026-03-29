@@ -211,7 +211,10 @@ public class EmailSignatureService {
 
     private String resolveLogoUrl(String provided) {
         if (hasText(provided)) {
-            return provided.trim();
+            String trimmed = provided.trim();
+            if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("data:image/")) {
+                return trimmed;
+            }
         }
         String cached = defaultLogoCache.get();
         if (cached != null) {
