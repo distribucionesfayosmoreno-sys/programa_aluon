@@ -18,6 +18,9 @@ export const RequestSection = ({
   onModelImageChange,
   onGoogleViewChange,
   onNotesChange,
+  highlightCustomer,
+  highlightM2,
+  highlightModelRef,
 }: {
   customers: CustomerOption[];
   customerId: string;
@@ -34,6 +37,9 @@ export const RequestSection = ({
   onModelImageChange: (file: File | null) => void;
   onGoogleViewChange: (value: boolean) => void;
   onNotesChange: (value: string) => void;
+  highlightCustomer?: boolean;
+  highlightM2?: boolean;
+  highlightModelRef?: boolean;
 }) => (
   <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="01" label="Solicitud del cliente" />
@@ -44,6 +50,7 @@ export const RequestSection = ({
           className="field"
           value={customerId}
           onChange={e => onCustomerChange(e.target.value)}
+          style={highlightCustomer ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 2px var(--danger-bg)' } : undefined}
         >
           <option value="">Selecciona un cliente</option>
           {customers.map(c => (
@@ -73,6 +80,7 @@ export const RequestSection = ({
           step="0.01"
           value={m2}
           onChange={e => onM2Change(Number(e.target.value || 0))}
+          style={highlightM2 ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 2px var(--danger-bg)' } : undefined}
         />
       </div>
       <div>
@@ -81,6 +89,7 @@ export const RequestSection = ({
           placeholder="Código o referencia interna"
           value={modelReference}
           onChange={e => onModelReferenceChange(e.target.value.toUpperCase())}
+          style={highlightModelRef ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 2px var(--danger-bg)' } : undefined}
         />
       </div>
       <div>
@@ -90,6 +99,7 @@ export const RequestSection = ({
           accept="image/*"
           className="field"
           onChange={e => onModelImageChange(e.target.files?.[0] ?? null)}
+          style={highlightModelRef ? { borderColor: 'var(--danger)', boxShadow: '0 0 0 2px var(--danger-bg)' } : undefined}
         />
       </div>
       <div className="flex items-center gap-3 pt-7">

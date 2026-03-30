@@ -10,6 +10,8 @@ export const BudgetSection = ({
   validationError,
   onGenerateBudget,
   onToggleAccounting,
+  highlightGenerate,
+  highlightAccounting,
 }: {
   pricePerM2: number;
   total: number;
@@ -20,6 +22,8 @@ export const BudgetSection = ({
   validationError: string;
   onGenerateBudget: () => void;
   onToggleAccounting: () => void;
+  highlightGenerate?: boolean;
+  highlightAccounting?: boolean;
 }) => (
   <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="02" label="Presupuesto" />
@@ -38,7 +42,12 @@ export const BudgetSection = ({
           className="btn-primary w-full justify-center"
           onClick={onGenerateBudget}
           disabled={!canGenerateBudget}
-          style={{ opacity: canGenerateBudget ? 1 : 0.5, cursor: canGenerateBudget ? 'pointer' : 'not-allowed' }}
+          style={{
+            opacity: canGenerateBudget ? 1 : 0.5,
+            cursor: canGenerateBudget ? 'pointer' : 'not-allowed',
+            boxShadow: highlightGenerate ? '0 0 0 3px var(--danger-bg)' : undefined,
+            border: highlightGenerate ? '1px solid var(--danger)' : undefined,
+          }}
         >
           Generar presupuesto
         </button>
@@ -55,7 +64,12 @@ export const BudgetSection = ({
         className="btn-ghost"
         onClick={onToggleAccounting}
         disabled={!budgetGenerated}
-        style={{ opacity: budgetGenerated ? 1 : 0.5, cursor: budgetGenerated ? 'pointer' : 'not-allowed' }}
+        style={{
+          opacity: budgetGenerated ? 1 : 0.5,
+          cursor: budgetGenerated ? 'pointer' : 'not-allowed',
+          boxShadow: highlightAccounting ? '0 0 0 3px var(--danger-bg)' : undefined,
+          border: highlightAccounting ? '1px solid var(--danger)' : undefined,
+        }}
       >
         Confirmar (Contabilidad)
       </button>

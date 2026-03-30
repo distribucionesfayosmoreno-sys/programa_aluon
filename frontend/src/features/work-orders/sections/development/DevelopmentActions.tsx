@@ -4,17 +4,25 @@ import type { DevelopmentActions as DevelopmentActionsType, DevelopmentStatus } 
 type DevelopmentActionsProps = {
   status: DevelopmentStatus;
   actions: Pick<DevelopmentActionsType, 'onGenerateDevelopment' | 'onGenerateCutlist' | 'onPrintForm'>;
+  highlightDevelopment?: boolean;
+  highlightCutlist?: boolean;
 };
 
-export const DevelopmentActionsBar = ({ status, actions }: DevelopmentActionsProps) => (
+export const DevelopmentActionsBar = ({ status, actions, highlightDevelopment, highlightCutlist }: DevelopmentActionsProps) => (
   <div className="flex flex-wrap items-center gap-3">
     <button
       type="button"
       className="btn-primary"
       onClick={actions.onGenerateDevelopment}
       disabled={!status.canGenerateDevelopment}
-      style={{ opacity: status.canGenerateDevelopment ? 1 : 0.5, cursor: status.canGenerateDevelopment ? 'pointer' : 'not-allowed' }}
+      style={{
+        opacity: status.canGenerateDevelopment ? 1 : 0.5,
+        cursor: status.canGenerateDevelopment ? 'pointer' : 'not-allowed',
+        boxShadow: highlightDevelopment ? '0 0 0 3px var(--danger-bg)' : undefined,
+        border: highlightDevelopment ? '1px solid var(--danger)' : undefined,
+      }}
     >
+      <span className="text-base">⚙️</span>
       Generar desarrollo
     </button>
     <button
@@ -22,8 +30,14 @@ export const DevelopmentActionsBar = ({ status, actions }: DevelopmentActionsPro
       className="btn-primary"
       onClick={actions.onGenerateCutlist}
       disabled={!status.canGenerateCutlist || status.cutlistLoading}
-      style={{ opacity: status.canGenerateCutlist && !status.cutlistLoading ? 1 : 0.5, cursor: status.canGenerateCutlist && !status.cutlistLoading ? 'pointer' : 'not-allowed' }}
+      style={{
+        opacity: status.canGenerateCutlist && !status.cutlistLoading ? 1 : 0.5,
+        cursor: status.canGenerateCutlist && !status.cutlistLoading ? 'pointer' : 'not-allowed',
+        boxShadow: highlightCutlist ? '0 0 0 3px var(--danger-bg)' : undefined,
+        border: highlightCutlist ? '1px solid var(--danger)' : undefined,
+      }}
     >
+      <span className="text-base">🧩</span>
       {status.cutlistLoading ? 'Generando...' : 'Generar despiece'}
     </button>
     <button
@@ -33,6 +47,7 @@ export const DevelopmentActionsBar = ({ status, actions }: DevelopmentActionsPro
       disabled={!status.canGenerateCutlist}
       style={{ opacity: status.canGenerateCutlist ? 1 : 0.5, cursor: status.canGenerateCutlist ? 'pointer' : 'not-allowed' }}
     >
+      <span className="text-base">🖨️</span>
       Imprimir
     </button>
     <StatusPill label="Desarrollo generado" ok={status.developmentGenerated} />

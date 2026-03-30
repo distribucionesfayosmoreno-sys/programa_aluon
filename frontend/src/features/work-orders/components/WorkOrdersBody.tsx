@@ -88,6 +88,23 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
   const isInbox = tab === 'INBOX';
   const showSummary = !isInbox;
 
+  const highlightRequestCustomer = tab === 'REQUEST' && !customerId;
+  const highlightRequestM2 = tab === 'REQUEST' && m2 <= 0;
+  const highlightRequestModelRef = tab === 'REQUEST' && !hasModelRef;
+
+  const highlightBudgetGenerate = tab === 'BUDGET' && !budgetGenerated;
+  const highlightBudgetAccounting = tab === 'BUDGET' && budgetGenerated && !accountingApproved;
+
+  const highlightValidationApprove = tab === 'VALIDATION' && !adminApproved;
+
+  const highlightDevelopment = tab === 'DEV' && !developmentGenerated;
+  const highlightCutlist = tab === 'DEV' && developmentGenerated && !cutlistGenerated;
+
+  const highlightProdCut = tab === 'PROD' && !prodCut;
+  const highlightProdFab = tab === 'PROD' && !prodFab;
+  const highlightProdLac = tab === 'PROD' && !prodLac;
+  const highlightProdLacControl = tab === 'PROD' && !prodLacControl;
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -120,6 +137,9 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               onModelImageChange={file => { setModelImage(file); resetDownstream(); }}
               onGoogleViewChange={value => setGoogleView(value)}
               onNotesChange={value => setNotes(value)}
+              highlightCustomer={highlightRequestCustomer}
+              highlightM2={highlightRequestM2}
+              highlightModelRef={highlightRequestModelRef}
             />
           )}
 
@@ -134,6 +154,8 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               validationError={budgetValidationError}
               onGenerateBudget={handleGenerateBudget}
               onToggleAccounting={handleToggleAccounting}
+              highlightGenerate={highlightBudgetGenerate}
+              highlightAccounting={highlightBudgetAccounting}
             />
           )}
 
@@ -143,11 +165,16 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               approverUserId={approverUserId}
               onApproverUserIdChange={handleApproverUserIdChange}
               onApproveBudget={handleApproveBudget}
+              highlightApprove={highlightValidationApprove}
             />
           )}
 
           {tab === 'DEV' && (
-            <DevelopmentSection {...dev} />
+            <DevelopmentSection
+              {...dev}
+              highlightDevelopment={highlightDevelopment}
+              highlightCutlist={highlightCutlist}
+            />
           )}
 
           {tab === 'PROD' && (
@@ -165,6 +192,10 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               onProdLacChange={value => setProdLac(value)}
               onProdLacControlChange={value => setProdLacControl(value)}
               onOpenWorkOrderModal={() => setShowWorkOrderModal(true)}
+              highlightProdCut={highlightProdCut}
+              highlightProdFab={highlightProdFab}
+              highlightProdLac={highlightProdLac}
+              highlightProdLacControl={highlightProdLacControl}
             />
           )}
 

@@ -6,11 +6,13 @@ export const ValidationSection = ({
   approverUserId,
   onApproverUserIdChange,
   onApproveBudget,
+  highlightApprove,
 }: {
   pendingBudgets: PendingBudget[];
   approverUserId: string;
   onApproverUserIdChange: (value: string) => void;
   onApproveBudget: (validationId: string) => void;
+  highlightApprove?: boolean;
 }) => {
   const canApprove = Boolean(approverUserId.trim());
 
@@ -61,7 +63,12 @@ export const ValidationSection = ({
                       type="button"
                       className="btn-ghost"
                       disabled={!canApprove}
-                      style={{ opacity: canApprove ? 1 : 0.4, cursor: canApprove ? 'pointer' : 'not-allowed' }}
+                      style={{
+                        opacity: canApprove ? 1 : 0.4,
+                        cursor: canApprove ? 'pointer' : 'not-allowed',
+                        boxShadow: highlightApprove ? '0 0 0 3px var(--danger-bg)' : undefined,
+                        border: highlightApprove ? '1px solid var(--danger)' : undefined,
+                      }}
                       onClick={() => onApproveBudget(budget.validationId)}
                     >
                       Aprobar

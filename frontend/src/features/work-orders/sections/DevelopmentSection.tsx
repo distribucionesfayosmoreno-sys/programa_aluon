@@ -11,6 +11,8 @@ export const DevelopmentSection = ({
   needs,
   cutlist,
   actions,
+  highlightDevelopment,
+  highlightCutlist,
 }: DevelopmentSectionProps) => (
   <section
     id="cutlist-form"
@@ -18,7 +20,12 @@ export const DevelopmentSection = ({
     style={cardStyle}
   >
     <SectionTitle n="04" label="Desarrollo automático" />
-    <DevelopmentActionsBar status={status} actions={actions} />
+    <DevelopmentActionsBar
+      status={status}
+      actions={actions}
+      highlightDevelopment={highlightDevelopment}
+      highlightCutlist={highlightCutlist}
+    />
     {!status.canGenerateCutlist && status.cutlistBlockingReasons.length > 0 && (
       <div className="mt-3 text-xs font-semibold" style={{ color: uiColors.dangerDark }}>
         <div className="uppercase tracking-widest text-[10px]" style={{ color: uiColors.dangerDark }}>

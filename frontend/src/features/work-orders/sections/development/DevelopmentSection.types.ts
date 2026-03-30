@@ -107,4 +107,6 @@ export type DevelopmentSectionProps = {
   needs: DevelopmentNeeds;
   cutlist: DevelopmentCutlist;
   actions: DevelopmentActions;
+  highlightDevelopment?: boolean;
+  highlightCutlist?: boolean;
 };

@@ -14,6 +14,10 @@ export const ProductionSection = ({
   onProdLacChange,
   onProdLacControlChange,
   onOpenWorkOrderModal,
+  highlightProdCut,
+  highlightProdFab,
+  highlightProdLac,
+  highlightProdLacControl,
 }: {
   productionPct: number;
   prodCut: boolean;
@@ -28,6 +32,10 @@ export const ProductionSection = ({
   onProdLacChange: (value: boolean) => void;
   onProdLacControlChange: (value: boolean) => void;
   onOpenWorkOrderModal: () => void;
+  highlightProdCut?: boolean;
+  highlightProdFab?: boolean;
+  highlightProdLac?: boolean;
+  highlightProdLacControl?: boolean;
 }) => (
   <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="05" label="Producción" />
@@ -38,7 +46,13 @@ export const ProductionSection = ({
       <span className="text-xs font-bold" style={{ color: uiColors.textSubtle }}>{productionPct}%</span>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
+      <label
+        className="flex items-center gap-3 p-3 rounded-xl"
+        style={{
+          border: `1px solid ${highlightProdCut ? 'var(--danger)' : uiColors.border}`,
+          background: highlightProdCut ? 'var(--danger-bg)' : '#f9fafb',
+        }}
+      >
         <input
           type="checkbox"
           checked={prodCut}
@@ -48,7 +62,13 @@ export const ProductionSection = ({
         />
         <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Corte</span>
       </label>
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
+      <label
+        className="flex items-center gap-3 p-3 rounded-xl"
+        style={{
+          border: `1px solid ${highlightProdFab ? 'var(--danger)' : uiColors.border}`,
+          background: highlightProdFab ? 'var(--danger-bg)' : '#f9fafb',
+        }}
+      >
         <input
           type="checkbox"
           checked={prodFab}
@@ -58,7 +78,13 @@ export const ProductionSection = ({
         />
         <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Fabricación</span>
       </label>
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
+      <label
+        className="flex items-center gap-3 p-3 rounded-xl"
+        style={{
+          border: `1px solid ${highlightProdLac ? 'var(--danger)' : uiColors.border}`,
+          background: highlightProdLac ? 'var(--danger-bg)' : '#f9fafb',
+        }}
+      >
         <input
           type="checkbox"
           checked={prodLac}
@@ -68,7 +94,13 @@ export const ProductionSection = ({
         />
         <span className="text-xs font-bold uppercase" style={{ color: uiColors.textPrimary }}>Lacado</span>
       </label>
-      <label className="flex items-center gap-3 p-3 rounded-xl" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
+      <label
+        className="flex items-center gap-3 p-3 rounded-xl"
+        style={{
+          border: `1px solid ${highlightProdLacControl ? 'var(--danger)' : uiColors.border}`,
+          background: highlightProdLacControl ? 'var(--danger-bg)' : '#f9fafb',
+        }}
+      >
         <input
           type="checkbox"
           checked={prodLacControl}
