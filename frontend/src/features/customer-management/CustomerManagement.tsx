@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useCustomers, Customer } from '../../hooks/useCustomers';
 import CustomerModal from '../../components/CustomerModal';
+import ConfirmDialog from '../../components/feedback/ConfirmDialog';
+import ErrorDialog from '../../components/feedback/ErrorDialog';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -132,9 +134,38 @@ const CustomerManagement: React.FC = () => {
   const [isModalOpen,      setIsModalOpen]      = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | undefined>();
   const [selected,         setSelected]         = useState<Set<string>>(new Set());
+  const [confirmDelete, setConfirmDelete] = useState<Customer | null>(null);
+  const [deleteError, setDeleteError] = useState<{ title: string; description: string; detail?: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit   = (c: Customer) => { setSelectedCustomer(c);         setIsModalOpen(true); };
   const handleCreate = ()            => { setSelectedCustomer(undefined); setIsModalOpen(true); };
+
+  const handleAskDelete = useCallback((customer: Customer) => {
+    setConfirmDelete(customer);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!confirmDelete?.id) {
+      setConfirmDelete(null);
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await deleteCustomer(confirmDelete.id);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'No se pudo eliminar el cliente.';
+      const name = confirmDelete.nombreComercial || confirmDelete.razonSocial || 'este cliente';
+      setDeleteError({
+        title: 'No pudimos eliminar al cliente',
+        description: `Eliminación cancelada para ${name}. Revisa que no tenga presupuestos o pedidos en curso antes de intentarlo de nuevo.`,
+        detail,
+      });
+    } finally {
+      setIsDeleting(false);
+      setConfirmDelete(null);
+    }
+  }, [confirmDelete, deleteCustomer]);
 
   const toggleRow = (id: string) => {
     setSelected(prev => {
@@ -350,18 +381,7 @@ const CustomerManagement: React.FC = () => {
                               </svg>
                             </button>
                             <button
-                              onClick={async () => {
-                                if (!c.id) return;
-                                const ok = window.confirm(`¿Eliminar el cliente "${c.nombreComercial || 'Sin nombre'}"?`);
-                                if (!ok) return;
-                                try {
-                                  await deleteCustomer(c.id);
-                                } catch (error) {
-                                  console.error('Error eliminando cliente:', error);
-                                  const message = error instanceof Error ? error.message : 'No se pudo eliminar el cliente.';
-                                  window.alert(message);
-                                }
-                              }}
+                              onClick={() => handleAskDelete(c)}
                               title="Eliminar"
                               className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 cursor-pointer"
                               style={{ color: '#9ca3af' }}
@@ -427,6 +447,24 @@ const CustomerManagement: React.FC = () => {
           onSave={saveCustomer}
         />
       )}
+      <ConfirmDialog
+        open={Boolean(confirmDelete)}
+        title="Eliminar cliente"
+        description={`Vas a eliminar el cliente "${confirmDelete?.nombreComercial || confirmDelete?.razonSocial || 'Sin nombre'}". Esto puede afectar presupuestos, órdenes de trabajo y facturación asociada.`}
+        confirmLabel="Eliminar cliente"
+        cancelLabel="Mantener cliente"
+        tone="danger"
+        loading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setConfirmDelete(null)}
+      />
+      <ErrorDialog
+        open={Boolean(deleteError)}
+        title={deleteError?.title ?? ''}
+        description={deleteError?.description ?? ''}
+        detail={deleteError?.detail}
+        onClose={() => setDeleteError(null)}
+      />
     </div>
   );
 };

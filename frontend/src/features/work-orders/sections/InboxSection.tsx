@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { WorkOrderRequest } from '../models';
 import { MODELS, WORKFLOW_STEP_LABELS } from '../constants';
 import { cardStyle, SectionTitle, uiColors } from '../components/ui';
+import ConfirmDialog from '../../../components/feedback/ConfirmDialog';
+import ErrorDialog from '../../../components/feedback/ErrorDialog';
 
 const statusStyles: Record<string, { background: string; color: string; border: string }> = {
   INBOX: { background: 'var(--accent-soft-2)', color: uiColors.accent, border: 'var(--accent-border)' },
@@ -41,6 +43,34 @@ export const InboxSection = ({
   const [filterText, setFilterText] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [filterDate, setFilterDate] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<WorkOrderRequest | null>(null);
+  const [deleteError, setDeleteError] = useState<{ title: string; description: string; detail?: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleAskDelete = useCallback((request: WorkOrderRequest) => {
+    setConfirmDelete(request);
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!confirmDelete) {
+      setConfirmDelete(null);
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await onDeleteRequest(confirmDelete);
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : 'No se pudo eliminar la solicitud.';
+      setDeleteError({
+        title: 'No pudimos eliminar la solicitud',
+        description: `La solicitud ${confirmDelete.reference} sigue activa. Revisa si ya está en producción o validación antes de volver a intentarlo.`,
+        detail,
+      });
+    } finally {
+      setIsDeleting(false);
+      setConfirmDelete(null);
+    }
+  }, [confirmDelete, onDeleteRequest]);
 
   const filteredRequests = useMemo(() => {
     const query = filterText.trim().toLowerCase();
@@ -223,14 +253,7 @@ export const InboxSection = ({
                       }}
                       onClick={async event => {
                         event.stopPropagation();
-                        if (!window.confirm(`¿Eliminar la solicitud ${req.reference}?`)) {
-                          return;
-                        }
-                        try {
-                          await onDeleteRequest(req);
-                        } catch (error) {
-                          alert(error instanceof Error ? error.message : 'No se pudo eliminar la solicitud.');
-                        }
+                        handleAskDelete(req);
                       }}
                       aria-label="Eliminar solicitud"
                       title="Eliminar"
@@ -249,6 +272,24 @@ export const InboxSection = ({
           No se encontró el cliente en CRM. Selecciónalo manualmente en la solicitud.
         </p>
       )}
+      <ConfirmDialog
+        open={Boolean(confirmDelete)}
+        title="Eliminar solicitud"
+        description={`Vas a eliminar la solicitud ${confirmDelete?.reference ?? 'sin referencia'}. Esto eliminará su rastro en la bandeja y sus notas asociadas.`}
+        confirmLabel="Eliminar solicitud"
+        cancelLabel="Mantener solicitud"
+        tone="danger"
+        loading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => setConfirmDelete(null)}
+      />
+      <ErrorDialog
+        open={Boolean(deleteError)}
+        title={deleteError?.title ?? ''}
+        description={deleteError?.description ?? ''}
+        detail={deleteError?.detail}
+        onClose={() => setDeleteError(null)}
+      />
     </section>
   );
 };
