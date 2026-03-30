@@ -21,6 +21,10 @@ export const RequestSection = ({
   highlightCustomer,
   highlightM2,
   highlightModelRef,
+  onAdvanceStep,
+  canAdvanceStep,
+  nextStepLabel,
+  advanceHint,
 }: {
   customers: CustomerOption[];
   customerId: string;
@@ -40,6 +44,10 @@ export const RequestSection = ({
   highlightCustomer?: boolean;
   highlightM2?: boolean;
   highlightModelRef?: boolean;
+  onAdvanceStep?: () => void;
+  canAdvanceStep?: boolean;
+  nextStepLabel?: string;
+  advanceHint?: string;
 }) => (
   <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="01" label="Solicitud del cliente" />
@@ -126,6 +134,26 @@ export const RequestSection = ({
       <p className="text-xs font-semibold mt-3" style={{ color: uiColors.danger }}>
         Debe incluir imagen o referencia del modelo.
       </p>
+    )}
+    {onAdvanceStep && (
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={onAdvanceStep}
+          disabled={!canAdvanceStep}
+          style={{ opacity: canAdvanceStep ? 1 : 0.5, cursor: canAdvanceStep ? 'pointer' : 'not-allowed' }}
+          title={advanceHint || undefined}
+        >
+          <span className="text-base">➡️</span>
+          Avanzar etapa{nextStepLabel ? ` · ${nextStepLabel}` : ''}
+        </button>
+        {advanceHint && (
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: uiColors.textGhost }}>
+            {advanceHint}
+          </span>
+        )}
+      </div>
     )}
   </section>
 );

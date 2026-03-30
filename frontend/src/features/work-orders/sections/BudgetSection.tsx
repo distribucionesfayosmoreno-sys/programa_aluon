@@ -12,6 +12,10 @@ export const BudgetSection = ({
   onToggleAccounting,
   highlightGenerate,
   highlightAccounting,
+  onAdvanceStep,
+  canAdvanceStep,
+  nextStepLabel,
+  advanceHint,
 }: {
   pricePerM2: number;
   total: number;
@@ -24,6 +28,10 @@ export const BudgetSection = ({
   onToggleAccounting: () => void;
   highlightGenerate?: boolean;
   highlightAccounting?: boolean;
+  onAdvanceStep?: () => void;
+  canAdvanceStep?: boolean;
+  nextStepLabel?: string;
+  advanceHint?: string;
 }) => (
   <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="02" label="Presupuesto" />
@@ -77,6 +85,26 @@ export const BudgetSection = ({
     {validationError && (
       <div className="text-xs font-semibold mt-3" style={{ color: uiColors.dangerDark }}>
         {validationError}
+      </div>
+    )}
+    {onAdvanceStep && (
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={onAdvanceStep}
+          disabled={!canAdvanceStep}
+          style={{ opacity: canAdvanceStep ? 1 : 0.5, cursor: canAdvanceStep ? 'pointer' : 'not-allowed' }}
+          title={advanceHint || undefined}
+        >
+          <span className="text-base">➡️</span>
+          Avanzar etapa{nextStepLabel ? ` · ${nextStepLabel}` : ''}
+        </button>
+        {advanceHint && (
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: uiColors.textGhost }}>
+            {advanceHint}
+          </span>
+        )}
       </div>
     )}
   </section>

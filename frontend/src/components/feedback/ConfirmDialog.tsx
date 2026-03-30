@@ -4,10 +4,10 @@ import AppDialog from './AppDialog';
 interface ConfirmDialogProps {
   open: boolean;
   title: string;
-  description: string;
+  description: React.ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
-  tone?: 'neutral' | 'danger';
+  tone?: 'neutral' | 'danger' | 'warning';
   loading?: boolean;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
@@ -62,7 +62,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </>
       )}
     >
-      <div className="text-sm" style={{ color: '#4b5563', lineHeight: 1.6 }}>
+      <div className="text-sm" style={{ color: '#4b5563', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
         {description}
       </div>
       {tone === 'danger' && (

@@ -16,9 +16,15 @@ import ErrorDialog from '../../../components/feedback/ErrorDialog';
 type WorkOrdersBodyProps = {
   ctx: UseWorkOrdersResult;
   dev: DevelopmentSectionProps;
+  advance: {
+    onAdvanceStep: () => void;
+    canAdvanceStep: boolean;
+    nextStepLabel?: string;
+    advanceHint?: string;
+  };
 };
 
-export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
+export const WorkOrdersBody = ({ ctx, dev, advance }: WorkOrdersBodyProps) => {
   const {
     customers,
     requests,
@@ -141,6 +147,10 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               highlightCustomer={highlightRequestCustomer}
               highlightM2={highlightRequestM2}
               highlightModelRef={highlightRequestModelRef}
+              onAdvanceStep={advance.onAdvanceStep}
+              canAdvanceStep={advance.canAdvanceStep}
+              nextStepLabel={advance.nextStepLabel}
+              advanceHint={advance.advanceHint}
             />
           )}
 
@@ -157,6 +167,10 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               onToggleAccounting={handleToggleAccounting}
               highlightGenerate={highlightBudgetGenerate}
               highlightAccounting={highlightBudgetAccounting}
+              onAdvanceStep={advance.onAdvanceStep}
+              canAdvanceStep={advance.canAdvanceStep}
+              nextStepLabel={advance.nextStepLabel}
+              advanceHint={advance.advanceHint}
             />
           )}
 
@@ -167,6 +181,10 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               onApproverUserIdChange={handleApproverUserIdChange}
               onApproveBudget={handleApproveBudget}
               highlightApprove={highlightValidationApprove}
+              onAdvanceStep={advance.onAdvanceStep}
+              canAdvanceStep={advance.canAdvanceStep}
+              nextStepLabel={advance.nextStepLabel}
+              advanceHint={advance.advanceHint}
             />
           )}
 
@@ -175,6 +193,10 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               {...dev}
               highlightDevelopment={highlightDevelopment}
               highlightCutlist={highlightCutlist}
+              onAdvanceStep={advance.onAdvanceStep}
+              canAdvanceStep={advance.canAdvanceStep}
+              nextStepLabel={advance.nextStepLabel}
+              advanceHint={advance.advanceHint}
             />
           )}
 
@@ -197,6 +219,10 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               highlightProdFab={highlightProdFab}
               highlightProdLac={highlightProdLac}
               highlightProdLacControl={highlightProdLacControl}
+              onAdvanceStep={advance.onAdvanceStep}
+              canAdvanceStep={advance.canAdvanceStep}
+              nextStepLabel={advance.nextStepLabel}
+              advanceHint={advance.advanceHint}
             />
           )}
 
@@ -207,6 +233,10 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               canFinalize={canFinalize}
               onFinalizedChange={value => setFinalized(value)}
               onReadyChange={value => setReady(value)}
+              onAdvanceStep={advance.onAdvanceStep}
+              canAdvanceStep={advance.canAdvanceStep}
+              nextStepLabel={advance.nextStepLabel}
+              advanceHint={advance.advanceHint}
             />
           )}
         </div>

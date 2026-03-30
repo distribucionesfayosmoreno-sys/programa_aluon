@@ -4,6 +4,7 @@ import { MODELS, WORKFLOW_STEP_LABELS } from '../constants';
 import { cardStyle, SectionTitle, uiColors } from '../components/ui';
 import ConfirmDialog from '../../../components/feedback/ConfirmDialog';
 import ErrorDialog from '../../../components/feedback/ErrorDialog';
+import { OriginalRequestDialog } from '../components/OriginalRequestDialog';
 
 const statusStyles: Record<string, { background: string; color: string; border: string }> = {
   INBOX: { background: 'var(--accent-soft-2)', color: uiColors.accent, border: 'var(--accent-border)' },
@@ -46,6 +47,8 @@ export const InboxSection = ({
   const [confirmDelete, setConfirmDelete] = useState<WorkOrderRequest | null>(null);
   const [deleteError, setDeleteError] = useState<{ title: string; description: string; detail?: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showOriginalRequest, setShowOriginalRequest] = useState(false);
+  const [originalRequest, setOriginalRequest] = useState<WorkOrderRequest | null>(null);
 
   const handleAskDelete = useCallback((request: WorkOrderRequest) => {
     setConfirmDelete(request);
@@ -71,6 +74,11 @@ export const InboxSection = ({
       setConfirmDelete(null);
     }
   }, [confirmDelete, onDeleteRequest]);
+
+  const handleShowOriginal = useCallback((request: WorkOrderRequest) => {
+    setOriginalRequest(request);
+    setShowOriginalRequest(true);
+  }, []);
 
   const filteredRequests = useMemo(() => {
     const query = filterText.trim().toLowerCase();
@@ -241,7 +249,24 @@ export const InboxSection = ({
                       aria-label="Cargar solicitud"
                       title="Cargar"
                     >
-                      <span className="material-symbols-outlined text-lg">save</span>
+                      <span className="text-base">📥</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="w-10 h-10 rounded-xl border transition-colors inline-flex items-center justify-center"
+                      style={{
+                        color: uiColors.textPrimary,
+                        borderColor: uiColors.border,
+                        background: '#f9fafb',
+                      }}
+                      onClick={event => {
+                        event.stopPropagation();
+                        handleShowOriginal(req);
+                      }}
+                      aria-label="Ver solicitud original"
+                      title="Solicitud original"
+                    >
+                      <span className="text-base">🧾</span>
                     </button>
                     <button
                       type="button"
@@ -258,7 +283,7 @@ export const InboxSection = ({
                       aria-label="Eliminar solicitud"
                       title="Eliminar"
                     >
-                      <span className="material-symbols-outlined text-lg">close</span>
+                      <span className="text-base">🗑️</span>
                     </button>
                   </div>
                 </div>
@@ -289,6 +314,11 @@ export const InboxSection = ({
         description={deleteError?.description ?? ''}
         detail={deleteError?.detail}
         onClose={() => setDeleteError(null)}
+      />
+      <OriginalRequestDialog
+        open={showOriginalRequest}
+        request={originalRequest}
+        onClose={() => { setShowOriginalRequest(false); setOriginalRequest(null); }}
       />
     </section>
   );

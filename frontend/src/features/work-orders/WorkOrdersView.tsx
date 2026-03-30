@@ -6,7 +6,8 @@ import { useWorkOrdersViewModel } from './hooks/useWorkOrdersViewModel';
 import { updateWorkOrderWorkflowStep } from './services/requestsApi';
 import AuthorizationDialog from '../../components/feedback/AuthorizationDialog';
 import ErrorDialog from '../../components/feedback/ErrorDialog';
-import { OriginalRequestDialog } from './components/OriginalRequestDialog';
+import ConfirmDialog from '../../components/feedback/ConfirmDialog';
+import { MODELS } from './constants';
 
 export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
   const { dev, onOpenNewRequest } = useWorkOrdersViewModel(ctx);
@@ -14,12 +15,8 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [workflowError, setWorkflowError] = useState('');
   const [navigationWarning, setNavigationWarning] = useState('');
-  const [showOriginalRequest, setShowOriginalRequest] = useState(false);
-
-  const selectedRequest = useMemo(
-    () => ctx.requests.find(req => req.id === ctx.selectedRequestId) ?? null,
-    [ctx.requests, ctx.selectedRequestId],
-  );
+  const [showDirtyConfirm, setShowDirtyConfirm] = useState(false);
+  const [pendingAdvance, setPendingAdvance] = useState<UseWorkOrdersResult['tab'] | null>(null);
 
   const workflowOrder = useMemo<UseWorkOrdersResult['tab'][]>(
     () => ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'],
@@ -39,6 +36,75 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     if (currentIndex === -1 || currentIndex >= workflowOrder.length - 1) return null;
     return workflowOrder[currentIndex + 1];
   }, [ctx.tab, workflowOrder]);
+
+  const currentCustomerName = useMemo(() => {
+    const customer = ctx.customers.find(c => c.id === ctx.customerId);
+    return customer?.nombreComercial || customer?.razonSocial || '';
+  }, [ctx.customers, ctx.customerId]);
+
+  const selectedRequest = useMemo(
+    () => ctx.requests.find(req => req.id === ctx.selectedRequestId) ?? null,
+    [ctx.requests, ctx.selectedRequestId],
+  );
+
+  const isDirtyRequest = useMemo(() => {
+    if (ctx.tab !== 'REQUEST') return false;
+    if (!selectedRequest) return false;
+    const selectedReference = (selectedRequest.reference ?? '').toUpperCase();
+    const currentReference = (ctx.modelReference ?? '').toUpperCase();
+    const customerMismatch = selectedRequest.customerId
+      ? (ctx.customerId && selectedRequest.customerId !== ctx.customerId)
+      : (currentCustomerName && selectedRequest.customerName && currentCustomerName !== selectedRequest.customerName);
+    return Boolean(
+      customerMismatch
+      || selectedRequest.modelId !== ctx.modelId
+      || Number(selectedRequest.m2) !== Number(ctx.m2)
+      || selectedReference !== currentReference
+      || Boolean(selectedRequest.googleView) !== Boolean(ctx.googleView)
+      || (selectedRequest.notes ?? '') !== (ctx.notes ?? '')
+      || ctx.modelImage
+    );
+  }, [
+    ctx.tab,
+    selectedRequest,
+    ctx.customerId,
+    currentCustomerName,
+    ctx.modelId,
+    ctx.m2,
+    ctx.modelReference,
+    ctx.googleView,
+    ctx.notes,
+    ctx.modelImage,
+  ]);
+
+  const dirtyFields = useMemo(() => {
+    if (!selectedRequest || ctx.tab !== 'REQUEST') return [];
+    const fields: string[] = [];
+    const selectedReference = (selectedRequest.reference ?? '').toUpperCase();
+    const currentReference = (ctx.modelReference ?? '').toUpperCase();
+    const customerMismatch = selectedRequest.customerId
+      ? (ctx.customerId && selectedRequest.customerId !== ctx.customerId)
+      : (currentCustomerName && selectedRequest.customerName && currentCustomerName !== selectedRequest.customerName);
+    if (customerMismatch) fields.push('Cliente');
+    if (selectedRequest.modelId !== ctx.modelId) fields.push('Modelo');
+    if (Number(selectedRequest.m2) !== Number(ctx.m2)) fields.push('m²');
+    if (selectedReference !== currentReference) fields.push('Referencia del modelo');
+    if (Boolean(selectedRequest.googleView) !== Boolean(ctx.googleView)) fields.push('Google View');
+    if ((selectedRequest.notes ?? '') !== (ctx.notes ?? '')) fields.push('Notas');
+    if (ctx.modelImage) fields.push('Imagen del modelo');
+    return fields;
+  }, [
+    selectedRequest,
+    ctx.tab,
+    ctx.customerId,
+    currentCustomerName,
+    ctx.modelId,
+    ctx.m2,
+    ctx.modelReference,
+    ctx.googleView,
+    ctx.notes,
+    ctx.modelImage,
+  ]);
 
   const advanceBlockReason = useMemo(() => {
     if (!nextStep) return 'No hay una etapa posterior.';
@@ -142,10 +208,40 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
       setNavigationWarning(advanceBlockReason);
       return;
     }
+    if (isDirtyRequest) {
+      setPendingAdvance(nextStep);
+      setShowDirtyConfirm(true);
+      return;
+    }
     if (!nextStep || !ctx.selectedRequestId) return;
     const ok = await persistWorkflowStep(nextStep);
     if (!ok) return;
     ctx.setTab(nextStep);
+  };
+
+  const handleConfirmAdvance = async () => {
+    setShowDirtyConfirm(false);
+    if (!pendingAdvance || !ctx.selectedRequestId || !selectedRequest) return;
+    const modelLabel = MODELS.find(m => m.id === ctx.modelId)?.label ?? selectedRequest.modelLabel ?? selectedRequest.modelId;
+    ctx.setRequests(prev => prev.map(req => {
+      if (req.id !== ctx.selectedRequestId) return req;
+      const updatedCustomerName = currentCustomerName || req.customerName;
+      return {
+        ...req,
+        customerId: ctx.customerId || req.customerId,
+        customerName: updatedCustomerName,
+        modelId: ctx.modelId,
+        modelLabel,
+        m2: ctx.m2,
+        reference: (ctx.modelReference || req.reference).toUpperCase(),
+        googleView: ctx.googleView,
+        notes: ctx.notes,
+      };
+    }));
+    const ok = await persistWorkflowStep(pendingAdvance);
+    if (!ok) return;
+    ctx.setTab(pendingAdvance);
+    setPendingAdvance(null);
   };
 
   return (
@@ -155,14 +251,17 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         activeTab={ctx.tab}
         onTabChange={handleTabChange}
         onOpenNewRequest={onOpenNewRequest}
-        onOpenOriginalRequest={() => setShowOriginalRequest(true)}
-        canOpenOriginalRequest={Boolean(selectedRequest)}
-        onAdvanceStep={handleAdvanceStep}
-        canAdvanceStep={Boolean(nextStep && !advanceBlockReason)}
-        nextStepLabel={nextStep ? ctx.pipelineSteps.find(step => step.key === nextStep)?.label : undefined}
-        advanceHint={advanceBlockReason ?? undefined}
       />
-      <WorkOrdersBody ctx={ctx} dev={dev} />
+      <WorkOrdersBody
+        ctx={ctx}
+        dev={dev}
+        advance={{
+          onAdvanceStep: handleAdvanceStep,
+          canAdvanceStep: Boolean(nextStep && !advanceBlockReason),
+          nextStepLabel: nextStep ? ctx.pipelineSteps.find(step => step.key === nextStep)?.label : undefined,
+          advanceHint: advanceBlockReason ?? undefined,
+        }}
+      />
 
       <AuthorizationDialog
         open={showAuthDialog}
@@ -184,10 +283,27 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         description={navigationWarning || ''}
         onClose={() => setNavigationWarning('')}
       />
-      <OriginalRequestDialog
-        open={showOriginalRequest}
-        request={selectedRequest}
-        onClose={() => setShowOriginalRequest(false)}
+      <ConfirmDialog
+        open={showDirtyConfirm}
+        title="Cambios sin guardar"
+        description={(
+          <div className="space-y-2">
+            <div>Hay cambios sin guardar en la solicitud. Si avanzas, se guardarán automáticamente antes de continuar.</div>
+            {dirtyFields.length > 0 && (
+              <div className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#9ca3af' }}>
+                Campos con cambios:
+              </div>
+            )}
+            {dirtyFields.map(field => (
+              <div key={field} className="text-sm">• {field}</div>
+            ))}
+          </div>
+        )}
+        confirmLabel="Guardar y avanzar"
+        cancelLabel="Volver a revisar"
+        tone="warning"
+        onConfirm={handleConfirmAdvance}
+        onClose={() => setShowDirtyConfirm(false)}
       />
     </div>
   );

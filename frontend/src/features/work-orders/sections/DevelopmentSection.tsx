@@ -13,6 +13,10 @@ export const DevelopmentSection = ({
   actions,
   highlightDevelopment,
   highlightCutlist,
+  onAdvanceStep,
+  canAdvanceStep,
+  nextStepLabel,
+  advanceHint,
 }: DevelopmentSectionProps) => (
   <section
     id="cutlist-form"
@@ -52,5 +56,25 @@ export const DevelopmentSection = ({
       cutlist={cutlist}
       actions={{ onCutlistHoverChange: actions.onCutlistHoverChange, onCutlistPinnedChange: actions.onCutlistPinnedChange }}
     />
+    {onAdvanceStep && (
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={onAdvanceStep}
+          disabled={!canAdvanceStep}
+          style={{ opacity: canAdvanceStep ? 1 : 0.5, cursor: canAdvanceStep ? 'pointer' : 'not-allowed' }}
+          title={advanceHint || undefined}
+        >
+          <span className="text-base">➡️</span>
+          Avanzar etapa{nextStepLabel ? ` · ${nextStepLabel}` : ''}
+        </button>
+        {advanceHint && (
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: uiColors.textGhost }}>
+            {advanceHint}
+          </span>
+        )}
+      </div>
+    )}
   </section>
 );

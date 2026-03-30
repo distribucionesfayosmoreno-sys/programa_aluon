@@ -109,4 +109,8 @@ export type DevelopmentSectionProps = {
   actions: DevelopmentActions;
   highlightDevelopment?: boolean;
   highlightCutlist?: boolean;
+  onAdvanceStep?: () => void;
+  canAdvanceStep?: boolean;
+  nextStepLabel?: string;
+  advanceHint?: string;
 };

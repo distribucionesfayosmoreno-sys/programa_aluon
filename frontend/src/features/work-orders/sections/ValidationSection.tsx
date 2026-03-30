@@ -7,12 +7,20 @@ export const ValidationSection = ({
   onApproverUserIdChange,
   onApproveBudget,
   highlightApprove,
+  onAdvanceStep,
+  canAdvanceStep,
+  nextStepLabel,
+  advanceHint,
 }: {
   pendingBudgets: PendingBudget[];
   approverUserId: string;
   onApproverUserIdChange: (value: string) => void;
   onApproveBudget: (validationId: string) => void;
   highlightApprove?: boolean;
+  onAdvanceStep?: () => void;
+  canAdvanceStep?: boolean;
+  nextStepLabel?: string;
+  advanceHint?: string;
 }) => {
   const canApprove = Boolean(approverUserId.trim());
 
@@ -78,6 +86,26 @@ export const ValidationSection = ({
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+      {onAdvanceStep && (
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={onAdvanceStep}
+            disabled={!canAdvanceStep}
+            style={{ opacity: canAdvanceStep ? 1 : 0.5, cursor: canAdvanceStep ? 'pointer' : 'not-allowed' }}
+            title={advanceHint || undefined}
+          >
+            <span className="text-base">➡️</span>
+            Avanzar etapa{nextStepLabel ? ` · ${nextStepLabel}` : ''}
+          </button>
+          {advanceHint && (
+            <span className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: uiColors.textGhost }}>
+              {advanceHint}
+            </span>
+          )}
         </div>
       )}
     </section>
