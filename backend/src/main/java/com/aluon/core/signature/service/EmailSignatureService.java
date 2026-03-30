@@ -18,7 +18,6 @@ import com.aluon.core.signature.dto.EmailSignatureDto;
 import com.aluon.core.signature.repository.EmailSignatureRepository;
 import com.aluon.core.signature.dto.UpdateEmailSignatureRequest;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -148,9 +147,11 @@ public class EmailSignatureService {
                 .append(";font-size:12px;color:#0d1117;\">\n")
                 .append("  <tr>\n")
                 .append("    <td style=\"padding-right:16px;vertical-align:top;\">\n")
-                .append("      <img src=\"").append(escapeHtml(logo)).append("\" alt=\"ALUON\" width=\"120\" style=\"display:block;max-width:120px;\"/>\n")
+                .append("      <img src=\"").append(escapeHtml(logo))
+                .append("\" alt=\"ALUON\" width=\"120\" style=\"display:block;max-width:120px;\"/>\n")
                 .append("    </td>\n")
-                .append("    <td style=\"border-left:2px solid ").append(escapeHtml(accent)).append(";padding-left:16px;vertical-align:top;\">\n")
+                .append("    <td style=\"border-left:2px solid ").append(escapeHtml(accent))
+                .append(";padding-left:16px;vertical-align:top;\">\n")
                 .append("      <div style=\"font-size:14px;font-weight:700;color:#0d1117;\">")
                 .append(escapeHtml(signature.getFullName()))
                 .append("</div>\n");
@@ -169,7 +170,6 @@ public class EmailSignatureService {
         appendLine(html, "Dirección", signature.getAddress(), "");
 
         html.append("      </div>\n")
-                .append("      <div style=\"margin-top:10px;font-size:10px;color:#9ca3af;\">Aluon · Firma automática</div>\n")
                 .append("    </td>\n")
                 .append("  </tr>\n")
                 .append("</table>");
