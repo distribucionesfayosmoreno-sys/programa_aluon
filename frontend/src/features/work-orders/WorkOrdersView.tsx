@@ -17,6 +17,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
   const [navigationWarning, setNavigationWarning] = useState('');
   const [showDirtyConfirm, setShowDirtyConfirm] = useState(false);
   const [pendingAdvance, setPendingAdvance] = useState<UseWorkOrdersResult['tab'] | null>(null);
+  const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
 
   const workflowOrder = useMemo<UseWorkOrdersResult['tab'][]>(
     () => ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'],
@@ -244,6 +245,20 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     setPendingAdvance(null);
   };
 
+  const handleFinalizeOrder = async () => {
+    if (!ctx.selectedRequestId) return;
+    setShowFinalizeConfirm(true);
+  };
+
+  const handleConfirmFinalize = async () => {
+    setShowFinalizeConfirm(false);
+    if (!ctx.selectedRequestId) return;
+    ctx.setFinalized(true);
+    const ok = await persistWorkflowStep('FINAL');
+    if (!ok) return;
+    ctx.setTab('FINAL');
+  };
+
   return (
     <div className="flex flex-col" style={{ minHeight: 600 }}>
       <WorkOrdersTabs
@@ -261,6 +276,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
           nextStepLabel: nextStep ? ctx.pipelineSteps.find(step => step.key === nextStep)?.label : undefined,
           advanceHint: advanceBlockReason ?? undefined,
         }}
+        onFinalizeOrder={handleFinalizeOrder}
       />
 
       <AuthorizationDialog
@@ -304,6 +320,16 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         tone="warning"
         onConfirm={handleConfirmAdvance}
         onClose={() => setShowDirtyConfirm(false)}
+      />
+      <ConfirmDialog
+        open={showFinalizeConfirm}
+        title="Confirmar finalización"
+        description="Vas a marcar esta orden como finalizada. Esta acción cerrará el flujo."
+        confirmLabel="Finalizar orden"
+        cancelLabel="Cancelar"
+        tone="warning"
+        onConfirm={handleConfirmFinalize}
+        onClose={() => setShowFinalizeConfirm(false)}
       />
     </div>
   );

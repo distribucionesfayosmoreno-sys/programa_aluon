@@ -22,9 +22,10 @@ type WorkOrdersBodyProps = {
     nextStepLabel?: string;
     advanceHint?: string;
   };
+  onFinalizeOrder: () => void;
 };
 
-export const WorkOrdersBody = ({ ctx, dev, advance }: WorkOrdersBodyProps) => {
+export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrdersBodyProps) => {
   const {
     customers,
     requests,
@@ -111,6 +112,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance }: WorkOrdersBodyProps) => {
   const highlightProdFab = tab === 'PROD' && !prodFab;
   const highlightProdLac = tab === 'PROD' && !prodLac;
   const highlightProdLacControl = tab === 'PROD' && !prodLacControl;
+  const canPersistFinal = canFinalize && ready !== '';
 
   return (
     <>
@@ -237,6 +239,8 @@ export const WorkOrdersBody = ({ ctx, dev, advance }: WorkOrdersBodyProps) => {
               canAdvanceStep={advance.canAdvanceStep}
               nextStepLabel={advance.nextStepLabel}
               advanceHint={advance.advanceHint}
+              onFinalizeOrder={onFinalizeOrder}
+              canPersistFinal={canPersistFinal}
             />
           )}
         </div>

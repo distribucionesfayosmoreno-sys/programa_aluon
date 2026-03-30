@@ -10,6 +10,8 @@ export const FinalSection = ({
   canAdvanceStep,
   nextStepLabel,
   advanceHint,
+  onFinalizeOrder,
+  canPersistFinal,
 }: {
   finalized: boolean;
   ready: 'PICKUP' | 'SHIPPING' | '';
@@ -20,6 +22,8 @@ export const FinalSection = ({
   canAdvanceStep?: boolean;
   nextStepLabel?: string;
   advanceHint?: string;
+  onFinalizeOrder?: () => void;
+  canPersistFinal?: boolean;
 }) => (
   <section className="p-6 rounded-2xl" style={cardStyle}>
     <SectionTitle n="06" label="Finalización" />
@@ -50,6 +54,25 @@ export const FinalSection = ({
       <p className="text-xs mt-3" style={{ color: uiColors.textGhost }}>
         Finalización disponible al completar producción.
       </p>
+    )}
+    {onFinalizeOrder && (
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          className="btn-primary"
+          onClick={onFinalizeOrder}
+          disabled={!canPersistFinal}
+          style={{ opacity: canPersistFinal ? 1 : 0.5, cursor: canPersistFinal ? 'pointer' : 'not-allowed' }}
+        >
+          <span className="text-base">✅</span>
+          Orden finalizada
+        </button>
+        {!canPersistFinal && (
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em]" style={{ color: uiColors.textGhost }}>
+            Completa producción y selecciona recogida o envío.
+          </span>
+        )}
+      </div>
     )}
     {onAdvanceStep && nextStepLabel && (
       <div className="mt-5 flex flex-wrap items-center gap-3">
