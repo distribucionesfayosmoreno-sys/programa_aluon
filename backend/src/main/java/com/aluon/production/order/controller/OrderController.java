@@ -54,7 +54,7 @@ public class OrderController {
     @PatchMapping("/requests/{requestId}/workflow-step")
     public ResponseEntity<Void> updateWorkflowStep(@PathVariable String requestId,
                                                    @RequestBody OrderWorkflowUpdateRequest request) {
-        orderService.updateWorkflowStep(requestId, request.getWorkflowStep());
+        orderService.updateWorkflowStep(requestId, request.getWorkflowStep(), request.getAuthorizerUserId());
         return ResponseEntity.noContent().build();
     }
 }

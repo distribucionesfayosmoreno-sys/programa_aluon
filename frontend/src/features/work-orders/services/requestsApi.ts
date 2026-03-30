@@ -69,11 +69,15 @@ export const deleteWorkOrderRequest = async (orderId: string): Promise<void> => 
   }
 };
 
-export const updateWorkOrderWorkflowStep = async (requestId: string, workflowStep: string): Promise<void> => {
+export const updateWorkOrderWorkflowStep = async (
+  requestId: string,
+  workflowStep: string,
+  authorizerUserId?: string,
+): Promise<void> => {
   const response = await fetch(`/api/orders/requests/${requestId}/workflow-step`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ workflowStep }),
+    body: JSON.stringify({ workflowStep, authorizerUserId }),
   });
   if (!response.ok) {
     const message = await response.text();

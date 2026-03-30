@@ -2,6 +2,9 @@ package com.aluon.production.order.service;
 
 import com.aluon.crm.customer.model.Customer;
 import com.aluon.crm.customer.service.CustomerService;
+import com.aluon.core.user.model.Role;
+import com.aluon.core.user.model.User;
+import com.aluon.core.user.repository.UserRepository;
 import com.aluon.production.cutlist.model.Cutlist;
 import com.aluon.production.cutlist.model.CutlistItem;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +38,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
+    private final UserRepository userRepository;
 
     public List<OrderStatusDto> listOrderStatuses() {
         return orderRepository.findAllByOrderByCodigoOrdenDesc().stream()
@@ -188,7 +192,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateWorkflowStep(String requestId, OrderWorkflowStep workflowStep) {
+    public void updateWorkflowStep(String requestId, OrderWorkflowStep workflowStep, String authorizerUserId) {
         if (requestId == null || requestId.isBlank()) {
             throw new IllegalArgumentException("La solicitud es obligatoria");
         }
@@ -203,6 +207,9 @@ public class OrderService {
         if (order.getWorkflowStep() == workflowStep) {
             return;
         }
+        if (isBackwardTransition(order.getWorkflowStep(), workflowStep)) {
+            validateBackwardAuthorization(authorizerUserId);
+        }
         order.setWorkflowStep(workflowStep);
         orderRepository.save(order);
     }
@@ -213,6 +220,41 @@ public class OrderService {
             return orderRepository.findById(orderId).orElse(null);
         } catch (IllegalArgumentException ignored) {
             return orderRepository.findByCodigoOrden(requestId).orElse(null);
+        }
+    }
+
+    private boolean isBackwardTransition(OrderWorkflowStep current, OrderWorkflowStep next) {
+        List<OrderWorkflowStep> steps = List.of(
+                OrderWorkflowStep.INBOX,
+                OrderWorkflowStep.REQUEST,
+                OrderWorkflowStep.BUDGET,
+                OrderWorkflowStep.VALIDATION,
+                OrderWorkflowStep.DEV,
+                OrderWorkflowStep.PROD,
+                OrderWorkflowStep.FINAL
+        );
+        int currentIndex = steps.indexOf(current);
+        int nextIndex = steps.indexOf(next);
+        if (currentIndex == -1 || nextIndex == -1) {
+            return false;
+        }
+        return nextIndex < currentIndex;
+    }
+
+    private void validateBackwardAuthorization(String authorizerUserId) {
+        if (authorizerUserId == null || authorizerUserId.isBlank()) {
+            throw new IllegalArgumentException("Se requiere autorización ADMIN o DIOS para retroceder el estado");
+        }
+        Long userId;
+        try {
+            userId = Long.valueOf(authorizerUserId.trim());
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("El ID del autorizador debe ser numérico");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario autorizador no encontrado"));
+        if (user.getRol() != Role.ADMIN && user.getRol() != Role.DIOS) {
+            throw new IllegalArgumentException("Solo ADMIN o DIOS pueden autorizar retrocesos");
         }
     }
 
