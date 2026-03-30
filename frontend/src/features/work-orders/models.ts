@@ -172,6 +172,8 @@ export type WorkOrderRequest = {
   modelId: string;
   modelLabel?: string;
   m2: number;
+  widthMm?: number;
+  heightMm?: number;
   reference: string;
   googleView: boolean;
   notes: string;

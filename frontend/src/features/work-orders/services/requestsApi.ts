@@ -45,6 +45,8 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
     modelId: resolveModelId(item.modeloPuerta),
     modelLabel: item.modeloPuerta ?? '—',
     m2: item.m2 ?? 0,
+    widthMm: item.anchoMm ?? undefined,
+    heightMm: item.altoMm ?? undefined,
     reference: item.codigoOrden || item.id,
     googleView: false,
     notes: item.notes ?? '',

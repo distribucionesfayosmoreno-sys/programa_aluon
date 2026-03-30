@@ -114,6 +114,8 @@ export const useWorkOrderRequests = ({
         customerName: data.customerName,
         modelId: data.modelId,
         m2: data.m2,
+        widthMm: 0,
+        heightMm: 0,
         reference: data.reference,
         googleView: data.googleView,
         notes: data.notes,

@@ -9,6 +9,7 @@ import type {
   CutlistResponse,
   HingesSide,
   OpeningSide,
+  WorkOrderRequest,
 } from '../models';
 import { generateCutlist } from '../services/cutlistApi';
 import { formatIsoDate } from '../utils/workOrderNumbers';
@@ -17,9 +18,29 @@ type CutlistWorkflowParams = {
   budgetNumber: string;
   canGenerateDevelopment: boolean;
   notes: string;
+  selectedRequest?: WorkOrderRequest | null;
+  selectedCustomerName?: string;
 };
 
-export const useCutlistWorkflow = ({ budgetNumber, canGenerateDevelopment, notes }: CutlistWorkflowParams) => {
+const resolveDoorModel = (request?: WorkOrderRequest | null): CutlistDoorModel | null => {
+  if (!request) return null;
+  const source = `${request.modelLabel ?? ''} ${request.modelId ?? ''}`.toLowerCase();
+  if (source.includes('premium')) return 'PREMIUM';
+  if (source.includes('classic')) return 'CLASSIC';
+  if (source.includes('inox')) return 'INOX';
+  if (source.includes('veneciana')) return 'VENECIANA';
+  if (source.includes('lux')) return 'INOX';
+  if (source.includes('pro')) return 'PREMIUM';
+  return null;
+};
+
+export const useCutlistWorkflow = ({
+  budgetNumber,
+  canGenerateDevelopment,
+  notes,
+  selectedRequest,
+  selectedCustomerName,
+}: CutlistWorkflowParams) => {
   const [cutlistGenerated, setCutlistGenerated] = useState(false);
 
   const [doorType, setDoorType] = useState<CutlistDoorType>('PEATONAL');
@@ -108,6 +129,31 @@ export const useCutlistWorkflow = ({ budgetNumber, canGenerateDevelopment, notes
       setCutlistBudgetDate(formatIsoDate());
     }
   }, [cutlistBudgetDate]);
+
+  useEffect(() => {
+    if (!selectedRequest) return;
+    if (widthMm <= 0 && selectedRequest.widthMm && selectedRequest.widthMm > 0) {
+      setWidthMm(selectedRequest.widthMm);
+    }
+    if (heightMm <= 0 && selectedRequest.heightMm && selectedRequest.heightMm > 0) {
+      setHeightMm(selectedRequest.heightMm);
+    }
+    if (!cutlistDistributor.trim()) {
+      const name = selectedCustomerName?.trim() || selectedRequest.customerName?.trim();
+      if (name) setCutlistDistributor(name);
+    }
+    const mappedModel = resolveDoorModel(selectedRequest);
+    if (mappedModel && doorModel === 'PREMIUM') {
+      setDoorModel(mappedModel);
+    }
+  }, [
+    selectedRequest,
+    selectedCustomerName,
+    widthMm,
+    heightMm,
+    cutlistDistributor,
+    doorModel,
+  ]);
 
   const canGenerateCutlist = canGenerateDevelopment
     && widthMm > 0

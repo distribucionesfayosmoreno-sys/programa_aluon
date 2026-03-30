@@ -47,7 +47,18 @@ export const useWorkOrders = ({
 
   const canGenerateDevelopment = budget.budgetGenerated && budget.accountingApproved && budget.adminApproved;
 
-  const cutlist = useCutlistWorkflow({ budgetNumber: budget.budgetNumber, canGenerateDevelopment, notes });
+  const selectedRequest = useMemo(
+    () => requests.find(req => req.id === selectedRequestId) ?? null,
+    [requests, selectedRequestId],
+  );
+
+  const cutlist = useCutlistWorkflow({
+    budgetNumber: budget.budgetNumber,
+    canGenerateDevelopment,
+    notes,
+    selectedRequest,
+    selectedCustomerName: resolvedCustomerName,
+  });
 
   const workflow = useWorkflowProgress({
     customerId,
