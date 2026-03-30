@@ -31,6 +31,7 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
     budgetGenerated,
     accountingApproved,
     adminApproved,
+    developmentGenerated,
     cutlistGenerated,
     prodCut,
     prodFab,
