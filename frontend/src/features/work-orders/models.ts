@@ -174,6 +174,8 @@ export type WorkOrderRequest = {
   m2: number;
   widthMm?: number;
   heightMm?: number;
+  color?: string;
+  installerName?: string;
   reference: string;
   googleView: boolean;
   notes: string;

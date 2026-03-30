@@ -142,6 +142,12 @@ export const useCutlistWorkflow = ({
       const name = selectedCustomerName?.trim() || selectedRequest.customerName?.trim();
       if (name) setCutlistDistributor(name);
     }
+    if (!cutlistColor.trim() && selectedRequest.color?.trim()) {
+      setCutlistColor(selectedRequest.color.trim());
+    }
+    if (!installerName.trim() && selectedRequest.installerName?.trim()) {
+      setInstallerName(selectedRequest.installerName.trim());
+    }
     const mappedModel = resolveDoorModel(selectedRequest);
     if (mappedModel && doorModel === 'PREMIUM') {
       setDoorModel(mappedModel);
@@ -152,6 +158,8 @@ export const useCutlistWorkflow = ({
     widthMm,
     heightMm,
     cutlistDistributor,
+    cutlistColor,
+    installerName,
     doorModel,
   ]);
 

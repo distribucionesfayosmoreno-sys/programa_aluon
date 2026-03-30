@@ -22,5 +22,7 @@ public class WorkOrderRequestDto {
     private Integer anchoMm;
     private Integer altoMm;
     private String notes;
+    private String color;
+    private String installerName;
     private List<MultipartFile> attachments;
 }

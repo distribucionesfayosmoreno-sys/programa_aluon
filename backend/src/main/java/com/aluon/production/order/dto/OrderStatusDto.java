@@ -26,6 +26,8 @@ public class OrderStatusDto {
     private Integer anchoMm;
     private Integer altoMm;
     private String notes;
+    private String color;
+    private String installerName;
     private LocalDate requestDate;
     private Double m2;
 }

@@ -47,6 +47,12 @@ public class Order {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "color")
+    private String color;
+
+    @Column(name = "installer_name")
+    private String installerName;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

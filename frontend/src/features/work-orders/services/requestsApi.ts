@@ -11,6 +11,8 @@ type OrderStatusApi = {
   anchoMm?: number | null;
   altoMm?: number | null;
   notes?: string | null;
+  color?: string | null;
+  installerName?: string | null;
   requestDate?: string | null;
   m2?: number | null;
 };
@@ -47,6 +49,8 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
     m2: item.m2 ?? 0,
     widthMm: item.anchoMm ?? undefined,
     heightMm: item.altoMm ?? undefined,
+    color: item.color ?? undefined,
+    installerName: item.installerName ?? undefined,
     reference: item.codigoOrden || item.id,
     googleView: false,
     notes: item.notes ?? '',

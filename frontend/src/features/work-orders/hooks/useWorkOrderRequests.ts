@@ -116,6 +116,8 @@ export const useWorkOrderRequests = ({
         m2: data.m2,
         widthMm: 0,
         heightMm: 0,
+        color: '',
+        installerName: '',
         reference: data.reference,
         googleView: data.googleView,
         notes: data.notes,
