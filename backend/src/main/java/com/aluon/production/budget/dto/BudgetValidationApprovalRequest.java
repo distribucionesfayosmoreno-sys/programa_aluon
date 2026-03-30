@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BudgetValidationApprovalRequest {
-    private Long userId;
+    private String userId;
 }

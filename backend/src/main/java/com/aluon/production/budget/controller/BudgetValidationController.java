@@ -30,7 +30,7 @@ public class BudgetValidationController {
     }
 
     @PostMapping("/{id}/approve")
-    public ResponseEntity<BudgetValidationDto> approve(@PathVariable UUID id, @RequestBody BudgetValidationApprovalRequest request) {
+    public ResponseEntity<BudgetValidationDto> approve(@PathVariable UUID id, @RequestBody(required = false) BudgetValidationApprovalRequest request) {
         return ResponseEntity.ok(budgetValidationService.approve(id, request));
     }
 }

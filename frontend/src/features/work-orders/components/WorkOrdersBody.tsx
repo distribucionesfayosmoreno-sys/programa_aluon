@@ -11,6 +11,7 @@ import { DevelopmentSection } from '../sections/DevelopmentSection';
 import { ProductionSection } from '../sections/ProductionSection';
 import { FinalSection } from '../sections/FinalSection';
 import { SidebarSummary } from '../sections/SidebarSummary';
+import ErrorDialog from '../../../components/feedback/ErrorDialog';
 
 type WorkOrdersBodyProps = {
   ctx: UseWorkOrdersResult;
@@ -49,6 +50,7 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
     productionPct,
     pendingBudgets,
     budgetValidationError,
+    setBudgetValidationError,
     approverUserId,
     canStartProduction,
     canFinalize,
@@ -141,7 +143,6 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
               approverUserId={approverUserId}
               onApproverUserIdChange={handleApproverUserIdChange}
               onApproveBudget={handleApproveBudget}
-              error={budgetValidationError}
             />
           )}
 
@@ -217,6 +218,14 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
         onClose={() => setShowRequestModal(false)}
         onCreate={createRequest}
         customers={customers}
+      />
+
+      <ErrorDialog
+        open={Boolean(budgetValidationError)}
+        title="No pudimos aprobar el presupuesto"
+        description="Revisa el ID del aprobador y vuelve a intentarlo."
+        detail={budgetValidationError || undefined}
+        onClose={() => setBudgetValidationError('')}
       />
     </>
   );

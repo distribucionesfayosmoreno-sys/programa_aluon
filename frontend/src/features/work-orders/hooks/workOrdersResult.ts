@@ -124,6 +124,7 @@ export const buildWorkOrdersResult = ({
   budgetData: budget.budgetData,
   pendingBudgets: budget.pendingBudgets,
   budgetValidationError: budget.budgetValidationError,
+  setBudgetValidationError: budget.setBudgetValidationError,
   workOrderData,
   setRequests: base.setRequests,
   setCustomerId: base.setCustomerId,

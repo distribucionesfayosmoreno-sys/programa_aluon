@@ -229,9 +229,14 @@ export const useBudgetWorkflow = ({
   };
 
   const handleApproveBudget = async (validationId: string) => {
-    if (!approverUserId.trim()) return;
+    const rawId = approverUserId.trim();
+    if (!rawId) return;
+    if (!/^\d+$/.test(rawId)) {
+      setBudgetValidationError('El ID del usuario debe ser numérico.');
+      return;
+    }
     try {
-      const record = await approveBudgetValidation(validationId, approverUserId.trim());
+      const record = await approveBudgetValidation(validationId, rawId);
       updateBudgetStatus(record.requestId, {
         adminApproved: true,
         approvedAt: record.approvedAt ?? new Date().toISOString(),
@@ -287,6 +292,7 @@ export const useBudgetWorkflow = ({
     handleToggleAccounting,
     handleApproverUserIdChange,
     handleApproveBudget,
+    setBudgetValidationError,
   };
 };
 

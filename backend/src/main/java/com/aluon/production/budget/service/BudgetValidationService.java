@@ -65,8 +65,15 @@ public class BudgetValidationService {
 
     @Transactional
     public BudgetValidationDto approve(UUID id, BudgetValidationApprovalRequest request) {
-        if (request == null || request.getUserId() == null) {
-            throw new IllegalArgumentException("El usuario aprobador es obligatorio");
+        if (request == null || request.getUserId() == null || request.getUserId().isBlank()) {
+            throw new IllegalArgumentException("El ID del usuario aprobador es obligatorio");
+        }
+
+        Long approverId;
+        try {
+            approverId = Long.valueOf(request.getUserId().trim());
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("El ID del usuario debe ser numérico");
         }
 
         BudgetValidation budget = budgetValidationRepository.findById(id)
@@ -76,7 +83,7 @@ public class BudgetValidationService {
             return toDto(budget);
         }
 
-        User approver = userRepository.findById(request.getUserId())
+        User approver = userRepository.findById(approverId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario aprobador no encontrado"));
 
         if (approver.getRol() != Role.ADMIN && approver.getRol() != Role.DIOS) {

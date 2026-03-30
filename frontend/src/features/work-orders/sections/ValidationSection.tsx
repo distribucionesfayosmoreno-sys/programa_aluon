@@ -6,13 +6,11 @@ export const ValidationSection = ({
   approverUserId,
   onApproverUserIdChange,
   onApproveBudget,
-  error,
 }: {
   pendingBudgets: PendingBudget[];
   approverUserId: string;
   onApproverUserIdChange: (value: string) => void;
   onApproveBudget: (validationId: string) => void;
-  error: string;
 }) => {
   const canApprove = Boolean(approverUserId.trim());
 
@@ -25,7 +23,7 @@ export const ValidationSection = ({
           <Field
             value={approverUserId}
             onChange={e => onApproverUserIdChange(e.target.value)}
-            placeholder="UUID del usuario"
+            placeholder="ID numérico del usuario"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -73,11 +71,6 @@ export const ValidationSection = ({
               ))}
             </tbody>
           </table>
-        </div>
-      )}
-      {error && (
-        <div className="text-xs font-semibold mt-3" style={{ color: uiColors.dangerDark }}>
-          {error}
         </div>
       )}
     </section>
