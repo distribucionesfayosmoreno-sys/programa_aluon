@@ -6,14 +6,16 @@ export const BudgetModal = ({
   open,
   onClose,
   data,
-  canExport,
+  canPrint,
+  canEmail,
   onPrint,
   onEmail,
 }: {
   open: boolean;
   onClose: () => void;
   data: BudgetData;
-  canExport: boolean;
+  canPrint: boolean;
+  canEmail: boolean;
   onPrint: () => void;
   onEmail: () => void;
 }) => {
@@ -162,17 +164,14 @@ export const BudgetModal = ({
           className="flex items-center justify-between gap-4 px-7 py-5"
           style={{ borderTop: `1px solid ${uiColors.border}`, background: '#f8f9fb' }}
         >
-          <p style={{ fontSize: 10, color: uiColors.textSubtle, fontWeight: 600 }} className="hidden sm:block">
-            Confirmación requerida para impresión o envío
-          </p>
           <div className="flex items-center gap-3 ml-auto">
             <button type="button" onClick={onClose} className="btn-ghost">Cerrar</button>
             <button
               type="button"
               onClick={onPrint}
               className="btn-primary"
-              disabled={!canExport}
-              style={{ opacity: canExport ? 1 : 0.5, cursor: canExport ? 'pointer' : 'not-allowed' }}
+              disabled={!canPrint}
+              style={{ opacity: canPrint ? 1 : 0.5, cursor: canPrint ? 'pointer' : 'not-allowed' }}
             >
               Imprimir
             </button>
@@ -180,8 +179,8 @@ export const BudgetModal = ({
               type="button"
               onClick={onEmail}
               className="btn-primary"
-              disabled={!canExport}
-              style={{ opacity: canExport ? 1 : 0.5, cursor: canExport ? 'pointer' : 'not-allowed' }}
+              disabled={!canEmail}
+              style={{ opacity: canEmail ? 1 : 0.5, cursor: canEmail ? 'pointer' : 'not-allowed' }}
             >
               Enviar por mail
             </button>

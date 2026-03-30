@@ -198,7 +198,8 @@ export const WorkOrdersBody = ({ ctx, dev }: WorkOrdersBodyProps) => {
         open={showBudgetModal}
         onClose={() => setShowBudgetModal(false)}
         data={budgetData}
-        canExport={accountingApproved && adminApproved}
+        canPrint={budgetGenerated}
+        canEmail={adminApproved}
         onPrint={handlePrint}
         onEmail={handleEmail}
       />

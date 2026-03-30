@@ -155,8 +155,8 @@ export const useWorkOrders = ({
   const printing = useWorkOrderPrinting({
     budgetData: budget.budgetData,
     workOrderData,
-    accountingApproved: budget.accountingApproved,
-    adminApproved: budget.adminApproved,
+    canPrintBudget: budget.budgetGenerated,
+    canEmailBudget: budget.adminApproved,
     canGenerateCutlist: cutlist.canGenerateCutlist,
     cutlistGenerated: cutlist.cutlistGenerated,
     cutlistResult: cutlist.cutlistResult,

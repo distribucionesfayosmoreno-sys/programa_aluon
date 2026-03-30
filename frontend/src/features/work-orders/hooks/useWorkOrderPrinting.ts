@@ -31,8 +31,8 @@ type CutlistPrintPayload = {
 type WorkOrderPrintingParams = {
   budgetData: BudgetData;
   workOrderData: WorkOrderData;
-  accountingApproved: boolean;
-  adminApproved: boolean;
+  canPrintBudget: boolean;
+  canEmailBudget: boolean;
   canGenerateCutlist: boolean;
   cutlistGenerated: boolean;
   cutlistResult: CutlistResponse | null;
@@ -42,8 +42,8 @@ type WorkOrderPrintingParams = {
 export const useWorkOrderPrinting = ({
   budgetData,
   workOrderData,
-  accountingApproved,
-  adminApproved,
+  canPrintBudget,
+  canEmailBudget,
   canGenerateCutlist,
   cutlistGenerated,
   cutlistResult,
@@ -97,12 +97,12 @@ export const useWorkOrderPrinting = ({
   };
 
   const handlePrint = () => {
-    if (!accountingApproved || !adminApproved) return;
+    if (!canPrintBudget) return;
     openPrintWindow(buildBudgetPrintHtml(budgetData), 900, 700);
   };
 
   const handleEmail = () => {
-    if (!accountingApproved || !adminApproved) return;
+    if (!canEmailBudget) return;
     const subject = `Presupuesto ${budgetData.budgetNumber}`;
     const mail = `mailto:${budgetData.customerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
     window.location.href = mail;
