@@ -1,5 +1,4 @@
 import type { UseWorkOrdersResult } from './hooks/useWorkOrders';
-import type { TabKey } from './models';
 import { useMemo, useState } from 'react';
 import { WorkOrdersTabs } from './components/WorkOrdersTabs';
 import { WorkOrdersBody } from './components/WorkOrdersBody';
@@ -11,7 +10,7 @@ import ConfirmDialog from '../../components/feedback/ConfirmDialog';
 import { MODELS } from './constants';
 
 export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
-  type WorkflowTab = 'INBOX' | 'REQUEST' | 'BUDGET' | 'VALIDATION' | 'DEV' | 'PROD' | 'FINAL';
+  const INBOX = 'INBOX' as UseWorkOrdersResult['tab'];
   const { dev, onOpenNewRequest } = useWorkOrdersViewModel(ctx);
   const [pendingTab, setPendingTab] = useState<UseWorkOrdersResult['tab'] | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -179,12 +178,12 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
       return false;
     }
   };
-  const handleTabChange = async (nextTab: WorkflowTab) => {
-    if (nextTab === 'INBOX') {
+  const handleTabChange = async (nextTab: UseWorkOrdersResult['tab']) => {
+    if (nextTab === INBOX) {
       ctx.setTab(nextTab);
       return;
     }
-    if (ctx.tab === 'INBOX' && nextTab !== 'INBOX' && ctx.selectedRequestId) {
+    if (ctx.tab === INBOX && nextTab !== INBOX && ctx.selectedRequestId) {
       const selectedRequest = ctx.requests.find(req => req.id === ctx.selectedRequestId);
       if (selectedRequest) {
         ctx.applyRequest(selectedRequest);
@@ -196,7 +195,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         setNavigationWarning('Para avanzar a una etapa superior usa el botón "Avanzar etapa".');
         return;
       }
-      if (isBackwardTransition(ctx.tab, nextTab) && nextTab !== 'INBOX') {
+      if (isBackwardTransition(ctx.tab, nextTab) && nextTab !== INBOX) {
         setPendingTab(nextTab);
         setShowAuthDialog(true);
         return;
