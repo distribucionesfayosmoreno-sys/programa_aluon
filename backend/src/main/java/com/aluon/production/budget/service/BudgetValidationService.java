@@ -94,7 +94,9 @@ public class BudgetValidationService {
         budget.setApprovedAt(LocalDateTime.now());
         budget.setApprovedBy(approver);
 
-        return toDto(budgetValidationRepository.save(budget));
+        BudgetValidation saved = budgetValidationRepository.save(budget);
+        updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.VALIDATION);
+        return toDto(saved);
     }
 
     private void validateCreate(BudgetValidationCreateRequest request) {
@@ -145,8 +147,29 @@ public class BudgetValidationService {
         if (order.getWorkflowStep() == nextStep) {
             return;
         }
+        if (!isForwardTransition(order.getWorkflowStep(), nextStep)) {
+            return;
+        }
         order.setWorkflowStep(nextStep);
         orderRepository.save(order);
+    }
+
+    private boolean isForwardTransition(OrderWorkflowStep current, OrderWorkflowStep next) {
+        List<OrderWorkflowStep> steps = List.of(
+                OrderWorkflowStep.INBOX,
+                OrderWorkflowStep.REQUEST,
+                OrderWorkflowStep.BUDGET,
+                OrderWorkflowStep.VALIDATION,
+                OrderWorkflowStep.DEV,
+                OrderWorkflowStep.PROD,
+                OrderWorkflowStep.FINAL
+        );
+        int currentIndex = steps.indexOf(current);
+        int nextIndex = steps.indexOf(next);
+        if (currentIndex == -1 || nextIndex == -1) {
+            return false;
+        }
+        return nextIndex > currentIndex;
     }
 
     private Order resolveOrder(String requestId) {
