@@ -113,6 +113,9 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
   const highlightProdLac = tab === 'PROD' && !prodLac;
   const highlightProdLacControl = tab === 'PROD' && !prodLacControl;
   const canPersistFinal = canFinalize && ready !== '';
+  const visiblePendingBudgets = selectedRequestId
+    ? pendingBudgets.filter(budget => budget.requestId === selectedRequestId)
+    : pendingBudgets;
 
   return (
     <>
@@ -178,7 +181,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
 
           {tab === 'VALIDATION' && (
             <ValidationSection
-              pendingBudgets={pendingBudgets}
+              pendingBudgets={visiblePendingBudgets}
               approverUserId={approverUserId}
               onApproverUserIdChange={handleApproverUserIdChange}
               onApproveBudget={handleApproveBudget}
