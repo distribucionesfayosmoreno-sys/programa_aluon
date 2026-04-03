@@ -11,6 +11,7 @@ import ConfirmDialog from '../../components/feedback/ConfirmDialog';
 import { MODELS } from './constants';
 
 export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
+  type WorkflowTab = 'INBOX' | 'REQUEST' | 'BUDGET' | 'VALIDATION' | 'DEV' | 'PROD' | 'FINAL';
   const { dev, onOpenNewRequest } = useWorkOrdersViewModel(ctx);
   const [pendingTab, setPendingTab] = useState<UseWorkOrdersResult['tab'] | null>(null);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -178,7 +179,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
       return false;
     }
   };
-  const handleTabChange = async (nextTab: TabKey) => {
+  const handleTabChange = async (nextTab: WorkflowTab) => {
     if (nextTab === 'INBOX') {
       ctx.setTab(nextTab);
       return;
