@@ -158,8 +158,13 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     ctx.prodLacControl,
   ]);
 
-  const persistWorkflowStep = async (nextTab: UseWorkOrdersResult['tab'], authorizerUserId?: string) => {
+  const persistWorkflowStep = async (
+    nextTab: UseWorkOrdersResult['tab'],
+    authorizerUserId?: string,
+    options: { skipPersist?: boolean } = {},
+  ) => {
     if (!ctx.selectedRequestId || ctx.tab === nextTab) return true;
+    if (options.skipPersist) return true;
     try {
       await updateWorkOrderWorkflowStep(ctx.selectedRequestId, nextTab, authorizerUserId);
       ctx.setRequests(prev => prev.map(req => (
@@ -194,7 +199,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         setShowAuthDialog(true);
         return;
       }
-      const ok = await persistWorkflowStep(nextTab);
+      const ok = await persistWorkflowStep(nextTab, undefined, { skipPersist: true });
       if (!ok) return;
     }
     ctx.setTab(nextTab);
