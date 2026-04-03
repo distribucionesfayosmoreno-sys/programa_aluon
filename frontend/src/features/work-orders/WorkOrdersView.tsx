@@ -173,6 +173,10 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     }
   };
   const handleTabChange = async (nextTab: UseWorkOrdersResult['tab']) => {
+    if (nextTab === 'INBOX') {
+      ctx.setTab(nextTab);
+      return;
+    }
     if (ctx.tab === 'INBOX' && nextTab !== 'INBOX' && ctx.selectedRequestId) {
       const selectedRequest = ctx.requests.find(req => req.id === ctx.selectedRequestId);
       if (selectedRequest) {
