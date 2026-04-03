@@ -69,6 +69,7 @@ export type CutlistImage = {
 };
 
 export type CutlistRequest = {
+  requestId: string;
   distributor?: string;
   budgetNumber?: string;
   budgetDate?: string;

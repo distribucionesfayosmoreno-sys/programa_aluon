@@ -17,6 +17,7 @@ import com.aluon.production.cutlist.model.RailType;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CutlistRequestDto {
+    private String requestId;
     private String distributor;
     private String budgetNumber;
     private java.time.LocalDate budgetDate;

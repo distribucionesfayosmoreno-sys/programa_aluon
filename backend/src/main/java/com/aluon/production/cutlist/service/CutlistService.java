@@ -19,6 +19,9 @@ import com.aluon.production.cutlist.repository.CutlistRepository;
 import com.aluon.production.cutlist.dto.CutlistRequestDto;
 import com.aluon.production.cutlist.dto.CutlistResponseDto;
 import com.aluon.production.cutlist.model.DoorType;
+import com.aluon.production.order.model.Order;
+import com.aluon.production.order.model.OrderWorkflowStep;
+import com.aluon.production.order.repository.OrderRepository;
 
 
 @Service
@@ -28,6 +31,7 @@ public class CutlistService {
 
     private final CutlistRepository cutlistRepository;
     private final CutlistCalculator cutlistCalculator;
+    private final OrderRepository orderRepository;
 
     public CutlistResponseDto generate(CutlistRequestDto request) {
         validate(request);
@@ -85,6 +89,7 @@ public class CutlistService {
 
         cutlist.setItems(items);
         Cutlist saved = cutlistRepository.save(cutlist);
+        linkOrderAndAdvanceWorkflow(request.getRequestId(), saved);
         return toResponse(saved);
     }
 
@@ -139,6 +144,9 @@ public class CutlistService {
     private void validate(CutlistRequestDto request) {
         if (request == null) {
             throw new IllegalArgumentException("La solicitud de despiece es obligatoria");
+        }
+        if (request.getRequestId() == null || request.getRequestId().isBlank()) {
+            throw new IllegalArgumentException("La orden es obligatoria");
         }
         if (request.getDoorType() == null) {
             throw new IllegalArgumentException("El tipo de puerta es obligatorio");
@@ -204,6 +212,48 @@ public class CutlistService {
         String datePart = date.format(DateTimeFormatter.BASIC_ISO_DATE);
         int suffix = ThreadLocalRandom.current().nextInt(1000, 10000);
         return "P-" + datePart + "-" + suffix;
+    }
+
+    private void linkOrderAndAdvanceWorkflow(String requestId, Cutlist cutlist) {
+        if (requestId == null || requestId.isBlank()) {
+            return;
+        }
+        Order order = resolveOrder(requestId.trim());
+        if (order == null) {
+            return;
+        }
+        order.setCutlist(cutlist);
+        if (isForwardTransition(order.getWorkflowStep(), OrderWorkflowStep.DEV)) {
+            order.setWorkflowStep(OrderWorkflowStep.DEV);
+        }
+        orderRepository.save(order);
+    }
+
+    private boolean isForwardTransition(OrderWorkflowStep current, OrderWorkflowStep next) {
+        List<OrderWorkflowStep> steps = List.of(
+                OrderWorkflowStep.INBOX,
+                OrderWorkflowStep.REQUEST,
+                OrderWorkflowStep.BUDGET,
+                OrderWorkflowStep.VALIDATION,
+                OrderWorkflowStep.DEV,
+                OrderWorkflowStep.PROD,
+                OrderWorkflowStep.FINAL
+        );
+        int currentIndex = steps.indexOf(current);
+        int nextIndex = steps.indexOf(next);
+        if (currentIndex == -1 || nextIndex == -1) {
+            return false;
+        }
+        return nextIndex > currentIndex;
+    }
+
+    private Order resolveOrder(String requestId) {
+        try {
+            UUID orderId = UUID.fromString(requestId);
+            return orderRepository.findById(orderId).orElse(null);
+        } catch (IllegalArgumentException ignored) {
+            return orderRepository.findByCodigoOrden(requestId).orElse(null);
+        }
     }
 
     private String normalize(String value) {

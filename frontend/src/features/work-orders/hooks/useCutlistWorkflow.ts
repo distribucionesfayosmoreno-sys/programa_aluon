@@ -164,6 +164,7 @@ export const useCutlistWorkflow = ({
   ]);
 
   const canGenerateCutlist = canGenerateDevelopment
+    && Boolean(selectedRequest?.id)
     && widthMm > 0
     && heightMm > 0
     && cutlistDistributor.trim().length > 0
@@ -203,6 +204,9 @@ export const useCutlistWorkflow = ({
     if (needsLeftRightWidths && (widthLeftMm === null || widthLeftMm <= 0 || widthRightMm === null || widthRightMm <= 0)) {
       reasons.push('Completa las anchuras izquierda y derecha.');
     }
+    if (!selectedRequest?.id) {
+      reasons.push('Selecciona una orden.');
+    }
     if (!cutlistDistributor.trim()) {
       reasons.push('Indica el distribuidor.');
     }
@@ -234,6 +238,7 @@ export const useCutlistWorkflow = ({
   ]);
 
   const buildCutlistPayload = (): CutlistRequest => ({
+    requestId: selectedRequest?.id ?? '',
     distributor: cutlistDistributor.trim(),
     budgetNumber: cutlistBudgetNumber.trim(),
     budgetDate: cutlistBudgetDate.trim(),
