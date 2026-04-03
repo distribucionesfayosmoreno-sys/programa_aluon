@@ -207,7 +207,8 @@ public class OrderService {
         if (order.getWorkflowStep() == workflowStep) {
             return;
         }
-        if (isBackwardTransition(order.getWorkflowStep(), workflowStep)) {
+        if (isBackwardTransition(order.getWorkflowStep(), workflowStep)
+                && workflowStep != OrderWorkflowStep.INBOX) {
             validateBackwardAuthorization(authorizerUserId);
         }
         order.setWorkflowStep(workflowStep);

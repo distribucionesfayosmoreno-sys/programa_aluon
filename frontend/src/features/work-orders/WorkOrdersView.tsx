@@ -185,7 +185,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         setNavigationWarning('Para avanzar a una etapa superior usa el botón "Avanzar etapa".');
         return;
       }
-      if (isBackwardTransition(ctx.tab, nextTab)) {
+      if (isBackwardTransition(ctx.tab, nextTab) && nextTab !== 'INBOX') {
         setPendingTab(nextTab);
         setShowAuthDialog(true);
         return;
