@@ -58,8 +58,6 @@ export const useWorkOrderRequests = ({
   resetDownstream,
   budget,
 }: UseWorkOrderRequestsParams) => {
-  const workflowOrder: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
-
   const resolveCustomerId = (name: string) => {
     const match = customers.find(c => {
       const n = (c.nombreComercial || c.razonSocial || '').toLowerCase();
