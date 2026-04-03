@@ -21,6 +21,7 @@ import com.aluon.production.order.dto.WorkOrderDto;
 import com.aluon.production.order.dto.WorkOrderRequestDto;
 import com.aluon.production.order.dto.WorkOrderRequestResponseDto;
 import com.aluon.production.order.dto.OrderWorkflowUpdateRequest;
+import com.aluon.production.order.dto.OrderAssignRequest;
 
 
 @RestController
@@ -55,6 +56,12 @@ public class OrderController {
     public ResponseEntity<Void> updateWorkflowStep(@PathVariable String requestId,
                                                    @RequestBody OrderWorkflowUpdateRequest request) {
         orderService.updateWorkflowStep(requestId, request.getWorkflowStep(), request.getAuthorizerUserId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/assigned-user")
+    public ResponseEntity<Void> assignUser(@PathVariable UUID id, @RequestBody OrderAssignRequest request) {
+        orderService.assignUser(id, request);
         return ResponseEntity.noContent().build();
     }
 }

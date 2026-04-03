@@ -7,6 +7,8 @@ type OrderStatusApi = {
   estado: string;
   workflowStep: string;
   workflowStage?: string;
+  assignedUserId?: number | null;
+  assignedUserName?: string | null;
   customerName: string;
   modeloPuerta?: string | null;
   anchoMm?: number | null;
@@ -59,6 +61,8 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
     workflowStep: (item.workflowStage as WorkOrderRequest['workflowStep'])
       ?? (item.workflowStep as WorkOrderRequest['workflowStep'])
       ?? 'INBOX',
+    assignedUserId: item.assignedUserId ?? undefined,
+    assignedUserName: item.assignedUserName ?? undefined,
   }));
   console.info('[work-orders] Loaded requests', mapped.length, mapped.map(item => ({
     id: item.id,
@@ -95,4 +99,19 @@ export const updateWorkOrderWorkflowStep = async (
     throw new Error(message || 'No se pudo actualizar el estado.');
   }
   console.info('[work-orders] Persist ok', { requestId, workflowStep });
+};
+
+export const assignWorkOrderUser = async (
+  orderId: string,
+  userId: number,
+): Promise<void> => {
+  const response = await fetch(`/api/orders/${orderId}/assigned-user`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId }),
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'No se pudo asignar el usuario.');
+  }
 };

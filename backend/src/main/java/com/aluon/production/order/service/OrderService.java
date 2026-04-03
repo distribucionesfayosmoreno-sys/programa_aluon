@@ -29,6 +29,9 @@ import com.aluon.production.order.dto.WorkOrderDto;
 import com.aluon.production.order.dto.WorkOrderItemDto;
 import com.aluon.production.order.dto.WorkOrderRequestDto;
 import com.aluon.production.order.dto.WorkOrderRequestResponseDto;
+import com.aluon.production.order.dto.OrderAssignRequest;
+import com.aluon.core.user.model.User;
+import com.aluon.core.user.repository.UserRepository;
 
 
 @Service
@@ -49,6 +52,10 @@ public class OrderService {
                         .estado(order.getEstado())
                         .workflowStep(order.getWorkflowStep())
                         .workflowStage(order.getWorkflowStage())
+                        .assignedUserId(order.getAssignedUser() != null ? order.getAssignedUser().getId() : null)
+                        .assignedUserName(order.getAssignedUser() != null
+                                ? (order.getAssignedUser().getNombre() + " " + order.getAssignedUser().getApellidos()).trim()
+                                : null)
                         .customerName(order.getCustomer().getNombreComercial() != null
                                 ? order.getCustomer().getNombreComercial()
                                 : order.getCustomer().getRazonSocial())
@@ -104,6 +111,10 @@ public class OrderService {
                 .estado(order.getEstado())
                 .workflowStep(order.getWorkflowStep())
                 .workflowStage(order.getWorkflowStage())
+                .assignedUserId(order.getAssignedUser() != null ? order.getAssignedUser().getId() : null)
+                .assignedUserName(order.getAssignedUser() != null
+                        ? (order.getAssignedUser().getNombre() + " " + order.getAssignedUser().getApellidos()).trim()
+                        : null)
                 .customerId(customer.getId())
                 .customerName(customer.getNombreComercial() != null ? customer.getNombreComercial() : customer.getRazonSocial())
                 .customerAddress(address)
@@ -140,6 +151,19 @@ public class OrderService {
                 .createdAt(cutlist.getCreatedAt())
                 .items(items)
                 .build();
+    }
+
+    @Transactional
+    public void assignUser(UUID id, OrderAssignRequest request) {
+        if (request == null || request.getUserId() == null) {
+            throw new IllegalArgumentException("El usuario es obligatorio");
+        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada"));
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+        order.setAssignedUser(user);
+        orderRepository.save(order);
     }
 
     @Transactional

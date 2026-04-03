@@ -170,6 +170,8 @@ export type WorkOrderRequest = {
   orderId: string;
   customerId?: string;
   customerName: string;
+  assignedUserId?: number;
+  assignedUserName?: string;
   modelId: string;
   modelLabel?: string;
   m2: number;

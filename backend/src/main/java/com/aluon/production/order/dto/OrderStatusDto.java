@@ -22,6 +22,8 @@ public class OrderStatusDto {
     private OrderStatus estado;
     private OrderWorkflowStep workflowStep;
     private String workflowStage;
+    private Long assignedUserId;
+    private String assignedUserName;
     private String customerName;
     private String modeloPuerta;
     private Integer anchoMm;

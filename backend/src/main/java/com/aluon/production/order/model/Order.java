@@ -1,6 +1,7 @@
 package com.aluon.production.order.model;
 
 import com.aluon.crm.customer.model.Customer;
+import com.aluon.core.user.model.User;
 import com.aluon.production.cutlist.model.Cutlist;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,6 +32,10 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_user_id")
+    private User assignedUser;
 
     @Column(name = "codigo_orden", nullable = false, unique = true)
     private String codigoOrden;
