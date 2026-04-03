@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
 import { deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
@@ -61,6 +61,8 @@ export const useWorkOrderRequests = ({
   currentWorkflowStep,
 }: UseWorkOrderRequestsParams) => {
   const workflowOrder: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
+  const persistTimerRef = useRef<number | null>(null);
+  const lastPersistedStepRef = useRef<TabKey | null>(null);
 
   const isWorkflowAdvance = useCallback((from: TabKey, to: TabKey) => (
     workflowOrder.indexOf(to) > workflowOrder.indexOf(from)
@@ -149,15 +151,29 @@ export const useWorkOrderRequests = ({
     if (!selected) return;
     if (!isWorkflowAdvance(selected.workflowStep, currentWorkflowStep)) return;
     updateRequestWorkflowStep(selectedRequestId, currentWorkflowStep);
-    const persist = async () => {
+    if (lastPersistedStepRef.current === currentWorkflowStep) return;
+    if (persistTimerRef.current) {
+      window.clearTimeout(persistTimerRef.current);
+      persistTimerRef.current = null;
+    }
+    persistTimerRef.current = window.setTimeout(async () => {
       try {
         await updateWorkOrderWorkflowStep(selectedRequestId, currentWorkflowStep);
+        lastPersistedStepRef.current = currentWorkflowStep;
       } catch (error) {
         console.error('[work-orders] Failed to persist workflow step', error);
       }
-    };
-    persist();
+    }, 500);
   }, [selectedRequestId, currentWorkflowStep, updateRequestWorkflowStep, isWorkflowAdvance, requests]);
+
+  useEffect(() => {
+    return () => {
+      if (persistTimerRef.current) {
+        window.clearTimeout(persistTimerRef.current);
+        persistTimerRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     setRequests(prev => prev.map(req => {
