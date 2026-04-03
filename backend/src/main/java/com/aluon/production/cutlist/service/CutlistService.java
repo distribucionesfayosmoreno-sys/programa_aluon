@@ -225,6 +225,7 @@ public class CutlistService {
         order.setCutlist(cutlist);
         if (isForwardTransition(order.getWorkflowStep(), OrderWorkflowStep.DEV)) {
             order.setWorkflowStep(OrderWorkflowStep.DEV);
+            order.setWorkflowStage(OrderWorkflowStep.DEV.name());
         }
         orderRepository.save(order);
     }

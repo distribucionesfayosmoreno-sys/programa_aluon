@@ -156,6 +156,7 @@ public class BudgetValidationService {
             return;
         }
         order.setWorkflowStep(nextStep);
+        order.setWorkflowStage(nextStep.name());
         orderRepository.save(order);
     }
 

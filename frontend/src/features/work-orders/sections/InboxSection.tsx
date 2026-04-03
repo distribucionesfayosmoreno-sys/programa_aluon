@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { WorkOrderRequest } from '../models';
 import { MODELS, WORKFLOW_STEP_LABELS } from '../constants';
-import { cardStyle, SectionTitle, uiColors } from '../components/ui';
+import { cardStyle, uiColors } from '../components/ui';
 import ConfirmDialog from '../../../components/feedback/ConfirmDialog';
 import ErrorDialog from '../../../components/feedback/ErrorDialog';
 import { OriginalRequestDialog } from '../components/OriginalRequestDialog';
@@ -99,7 +99,6 @@ export const InboxSection = ({
 
   return (
     <section className="p-6 rounded-2xl" style={cardStyle}>
-      <SectionTitle n="00" label="Bandeja de solicitudes" />
       <div
         className="flex flex-col lg:flex-row lg:items-end gap-3 p-4 rounded-2xl border mb-4"
         style={{ borderColor: uiColors.border, background: '#ffffff' }}

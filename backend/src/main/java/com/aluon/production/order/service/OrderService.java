@@ -48,6 +48,7 @@ public class OrderService {
                         .codigoOrden(order.getCodigoOrden())
                         .estado(order.getEstado())
                         .workflowStep(order.getWorkflowStep())
+                        .workflowStage(order.getWorkflowStage())
                         .customerName(order.getCustomer().getNombreComercial() != null
                                 ? order.getCustomer().getNombreComercial()
                                 : order.getCustomer().getRazonSocial())
@@ -102,6 +103,7 @@ public class OrderService {
                 .codigoOrden(order.getCodigoOrden())
                 .estado(order.getEstado())
                 .workflowStep(order.getWorkflowStep())
+                .workflowStage(order.getWorkflowStage())
                 .customerId(customer.getId())
                 .customerName(customer.getNombreComercial() != null ? customer.getNombreComercial() : customer.getRazonSocial())
                 .customerAddress(address)
@@ -168,6 +170,7 @@ public class OrderService {
                 .createdAt(LocalDateTime.now())
                 .estado(OrderStatus.PENDIENTE_MATERIAL)
                 .workflowStep(OrderWorkflowStep.INBOX)
+                .workflowStage(OrderWorkflowStep.INBOX.name())
                 .build();
 
         List<MultipartFile> attachments = request.getAttachments();
@@ -212,6 +215,7 @@ public class OrderService {
             validateBackwardAuthorization(authorizerUserId);
         }
         order.setWorkflowStep(workflowStep);
+        order.setWorkflowStage(workflowStep.name());
         orderRepository.save(order);
     }
 

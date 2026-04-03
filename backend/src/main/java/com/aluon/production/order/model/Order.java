@@ -65,6 +65,10 @@ public class Order {
     @Column(name = "workflow_step", nullable = false)
     private OrderWorkflowStep workflowStep = OrderWorkflowStep.INBOX;
 
+    @Builder.Default
+    @Column(name = "workflow_stage", nullable = false)
+    private String workflowStage = OrderWorkflowStep.INBOX.name();
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cutlist_id")
     private Cutlist cutlist;

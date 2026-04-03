@@ -6,6 +6,7 @@ type OrderStatusApi = {
   codigoOrden: string;
   estado: string;
   workflowStep: string;
+  workflowStage?: string;
   customerName: string;
   modeloPuerta?: string | null;
   anchoMm?: number | null;
@@ -55,7 +56,9 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
     googleView: false,
     notes: item.notes ?? '',
     requestDate: resolveRequestDate(item.requestDate),
-    workflowStep: (item.workflowStep as WorkOrderRequest['workflowStep']) ?? 'INBOX',
+    workflowStep: (item.workflowStage as WorkOrderRequest['workflowStep'])
+      ?? (item.workflowStep as WorkOrderRequest['workflowStep'])
+      ?? 'INBOX',
   }));
 };
 
