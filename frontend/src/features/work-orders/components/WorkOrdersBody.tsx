@@ -93,7 +93,6 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
     handleEmail,
     handleWorkOrderPrint,
   } = ctx;
-  const isInbox = tab === 'INBOX';
   const showSummary = true;
 
   const highlightRequestCustomer = tab === 'REQUEST' && !customerId;
