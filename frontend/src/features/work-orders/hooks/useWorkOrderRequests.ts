@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
-import { deleteWorkOrderRequest } from '../services/requestsApi';
+import { deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
 
 type BudgetControls = {
   budgetStatusByRequestId: Record<string, { adminApproved: boolean; budgetGenerated: boolean; accountingApproved: boolean }>;
@@ -145,8 +145,19 @@ export const useWorkOrderRequests = ({
 
   useEffect(() => {
     if (!selectedRequestId) return;
+    const selected = requests.find(req => req.id === selectedRequestId);
+    if (!selected) return;
+    if (!isWorkflowAdvance(selected.workflowStep, currentWorkflowStep)) return;
     updateRequestWorkflowStep(selectedRequestId, currentWorkflowStep);
-  }, [selectedRequestId, currentWorkflowStep, updateRequestWorkflowStep]);
+    const persist = async () => {
+      try {
+        await updateWorkOrderWorkflowStep(selectedRequestId, currentWorkflowStep);
+      } catch (error) {
+        console.error('[work-orders] Failed to persist workflow step', error);
+      }
+    };
+    persist();
+  }, [selectedRequestId, currentWorkflowStep, updateRequestWorkflowStep, isWorkflowAdvance, requests]);
 
   useEffect(() => {
     setRequests(prev => prev.map(req => {

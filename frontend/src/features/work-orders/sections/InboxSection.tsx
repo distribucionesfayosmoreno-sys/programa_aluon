@@ -249,7 +249,9 @@ export const InboxSection = ({
                       aria-label="Cargar solicitud"
                       title="Cargar"
                     >
-                      <span className="text-[12px] leading-none">📥</span>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 15v4a1 1 0 001 1h14a1 1 0 001-1v-4M7 10l5 5 5-5M12 15V3" />
+                      </svg>
                     </button>
                     <button
                       type="button"
@@ -266,7 +268,9 @@ export const InboxSection = ({
                       aria-label="Ver solicitud original"
                       title="Solicitud original"
                     >
-                      <span className="text-[12px] leading-none">🧾</span>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5h6m-6 4h6m-7 4h8m-9 4h10M6 3h9l3 3v15a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" />
+                      </svg>
                     </button>
                     <button
                       type="button"
@@ -283,7 +287,9 @@ export const InboxSection = ({
                       aria-label="Eliminar solicitud"
                       title="Eliminar"
                     >
-                      <span className="text-[12px] leading-none">🗑️</span>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-1 12a2 2 0 01-2 2H8a2 2 0 01-2-2L5 7m3-3h8m-6 3v10m4-10v10" />
+                      </svg>
                     </button>
                   </div>
                 </div>
