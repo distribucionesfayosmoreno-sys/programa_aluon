@@ -40,7 +40,7 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
   }
 
   const data = (await response.json()) as OrderStatusApi[];
-  return data.map(item => ({
+  const mapped = data.map(item => ({
     id: item.codigoOrden || item.id,
     orderId: item.id,
     customerId: item.customerId ?? undefined,
@@ -60,6 +60,12 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
       ?? (item.workflowStep as WorkOrderRequest['workflowStep'])
       ?? 'INBOX',
   }));
+  console.info('[work-orders] Loaded requests', mapped.length, mapped.map(item => ({
+    id: item.id,
+    orderId: item.orderId,
+    workflowStep: item.workflowStep,
+  })));
+  return mapped;
 };
 
 export const deleteWorkOrderRequest = async (orderId: string): Promise<void> => {
