@@ -1,4 +1,5 @@
 import type { UseWorkOrdersResult } from './hooks/useWorkOrders';
+import type { TabKey } from './models';
 import { useMemo, useState } from 'react';
 import { WorkOrdersTabs } from './components/WorkOrdersTabs';
 import { WorkOrdersBody } from './components/WorkOrdersBody';
@@ -177,7 +178,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
       return false;
     }
   };
-  const handleTabChange = async (nextTab: UseWorkOrdersResult['tab']) => {
+  const handleTabChange = async (nextTab: TabKey) => {
     if (nextTab === 'INBOX') {
       ctx.setTab(nextTab);
       return;
