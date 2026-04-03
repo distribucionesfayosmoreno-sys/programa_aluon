@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
-import { deleteWorkOrderRequest } from '../services/requestsApi';
+import { deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
 
 type BudgetControls = {
   budgetStatusByRequestId: Record<string, { adminApproved: boolean; budgetGenerated: boolean; accountingApproved: boolean }>;
@@ -77,7 +77,16 @@ export const useWorkOrderRequests = ({
     setGoogleView(req.googleView);
     setNotes(req.notes);
     setModelImage(null);
-    setTab(req.workflowStep);
+    const nextTab: TabKey = req.workflowStep === 'INBOX' ? 'REQUEST' : req.workflowStep;
+    setTab(nextTab);
+    if (req.workflowStep === 'INBOX') {
+      setRequests(prev => prev.map(item => (
+        item.id === req.id ? { ...item, workflowStep: 'REQUEST' } : item
+      )));
+      updateWorkOrderWorkflowStep(req.id, 'REQUEST').catch(error => {
+        console.error('[work-orders] Failed to persist workflow step on load', error);
+      });
+    }
     const status = budget.getBudgetStatus(req.id);
     budget.setBudgetGenerated(status.budgetGenerated);
     budget.setAccountingApproved(status.accountingApproved);
