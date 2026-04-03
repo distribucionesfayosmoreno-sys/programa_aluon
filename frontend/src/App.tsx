@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './features/customer-management/CustomerManagement';
 import CustomerOnboarding from './features/customer-onboarding/CustomerOnboarding';
@@ -13,9 +13,7 @@ const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [theme, setTheme] = useState<'red' | 'blue'>('red');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarOpenTimer = useRef<number | null>(null);
-  const sidebarCloseTimer = useRef<number | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     try {
@@ -63,32 +61,6 @@ const App = () => {
     }
   }, [activeModule]);
 
-  const openSidebar = () => {
-    if (sidebarCloseTimer.current) {
-      window.clearTimeout(sidebarCloseTimer.current);
-      sidebarCloseTimer.current = null;
-    }
-    if (sidebarOpenTimer.current) {
-      window.clearTimeout(sidebarOpenTimer.current);
-    }
-    sidebarOpenTimer.current = window.setTimeout(() => {
-      setSidebarOpen(true);
-    }, 60);
-  };
-
-  const closeSidebar = () => {
-    if (sidebarOpenTimer.current) {
-      window.clearTimeout(sidebarOpenTimer.current);
-      sidebarOpenTimer.current = null;
-    }
-    if (sidebarCloseTimer.current) {
-      window.clearTimeout(sidebarCloseTimer.current);
-    }
-    sidebarCloseTimer.current = window.setTimeout(() => {
-      setSidebarOpen(false);
-    }, 140);
-  };
-
   return (
     <div className="flex min-h-screen font-sans" style={{ backgroundColor: '#f8f9fb' }}>
       <Sidebar
@@ -99,22 +71,37 @@ const App = () => {
           setOpenNewRequest(true);
         }}
         isOpen={sidebarOpen}
-        onHoverChange={open => (open ? openSidebar() : closeSidebar())}
       />
 
       <div id="main-layout" className="flex-1 flex flex-col min-w-0 relative">
-        <div
-          className="fixed left-0 top-0 h-full w-3 z-40"
-          onMouseEnter={openSidebar}
-          onMouseLeave={closeSidebar}
-        />
+        <div className="fixed left-0 top-0 h-full w-3 z-40" />
         {/* Topbar */}
         <header
           className="h-16 flex-shrink-0 flex items-center justify-between px-8 sticky top-0 z-30"
           style={{ background: '#ffffff', borderBottom: '1px solid #e8eaed' }}
         >
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide">
+          <div className="flex items-center gap-3 text-xs font-bold uppercase tracking-wide">
+            <button
+              type="button"
+              className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200"
+              style={{ color: '#8b949e' }}
+              onClick={() => setSidebarOpen(prev => !prev)}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#f8f9fb';
+                (e.currentTarget as HTMLButtonElement).style.color = '#0d1117';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+                (e.currentTarget as HTMLButtonElement).style.color = '#8b949e';
+              }}
+              aria-label={sidebarOpen ? 'Ocultar sidebar' : 'Mostrar sidebar'}
+              title={sidebarOpen ? 'Ocultar sidebar' : 'Mostrar sidebar'}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
             <span style={{ color: '#8b949e' }}>ALUON</span>
             <span style={{ color: '#8b949e' }}>/</span>
             <span style={{ color: '#0d1117' }}>{breadcrumb}</span>
