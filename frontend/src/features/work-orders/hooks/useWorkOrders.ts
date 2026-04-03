@@ -207,6 +207,7 @@ export const useWorkOrders = ({
 
   useEffect(() => {
     if (!selectedRequestId) return;
+    if (base.tab !== 'REQUEST') return;
     setRequests(prev => prev.map(req => {
       if (req.id !== selectedRequestId) return req;
       const nextCustomerName = resolvedCustomerName || req.customerName;
@@ -229,6 +230,7 @@ export const useWorkOrders = ({
     modelReference,
     googleView,
     notes,
+    base.tab,
   ]);
 
   return buildWorkOrdersResult({
