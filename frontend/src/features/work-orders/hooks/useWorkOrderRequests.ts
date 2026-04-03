@@ -64,14 +64,6 @@ export const useWorkOrderRequests = ({
     workflowOrder.indexOf(to) > workflowOrder.indexOf(from)
   ), [workflowOrder]);
 
-  const updateRequestWorkflowStep = useCallback((requestId: string, workflowStep: TabKey) => {
-    setRequests(prev => prev.map(req => {
-      if (req.id !== requestId) return req;
-      if (!isWorkflowAdvance(req.workflowStep, workflowStep)) return req;
-      return { ...req, workflowStep };
-    }));
-  }, [isWorkflowAdvance, setRequests]);
-
   const resolveCustomerId = (name: string) => {
     const match = customers.find(c => {
       const n = (c.nombreComercial || c.razonSocial || '').toLowerCase();
