@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans:    ['Inter', 'system-ui', 'sans-serif'],
+        sans:    ['Fira Sans', 'system-ui', 'sans-serif'],
+        mono:    ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
       },
       colors: {
         brand:     'var(--accent)',

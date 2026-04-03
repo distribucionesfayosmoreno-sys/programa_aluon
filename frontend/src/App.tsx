@@ -167,7 +167,7 @@ const App = () => {
 
         {/* Content */}
         <main className="flex-1 p-8 overflow-y-auto">
-          <div className="max-w-screen-xl mx-auto animate-fade-up">
+          <div className="max-w-[1440px] mx-auto animate-fade-up">
             {activeModule === 'clientes' && <CustomerManagement />}
             {activeModule === 'registro' && <CustomerOnboarding />}
             {activeModule === 'inscripciones' && <RegistrationRequests />}
