@@ -77,7 +77,6 @@ export const useWorkOrders = ({
     ready,
     selectedRequestId,
   });
-  const currentWorkflowStep = workflow.resolveWorkflowStep();
 
   const workOrderNumber = useMemo(() => buildWorkOrderNumber(selectedRequestId), [selectedRequestId]);
   const workOrderDate = useMemo(() => formatLongDate(), []);
@@ -202,7 +201,6 @@ export const useWorkOrders = ({
   const { applyRequest, createRequest, deleteRequest } = useWorkOrderRequests({
     customers, requests, setRequests, selectedRequestId, setSelectedRequestId, setCustomerId, setModelId, setM2, setModelReference, setGoogleView, setNotes, setModelImage, setTab, setShowRequestModal, openNewRequest, onNewRequestHandled, resetDownstream,
     budget: { budgetStatusByRequestId: budget.budgetStatusByRequestId, getBudgetStatus: budget.getBudgetStatus, setBudgetGenerated: budget.setBudgetGenerated, setAccountingApproved: budget.setAccountingApproved, setAdminApproved: budget.setAdminApproved, updateBudgetStatus: budget.updateBudgetStatus },
-    currentWorkflowStep,
   });
 
   useEffect(() => {

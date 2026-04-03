@@ -36,7 +36,6 @@ type UseWorkOrderRequestsParams = {
   onNewRequestHandled?: () => void;
   resetDownstream: (options?: { keepBudget?: boolean }) => void;
   budget: BudgetControls;
-  currentWorkflowStep: TabKey;
 };
 
 export const useWorkOrderRequests = ({
@@ -58,7 +57,6 @@ export const useWorkOrderRequests = ({
   onNewRequestHandled,
   resetDownstream,
   budget,
-  currentWorkflowStep,
 }: UseWorkOrderRequestsParams) => {
   const workflowOrder: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
 
@@ -142,14 +140,6 @@ export const useWorkOrderRequests = ({
       onNewRequestHandled?.();
     }
   }, [openNewRequest, onNewRequestHandled, setShowRequestModal]);
-
-  useEffect(() => {
-    if (!selectedRequestId) return;
-    const selected = requests.find(req => req.id === selectedRequestId);
-    if (!selected) return;
-    if (!isWorkflowAdvance(selected.workflowStep, currentWorkflowStep)) return;
-    updateRequestWorkflowStep(selectedRequestId, currentWorkflowStep);
-  }, [selectedRequestId, currentWorkflowStep, updateRequestWorkflowStep, isWorkflowAdvance, requests]);
 
   useEffect(() => {
     setRequests(prev => prev.map(req => {
