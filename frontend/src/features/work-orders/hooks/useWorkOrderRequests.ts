@@ -60,10 +60,6 @@ export const useWorkOrderRequests = ({
 }: UseWorkOrderRequestsParams) => {
   const workflowOrder: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
 
-  const isWorkflowAdvance = useCallback((from: TabKey, to: TabKey) => (
-    workflowOrder.indexOf(to) > workflowOrder.indexOf(from)
-  ), [workflowOrder]);
-
   const resolveCustomerId = (name: string) => {
     const match = customers.find(c => {
       const n = (c.nombreComercial || c.razonSocial || '').toLowerCase();
