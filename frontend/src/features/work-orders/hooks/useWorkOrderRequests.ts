@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
-import { deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
+import { assignWorkOrderCustomer, deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
 
 type BudgetControls = {
   budgetStatusByRequestId: Record<string, { adminApproved: boolean; budgetGenerated: boolean; accountingApproved: boolean }>;
@@ -71,6 +71,15 @@ export const useWorkOrderRequests = ({
     setSelectedRequestId(req.id);
     const resolvedCustomerId = req.customerId || resolveCustomerId(req.customerName);
     setCustomerId(resolvedCustomerId);
+    if (!req.customerId && resolvedCustomerId) {
+      const persistId = req.orderId || req.id;
+      assignWorkOrderCustomer(persistId, resolvedCustomerId).catch(error => {
+        console.error('[work-orders] Failed to persist customer assignment', error);
+      });
+      setRequests(prev => prev.map(item => (
+        item.id === req.id ? { ...item, customerId: resolvedCustomerId } : item
+      )));
+    }
     setModelId(req.modelId);
     setM2(req.m2);
     setModelReference(req.reference.toUpperCase());

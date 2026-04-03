@@ -22,6 +22,9 @@ import com.aluon.production.order.dto.WorkOrderRequestDto;
 import com.aluon.production.order.dto.WorkOrderRequestResponseDto;
 import com.aluon.production.order.dto.OrderWorkflowUpdateRequest;
 import com.aluon.production.order.dto.OrderAssignRequest;
+import com.aluon.production.order.dto.OrderCustomerAssignRequest;
+import com.aluon.production.order.dto.OrderCustomerBulkAssignRequest;
+import com.aluon.production.order.dto.OrderCustomerBulkAssignResponse;
 
 
 @RestController
@@ -63,5 +66,18 @@ public class OrderController {
     public ResponseEntity<Void> assignUser(@PathVariable UUID id, @RequestBody OrderAssignRequest request) {
         orderService.assignUser(id, request);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/customer")
+    public ResponseEntity<Void> assignCustomer(@PathVariable UUID id, @RequestBody OrderCustomerAssignRequest request) {
+        orderService.assignCustomer(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/customers/backfill")
+    public ResponseEntity<OrderCustomerBulkAssignResponse> assignCustomersBulk(
+            @RequestBody OrderCustomerBulkAssignRequest request
+    ) {
+        return ResponseEntity.ok(orderService.assignCustomersBulk(request));
     }
 }

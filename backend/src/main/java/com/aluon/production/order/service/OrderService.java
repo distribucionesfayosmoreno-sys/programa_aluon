@@ -30,6 +30,9 @@ import com.aluon.production.order.dto.WorkOrderItemDto;
 import com.aluon.production.order.dto.WorkOrderRequestDto;
 import com.aluon.production.order.dto.WorkOrderRequestResponseDto;
 import com.aluon.production.order.dto.OrderAssignRequest;
+import com.aluon.production.order.dto.OrderCustomerAssignRequest;
+import com.aluon.production.order.dto.OrderCustomerBulkAssignRequest;
+import com.aluon.production.order.dto.OrderCustomerBulkAssignResponse;
 import com.aluon.core.user.model.User;
 import com.aluon.core.user.repository.UserRepository;
 
@@ -164,6 +167,46 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         order.setAssignedUser(user);
         orderRepository.save(order);
+    }
+
+    @Transactional
+    public void assignCustomer(UUID id, OrderCustomerAssignRequest request) {
+        if (request == null || request.getCustomerId() == null) {
+            throw new IllegalArgumentException("El cliente es obligatorio");
+        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada"));
+        Customer customer = customerService.findById(request.getCustomerId());
+        order.setCustomer(customer);
+        orderRepository.save(order);
+    }
+
+    @Transactional
+    public OrderCustomerBulkAssignResponse assignCustomersBulk(OrderCustomerBulkAssignRequest request) {
+        if (request == null || request.getItems() == null || request.getItems().isEmpty()) {
+            throw new IllegalArgumentException("La lista de asignaciones es obligatoria");
+        }
+        int updated = 0;
+        int skipped = 0;
+        for (OrderCustomerBulkAssignRequest.Item item : request.getItems()) {
+            if (item == null || item.getOrderId() == null || item.getCustomerId() == null) {
+                skipped++;
+                continue;
+            }
+            Order order = orderRepository.findById(item.getOrderId()).orElse(null);
+            if (order == null) {
+                skipped++;
+                continue;
+            }
+            Customer customer = customerService.findById(item.getCustomerId());
+            order.setCustomer(customer);
+            orderRepository.save(order);
+            updated++;
+        }
+        return OrderCustomerBulkAssignResponse.builder()
+                .updated(updated)
+                .skipped(skipped)
+                .build();
     }
 
     @Transactional

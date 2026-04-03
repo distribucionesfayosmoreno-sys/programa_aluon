@@ -115,3 +115,18 @@ export const assignWorkOrderUser = async (
     throw new Error(message || 'No se pudo asignar el usuario.');
   }
 };
+
+export const assignWorkOrderCustomer = async (
+  orderId: string,
+  customerId: string,
+): Promise<void> => {
+  const response = await fetch(`/api/orders/${orderId}/customer`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customerId }),
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'No se pudo asignar el cliente.');
+  }
+};
