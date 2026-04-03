@@ -11,13 +11,6 @@ type DashboardKpisResponse = {
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
-const mockResponse: DashboardKpisResponse = {
-  ordersToPrepare: 12,
-  monthlyBilling: 24580,
-  criticalStockAlerts: 5,
-  crmTasksToday: 9,
-};
-
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('es-ES', {
     style: 'currency',
@@ -61,8 +54,8 @@ export const useDashboardKpis = () => {
         setStatus('ready');
       } catch (error) {
         if (!active) return;
-        setData(mockResponse);
-        setLastUpdated(new Date());
+        setData(null);
+        setLastUpdated(null);
         setStatus('error');
       }
     };
@@ -77,7 +70,12 @@ export const useDashboardKpis = () => {
   }, []);
 
   const kpis: DashboardKpisView[] = useMemo(() => {
-    const source = data ?? mockResponse;
+    const source = data ?? {
+      ordersToPrepare: 0,
+      monthlyBilling: 0,
+      criticalStockAlerts: 0,
+      crmTasksToday: 0,
+    };
     return [
       {
         label: 'Pedidos por preparar',

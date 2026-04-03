@@ -10,12 +10,6 @@ type DashboardOperationsResponse = {
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
-const mockResponse: DashboardOperationsResponse = {
-  inRoute: 6,
-  completed: 18,
-  avgTimeMinutes: 38,
-};
-
 export const useDashboardOperations = () => {
   const [data, setData] = useState<DashboardOperationsResponse | null>(null);
   const [status, setStatus] = useState<LoadState>('idle');
@@ -42,7 +36,7 @@ export const useDashboardOperations = () => {
         setStatus('ready');
       } catch (error) {
         if (!active) return;
-        setData(mockResponse);
+        setData(null);
         setStatus('error');
       }
     };
@@ -56,7 +50,7 @@ export const useDashboardOperations = () => {
     };
   }, []);
 
-  const source = data ?? mockResponse;
+  const source = data ?? { inRoute: 0, completed: 0, avgTimeMinutes: 0 };
 
   return {
     status,

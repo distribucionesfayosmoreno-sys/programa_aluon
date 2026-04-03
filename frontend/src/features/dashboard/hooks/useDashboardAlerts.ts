@@ -14,14 +14,6 @@ type DashboardAlertsResponse = {
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error';
 
-const mockResponse: DashboardAlertsResponse = {
-  alerts: [
-    { title: 'Bombín 30/30', detail: 'Stock crítico (2 uds)', tone: 'danger' },
-    { title: 'Factura #F-1203', detail: 'Pendiente de pago 15 días', tone: 'warning' },
-    { title: 'Cliente BBVA', detail: 'Nueva solicitud prioritaria', tone: 'neutral' },
-  ],
-};
-
 export const useDashboardAlerts = () => {
   const [data, setData] = useState<DashboardAlertsResponse | null>(null);
   const [status, setStatus] = useState<LoadState>('idle');
@@ -48,7 +40,7 @@ export const useDashboardAlerts = () => {
         setStatus('ready');
       } catch (error) {
         if (!active) return;
-        setData(mockResponse);
+        setData(null);
         setStatus('error');
       }
     };
@@ -64,6 +56,6 @@ export const useDashboardAlerts = () => {
 
   return {
     status,
-    alerts: (data ?? mockResponse).alerts,
+    alerts: data?.alerts ?? [],
   };
 };
