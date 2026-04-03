@@ -236,7 +236,7 @@ export const InboxSection = ({
                   <div className="flex justify-end gap-2">
                     <button
                       type="button"
-                      className="w-10 h-10 rounded-xl border transition-colors inline-flex items-center justify-center"
+                      className="w-7 h-7 rounded-lg border transition-colors inline-flex items-center justify-center"
                       style={{
                         color: uiColors.textPrimary,
                         borderColor: active ? uiColors.accent : uiColors.border,
@@ -249,11 +249,11 @@ export const InboxSection = ({
                       aria-label="Cargar solicitud"
                       title="Cargar"
                     >
-                      <span className="text-base">📥</span>
+                      <span className="text-[12px] leading-none">📥</span>
                     </button>
                     <button
                       type="button"
-                      className="w-10 h-10 rounded-xl border transition-colors inline-flex items-center justify-center"
+                      className="w-7 h-7 rounded-lg border transition-colors inline-flex items-center justify-center"
                       style={{
                         color: uiColors.textPrimary,
                         borderColor: uiColors.border,
@@ -266,11 +266,11 @@ export const InboxSection = ({
                       aria-label="Ver solicitud original"
                       title="Solicitud original"
                     >
-                      <span className="text-base">🧾</span>
+                      <span className="text-[12px] leading-none">🧾</span>
                     </button>
                     <button
                       type="button"
-                      className="w-10 h-10 rounded-xl border transition-colors inline-flex items-center justify-center"
+                      className="w-7 h-7 rounded-lg border transition-colors inline-flex items-center justify-center"
                       style={{
                         color: uiColors.danger,
                         borderColor: uiColors.danger,
@@ -283,7 +283,7 @@ export const InboxSection = ({
                       aria-label="Eliminar solicitud"
                       title="Eliminar"
                     >
-                      <span className="text-base">🗑️</span>
+                      <span className="text-[12px] leading-none">🗑️</span>
                     </button>
                   </div>
                 </div>
