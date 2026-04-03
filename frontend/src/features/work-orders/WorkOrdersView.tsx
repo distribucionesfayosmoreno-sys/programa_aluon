@@ -272,12 +272,25 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
 
   return (
     <div className="flex flex-col" style={{ minHeight: 600 }}>
-      <WorkOrdersTabs
-        steps={ctx.pipelineSteps}
-        activeTab={ctx.tab}
-        onTabChange={handleTabChange}
-        onOpenNewRequest={onOpenNewRequest}
-      />
+      {/*
+        If the order has a persisted workflowStep, mark all previous steps as done.
+        This keeps the pipeline consistent when loading a finished order.
+      */}
+      {(() => {
+        const current = selectedRequest?.workflowStep ?? null;
+        const currentIndex = current ? workflowOrder.indexOf(current) : -1;
+        const steps = ctx.pipelineSteps.map(step => (
+          currentIndex >= 0 ? { ...step, done: workflowOrder.indexOf(step.key) <= currentIndex } : step
+        ));
+        return (
+          <WorkOrdersTabs
+            steps={steps}
+            activeTab={ctx.tab}
+            onTabChange={handleTabChange}
+            onOpenNewRequest={onOpenNewRequest}
+          />
+        );
+      })()}
       <WorkOrdersBody
         ctx={ctx}
         dev={dev}
