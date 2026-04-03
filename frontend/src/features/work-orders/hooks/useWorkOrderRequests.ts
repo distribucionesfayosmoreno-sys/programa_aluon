@@ -93,7 +93,7 @@ export const useWorkOrderRequests = ({
     setGoogleView(req.googleView);
     setNotes(req.notes);
     setModelImage(null);
-    setTab('REQUEST');
+    setTab(req.workflowStep);
     const status = budget.getBudgetStatus(req.id);
     budget.setBudgetGenerated(status.budgetGenerated);
     budget.setAccountingApproved(status.accountingApproved);

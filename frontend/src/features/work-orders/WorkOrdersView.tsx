@@ -177,6 +177,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
       const selectedRequest = ctx.requests.find(req => req.id === ctx.selectedRequestId);
       if (selectedRequest) {
         ctx.applyRequest(selectedRequest);
+        return;
       }
     }
     if (ctx.selectedRequestId && ctx.tab !== nextTab) {
