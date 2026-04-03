@@ -80,10 +80,11 @@ export const useWorkOrderRequests = ({
     const nextTab: TabKey = req.workflowStep === 'INBOX' ? 'REQUEST' : req.workflowStep;
     setTab(nextTab);
     if (req.workflowStep === 'INBOX') {
+      const persistId = req.orderId || req.id;
       setRequests(prev => prev.map(item => (
         item.id === req.id ? { ...item, workflowStep: 'REQUEST' } : item
       )));
-      updateWorkOrderWorkflowStep(req.id, 'REQUEST').catch(error => {
+      updateWorkOrderWorkflowStep(persistId, 'REQUEST').catch(error => {
         console.error('[work-orders] Failed to persist workflow step on load', error);
       });
     }
