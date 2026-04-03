@@ -94,7 +94,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
     handleWorkOrderPrint,
   } = ctx;
   const isInbox = tab === 'INBOX';
-  const showSummary = !isInbox;
+  const showSummary = true;
 
   const highlightRequestCustomer = tab === 'REQUEST' && !customerId;
   const highlightRequestM2 = tab === 'REQUEST' && m2 <= 0;
@@ -117,7 +117,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className={`${isInbox ? 'lg:col-span-3' : 'lg:col-span-2'} space-y-8`}>
+        <div className="lg:col-span-2 space-y-8">
           {tab === 'INBOX' && (
             <InboxSection
               requests={requests}
