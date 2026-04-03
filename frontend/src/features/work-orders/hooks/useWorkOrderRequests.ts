@@ -81,6 +81,7 @@ export const useWorkOrderRequests = ({
     setTab(nextTab);
     if (req.workflowStep === 'INBOX') {
       const persistId = req.orderId || req.id;
+      console.info('[work-orders] Auto-advance INBOX -> REQUEST', { requestId: persistId });
       setRequests(prev => prev.map(item => (
         item.id === req.id ? { ...item, workflowStep: 'REQUEST' } : item
       )));

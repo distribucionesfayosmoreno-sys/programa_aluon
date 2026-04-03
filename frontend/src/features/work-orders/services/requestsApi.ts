@@ -77,6 +77,7 @@ export const updateWorkOrderWorkflowStep = async (
   workflowStep: string,
   authorizerUserId?: string,
 ): Promise<void> => {
+  console.info('[work-orders] Persist workflow step', { requestId, workflowStep, authorizerUserId });
   const response = await fetch(`/api/orders/requests/${requestId}/workflow-step`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -84,6 +85,8 @@ export const updateWorkOrderWorkflowStep = async (
   });
   if (!response.ok) {
     const message = await response.text();
+    console.error('[work-orders] Persist failed', { requestId, workflowStep, status: response.status, message });
     throw new Error(message || 'No se pudo actualizar el estado.');
   }
+  console.info('[work-orders] Persist ok', { requestId, workflowStep });
 };

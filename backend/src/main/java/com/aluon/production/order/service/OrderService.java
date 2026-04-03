@@ -196,6 +196,8 @@ public class OrderService {
 
     @Transactional
     public void updateWorkflowStep(String requestId, OrderWorkflowStep workflowStep, String authorizerUserId) {
+        System.out.printf("[orders] updateWorkflowStep requestId=%s workflowStep=%s authorizer=%s%n",
+                requestId, workflowStep, authorizerUserId);
         if (requestId == null || requestId.isBlank()) {
             throw new IllegalArgumentException("La solicitud es obligatoria");
         }
@@ -207,6 +209,8 @@ public class OrderService {
         if (order == null) {
             throw new IllegalArgumentException("Solicitud no encontrada");
         }
+        System.out.printf("[orders] resolved order id=%s codigo=%s currentStep=%s currentStage=%s%n",
+                order.getId(), order.getCodigoOrden(), order.getWorkflowStep(), order.getWorkflowStage());
         if (order.getWorkflowStep() == workflowStep) {
             return;
         }
@@ -217,6 +221,8 @@ public class OrderService {
         order.setWorkflowStep(workflowStep);
         order.setWorkflowStage(workflowStep.name());
         orderRepository.save(order);
+        System.out.printf("[orders] persisted workflowStep=%s workflowStage=%s%n",
+                order.getWorkflowStep(), order.getWorkflowStage());
     }
 
     private Order resolveOrder(String requestId) {
