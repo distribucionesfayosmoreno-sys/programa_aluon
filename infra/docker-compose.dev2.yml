@@ -1,5 +1,3 @@
-version: "3.8"
-
 x-logging: &default-logging
   driver: "json-file"
   options:
@@ -62,4 +60,5 @@ networks:
 
 volumes:
   pgdata:
+    external: true
     name: aluon-pgdata-dev2
