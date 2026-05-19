@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,12 @@ public class MailService {
     @Value("${spring.mail.from:}")
     private String defaultFrom;
 
+    @Value("${spring.mail.username:}")
+    private String configuredUsername;
+
+    @Value("${spring.mail.password:}")
+    private String configuredPassword;
+
     public void sendTemplate(String templateKey, String to, Map<String, String> variables) {
         EmailTemplate template = templateService.getOrCreateTemplate(templateKey);
 
@@ -43,6 +50,11 @@ public class MailService {
             return;
         }
 
+        if (configuredPassword == null || configuredPassword.isBlank()) {
+            logger.warn("SMTP sin contraseña configurada. Se omite el envío de email a {}.", to);
+            return;
+        }
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
@@ -53,6 +65,8 @@ public class MailService {
             helper.setSubject(subject);
             helper.setText(bodyHtml, true);
             mailSender.send(message);
+        } catch (MailException ex) {
+            logger.error("Error enviando email a {} (MailException). Se continúa sin bloquear el flujo.", to, ex);
         } catch (MessagingException ex) {
             logger.error("Error enviando email a {}", to, ex);
         }
