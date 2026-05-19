@@ -12,6 +12,7 @@ spring:
           starttls:
             enable: ${SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:true}
   flyway:
+    enabled: false
     baseline-on-migrate: true
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://192.168.99.14:3000/aluonbbdd}
