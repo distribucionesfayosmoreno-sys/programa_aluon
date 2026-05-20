@@ -35,7 +35,6 @@ import com.aluon.production.order.dto.OrderCustomerAssignRequest;
 import com.aluon.production.order.dto.OrderCustomerBulkAssignRequest;
 import com.aluon.production.order.dto.OrderCustomerBulkAssignResponse;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -56,7 +55,8 @@ public class OrderService {
                         .workflowStage(order.getWorkflowStage())
                         .assignedUserId(order.getAssignedUser() != null ? order.getAssignedUser().getId() : null)
                         .assignedUserName(order.getAssignedUser() != null
-                                ? (order.getAssignedUser().getNombre() + " " + order.getAssignedUser().getApellidos()).trim()
+                                ? (order.getAssignedUser().getNombre() + " " + order.getAssignedUser().getApellidos())
+                                        .trim()
                                 : null)
                         .customerName(order.getCustomer().getNombreComercial() != null
                                 ? order.getCustomer().getNombreComercial()
@@ -67,7 +67,8 @@ public class OrderService {
                         .notes(order.getNotes())
                         .color(order.getColor())
                         .installerName(order.getInstallerName())
-                        .requestDate(order.getCreatedAt() != null ? order.getCreatedAt().toLocalDate() : LocalDate.now())
+                        .requestDate(
+                                order.getCreatedAt() != null ? order.getCreatedAt().toLocalDate() : LocalDate.now())
                         .m2(calculateM2(order.getAnchoMm(), order.getAltoMm()))
                         .build())
                 .toList();
@@ -119,7 +120,8 @@ public class OrderService {
                         ? (order.getAssignedUser().getNombre() + " " + order.getAssignedUser().getApellidos()).trim()
                         : null)
                 .customerId(customer.getId())
-                .customerName(customer.getNombreComercial() != null ? customer.getNombreComercial() : customer.getRazonSocial())
+                .customerName(customer.getNombreComercial() != null ? customer.getNombreComercial()
+                        : customer.getRazonSocial())
                 .customerAddress(address)
                 .customerPhone(customer.getTelefono())
                 .modeloPuerta(order.getModeloPuerta())
@@ -252,7 +254,6 @@ public class OrderService {
                     .forEach(file -> order.addAttachment(buildAttachment(file)));
         }
 
-        @SuppressWarnings("null")
         Order savedOrder = orderRepository.save(order);
         savedOrder = Objects.requireNonNull(savedOrder, "savedOrder");
         return WorkOrderRequestResponseDto.builder()
@@ -317,8 +318,7 @@ public class OrderService {
                 OrderWorkflowStep.VALIDATION,
                 OrderWorkflowStep.DEV,
                 OrderWorkflowStep.PROD,
-                OrderWorkflowStep.FINAL
-        );
+                OrderWorkflowStep.FINAL);
         int currentIndex = steps.indexOf(current);
         int nextIndex = steps.indexOf(next);
         if (currentIndex == -1 || nextIndex == -1) {

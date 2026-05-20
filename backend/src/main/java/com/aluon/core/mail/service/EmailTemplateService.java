@@ -14,7 +14,6 @@ import com.aluon.core.mail.dto.EmailTemplateDto;
 import com.aluon.core.mail.repository.EmailTemplateRepository;
 import com.aluon.core.mail.dto.EmailTemplateRequest;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -31,7 +30,6 @@ public class EmailTemplateService {
         return repository.findAll().stream().map(this::toDto).toList();
     }
 
-    @SuppressWarnings("null")
     public EmailTemplateDto upsert(UUID id, EmailTemplateRequest request) {
         EmailTemplate template;
         if (id != null) {
@@ -44,7 +42,6 @@ public class EmailTemplateService {
         return toDto(Objects.requireNonNull(repository.save(template), "template"));
     }
 
-    @SuppressWarnings("null")
     public EmailTemplateDto save(EmailTemplateRequest request) {
         String normalizedKey = Objects.requireNonNull(normalizeKey(request.getTemplateKey()), "templateKey");
         EmailTemplate template = repository.findByTemplateKey(normalizedKey)
@@ -71,7 +68,6 @@ public class EmailTemplateService {
         repository.deleteById(Objects.requireNonNull(id, "id"));
     }
 
-
     private void apply(EmailTemplate template, EmailTemplateRequest request) {
         String key = normalizeKey(request.getTemplateKey());
         if (key == null) {
@@ -89,7 +85,8 @@ public class EmailTemplateService {
     }
 
     private String normalizeKey(String key) {
-        if (key == null) return null;
+        if (key == null)
+            return null;
         String trimmed = key.trim();
         return trimmed.isBlank() ? null : trimmed.toUpperCase();
     }
@@ -124,20 +121,21 @@ public class EmailTemplateService {
         EmailTemplateRequest request = new EmailTemplateRequest();
         request.setTemplateKey(KEY_REGISTRATION_CONFIRMATION);
         request.setSubject("Hemos recibido tu solicitud en Aluon");
-        request.setBodyHtml("""
-            <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
-              <p>Hola {{nombreComercial}},</p>
-              <p>Hemos recibido tu solicitud de inscripción. Nuestro equipo la revisará en breve.</p>
-              <p>Te avisaremos por email con la aprobación o el rechazo. También podrás ver el estado desde la app web.</p>
-              <p>Datos recibidos:</p>
-              <ul>
-                <li>Email: {{email}}</li>
-                <li>Teléfono: {{telefono}}</li>
-              </ul>
-              <p>Gracias por confiar en Aluon.</p>
-              <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
-            </div>
-            """);
+        request.setBodyHtml(
+                """
+                        <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
+                          <p>Hola {{nombreComercial}},</p>
+                          <p>Hemos recibido tu solicitud de inscripción. Nuestro equipo la revisará en breve.</p>
+                          <p>Te avisaremos por email con la aprobación o el rechazo. También podrás ver el estado desde la app web.</p>
+                          <p>Datos recibidos:</p>
+                          <ul>
+                            <li>Email: {{email}}</li>
+                            <li>Teléfono: {{telefono}}</li>
+                          </ul>
+                          <p>Gracias por confiar en Aluon.</p>
+                          <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
+                        </div>
+                        """);
         return request;
     }
 
@@ -146,13 +144,13 @@ public class EmailTemplateService {
         request.setTemplateKey(KEY_REGISTRATION_APPROVED);
         request.setSubject("Tu cuenta Aluon ha sido validada");
         request.setBodyHtml("""
-            <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
-              <p>Hola {{nombreComercial}},</p>
-              <p>Tu solicitud ha sido aprobada. Ya puedes iniciar sesión en la app móvil.</p>
-              <p>Si necesitas ayuda, responde a este correo.</p>
-              <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
-            </div>
-            """);
+                <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
+                  <p>Hola {{nombreComercial}},</p>
+                  <p>Tu solicitud ha sido aprobada. Ya puedes iniciar sesión en la app móvil.</p>
+                  <p>Si necesitas ayuda, responde a este correo.</p>
+                  <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
+                </div>
+                """);
         return request;
     }
 
@@ -161,15 +159,15 @@ public class EmailTemplateService {
         request.setTemplateKey(KEY_PASSWORD_RESET);
         request.setSubject("Código de recuperación de contraseña");
         request.setBodyHtml("""
-            <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
-              <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
-              <p>Tu código de recuperación es:</p>
-              <p style=\"font-size:18px;font-weight:700;letter-spacing:0.08em;\">{{token}}</p>
-              <p>Este código caduca en {{expiresMinutes}} minutos.</p>
-              <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
-              <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
-            </div>
-            """);
+                <div style=\"font-family:Arial, 'Segoe UI', sans-serif;font-size:14px;color:#0d1117;\">
+                  <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+                  <p>Tu código de recuperación es:</p>
+                  <p style=\"font-size:18px;font-weight:700;letter-spacing:0.08em;\">{{token}}</p>
+                  <p>Este código caduca en {{expiresMinutes}} minutos.</p>
+                  <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+                  <div style=\"margin-top:16px;\">{{signatureHtml}}</div>
+                </div>
+                """);
         return request;
     }
 }

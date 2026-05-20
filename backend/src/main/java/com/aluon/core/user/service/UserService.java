@@ -13,7 +13,6 @@ import com.aluon.core.user.model.User;
 import com.aluon.core.user.dto.UserDto;
 import com.aluon.core.user.repository.UserRepository;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -51,8 +50,6 @@ public class UserService {
                 .foto(decodeBase64(request.getFotoBase64()))
                 .build();
 
-        // Suppress IDE null-safety warnings for legacy nullness on Spring Data signatures.
-        @SuppressWarnings("null")
         User saved = userRepository.save(user);
         return toDto(Objects.requireNonNull(saved, "user"));
     }
@@ -98,7 +95,6 @@ public class UserService {
             user.setFoto(decodeBase64(request.getFotoBase64()));
         }
 
-        @SuppressWarnings("null")
         User saved = userRepository.save(user);
         return toDto(Objects.requireNonNull(saved, "user"));
     }
