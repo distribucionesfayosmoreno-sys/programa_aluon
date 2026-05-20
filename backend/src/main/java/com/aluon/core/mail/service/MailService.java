@@ -58,8 +58,9 @@ public class MailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
-            if (defaultFrom != null && !defaultFrom.isBlank()) {
-                helper.setFrom(defaultFrom);
+            String from = defaultFrom;
+            if (from != null && !from.isBlank()) {
+                helper.setFrom(from);
             }
             helper.setTo(to);
             helper.setSubject(subject);
