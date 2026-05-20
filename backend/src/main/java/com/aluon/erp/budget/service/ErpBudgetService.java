@@ -12,7 +12,6 @@ import java.util.Objects;
 import com.aluon.erp.budget.dto.ErpBudgetStatusResponse;
 import com.aluon.erp.budget.dto.ErpBudgetSyncRequest;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -36,7 +35,6 @@ public class ErpBudgetService {
             applyStatus(quote, targetStatus);
         }
 
-        @SuppressWarnings("null")
         QuoteRequest saved = quoteRequestRepository.save(quote);
         return toResponse(Objects.requireNonNull(saved, "saved"));
     }

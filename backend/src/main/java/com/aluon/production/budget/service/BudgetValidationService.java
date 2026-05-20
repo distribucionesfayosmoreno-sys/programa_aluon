@@ -21,7 +21,6 @@ import com.aluon.production.order.model.Order;
 import com.aluon.production.order.model.OrderWorkflowStep;
 import com.aluon.production.order.repository.OrderRepository;
 
-
 @Service
 @RequiredArgsConstructor
 public class BudgetValidationService {
@@ -51,7 +50,6 @@ public class BudgetValidationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        @SuppressWarnings("null")
         BudgetValidation saved = budgetValidationRepository.save(budget);
         updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.BUDGET);
         return toDto(Objects.requireNonNull(saved, "saved"));
@@ -102,7 +100,6 @@ public class BudgetValidationService {
         budget.setApprovedAt(LocalDateTime.now());
         budget.setApprovedBy(approver);
 
-        @SuppressWarnings("null")
         BudgetValidation saved = budgetValidationRepository.save(budget);
         updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.VALIDATION);
         return toDto(Objects.requireNonNull(saved, "saved"));
@@ -172,8 +169,7 @@ public class BudgetValidationService {
                 OrderWorkflowStep.VALIDATION,
                 OrderWorkflowStep.DEV,
                 OrderWorkflowStep.PROD,
-                OrderWorkflowStep.FINAL
-        );
+                OrderWorkflowStep.FINAL);
         int currentIndex = steps.indexOf(current);
         int nextIndex = steps.indexOf(next);
         if (currentIndex == -1 || nextIndex == -1) {

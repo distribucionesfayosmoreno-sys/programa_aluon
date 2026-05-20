@@ -56,7 +56,6 @@ public class CustomerRegistrationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        @SuppressWarnings("null")
         CustomerRegistration saved = registrationRepository.save(registration);
         saved = Objects.requireNonNull(saved, "saved");
 
@@ -145,7 +144,6 @@ public class CustomerRegistrationService {
                 .autoApproveQuotes(autoApproveQuotes)
                 .build();
 
-        @SuppressWarnings("null")
         Customer savedCustomer = customerRepository.save(customer);
         savedCustomer = Objects.requireNonNull(savedCustomer, "customer");
 
@@ -158,8 +156,10 @@ public class CustomerRegistrationService {
         registrationRepository.save(registration);
 
         String registrationEmail = Objects.requireNonNull(registration.getEmail(), "email");
-        String registrationNombreComercial = Objects.requireNonNull(registration.getNombreComercial(), "nombreComercial");
-        String registrationTelefonoWhatsapp = Objects.requireNonNull(registration.getTelefonoWhatsapp(), "telefonoWhatsapp");
+        String registrationNombreComercial = Objects.requireNonNull(registration.getNombreComercial(),
+                "nombreComercial");
+        String registrationTelefonoWhatsapp = Objects.requireNonNull(registration.getTelefonoWhatsapp(),
+                "telefonoWhatsapp");
 
         mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_REGISTRATION_APPROVED,
