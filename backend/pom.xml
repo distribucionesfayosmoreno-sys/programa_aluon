@@ -76,6 +76,14 @@
       <artifactId>spring-security-crypto</artifactId>
     </dependency>
 
+    <!-- IDE null-analysis annotations (Eclipse JDT) -->
+    <dependency>
+      <groupId>org.eclipse.jdt</groupId>
+      <artifactId>org.eclipse.jdt.annotation</artifactId>
+      <version>2.2.700</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Testing -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
