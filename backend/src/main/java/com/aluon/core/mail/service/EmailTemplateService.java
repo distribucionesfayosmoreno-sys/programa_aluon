@@ -31,6 +31,7 @@ public class EmailTemplateService {
         return repository.findAll().stream().map(this::toDto).toList();
     }
 
+    @SuppressWarnings("null")
     public EmailTemplateDto upsert(UUID id, EmailTemplateRequest request) {
         EmailTemplate template;
         if (id != null) {
@@ -43,6 +44,7 @@ public class EmailTemplateService {
         return toDto(Objects.requireNonNull(repository.save(template), "template"));
     }
 
+    @SuppressWarnings("null")
     public EmailTemplateDto save(EmailTemplateRequest request) {
         String normalizedKey = Objects.requireNonNull(normalizeKey(request.getTemplateKey()), "templateKey");
         EmailTemplate template = repository.findByTemplateKey(normalizedKey)

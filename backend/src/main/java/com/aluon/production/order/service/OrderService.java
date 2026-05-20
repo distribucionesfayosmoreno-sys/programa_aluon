@@ -74,7 +74,8 @@ public class OrderService {
     }
 
     public WorkOrderDto getWorkOrder(UUID id) {
-        Order order = orderRepository.findById(id)
+        UUID orderId = Objects.requireNonNull(id, "id");
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada"));
 
         Cutlist cutlist = order.getCutlist();
@@ -163,7 +164,8 @@ public class OrderService {
         UUID orderId = Objects.requireNonNull(id, "id");
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada"));
-        User user = userRepository.findById(request.getUserId())
+        Long userId = Objects.requireNonNull(request.getUserId(), "userId");
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
         order.setAssignedUser(user);
         orderRepository.save(order);
@@ -194,12 +196,14 @@ public class OrderService {
                 skipped++;
                 continue;
             }
-            Order order = orderRepository.findById(item.getOrderId()).orElse(null);
+            UUID bulkOrderId = Objects.requireNonNull(item.getOrderId(), "orderId");
+            UUID bulkCustomerId = Objects.requireNonNull(item.getCustomerId(), "customerId");
+            Order order = orderRepository.findById(bulkOrderId).orElse(null);
             if (order == null) {
                 skipped++;
                 continue;
             }
-            Customer customer = customerService.findById(item.getCustomerId());
+            Customer customer = customerService.findById(bulkCustomerId);
             order.setCustomer(customer);
             orderRepository.save(order);
             updated++;
@@ -248,7 +252,7 @@ public class OrderService {
                     .forEach(file -> order.addAttachment(buildAttachment(file)));
         }
 
-        Order savedOrder = orderRepository.save(order);
+        Order savedOrder = Objects.requireNonNull(orderRepository.save(order), "savedOrder");
         return WorkOrderRequestResponseDto.builder()
                 .id(savedOrder.getId())
                 .codigoOrden(savedOrder.getCodigoOrden())
@@ -297,7 +301,7 @@ public class OrderService {
     private Order resolveOrder(String requestId) {
         try {
             UUID orderId = UUID.fromString(requestId);
-            return orderRepository.findById(orderId).orElse(null);
+            return orderRepository.findById(Objects.requireNonNull(orderId, "orderId")).orElse(null);
         } catch (IllegalArgumentException ignored) {
             return orderRepository.findByCodigoOrden(requestId).orElse(null);
         }
@@ -331,7 +335,7 @@ public class OrderService {
         } catch (NumberFormatException ex) {
             throw new IllegalArgumentException("El ID del autorizador debe ser numérico");
         }
-        User user = userRepository.findById(userId)
+        User user = userRepository.findById(Objects.requireNonNull(userId, "userId"))
                 .orElseThrow(() -> new IllegalArgumentException("Usuario autorizador no encontrado"));
         if (user.getRol() != Role.ADMIN && user.getRol() != Role.DIOS) {
             throw new IllegalArgumentException("Solo ADMIN o DIOS pueden autorizar retrocesos");

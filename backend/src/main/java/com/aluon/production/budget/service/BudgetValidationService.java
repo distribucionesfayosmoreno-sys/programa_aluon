@@ -87,7 +87,7 @@ public class BudgetValidationService {
             return toDto(budget);
         }
 
-        User approver = userRepository.findById(approverId).orElse(null);
+        User approver = userRepository.findById(Objects.requireNonNull(approverId, "approverId")).orElse(null);
         if (!isMasterApprover) {
             if (approver == null) {
                 throw new IllegalArgumentException("Usuario aprobador no encontrado");
@@ -183,7 +183,7 @@ public class BudgetValidationService {
     private Order resolveOrder(String requestId) {
         try {
             UUID orderId = UUID.fromString(requestId);
-            return orderRepository.findById(orderId).orElse(null);
+            return orderRepository.findById(Objects.requireNonNull(orderId, "orderId")).orElse(null);
         } catch (IllegalArgumentException ignored) {
             return orderRepository.findByCodigoOrden(requestId).orElse(null);
         }

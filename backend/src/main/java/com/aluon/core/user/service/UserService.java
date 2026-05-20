@@ -51,7 +51,7 @@ public class UserService {
                 .foto(decodeBase64(request.getFotoBase64()))
                 .build();
 
-        return toDto(userRepository.save(user));
+        return toDto(Objects.requireNonNull(userRepository.save(user), "user"));
     }
 
     public UserDto update(Long id, UpdateUserRequest request) {
@@ -95,7 +95,7 @@ public class UserService {
             user.setFoto(decodeBase64(request.getFotoBase64()));
         }
 
-        return toDto(userRepository.save(user));
+        return toDto(Objects.requireNonNull(userRepository.save(user), "user"));
     }
 
     public void deleteById(Long id) {

@@ -253,7 +253,7 @@ public class CutlistService {
     private Order resolveOrder(String requestId) {
         try {
             UUID orderId = UUID.fromString(requestId);
-            return orderRepository.findById(orderId).orElse(null);
+            return orderRepository.findById(Objects.requireNonNull(orderId, "orderId")).orElse(null);
         } catch (IllegalArgumentException ignored) {
             return orderRepository.findByCodigoOrden(requestId).orElse(null);
         }

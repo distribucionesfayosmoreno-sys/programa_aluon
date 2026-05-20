@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import com.aluon.erp.budget.dto.ErpBudgetStatusResponse;
 import com.aluon.erp.budget.dto.ErpBudgetSyncRequest;
 
@@ -36,7 +37,7 @@ public class ErpBudgetService {
         }
 
         QuoteRequest saved = quoteRequestRepository.save(quote);
-        return toResponse(saved);
+        return toResponse(Objects.requireNonNull(saved, "saved"));
     }
 
     private QuoteRequest getQuoteByNumber(String quoteNumber) {
