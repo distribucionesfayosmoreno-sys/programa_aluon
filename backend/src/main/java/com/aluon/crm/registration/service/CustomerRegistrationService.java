@@ -59,22 +59,26 @@ public class CustomerRegistrationService {
         CustomerRegistration saved = registrationRepository.save(registration);
         saved = Objects.requireNonNull(saved, "saved");
 
+        String savedEmail = Objects.requireNonNull(saved.getEmail(), "email");
+        String savedNombreComercial = Objects.requireNonNull(saved.getNombreComercial(), "nombreComercial");
+        String savedTelefonoWhatsapp = Objects.requireNonNull(saved.getTelefonoWhatsapp(), "telefonoWhatsapp");
+
         mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_REGISTRATION_CONFIRMATION,
-                saved.getEmail(),
+                savedEmail,
                 Map.of(
-                        "nombreComercial", saved.getNombreComercial(),
-                        "email", saved.getEmail(),
-                        "telefono", saved.getTelefonoWhatsapp())));
+                        "nombreComercial", savedNombreComercial,
+                        "email", savedEmail,
+                        "telefono", savedTelefonoWhatsapp)));
 
         return CustomerRegistrationResponse.builder()
-                .registrationId(saved.getId())
+                .registrationId(Objects.requireNonNull(saved.getId(), "id"))
                 .customerId(saved.getCustomerId())
-                .nombreComercial(saved.getNombreComercial())
-                .email(saved.getEmail())
-                .telefonoWhatsapp(saved.getTelefonoWhatsapp())
-                .status(saved.getStatus())
-                .createdAt(saved.getCreatedAt())
+                .nombreComercial(savedNombreComercial)
+                .email(savedEmail)
+                .telefonoWhatsapp(savedTelefonoWhatsapp)
+                .status(Objects.requireNonNull(saved.getStatus(), "status"))
+                .createdAt(Objects.requireNonNull(saved.getCreatedAt(), "createdAt"))
                 .build();
     }
 
@@ -145,21 +149,25 @@ public class CustomerRegistrationService {
         registration.setStatus(CustomerRegistrationStatus.APROBADO);
         registration.setTariffCode(finalTariff);
         registration.setAutoApproveQuotes(autoApproveQuotes);
-        registration.setCustomerId(savedCustomer.getId());
+        registration.setCustomerId(Objects.requireNonNull(savedCustomer.getId(), "customerId"));
         registration.setReviewedAt(LocalDateTime.now());
 
         registrationRepository.save(registration);
 
+        String registrationEmail = Objects.requireNonNull(registration.getEmail(), "email");
+        String registrationNombreComercial = Objects.requireNonNull(registration.getNombreComercial(), "nombreComercial");
+        String registrationTelefonoWhatsapp = Objects.requireNonNull(registration.getTelefonoWhatsapp(), "telefonoWhatsapp");
+
         mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_REGISTRATION_APPROVED,
-                registration.getEmail(),
+                registrationEmail,
                 Map.of(
-                        "nombreComercial", registration.getNombreComercial(),
-                        "email", registration.getEmail(),
-                        "telefono", registration.getTelefonoWhatsapp())));
+                        "nombreComercial", registrationNombreComercial,
+                        "email", registrationEmail,
+                        "telefono", registrationTelefonoWhatsapp)));
 
         // Una vez aprobada y creada en customers, eliminar la solicitud
-        registrationRepository.deleteById(registration.getId());
+        registrationRepository.deleteById(Objects.requireNonNull(registration.getId(), "id"));
         return toDto(registration);
     }
 
