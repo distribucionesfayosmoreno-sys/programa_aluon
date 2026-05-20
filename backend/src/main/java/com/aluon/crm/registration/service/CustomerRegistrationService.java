@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 import com.aluon.crm.registration.model.CustomerRegistration;
 import com.aluon.crm.registration.dto.CustomerRegistrationApprovalRequest;
@@ -86,14 +87,16 @@ public class CustomerRegistrationService {
 
     @Transactional(readOnly = true)
     public CustomerRegistrationDto getById(UUID id) {
-        CustomerRegistration registration = registrationRepository.findById(id)
+        UUID registrationId = Objects.requireNonNull(id, "id");
+        CustomerRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
         return toDto(registration);
     }
 
     @Transactional(readOnly = true)
     public CustomerRegistrationResponse getResponseById(UUID id) {
-        CustomerRegistration registration = registrationRepository.findById(id)
+        UUID registrationId = Objects.requireNonNull(id, "id");
+        CustomerRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
         return CustomerRegistrationResponse.builder()
                 .registrationId(registration.getId())
@@ -108,7 +111,8 @@ public class CustomerRegistrationService {
 
     @Transactional
     public CustomerRegistrationDto approve(UUID id, CustomerRegistrationApprovalRequest request) {
-        CustomerRegistration registration = registrationRepository.findById(id)
+        UUID registrationId = Objects.requireNonNull(id, "id");
+        CustomerRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
 
         if (registration.getStatus() == CustomerRegistrationStatus.APROBADO) {
@@ -160,7 +164,8 @@ public class CustomerRegistrationService {
 
     @Transactional
     public CustomerRegistrationDto reject(UUID id, CustomerRegistrationRejectionRequest request) {
-        CustomerRegistration registration = registrationRepository.findById(id)
+        UUID registrationId = Objects.requireNonNull(id, "id");
+        CustomerRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
 
         if (registration.getStatus() == CustomerRegistrationStatus.RECHAZADO) {

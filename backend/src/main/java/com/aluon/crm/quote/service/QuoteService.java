@@ -84,7 +84,7 @@ public class QuoteService {
         }
 
         QuoteRequest saved = quoteRequestRepository.save(quote);
-        return toResponse(saved);
+        return toResponse(Objects.requireNonNull(saved, "saved"));
     }
 
     @Transactional

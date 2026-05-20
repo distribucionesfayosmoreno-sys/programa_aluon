@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import com.aluon.production.order.model.Order;
@@ -33,8 +34,6 @@ import com.aluon.production.order.dto.OrderAssignRequest;
 import com.aluon.production.order.dto.OrderCustomerAssignRequest;
 import com.aluon.production.order.dto.OrderCustomerBulkAssignRequest;
 import com.aluon.production.order.dto.OrderCustomerBulkAssignResponse;
-import com.aluon.core.user.model.User;
-import com.aluon.core.user.repository.UserRepository;
 
 
 @Service
@@ -161,7 +160,8 @@ public class OrderService {
         if (request == null || request.getUserId() == null) {
             throw new IllegalArgumentException("El usuario es obligatorio");
         }
-        Order order = orderRepository.findById(id)
+        UUID orderId = Objects.requireNonNull(id, "id");
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada"));
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -174,7 +174,8 @@ public class OrderService {
         if (request == null || request.getCustomerId() == null) {
             throw new IllegalArgumentException("El cliente es obligatorio");
         }
-        Order order = orderRepository.findById(id)
+        UUID orderId = Objects.requireNonNull(id, "id");
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Orden de trabajo no encontrada"));
         Customer customer = customerService.findById(request.getCustomerId());
         order.setCustomer(customer);
@@ -256,7 +257,8 @@ public class OrderService {
 
     @Transactional
     public void deleteRequest(UUID id) {
-        Order order = orderRepository.findById(id)
+        UUID orderId = Objects.requireNonNull(id, "id");
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
         orderRepository.delete(order);
     }

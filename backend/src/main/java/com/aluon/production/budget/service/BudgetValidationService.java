@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import com.aluon.production.budget.model.BudgetValidation;
 import com.aluon.production.budget.dto.BudgetValidationApprovalRequest;
@@ -78,7 +79,8 @@ public class BudgetValidationService {
             throw new IllegalArgumentException("El ID del usuario debe ser numérico");
         }
 
-        BudgetValidation budget = budgetValidationRepository.findById(id)
+        UUID budgetId = Objects.requireNonNull(id, "id");
+        BudgetValidation budget = budgetValidationRepository.findById(budgetId)
                 .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
 
         if (budget.getStatus() == BudgetValidationStatus.APROBADO) {
@@ -101,7 +103,7 @@ public class BudgetValidationService {
 
         BudgetValidation saved = budgetValidationRepository.save(budget);
         updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.VALIDATION);
-        return toDto(saved);
+        return toDto(Objects.requireNonNull(saved, "saved"));
     }
 
     private void validateCreate(BudgetValidationCreateRequest request) {
