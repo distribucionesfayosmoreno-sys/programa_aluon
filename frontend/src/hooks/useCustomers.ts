@@ -18,6 +18,7 @@ export interface Customer {
   personaContacto: string;
   tarifa: string;
   tipoDocumento: 'DNI' | 'CIF' | 'NIE' | 'PASAPORTE';
+  numeroDocumento: string;
   telefono: string;
   email: string;
   direccion: string;
@@ -39,7 +40,12 @@ export const useCustomers = () => {
   const fetchCustomers = async () => {
     try {
       const response = await fetch('/api/erp/customers');
-      const data = await response.json();
+      if (!response.ok) {
+        const details = await response.text().catch(() => '');
+        const message = details?.trim() || `Error cargando clientes (status ${response.status})`;
+        throw new Error(message);
+      }
+      const data: unknown = await response.json();
       if (Array.isArray(data)) {
         setCustomers(data);
       } else {

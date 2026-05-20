@@ -189,20 +189,8 @@ const CustomerManagement: React.FC = () => {
     <div className="flex flex-col" style={{ height: 'calc(100vh - 128px)', minHeight: 400 }}>
 
       {/* ── Toolbar ── */}
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-1 h-5 rounded-full bg-brand" />
-            <h1 className="text-xl font-black uppercase tracking-tight" style={{ color: '#0d1117' }}>
-              Gestión de Clientes
-            </h1>
-          </div>
-          <p className="text-xs font-semibold uppercase tracking-wide ml-3.5 mt-0.5" style={{ color: '#9ca3af' }}>
-            GUM · CRM
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           {selected.size > 0 && (
             <div
               className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold"
@@ -216,16 +204,18 @@ const CustomerManagement: React.FC = () => {
             </div>
           )}
           {/* Search */}
-          <div className="relative hidden md:block">
+          <div className="relative hidden md:block flex-1 min-w-0">
             <svg className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#9ca3af' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
               placeholder="Buscar cliente..."
               className="pl-9 pr-4 py-2 rounded-xl text-sm border"
-              style={{ border: '1px solid #e5e7eb', fontSize: 12, outline: 'none', background: '#fff', width: 220 }}
+              style={{ border: '1px solid #e5e7eb', fontSize: 12, outline: 'none', background: '#fff', width: '100%' }}
             />
           </div>
+        </div>
+        <div className="flex items-center gap-2">
           <button id="btn-nuevo-cliente" onClick={handleCreate} className="btn-primary">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

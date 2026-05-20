@@ -231,6 +231,7 @@ export const useCutlistWorkflow = ({
     needsLeftRightWidths,
     widthLeftMm,
     widthRightMm,
+    selectedRequest?.id,
     cutlistDistributor,
     cutlistBudgetNumber,
     cutlistBudgetDate,

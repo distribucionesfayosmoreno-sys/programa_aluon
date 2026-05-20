@@ -61,6 +61,7 @@ public class ErpCustomerService {
                 .personaContacto(trimToNull(request.getPersonaContacto()))
                 .tarifa(trimToNull(request.getTarifa()))
                 .tipoDocumento(request.getTipoDocumento())
+                .numeroDocumento(trimToNull(request.getNumeroDocumento()))
                 .telefono(trimToNull(request.getTelefono()))
                 .email(trimToNull(request.getEmail()))
                 .direccion(trimToNull(request.getDireccion()))
@@ -86,6 +87,7 @@ public class ErpCustomerService {
         customer.setPersonaContacto(trimToNull(request.getPersonaContacto()));
         customer.setTarifa(trimToNull(request.getTarifa()));
         customer.setTipoDocumento(request.getTipoDocumento());
+        customer.setNumeroDocumento(trimToNull(request.getNumeroDocumento()));
         customer.setTelefono(trimToNull(request.getTelefono()));
         customer.setEmail(trimToNull(request.getEmail()));
         customer.setDireccion(trimToNull(request.getDireccion()));
@@ -146,6 +148,7 @@ public class ErpCustomerService {
                 .personaContacto(customer.getPersonaContacto())
                 .tarifa(customer.getTarifa())
                 .tipoDocumento(customer.getTipoDocumento())
+                .numeroDocumento(customer.getNumeroDocumento())
                 .telefono(customer.getTelefono())
                 .email(customer.getEmail())
                 .direccion(customer.getDireccion())

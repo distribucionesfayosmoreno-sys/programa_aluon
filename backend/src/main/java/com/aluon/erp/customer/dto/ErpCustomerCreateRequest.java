@@ -13,6 +13,7 @@ public class ErpCustomerCreateRequest {
     private String personaContacto;
     private String tarifa;
     private Customer.DocumentType tipoDocumento;
+    private String numeroDocumento;
     private String telefono;
     private String email;
     private String direccion;

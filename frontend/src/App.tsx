@@ -12,7 +12,7 @@ import Cutlist from './features/cutlist/Cutlist';
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
   const [openNewRequest, setOpenNewRequest] = useState(false);
-  const [theme, setTheme] = useState<'red' | 'blue'>('red');
+  const [theme, setTheme] = useState<'red' | 'blue'>('blue');
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {

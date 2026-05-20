@@ -16,6 +16,7 @@ public class ErpCustomerResponse {
     String personaContacto;
     String tarifa;
     Customer.DocumentType tipoDocumento;
+    String numeroDocumento;
     String telefono;
     String email;
     String direccion;

@@ -1,18 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Customer, DeliveryAddress } from '../hooks/useCustomers';
-
+import {
+  documentPatternHint,
+  emailPatternHint,
+  ibanPatternHint,
+  lookupPostalCodeEs,
+  normalizeDocumentNumber,
+  normalizeEmail,
+  normalizeIban,
+  normalizePostalCodeEs,
+  phonePatternHint,
+  validateDocumentNumber,
+  validateEmail,
+  validateIban,
+  validatePhone,
+} from './customer-modal/customerModalValidators';
 interface Props {
   customer?: Customer;
   onClose:   () => void;
   onSave:    (c: Customer) => void;
 }
-
 type TabKey = 'GENERAL' | 'ADDRESSES';
 
 const EMPTY_CUSTOMER: Customer = {
   nombreComercial: '', razonSocial: '', personaContacto: '',
-  tarifa: '', tipoDocumento: 'CIF', telefono: '', email: '',
+  tarifa: '', tipoDocumento: 'CIF', numeroDocumento: '', telefono: '', email: '',
   direccion: '', cp: '', poblacion: '', provincia: '', pais: 'ESPAÑA',
   iban: '', formaPago: '', diasVencimiento: 0, remanente: 0, direccionesEntrega: [],
 };
@@ -30,6 +43,34 @@ const FI = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...p} className="field" autoComplete="off" />
 );
 
+type ValidationStatus = 'neutral' | 'error' | 'ok';
+
+const ValidationHint = ({ status, hint }: { status: ValidationStatus; hint: string }) => (
+  <div
+    className="mt-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
+    style={{
+      color:
+        status === 'error'
+          ? 'var(--danger, #ef4444)'
+          : status === 'ok'
+            ? 'var(--success, #16a34a)'
+            : '#9ca3af',
+    }}
+  >
+    {status === 'error' && (
+      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    )}
+    {status === 'ok' && (
+      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+      </svg>
+    )}
+    <span>{hint}</span>
+  </div>
+);
+
 const SectionTitle = ({ n, label }: { n: string; label: string }) => (
   <div className="flex items-center gap-3 mb-5">
     <span style={{ fontSize: 9, fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
@@ -44,6 +85,7 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
   const [tab,     setTab]     = useState<TabKey>('GENERAL');
   const [form,    setForm]    = useState<Customer>(customer ?? EMPTY_CUSTOMER);
   const [newAddr, setNewAddr] = useState<DeliveryAddress>(EMPTY_ADDR);
+  const lastPostalLookupRef = useRef<string>('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -69,6 +111,49 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
   };
 
   const isEdit = Boolean(customer?.id);
+  const docHint = documentPatternHint(form.tipoDocumento);
+  const isDocValid = validateDocumentNumber(form.tipoDocumento, form.numeroDocumento);
+  const showDocError = normalizeDocumentNumber(form.numeroDocumento).length > 0 && !isDocValid;
+  const showDocOk = normalizeDocumentNumber(form.numeroDocumento).length > 0 && isDocValid;
+
+  const isPhoneValid = validatePhone(form.telefono);
+  const showPhoneError = form.telefono.trim().length > 0 && !isPhoneValid;
+  const showPhoneOk = form.telefono.trim().length > 0 && isPhoneValid;
+  const normalizedEmail = normalizeEmail(form.email);
+  const isEmailValid = validateEmail(normalizedEmail);
+  const showEmailError = normalizedEmail.length > 0 && !isEmailValid;
+  const showEmailOk = normalizedEmail.length > 0 && isEmailValid;
+  const normalizedIban = normalizeIban(form.iban);
+  const isIbanValid = validateIban(normalizedIban);
+  const showIbanError = normalizedIban.length > 0 && !isIbanValid;
+  const showIbanOk = normalizedIban.length > 0 && isIbanValid;
+
+  useEffect(() => {
+    const cp = normalizePostalCodeEs(form.cp);
+    if (cp.length !== 5) {
+      lastPostalLookupRef.current = '';
+      return;
+    }
+    if (lastPostalLookupRef.current === cp) return;
+    lastPostalLookupRef.current = cp;
+    const controller = new AbortController();
+    void (async () => {
+      const result = await lookupPostalCodeEs(cp, controller.signal).catch(() => null);
+      if (!result) return;
+
+      setForm(prev => {
+        const currentCp = normalizePostalCodeEs(prev.cp);
+        if (currentCp !== cp) return prev;
+        return {
+          ...prev,
+          poblacion: result.poblacion.toUpperCase(),
+          provincia: result.ciudad,
+        };
+      });
+    })();
+
+    return () => controller.abort();
+  }, [form.cp]);
 
   const portalTarget =
     typeof document !== 'undefined' ? document.getElementById('main-layout') : null;
@@ -109,25 +194,6 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button type="submit" form="cm-form" className="btn-primary">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-              {isEdit ? 'Guardar cambios' : 'Crear cliente'}
-            </button>
-            <button
-              onClick={onClose}
-              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
-              style={{ color: '#8b949e' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
         </div>
 
         {/* Tabs */}
@@ -167,18 +233,101 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
               {/* 01 Empresa */}
               <section>
                 <SectionTitle n="01" label="Empresa" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-                  <div className="md:col-span-2"><FL>Nombre Comercial *</FL><FI name="nombreComercial" value={form.nombreComercial} onChange={handleChange} required /></div>
-                  <div><FL>Tipo de Documento</FL>
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-x-6 gap-y-4">
+                  <div className="md:col-span-3">
+                    <FL>Nombre Comercial *</FL>
+                    <FI name="nombreComercial" value={form.nombreComercial} onChange={handleChange} required />
+                  </div>
+                  <div className="md:col-span-3">
+                    <FL>Razón Social</FL>
+                    <FI name="razonSocial" value={form.razonSocial} onChange={handleChange} />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <FL>Persona de Contacto</FL>
+                    <FI name="personaContacto" value={form.personaContacto} onChange={handleChange} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <FL>Tipo de Documento</FL>
                     <select name="tipoDocumento" value={form.tipoDocumento} onChange={handleChange} className="field">
-                      {['CIF','DNI','NIE','PASAPORTE'].map(v => <option key={v}>{v}</option>)}
+                      {['CIF', 'DNI', 'NIE', 'PASAPORTE'].map(v => <option key={v}>{v}</option>)}
                     </select>
                   </div>
-                  <div><FL>Razón Social</FL><FI name="razonSocial" value={form.razonSocial} onChange={handleChange} /></div>
-                  <div><FL>Persona de Contacto</FL><FI name="personaContacto" value={form.personaContacto} onChange={handleChange} /></div>
-                  <div><FL>Teléfono</FL><FI name="telefono" value={form.telefono} onChange={handleChange} /></div>
-                  <div><FL>Email</FL><FI name="email" type="email" value={form.email} onChange={handleChange} /></div>
-                  <div><FL>Tarifa</FL><FI name="tarifa" value={form.tarifa} onChange={handleChange} /></div>
+                  <div className="md:col-span-2">
+                    <FL>Número de documento</FL>
+                    <div className="relative">
+                        <FI
+                          name="numeroDocumento"
+                          value={form.numeroDocumento}
+                          onChange={e => setForm(p => ({ ...p, numeroDocumento: normalizeDocumentNumber(e.target.value) }))}
+                          style={{
+                            outline: 'none',
+                            borderColor: showDocOk ? 'var(--success, #16a34a)' : showDocError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                            boxShadow: showDocOk
+                              ? '0 0 0 3px rgba(22,163,74,0.12)'
+                              : showDocError
+                                ? '0 0 0 3px rgba(239,68,68,0.12)'
+                                : undefined,
+                            paddingRight: 36,
+                          }}
+                          aria-invalid={showDocError}
+                        />
+                        {showDocOk && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--success, #16a34a)' }}>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                      )}
+                    </div>
+                    <ValidationHint status={showDocError ? 'error' : showDocOk ? 'ok' : 'neutral'} hint={docHint} />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <FL>Teléfono</FL>
+                      <FI
+                        name="telefono"
+                        inputMode="tel"
+                        value={form.telefono}
+                        onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
+                        style={{
+                          outline: 'none',
+                          borderColor: showPhoneOk ? 'var(--success, #16a34a)' : showPhoneError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                          boxShadow: showPhoneOk
+                            ? '0 0 0 3px rgba(22,163,74,0.12)'
+                            : showPhoneError
+                              ? '0 0 0 3px rgba(239,68,68,0.12)'
+                              : undefined,
+                      }}
+                      aria-invalid={showPhoneError}
+                    />
+                    <ValidationHint status={showPhoneError ? 'error' : showPhoneOk ? 'ok' : 'neutral'} hint={phonePatternHint} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <FL>Email</FL>
+                      <FI
+                        name="email"
+                        type="email"
+                        inputMode="email"
+                        value={form.email}
+                        onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                        style={{
+                          outline: 'none',
+                          borderColor: showEmailOk ? 'var(--success, #16a34a)' : showEmailError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                          boxShadow: showEmailOk
+                            ? '0 0 0 3px rgba(22,163,74,0.12)'
+                            : showEmailError
+                              ? '0 0 0 3px rgba(239,68,68,0.12)'
+                              : undefined,
+                      }}
+                      aria-invalid={showEmailError}
+                    />
+                    <ValidationHint status={showEmailError ? 'error' : showEmailOk ? 'ok' : 'neutral'} hint={emailPatternHint} />
+                  </div>
+                  <div className="md:col-span-2">
+                    <FL>Tarifa</FL>
+                    <FI name="tarifa" value={form.tarifa} onChange={handleChange} />
+                  </div>
                 </div>
               </section>
 
@@ -187,19 +336,54 @@ const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
                 <SectionTitle n="02" label="Dirección fiscal" />
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
                   <div className="md:col-span-2"><FL>Calle / Dirección</FL><FI name="direccion" value={form.direccion} onChange={handleChange} /></div>
-                  <div><FL>CP</FL><FI name="cp" value={form.cp} onChange={handleChange} /></div>
+                  <div>
+                    <FL>CP</FL>
+                    <FI
+                      name="cp"
+                      inputMode="numeric"
+                      value={form.cp}
+                      onChange={e => setForm(prev => ({ ...prev, cp: normalizePostalCodeEs(e.target.value) }))}
+                    />
+                  </div>
                   <div><FL>Población</FL><FI name="poblacion" value={form.poblacion} onChange={handleChange} /></div>
-                  <div><FL>Provincia</FL><FI name="provincia" value={form.provincia} onChange={handleChange} /></div>
+                  <div><FL>Ciudad</FL><FI name="provincia" value={form.provincia} onChange={handleChange} /></div>
                   <div><FL>País</FL><FI name="pais" value={form.pais} onChange={handleChange} /></div>
                 </div>
               </section>
 
               {/* 03 Finanzas */}
-              <section>
-                <SectionTitle n="03" label="Finanzas" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
-                  <div className="md:col-span-1"><FL>IBAN</FL><FI name="iban" value={form.iban} onChange={handleChange} /></div>
-                  <div><FL>Forma de pago</FL><FI name="formaPago" value={form.formaPago} onChange={handleChange} /></div>
+                <section>
+                  <SectionTitle n="03" label="Finanzas" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+                  <div className="md:col-span-1">
+                    <FL>IBAN</FL>
+                      <FI
+                        name="iban"
+                        value={form.iban}
+                        onChange={e => setForm(p => ({ ...p, iban: normalizeIban(e.target.value) }))}
+                        style={{
+                          outline: 'none',
+                          borderColor: showIbanOk ? 'var(--success, #16a34a)' : showIbanError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                          boxShadow: showIbanOk
+                            ? '0 0 0 3px rgba(22,163,74,0.12)'
+                            : showIbanError
+                              ? '0 0 0 3px rgba(239,68,68,0.12)'
+                              : undefined,
+                      }}
+                      aria-invalid={showIbanError}
+                    />
+                    <ValidationHint status={showIbanError ? 'error' : showIbanOk ? 'ok' : 'neutral'} hint={ibanPatternHint} />
+                  </div>
+                    <div>
+                      <FL>Forma de pago</FL>
+                      <select name="formaPago" value={form.formaPago} onChange={handleChange} className="field">
+                        {['', 'EFECTIVO', 'BIZUM', 'TRANSFERENCIA'].map(v => (
+                          <option key={v} value={v}>
+                            {v || 'SELECCIONA...'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   <div className="flex gap-4">
                     <div className="flex-1"><FL>Días vto.</FL><FI name="diasVencimiento" type="number" value={form.diasVencimiento} onChange={handleChange} /></div>
                     <div className="flex-1"><FL>Remanente</FL><FI name="remanente" type="number" value={form.remanente} onChange={handleChange} /></div>

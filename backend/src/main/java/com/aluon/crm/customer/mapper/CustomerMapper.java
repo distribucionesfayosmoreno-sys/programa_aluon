@@ -30,6 +30,7 @@ public class CustomerMapper {
                 customer.getPersonaContacto(),
                 customer.getTarifa(),
                 customer.getTipoDocumento(),
+                customer.getNumeroDocumento(),
                 customer.getTelefono(),
                 customer.getEmail(),
                 customer.getDireccion(),
@@ -54,6 +55,7 @@ public class CustomerMapper {
         customer.setPersonaContacto(request.personaContacto());
         customer.setTarifa(request.tarifa());
         customer.setTipoDocumento(request.tipoDocumento());
+        customer.setNumeroDocumento(request.numeroDocumento());
         customer.setTelefono(request.telefono());
         customer.setEmail(request.email());
         customer.setDireccion(request.direccion());

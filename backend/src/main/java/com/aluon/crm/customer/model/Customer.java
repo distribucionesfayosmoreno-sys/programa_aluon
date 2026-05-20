@@ -41,6 +41,9 @@ public class Customer {
     @Column(name = "TIPO_DOCUMENTO")
     private DocumentType tipoDocumento;
 
+    @Column(name = "NUMERO_DOCUMENTO")
+    private String numeroDocumento;
+
     @Column(name = "TELEFONO")
     private String telefono;
 
