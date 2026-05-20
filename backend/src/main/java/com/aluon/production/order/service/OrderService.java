@@ -252,7 +252,9 @@ public class OrderService {
                     .forEach(file -> order.addAttachment(buildAttachment(file)));
         }
 
-        Order savedOrder = Objects.requireNonNull(orderRepository.save(order), "savedOrder");
+        @SuppressWarnings("null")
+        Order savedOrder = orderRepository.save(order);
+        savedOrder = Objects.requireNonNull(savedOrder, "savedOrder");
         return WorkOrderRequestResponseDto.builder()
                 .id(savedOrder.getId())
                 .codigoOrden(savedOrder.getCodigoOrden())

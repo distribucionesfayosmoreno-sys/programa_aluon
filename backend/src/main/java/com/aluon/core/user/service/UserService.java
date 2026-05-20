@@ -51,7 +51,10 @@ public class UserService {
                 .foto(decodeBase64(request.getFotoBase64()))
                 .build();
 
-        return toDto(Objects.requireNonNull(userRepository.save(user), "user"));
+        // Suppress IDE null-safety warnings for legacy nullness on Spring Data signatures.
+        @SuppressWarnings("null")
+        User saved = userRepository.save(user);
+        return toDto(Objects.requireNonNull(saved, "user"));
     }
 
     public UserDto update(Long id, UpdateUserRequest request) {
@@ -95,7 +98,9 @@ public class UserService {
             user.setFoto(decodeBase64(request.getFotoBase64()));
         }
 
-        return toDto(Objects.requireNonNull(userRepository.save(user), "user"));
+        @SuppressWarnings("null")
+        User saved = userRepository.save(user);
+        return toDto(Objects.requireNonNull(saved, "user"));
     }
 
     public void deleteById(Long id) {

@@ -36,6 +36,7 @@ public class ErpBudgetService {
             applyStatus(quote, targetStatus);
         }
 
+        @SuppressWarnings("null")
         QuoteRequest saved = quoteRequestRepository.save(quote);
         return toResponse(Objects.requireNonNull(saved, "saved"));
     }

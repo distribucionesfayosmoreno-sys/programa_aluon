@@ -51,6 +51,7 @@ public class BudgetValidationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        @SuppressWarnings("null")
         BudgetValidation saved = budgetValidationRepository.save(budget);
         updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.BUDGET);
         return toDto(Objects.requireNonNull(saved, "saved"));
@@ -101,6 +102,7 @@ public class BudgetValidationService {
         budget.setApprovedAt(LocalDateTime.now());
         budget.setApprovedBy(approver);
 
+        @SuppressWarnings("null")
         BudgetValidation saved = budgetValidationRepository.save(budget);
         updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.VALIDATION);
         return toDto(Objects.requireNonNull(saved, "saved"));
