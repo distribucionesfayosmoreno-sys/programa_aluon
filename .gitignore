@@ -17,6 +17,8 @@ build/
 .settings/
 .classpath
 .project
+!backend/.settings/
+!backend/.settings/org.eclipse.jdt.core.prefs
 *.class
 *.jar
 *.war
