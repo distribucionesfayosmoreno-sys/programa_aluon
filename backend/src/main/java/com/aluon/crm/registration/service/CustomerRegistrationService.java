@@ -145,7 +145,9 @@ public class CustomerRegistrationService {
                 .autoApproveQuotes(autoApproveQuotes)
                 .build();
 
+        @SuppressWarnings("null")
         Customer savedCustomer = customerRepository.save(customer);
+        savedCustomer = Objects.requireNonNull(savedCustomer, "customer");
 
         registration.setStatus(CustomerRegistrationStatus.APROBADO);
         registration.setTariffCode(finalTariff);
