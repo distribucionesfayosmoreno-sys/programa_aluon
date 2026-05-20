@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import com.aluon.core.user.dto.CreateUserRequest;
 import com.aluon.core.user.dto.UpdateUserRequest;
 import com.aluon.core.user.model.User;
@@ -27,7 +28,7 @@ public class UserService {
     }
 
     public UserDto findById(Long id) {
-        return toDto(getUserById(id));
+        return toDto(getUserById(Objects.requireNonNull(id, "id")));
     }
 
     public UserDto create(CreateUserRequest request) {
@@ -54,7 +55,8 @@ public class UserService {
     }
 
     public UserDto update(Long id, UpdateUserRequest request) {
-        User user = getUserById(id);
+        Objects.requireNonNull(request, "request");
+        User user = getUserById(Objects.requireNonNull(id, "id"));
 
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             String nextEmail = request.getEmail();
@@ -97,7 +99,7 @@ public class UserService {
     }
 
     public void deleteById(Long id) {
-        userRepository.deleteById(id);
+        userRepository.deleteById(Objects.requireNonNull(id, "id"));
     }
 
     private void validateCreate(CreateUserRequest request) {
@@ -119,7 +121,7 @@ public class UserService {
     }
 
     private User getUserById(Long id) {
-        return userRepository.findById(id)
+        return userRepository.findById(Objects.requireNonNull(id, "id"))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 

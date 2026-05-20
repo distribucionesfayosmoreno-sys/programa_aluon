@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
@@ -94,7 +95,8 @@ public class CutlistService {
     }
 
     public CutlistResponseDto findById(UUID id) {
-        Cutlist cutlist = cutlistRepository.findById(id)
+        UUID cutlistId = Objects.requireNonNull(id, "id");
+        Cutlist cutlist = cutlistRepository.findById(cutlistId)
                 .orElseThrow(() -> new IllegalArgumentException("Despiece no encontrado"));
         return toResponse(cutlist);
     }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 import com.aluon.core.mail.model.EmailTemplate;
 
 
@@ -38,7 +39,7 @@ public class MailService {
     private String configuredPassword;
 
     public void sendTemplate(String templateKey, String to, Map<String, String> variables) {
-        EmailTemplate template = templateService.getOrCreateTemplate(templateKey);
+        EmailTemplate template = Objects.requireNonNull(templateService.getOrCreateTemplate(templateKey), "template");
 
         String signatureHtml = signatureService.findLatestHtml();
         String subject = applyVariables(template.getSubject(), variables, signatureHtml);
@@ -74,7 +75,7 @@ public class MailService {
     }
 
     private String applyVariables(String template, Map<String, String> variables, String signatureHtml) {
-        String result = template;
+        String result = template == null ? "" : template;
         if (variables != null) {
             for (Map.Entry<String, String> entry : variables.entrySet()) {
                 String key = entry.getKey();

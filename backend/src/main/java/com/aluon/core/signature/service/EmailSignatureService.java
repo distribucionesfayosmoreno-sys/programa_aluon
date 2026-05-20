@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import com.aluon.core.signature.dto.CreateEmailSignatureRequest;
@@ -37,7 +38,8 @@ public class EmailSignatureService {
     }
 
     public EmailSignatureDto findById(UUID id) {
-        return toDto(repository.findById(id)
+        UUID signatureId = Objects.requireNonNull(id, "id");
+        return toDto(repository.findById(signatureId)
                 .orElseThrow(() -> new RuntimeException("Firma de email no encontrada")));
     }
 
@@ -57,7 +59,8 @@ public class EmailSignatureService {
     }
 
     public EmailSignatureDto update(UUID id, UpdateEmailSignatureRequest request) {
-        EmailSignature signature = repository.findById(id)
+        UUID signatureId = Objects.requireNonNull(id, "id");
+        EmailSignature signature = repository.findById(signatureId)
                 .orElseThrow(() -> new RuntimeException("Firma de email no encontrada"));
         applyRequest(signature, request);
         signature.setHtml(buildHtml(signature));
@@ -65,7 +68,7 @@ public class EmailSignatureService {
     }
 
     public void deleteById(UUID id) {
-        repository.deleteById(id);
+        repository.deleteById(Objects.requireNonNull(id, "id"));
     }
 
     private void applyRequest(EmailSignature signature, CreateEmailSignatureRequest request) {

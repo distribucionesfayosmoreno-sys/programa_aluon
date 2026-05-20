@@ -15,6 +15,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import com.aluon.crm.quote.model.QuoteChannel;
 import com.aluon.crm.quote.dto.QuoteCreateRequest;
@@ -43,7 +44,8 @@ public class QuoteService {
     public QuoteResponse create(QuoteCreateRequest request) {
         validateCreate(request);
 
-        Customer customer = customerRepository.findById(request.getCustomerId())
+        UUID customerId = Objects.requireNonNull(request.getCustomerId(), "customerId");
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
 
         Tariff tariff = tariffService.getTariffByCode(customer.getTarifa());
@@ -87,7 +89,8 @@ public class QuoteService {
 
     @Transactional
     public QuoteResponse validate(UUID id) {
-        QuoteRequest quote = quoteRequestRepository.findById(id)
+        UUID quoteId = Objects.requireNonNull(id, "id");
+        QuoteRequest quote = quoteRequestRepository.findById(quoteId)
                 .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
 
         if (quote.getStatus() == QuoteStatus.ENVIADO) {
@@ -101,7 +104,8 @@ public class QuoteService {
 
     @Transactional
     public QuoteResponse send(UUID id, QuoteSendRequest request) {
-        QuoteRequest quote = quoteRequestRepository.findById(id)
+        UUID quoteId = Objects.requireNonNull(id, "id");
+        QuoteRequest quote = quoteRequestRepository.findById(quoteId)
                 .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
 
         if (quote.getStatus() != QuoteStatus.VALIDADO && quote.getStatus() != QuoteStatus.ENVIADO) {
@@ -117,17 +121,24 @@ public class QuoteService {
 
     @Transactional(readOnly = true)
     public QuoteResponse getById(UUID id) {
-        QuoteRequest quote = quoteRequestRepository.findById(id)
+        UUID quoteId = Objects.requireNonNull(id, "id");
+        QuoteRequest quote = quoteRequestRepository.findById(quoteId)
                 .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
         return toResponse(quote);
     }
 
     private QuoteItem toQuoteItem(QuoteRequest quote, Tariff tariff, QuoteItemRequest item) {
+        Objects.requireNonNull(quote, "quote");
+        Objects.requireNonNull(tariff, "tariff");
+        Objects.requireNonNull(item, "item");
         DoorModel doorModel = item.getDoorModel();
         DoorType doorType = item.getDoorType();
 
-        BigDecimal m2 = BigDecimal.valueOf(item.getWidthMm())
-                .multiply(BigDecimal.valueOf(item.getHeightMm()))
+        Integer widthMm = Objects.requireNonNull(item.getWidthMm(), "widthMm");
+        Integer heightMm = Objects.requireNonNull(item.getHeightMm(), "heightMm");
+
+        BigDecimal m2 = BigDecimal.valueOf(widthMm)
+                .multiply(BigDecimal.valueOf(heightMm))
                 .divide(MM2_IN_M2, 4, RoundingMode.HALF_UP);
 
         BigDecimal pricePerM2 = tariffService.getPricePerM2(tariff, doorModel, doorType)
@@ -139,8 +150,8 @@ public class QuoteService {
                 .quoteRequest(quote)
                 .doorModel(doorModel)
                 .doorType(doorType)
-                .widthMm(item.getWidthMm())
-                .heightMm(item.getHeightMm())
+                .widthMm(widthMm)
+                .heightMm(heightMm)
                 .m2(m2)
                 .pricePerM2(pricePerM2)
                 .lineTotal(lineTotal)
