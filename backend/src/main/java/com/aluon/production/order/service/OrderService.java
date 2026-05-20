@@ -264,8 +264,8 @@ public class OrderService {
     @Transactional
     public void deleteRequest(UUID id) {
         UUID orderId = Objects.requireNonNull(id, "id");
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada"));
+        Order order = Objects.requireNonNull(orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada")), "order");
         orderRepository.delete(order);
     }
 

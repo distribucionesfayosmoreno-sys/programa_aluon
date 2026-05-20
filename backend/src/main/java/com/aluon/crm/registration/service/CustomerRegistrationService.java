@@ -56,6 +56,7 @@ public class CustomerRegistrationService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
+        @SuppressWarnings("null")
         CustomerRegistration saved = registrationRepository.save(registration);
         saved = Objects.requireNonNull(saved, "saved");
 
