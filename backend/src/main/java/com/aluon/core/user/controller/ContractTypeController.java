@@ -4,9 +4,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.List;
 import com.aluon.core.user.model.ContractType;
+import org.eclipse.jdt.annotation.NonNull;
 
 
 @RestController
@@ -14,7 +14,7 @@ import com.aluon.core.user.model.ContractType;
 public class ContractTypeController {
 
     @GetMapping
-    public List<ContractType> getContractTypes() {
-        return Arrays.asList(ContractType.values());
+    public List<@NonNull ContractType> getContractTypes() {
+        return List.of(ContractType.values());
     }
 }
