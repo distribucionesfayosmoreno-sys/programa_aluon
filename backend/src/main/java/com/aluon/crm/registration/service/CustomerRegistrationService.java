@@ -57,6 +57,7 @@ public class CustomerRegistrationService {
                 .build();
 
         CustomerRegistration saved = registrationRepository.save(registration);
+        saved = Objects.requireNonNull(saved, "saved");
 
         mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_REGISTRATION_CONFIRMATION,

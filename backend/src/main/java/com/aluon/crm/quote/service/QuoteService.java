@@ -90,8 +90,8 @@ public class QuoteService {
     @Transactional
     public QuoteResponse validate(UUID id) {
         UUID quoteId = Objects.requireNonNull(id, "id");
-        QuoteRequest quote = quoteRequestRepository.findById(quoteId)
-                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
+        QuoteRequest quote = Objects.requireNonNull(quoteRequestRepository.findById(quoteId)
+                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado")), "quote");
 
         if (quote.getStatus() == QuoteStatus.ENVIADO) {
             return toResponse(quote);
@@ -99,14 +99,14 @@ public class QuoteService {
 
         quote.setStatus(QuoteStatus.VALIDADO);
         quote.setValidatedAt(LocalDateTime.now());
-        return toResponse(quoteRequestRepository.save(quote));
+        return toResponse(Objects.requireNonNull(quoteRequestRepository.save(quote), "quote"));
     }
 
     @Transactional
     public QuoteResponse send(UUID id, QuoteSendRequest request) {
         UUID quoteId = Objects.requireNonNull(id, "id");
-        QuoteRequest quote = quoteRequestRepository.findById(quoteId)
-                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
+        QuoteRequest quote = Objects.requireNonNull(quoteRequestRepository.findById(quoteId)
+                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado")), "quote");
 
         if (quote.getStatus() != QuoteStatus.VALIDADO && quote.getStatus() != QuoteStatus.ENVIADO) {
             throw new IllegalArgumentException("El presupuesto debe estar validado antes de enviar");
@@ -116,14 +116,14 @@ public class QuoteService {
         quote.setChannel(channel);
         quote.setStatus(QuoteStatus.ENVIADO);
         quote.setSentAt(LocalDateTime.now());
-        return toResponse(quoteRequestRepository.save(quote));
+        return toResponse(Objects.requireNonNull(quoteRequestRepository.save(quote), "quote"));
     }
 
     @Transactional(readOnly = true)
     public QuoteResponse getById(UUID id) {
         UUID quoteId = Objects.requireNonNull(id, "id");
-        QuoteRequest quote = quoteRequestRepository.findById(quoteId)
-                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
+        QuoteRequest quote = Objects.requireNonNull(quoteRequestRepository.findById(quoteId)
+                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado")), "quote");
         return toResponse(quote);
     }
 

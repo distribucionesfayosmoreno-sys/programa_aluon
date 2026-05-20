@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -110,7 +111,7 @@ public class CustomerAuthService {
                 .expiresAt(now.plusMinutes(30))
                 .build();
 
-        passwordResetRepository.save(reset);
+        passwordResetRepository.save(Objects.requireNonNull(reset, "reset"));
 
         mailService.ifPresent(service -> service.sendTemplate(
                 EmailTemplateService.KEY_PASSWORD_RESET,
@@ -144,7 +145,7 @@ public class CustomerAuthService {
                 .findFirstByTokenHashAndUsedAtIsNullAndExpiresAtAfter(tokenHash, LocalDateTime.now())
                 .orElseThrow(() -> new IllegalArgumentException("El código es inválido o ha caducado."));
 
-        Customer customer = customerRepository.findById(reset.getCustomerId())
+        Customer customer = customerRepository.findById(Objects.requireNonNull(reset.getCustomerId(), "customerId"))
                 .orElseThrow(() -> new IllegalArgumentException("Cuenta no encontrada"));
 
         customer.setPasswordHash(passwordEncoder.encode(password));

@@ -40,18 +40,20 @@ public class EmailTemplateService {
             template = new EmailTemplate();
         }
         apply(template, request);
-        return toDto(repository.save(template));
+        return toDto(Objects.requireNonNull(repository.save(template), "template"));
     }
 
     public EmailTemplateDto save(EmailTemplateRequest request) {
-        EmailTemplate template = repository.findByTemplateKey(normalizeKey(request.getTemplateKey()))
+        String normalizedKey = Objects.requireNonNull(normalizeKey(request.getTemplateKey()), "templateKey");
+        EmailTemplate template = repository.findByTemplateKey(normalizedKey)
                 .orElseGet(EmailTemplate::new);
         apply(template, request);
-        return toDto(repository.save(template));
+        return toDto(Objects.requireNonNull(repository.save(template), "template"));
     }
 
     public EmailTemplateDto findByKey(String templateKey) {
-        return repository.findByTemplateKey(normalizeKey(templateKey))
+        String normalizedKey = Objects.requireNonNull(normalizeKey(templateKey), "templateKey");
+        return repository.findByTemplateKey(normalizedKey)
                 .map(this::toDto)
                 .orElseThrow(() -> new RuntimeException("Plantilla no encontrada"));
     }
@@ -64,7 +66,7 @@ public class EmailTemplateService {
     }
 
     public void deleteById(UUID id) {
-        repository.deleteById(id);
+        repository.deleteById(Objects.requireNonNull(id, "id"));
     }
 
 

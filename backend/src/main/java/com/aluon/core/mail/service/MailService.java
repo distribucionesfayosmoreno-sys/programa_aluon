@@ -45,14 +45,18 @@ public class MailService {
         String subject = applyVariables(template.getSubject(), variables, signatureHtml);
         String bodyHtml = applyVariables(template.getBodyHtml(), variables, signatureHtml);
 
+        String safeTo = Objects.requireNonNull(to, "to");
+        String safeSubject = Objects.requireNonNull(subject, "subject");
+        String safeBodyHtml = Objects.requireNonNull(bodyHtml, "bodyHtml");
+
         JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
         if (mailSender == null) {
-            logger.warn("JavaMailSender no configurado. No se enviará email a {}.", to);
+            logger.warn("JavaMailSender no configurado. No se enviará email a {}.", safeTo);
             return;
         }
 
         if (configuredPassword == null || configuredPassword.isBlank()) {
-            logger.warn("SMTP sin contraseña configurada. Se omite el envío de email a {}.", to);
+            logger.warn("SMTP sin contraseña configurada. Se omite el envío de email a {}.", safeTo);
             return;
         }
 
@@ -63,14 +67,14 @@ public class MailService {
             if (from != null && !from.isBlank()) {
                 helper.setFrom(from);
             }
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(bodyHtml, true);
+            helper.setTo(safeTo);
+            helper.setSubject(safeSubject);
+            helper.setText(safeBodyHtml, true);
             mailSender.send(message);
         } catch (MailException ex) {
-            logger.error("Error enviando email a {} (MailException). Se continúa sin bloquear el flujo.", to, ex);
+            logger.error("Error enviando email a {} (MailException). Se continúa sin bloquear el flujo.", safeTo, ex);
         } catch (MessagingException ex) {
-            logger.error("Error enviando email a {}", to, ex);
+            logger.error("Error enviando email a {}", safeTo, ex);
         }
     }
 

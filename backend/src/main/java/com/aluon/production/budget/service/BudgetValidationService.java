@@ -53,7 +53,7 @@ public class BudgetValidationService {
 
         BudgetValidation saved = budgetValidationRepository.save(budget);
         updateOrderWorkflowStep(budget.getRequestId(), OrderWorkflowStep.BUDGET);
-        return toDto(saved);
+        return toDto(Objects.requireNonNull(saved, "saved"));
     }
 
     @Transactional(readOnly = true)
