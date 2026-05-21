@@ -142,28 +142,28 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
                   <div className="md:col-span-2">
                     <FL>Número de documento</FL>
                     <div className="relative">
-                        <FI
-                          name="numeroDocumento"
-                          value={form.numeroDocumento}
-                          onChange={e => setForm(p => ({ ...p, numeroDocumento: normalizeDocumentNumber(e.target.value) }))}
-                          style={{
-                            outline: 'none',
-                            borderColor: showDocOk ? 'var(--success, #16a34a)' : showDocError ? 'var(--danger, #ef4444)' : '#e5e7eb',
-                            boxShadow: showDocOk
-                              ? '0 0 0 3px rgba(22,163,74,0.12)'
-                              : showDocError
-                                ? '0 0 0 3px rgba(239,68,68,0.12)'
-                                : undefined,
-                            paddingRight: 36,
-                          }}
-                          aria-invalid={showDocError}
-                        />
-                        {showDocOk && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--success, #16a34a)' }}>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
+                      <FI
+                        name="numeroDocumento"
+                        value={form.numeroDocumento}
+                        onChange={e => setForm(p => ({ ...p, numeroDocumento: normalizeDocumentNumber(e.target.value) }))}
+                        style={{
+                          outline: 'none',
+                          borderColor: showDocOk ? 'var(--success, #16a34a)' : showDocError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                          boxShadow: showDocOk
+                            ? '0 0 0 3px rgba(22,163,74,0.12)'
+                            : showDocError
+                              ? '0 0 0 3px rgba(239,68,68,0.12)'
+                              : undefined,
+                          paddingRight: 36,
+                        }}
+                        aria-invalid={showDocError}
+                      />
+                      {showDocOk && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--success, #16a34a)' }}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
                       )}
                     </div>
                     <ValidationHint status={showDocError ? 'error' : showDocOk ? 'ok' : 'neutral'} hint={docHint} />
@@ -171,19 +171,19 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
 
                   <div className="md:col-span-2">
                     <FL>Teléfono</FL>
-                      <FI
-                        name="telefono"
-                        inputMode="tel"
-                        value={form.telefono}
-                        onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
-                        style={{
-                          outline: 'none',
-                          borderColor: showPhoneOk ? 'var(--success, #16a34a)' : showPhoneError ? 'var(--danger, #ef4444)' : '#e5e7eb',
-                          boxShadow: showPhoneOk
-                            ? '0 0 0 3px rgba(22,163,74,0.12)'
-                            : showPhoneError
-                              ? '0 0 0 3px rgba(239,68,68,0.12)'
-                              : undefined,
+                    <FI
+                      name="telefono"
+                      inputMode="tel"
+                      value={form.telefono}
+                      onChange={e => setForm(p => ({ ...p, telefono: e.target.value }))}
+                      style={{
+                        outline: 'none',
+                        borderColor: showPhoneOk ? 'var(--success, #16a34a)' : showPhoneError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                        boxShadow: showPhoneOk
+                          ? '0 0 0 3px rgba(22,163,74,0.12)'
+                          : showPhoneError
+                            ? '0 0 0 3px rgba(239,68,68,0.12)'
+                            : undefined,
                       }}
                       aria-invalid={showPhoneError}
                     />
@@ -191,20 +191,20 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
                   </div>
                   <div className="md:col-span-2">
                     <FL>Email</FL>
-                      <FI
-                        name="email"
-                        type="email"
-                        inputMode="email"
-                        value={form.email}
-                        onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                        style={{
-                          outline: 'none',
-                          borderColor: showEmailOk ? 'var(--success, #16a34a)' : showEmailError ? 'var(--danger, #ef4444)' : '#e5e7eb',
-                          boxShadow: showEmailOk
-                            ? '0 0 0 3px rgba(22,163,74,0.12)'
-                            : showEmailError
-                              ? '0 0 0 3px rgba(239,68,68,0.12)'
-                              : undefined,
+                    <FI
+                      name="email"
+                      type="email"
+                      inputMode="email"
+                      value={form.email}
+                      onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                      style={{
+                        outline: 'none',
+                        borderColor: showEmailOk ? 'var(--success, #16a34a)' : showEmailError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                        boxShadow: showEmailOk
+                          ? '0 0 0 3px rgba(22,163,74,0.12)'
+                          : showEmailError
+                            ? '0 0 0 3px rgba(239,68,68,0.12)'
+                            : undefined,
                       }}
                       aria-invalid={showEmailError}
                     />
@@ -220,7 +220,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
               {/* 02 Dirección fiscal */}
               <section>
                 <SectionTitle n="02" label="Dirección fiscal" />
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-x-6 gap-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-x-6 gap-y-4">
                   <div className="md:col-span-2"><FL>Calle / Dirección</FL><FI name="direccion" value={form.direccion} onChange={handleChange} /></div>
                   <div>
                     <FL>CP</FL>
@@ -238,38 +238,38 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
               </section>
 
               {/* 03 Finanzas */}
-                <section>
-                  <SectionTitle n="03" label="Finanzas" />
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+              <section>
+                <SectionTitle n="03" label="Finanzas" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
                   <div className="md:col-span-1">
                     <FL>IBAN</FL>
-                      <FI
-                        name="iban"
-                        value={form.iban}
-                        onChange={e => setForm(p => ({ ...p, iban: normalizeIban(e.target.value) }))}
-                        style={{
-                          outline: 'none',
-                          borderColor: showIbanOk ? 'var(--success, #16a34a)' : showIbanError ? 'var(--danger, #ef4444)' : '#e5e7eb',
-                          boxShadow: showIbanOk
-                            ? '0 0 0 3px rgba(22,163,74,0.12)'
-                            : showIbanError
-                              ? '0 0 0 3px rgba(239,68,68,0.12)'
-                              : undefined,
+                    <FI
+                      name="iban"
+                      value={form.iban}
+                      onChange={e => setForm(p => ({ ...p, iban: normalizeIban(e.target.value) }))}
+                      style={{
+                        outline: 'none',
+                        borderColor: showIbanOk ? 'var(--success, #16a34a)' : showIbanError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                        boxShadow: showIbanOk
+                          ? '0 0 0 3px rgba(22,163,74,0.12)'
+                          : showIbanError
+                            ? '0 0 0 3px rgba(239,68,68,0.12)'
+                            : undefined,
                       }}
                       aria-invalid={showIbanError}
                     />
                     <ValidationHint status={showIbanError ? 'error' : showIbanOk ? 'ok' : 'neutral'} hint={ibanPatternHint} />
                   </div>
-                    <div>
-                      <FL>Forma de pago</FL>
-                      <select name="formaPago" value={form.formaPago} onChange={handleChange} className="field">
-                        {['', 'EFECTIVO', 'BIZUM', 'TRANSFERENCIA'].map(v => (
-                          <option key={v} value={v}>
-                            {v || 'SELECCIONA...'}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <FL>Forma de pago</FL>
+                    <select name="formaPago" value={form.formaPago} onChange={handleChange} className="field">
+                      {['', 'EFECTIVO', 'BIZUM', 'TRANSFERENCIA'].map(v => (
+                        <option key={v} value={v}>
+                          {v || 'SELECCIONA...'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="flex gap-4">
                     <div className="flex-1"><FL>Días vto.</FL><FI name="diasVencimiento" type="number" value={form.diasVencimiento} onChange={handleChange} /></div>
                     <div className="flex-1"><FL>Remanente</FL><FI name="remanente" type="number" value={form.remanente} onChange={handleChange} /></div>
@@ -286,13 +286,13 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <FI placeholder="ALIAS (ej: ALMACÉN SUR)" value={newAddr.nombreAlias} onChange={e => handleAddrField('nombreAlias', e.target.value)} />
-                  <FI placeholder="PERSONA DE CONTACTO"    value={newAddr.contacto}    onChange={e => handleAddrField('contacto',    e.target.value)} />
-                  <FI placeholder="TELÉFONO"               value={newAddr.telefono}    onChange={e => handleAddrField('telefono',    e.target.value)} />
+                  <FI placeholder="PERSONA DE CONTACTO" value={newAddr.contacto} onChange={e => handleAddrField('contacto', e.target.value)} />
+                  <FI placeholder="TELÉFONO" value={newAddr.telefono} onChange={e => handleAddrField('telefono', e.target.value)} />
                   <div className="sm:col-span-2">
-                    <FI placeholder="CALLE / DIRECCIÓN"   value={newAddr.direccion}  onChange={e => handleAddrField('direccion',  e.target.value)} />
+                    <FI placeholder="CALLE / DIRECCIÓN" value={newAddr.direccion} onChange={e => handleAddrField('direccion', e.target.value)} />
                   </div>
-                  <FI placeholder="POBLACIÓN"              value={newAddr.poblacion}  onChange={e => handleAddrField('poblacion',  e.target.value)} />
-                  <FI placeholder="PROVINCIA"              value={newAddr.provincia}  onChange={e => handleAddrField('provincia',  e.target.value)} />
+                  <FI placeholder="POBLACIÓN" value={newAddr.poblacion} onChange={e => handleAddrField('poblacion', e.target.value)} />
+                  <FI placeholder="PROVINCIA" value={newAddr.provincia} onChange={e => handleAddrField('provincia', e.target.value)} />
                 </div>
                 <button
                   type="button"
@@ -344,7 +344,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
                         onClick={() => removeAddr(i)}
                         className="w-7 h-7 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 cursor-pointer transition-all duration-200"
                         style={{ color: '#8b949e' }}
-                      onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.backgroundColor = 'var(--danger-bg)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.backgroundColor = 'var(--danger-bg)'; }}
                         onMouseLeave={e => { e.currentTarget.style.color = '#8b949e'; e.currentTarget.style.backgroundColor = 'transparent'; }}
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

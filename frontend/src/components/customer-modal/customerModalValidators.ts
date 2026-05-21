@@ -220,7 +220,7 @@ export const validateEmail = (value: string | null | undefined): boolean => {
 
 export const normalizeIban = (value: string | null | undefined): string => (value || '').replace(/\s+/g, '').toUpperCase();
 
-export const ibanPatternHint = 'Formato: ES76 1234 5678 9012 3456 7890';
+export const ibanPatternHint = 'Formato: ES97 1465 8052 5408 6702 6743';
 
 const ibanToNumericString = (iban: string): string => {
   const rearranged = `${iban.slice(4)}${iban.slice(0, 4)}`;
