@@ -8,7 +8,7 @@ export default defineConfig(function (_a) {
     var mode = _a.mode;
     var rootDir = dirname(fileURLToPath(import.meta.url));
     var env = loadEnv(mode, rootDir, '');
-    var apiTarget = ((_b = env.VITE_API_TARGET) !== null && _b !== void 0 ? _b : '').trim() || 'http://192.168.99.14:8080';
+    var apiTarget = ((_b = env.VITE_API_TARGET) !== null && _b !== void 0 ? _b : '').trim() || 'http://localhost:8080';
     console.log("[vite] proxy /api -> ".concat(apiTarget));
     return {
         root: rootDir,

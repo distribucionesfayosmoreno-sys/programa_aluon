@@ -1,11 +1,11 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/aluon;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE}
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
-    username: ${SPRING_DATASOURCE_USERNAME:sa}
-    password: ${SPRING_DATASOURCE_PASSWORD:}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://192.168.99.14:3000/aluonbbdd}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.postgresql.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:aluon}
+    password: ${SPRING_DATASOURCE_PASSWORD:aluon}
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -13,10 +13,6 @@ spring:
       hibernate:
         format_sql: true
         tenant_identifier_resolver: com.aluon.core.tenant.service.CurrentTenantIdentifierResolverImpl
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
   modulith:
     events:
       jdbc-schema-initialization:

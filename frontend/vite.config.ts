@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 export default defineConfig(({ mode }) => {
   const rootDir = dirname(fileURLToPath(import.meta.url))
   const env = loadEnv(mode, rootDir, '')
-  const apiTarget = (env.VITE_API_TARGET ?? '').trim() || 'http://192.168.99.14:8080'
+  const apiTarget = (env.VITE_API_TARGET ?? '').trim() || 'http://localhost:8080'
 
   console.log(`[vite] proxy /api -> ${apiTarget}`)
 
