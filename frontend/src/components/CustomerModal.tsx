@@ -1,159 +1,45 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { createPortal } from 'react-dom';
-import { Customer, DeliveryAddress } from '../hooks/useCustomers';
+import { CustomerModalProps, TabKey } from './customer-modal/customerModalTypes';
 import {
-  documentPatternHint,
+  FL,
+  FI,
+  ValidationHint,
+  SectionTitle,
+} from './customer-modal/CustomerModalComponents';
+import {
   emailPatternHint,
   ibanPatternHint,
-  lookupPostalCodeEs,
   normalizeDocumentNumber,
-  normalizeEmail,
   normalizeIban,
   normalizePostalCodeEs,
   phonePatternHint,
-  validateDocumentNumber,
-  validateEmail,
-  validateIban,
-  validatePhone,
 } from './customer-modal/customerModalValidators';
-interface Props {
-  customer?: Customer;
-  onClose:   () => void;
-  onSave:    (c: Customer) => void;
-}
-type TabKey = 'GENERAL' | 'ADDRESSES';
+import { useCustomerModal } from './customer-modal/useCustomerModal';
 
-const EMPTY_CUSTOMER: Customer = {
-  nombreComercial: '', razonSocial: '', personaContacto: '',
-  tarifa: '', tipoDocumento: 'CIF', numeroDocumento: '', telefono: '', email: '',
-  direccion: '', cp: '', poblacion: '', provincia: '', pais: 'ESPAÑA',
-  iban: '', formaPago: '', diasVencimiento: 0, remanente: 0, direccionesEntrega: [],
-};
-
-const EMPTY_ADDR: DeliveryAddress = {
-  nombreAlias: '', direccion: '', cp: '', poblacion: '', provincia: '', telefono: '', contacto: '',
-};
-
-// ── Simple helpers ─────────────────────────────────────────────────────────────
-const FL = ({ children }: { children: React.ReactNode }) => (
-  <label className="field-label">{children}</label>
-);
-
-const FI = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input {...p} className="field" autoComplete="off" />
-);
-
-type ValidationStatus = 'neutral' | 'error' | 'ok';
-
-const ValidationHint = ({ status, hint }: { status: ValidationStatus; hint: string }) => (
-  <div
-    className="mt-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
-    style={{
-      color:
-        status === 'error'
-          ? 'var(--danger, #ef4444)'
-          : status === 'ok'
-            ? 'var(--success, #16a34a)'
-            : '#9ca3af',
-    }}
-  >
-    {status === 'error' && (
-      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    )}
-    {status === 'ok' && (
-      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-      </svg>
-    )}
-    <span>{hint}</span>
-  </div>
-);
-
-const SectionTitle = ({ n, label }: { n: string; label: string }) => (
-  <div className="flex items-center gap-3 mb-5">
-    <span style={{ fontSize: 9, fontWeight: 900, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.2em' }}>
-      {n} · {label}
-    </span>
-    <div className="flex-1 h-px" style={{ backgroundColor: '#e8eaed' }} />
-  </div>
-);
-
-// ── Modal ──────────────────────────────────────────────────────────────────────
-const CustomerModal: React.FC<Props> = ({ customer, onClose, onSave }) => {
-  const [tab,     setTab]     = useState<TabKey>('GENERAL');
-  const [form,    setForm]    = useState<Customer>(customer ?? EMPTY_CUSTOMER);
-  const [newAddr, setNewAddr] = useState<DeliveryAddress>(EMPTY_ADDR);
-  const lastPostalLookupRef = useRef<string>('');
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm(p => ({ ...p, [name]: value.toUpperCase() }));
-  };
-
-  const handleAddrField = (name: keyof DeliveryAddress, value: string) =>
-    setNewAddr(p => ({ ...p, [name]: value.toUpperCase() }));
-
-  const addAddr = () => {
-    if (!newAddr.nombreAlias) return;
-    setForm(p => ({ ...p, direccionesEntrega: [...p.direccionesEntrega, newAddr] }));
-    setNewAddr(EMPTY_ADDR);
-  };
-
-  const removeAddr = (i: number) =>
-    setForm(p => ({ ...p, direccionesEntrega: p.direccionesEntrega.filter((_, j) => j !== i) }));
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(form);
-    onClose();
-  };
-
-  const isEdit = Boolean(customer?.id);
-  const docHint = documentPatternHint(form.tipoDocumento);
-  const isDocValid = validateDocumentNumber(form.tipoDocumento, form.numeroDocumento);
-  const showDocError = normalizeDocumentNumber(form.numeroDocumento).length > 0 && !isDocValid;
-  const showDocOk = normalizeDocumentNumber(form.numeroDocumento).length > 0 && isDocValid;
-
-  const isPhoneValid = validatePhone(form.telefono);
-  const showPhoneError = form.telefono.trim().length > 0 && !isPhoneValid;
-  const showPhoneOk = form.telefono.trim().length > 0 && isPhoneValid;
-  const normalizedEmail = normalizeEmail(form.email);
-  const isEmailValid = validateEmail(normalizedEmail);
-  const showEmailError = normalizedEmail.length > 0 && !isEmailValid;
-  const showEmailOk = normalizedEmail.length > 0 && isEmailValid;
-  const normalizedIban = normalizeIban(form.iban);
-  const isIbanValid = validateIban(normalizedIban);
-  const showIbanError = normalizedIban.length > 0 && !isIbanValid;
-  const showIbanOk = normalizedIban.length > 0 && isIbanValid;
-
-  useEffect(() => {
-    const cp = normalizePostalCodeEs(form.cp);
-    if (cp.length !== 5) {
-      lastPostalLookupRef.current = '';
-      return;
-    }
-    if (lastPostalLookupRef.current === cp) return;
-    lastPostalLookupRef.current = cp;
-    const controller = new AbortController();
-    void (async () => {
-      const result = await lookupPostalCodeEs(cp, controller.signal).catch(() => null);
-      if (!result) return;
-
-      setForm(prev => {
-        const currentCp = normalizePostalCodeEs(prev.cp);
-        if (currentCp !== cp) return prev;
-        return {
-          ...prev,
-          poblacion: result.poblacion.toUpperCase(),
-          provincia: result.ciudad,
-        };
-      });
-    })();
-
-    return () => controller.abort();
-  }, [form.cp]);
+const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave }) => {
+  const {
+    tab,
+    setTab,
+    form,
+    setForm,
+    newAddr,
+    handleChange,
+    handleAddrField,
+    addAddr,
+    removeAddr,
+    handleSubmit,
+    isEdit,
+    docHint,
+    showDocError,
+    showDocOk,
+    showPhoneError,
+    showPhoneOk,
+    showEmailError,
+    showEmailOk,
+    showIbanError,
+    showIbanOk,
+  } = useCustomerModal({ customer, onClose, onSave });
 
   const portalTarget =
     typeof document !== 'undefined' ? document.getElementById('main-layout') : null;

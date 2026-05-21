@@ -2,10 +2,10 @@ import { Customer } from '../../hooks/useCustomers';
 
 export type DocumentType = Customer['tipoDocumento'];
 
-export const normalizeDocumentNumber = (value: string) =>
-  value.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
+export const normalizeDocumentNumber = (value: string | null | undefined) =>
+  (value || '').replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
 
-export const normalizePostalCodeEs = (value: string) => value.replace(/\D/g, '').slice(0, 5);
+export const normalizePostalCodeEs = (value: string | null | undefined) => (value || '').replace(/\D/g, '').slice(0, 5);
 
 export const documentPatternHint = (tipo: DocumentType): string => {
   switch (tipo) {
@@ -85,7 +85,7 @@ const isValidPassport = (value: string): boolean => {
   return /^[A-Z0-9]{3,20}$/.test(v);
 };
 
-export const validateDocumentNumber = (tipo: DocumentType, value: string): boolean => {
+export const validateDocumentNumber = (tipo: DocumentType, value: string | null | undefined): boolean => {
   const normalized = normalizeDocumentNumber(value);
   if (!normalized) return false;
 
@@ -195,11 +195,11 @@ export const lookupPostalCodeEs = async (
   return { poblacion, ciudad };
 };
 
-const normalizePhone = (value: string): string => value.replace(/[^\d+]/g, '');
+const normalizePhone = (value: string | null | undefined): string => (value || '').replace(/[^\d+]/g, '');
 
 export const phonePatternHint = 'Formato: +34123456789 o 612345678';
 
-export const validatePhone = (value: string): boolean => {
+export const validatePhone = (value: string | null | undefined): boolean => {
   const v = normalizePhone(value);
   if (!v) return false;
   if (v.startsWith('+')) {
@@ -208,17 +208,17 @@ export const validatePhone = (value: string): boolean => {
   return /^\d{9,15}$/.test(v);
 };
 
-export const normalizeEmail = (value: string): string => value.trim().toLowerCase();
+export const normalizeEmail = (value: string | null | undefined): string => (value || '').trim().toLowerCase();
 
 export const emailPatternHint = 'Formato: nombre@dominio.com';
 
-export const validateEmail = (value: string): boolean => {
+export const validateEmail = (value: string | null | undefined): boolean => {
   const v = normalizeEmail(value);
   if (!v) return false;
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(v);
 };
 
-export const normalizeIban = (value: string): string => value.replace(/\s+/g, '').toUpperCase();
+export const normalizeIban = (value: string | null | undefined): string => (value || '').replace(/\s+/g, '').toUpperCase();
 
 export const ibanPatternHint = 'Formato: ES76 1234 5678 9012 3456 7890';
 
@@ -246,7 +246,7 @@ const mod97 = (numeric: string): number => {
   return remainder;
 };
 
-export const validateIban = (value: string): boolean => {
+export const validateIban = (value: string | null | undefined): boolean => {
   const iban = normalizeIban(value);
   if (!iban) return false;
   if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(iban)) return false;
@@ -254,4 +254,40 @@ export const validateIban = (value: string): boolean => {
   if (!numeric) return false;
   return mod97(numeric) === 1;
 };
-
+export const sanitizeCustomer = (
+  customer: Partial<Customer> | null | undefined,
+  emptyCustomer: Customer,
+): Customer => {
+  if (!customer) return emptyCustomer;
+  const sanitize = (val: string | null | undefined, fallback = '') => val || fallback;
+  return {
+    ...emptyCustomer,
+    ...customer,
+    nombreComercial: sanitize(customer.nombreComercial),
+    razonSocial: sanitize(customer.razonSocial),
+    personaContacto: sanitize(customer.personaContacto),
+    tarifa: sanitize(customer.tarifa),
+    tipoDocumento: customer.tipoDocumento || 'CIF',
+    numeroDocumento: sanitize(customer.numeroDocumento),
+    telefono: sanitize(customer.telefono),
+    email: sanitize(customer.email),
+    direccion: sanitize(customer.direccion),
+    cp: sanitize(customer.cp),
+    poblacion: sanitize(customer.poblacion),
+    provincia: sanitize(customer.provincia),
+    pais: sanitize(customer.pais, 'ESPAÑA'),
+    iban: sanitize(customer.iban),
+    formaPago: sanitize(customer.formaPago),
+    diasVencimiento: customer.diasVencimiento ?? 0,
+    remanente: customer.remanente ?? 0,
+    direccionesEntrega: (customer.direccionesEntrega || []).map(addr => ({
+      nombreAlias: sanitize(addr.nombreAlias),
+      direccion: sanitize(addr.direccion),
+      cp: sanitize(addr.cp),
+      poblacion: sanitize(addr.poblacion),
+      provincia: sanitize(addr.provincia),
+      telefono: sanitize(addr.telefono),
+      contacto: sanitize(addr.contacto),
+    })),
+  };
+};
