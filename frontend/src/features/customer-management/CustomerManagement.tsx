@@ -9,8 +9,8 @@ import ErrorDialog from '../../components/feedback/ErrorDialog';
 /** Genera un color de avatar determinístico a partir del texto */
 const avatarColor = (name: string): string => {
   const colors = [
-    '#3b82f6','#8b5cf6','#ec4899','#f59e0b',
-    '#10b981','#6366f1','#ef4444','#14b8a6',
+    '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
+    '#10b981', '#6366f1', '#ef4444', '#14b8a6',
   ];
   let h = 0;
   for (let i = 0; i < name.length; i++) h = (h + name.charCodeAt(i)) % colors.length;
@@ -42,10 +42,10 @@ const Avatar = ({ name }: { name: string }) => {
 /** Badge de tarifa con color */
 const TarifaBadge = ({ value }: { value: string }) => {
   const map: Record<string, { bg: string; color: string }> = {
-    'A':       { bg: '#fef3c7', color: '#92400e' },
-    'B':       { bg: '#dbeafe', color: '#1e40af' },
-    'C':       { bg: '#f3f4f6', color: '#374151' },
-    'VIP':     { bg: '#fae8ff', color: '#7c3aed' },
+    'A': { bg: '#fef3c7', color: '#92400e' },
+    'B': { bg: '#dbeafe', color: '#1e40af' },
+    'C': { bg: '#f3f4f6', color: '#374151' },
+    'VIP': { bg: '#fae8ff', color: '#7c3aed' },
     'PREMIUM': { bg: '#fdf4ff', color: '#9333ea' },
     'GENERAL': { bg: '#f0fdf4', color: '#15803d' },
   };
@@ -131,15 +131,15 @@ const EmptyState = ({ onAdd }: { onAdd: () => void }) => (
 // ─── Main page ────────────────────────────────────────────────────────────────
 const CustomerManagement: React.FC = () => {
   const { customers, loading, saveCustomer, deleteCustomer } = useCustomers();
-  const [isModalOpen,      setIsModalOpen]      = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | undefined>();
-  const [selected,         setSelected]         = useState<Set<string>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState<Customer | null>(null);
   const [deleteError, setDeleteError] = useState<{ title: string; description: string; detail?: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleEdit   = (c: Customer) => { setSelectedCustomer(c);         setIsModalOpen(true); };
-  const handleCreate = ()            => { setSelectedCustomer(undefined); setIsModalOpen(true); };
+  const handleEdit = (c: Customer) => { setSelectedCustomer(c); setIsModalOpen(true); };
+  const handleCreate = () => { setSelectedCustomer(undefined); setIsModalOpen(true); };
 
   const handleAskDelete = useCallback((customer: Customer) => {
     setConfirmDelete(customer);
@@ -265,7 +265,7 @@ const CustomerManagement: React.FC = () => {
                 : customers.length === 0
                   ? <EmptyState onAdd={handleCreate} />
                   : customers.map((c, idx) => {
-                    const id       = c.id ?? idx.toString();
+                    const id = c.id ?? idx.toString();
                     const isChecked = selected.has(id);
 
                     return (
@@ -350,7 +350,7 @@ const CustomerManagement: React.FC = () => {
                         {/* Email */}
                         <td className="px-3 py-2.5" style={{ color: '#6b7280', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {c.email
-                            ? <a href={`mailto:${c.email}`} className="hover:text-brand transition-colors" style={{ color: '#6b7280' }}>{c.email}</a>
+                            ? <a href={`mailto:${c.email.toLowerCase()}`} className="hover:text-brand transition-colors" style={{ color: '#6b7280' }}>{c.email.toLowerCase()}</a>
                             : <span style={{ color: '#d1d5db' }}>—</span>
                           }
                         </td>

@@ -292,7 +292,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
       <ErrorDialog
         open={Boolean(budgetValidationError)}
         title="No pudimos aprobar el presupuesto"
-        description="Revisa el ID del aprobador y vuelve a intentarlo."
+        description="Revisa el ID del aprobador y vuelve a intentarlo. El ID del usuario debe ser numérico."
         detail={budgetValidationError || undefined}
         onClose={() => setBudgetValidationError('')}
       />

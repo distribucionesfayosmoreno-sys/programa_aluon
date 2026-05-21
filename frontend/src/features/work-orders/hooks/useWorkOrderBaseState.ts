@@ -103,47 +103,71 @@ export const useWorkOrderBaseState = () => {
     [],
   );
 
-  return {
-    requests: state.requests,
-    setRequests: (value: WorkOrderRequest[] | ((prev: WorkOrderRequest[]) => WorkOrderRequest[])) => {
+  const setRequests = useCallback(
+    (value: WorkOrderRequest[] | ((prev: WorkOrderRequest[]) => WorkOrderRequest[])) => {
       dispatch({ type: 'SET_REQUESTS', value });
     },
+    [],
+  );
+
+  const setCustomerId = useCallback((value: string) => setField('customerId', value), [setField]);
+  const setModelId = useCallback((value: string) => setField('modelId', value), [setField]);
+  const setModelReference = useCallback((value: string) => setField('modelReference', value), [setField]);
+  const setModelImage = useCallback((value: File | null) => setField('modelImage', value), [setField]);
+  const setM2 = useCallback((value: number) => setField('m2', value), [setField]);
+  const setGoogleView = useCallback((value: boolean) => setField('googleView', value), [setField]);
+  const setNotes = useCallback((value: string) => setField('notes', value), [setField]);
+  const setDevelopmentGenerated = useCallback((value: boolean) => setField('developmentGenerated', value), [setField]);
+  const setProdCut = useCallback((value: boolean) => setField('prodCut', value), [setField]);
+  const setProdFab = useCallback((value: boolean) => setField('prodFab', value), [setField]);
+  const setProdLac = useCallback((value: boolean) => setField('prodLac', value), [setField]);
+  const setProdLacControl = useCallback((value: boolean) => setField('prodLacControl', value), [setField]);
+  const setFinalized = useCallback((value: boolean) => setField('finalized', value), [setField]);
+  const setReady = useCallback((value: 'PICKUP' | 'SHIPPING' | '') => setField('ready', value), [setField]);
+  const setSelectedRequestId = useCallback((value: string | null) => setField('selectedRequestId', value), [setField]);
+  const setTab = useCallback((value: TabKey) => setField('tab', value), [setField]);
+  const setShowRequestModal = useCallback((value: boolean) => setField('showRequestModal', value), [setField]);
+  const setShowWorkOrderModal = useCallback((value: boolean) => setField('showWorkOrderModal', value), [setField]);
+
+  return {
+    requests: state.requests,
+    setRequests,
     customerId: state.customerId,
-    setCustomerId: (value: string) => setField('customerId', value),
+    setCustomerId,
     modelId: state.modelId,
-    setModelId: (value: string) => setField('modelId', value),
+    setModelId,
     modelReference: state.modelReference,
-    setModelReference: (value: string) => setField('modelReference', value),
+    setModelReference,
     modelImage: state.modelImage,
-    setModelImage: (value: File | null) => setField('modelImage', value),
+    setModelImage,
     m2: state.m2,
-    setM2: (value: number) => setField('m2', value),
+    setM2,
     googleView: state.googleView,
-    setGoogleView: (value: boolean) => setField('googleView', value),
+    setGoogleView,
     notes: state.notes,
-    setNotes: (value: string) => setField('notes', value),
+    setNotes,
     developmentGenerated: state.developmentGenerated,
-    setDevelopmentGenerated: (value: boolean) => setField('developmentGenerated', value),
+    setDevelopmentGenerated,
     prodCut: state.prodCut,
-    setProdCut: (value: boolean) => setField('prodCut', value),
+    setProdCut,
     prodFab: state.prodFab,
-    setProdFab: (value: boolean) => setField('prodFab', value),
+    setProdFab,
     prodLac: state.prodLac,
-    setProdLac: (value: boolean) => setField('prodLac', value),
+    setProdLac,
     prodLacControl: state.prodLacControl,
-    setProdLacControl: (value: boolean) => setField('prodLacControl', value),
+    setProdLacControl,
     finalized: state.finalized,
-    setFinalized: (value: boolean) => setField('finalized', value),
+    setFinalized,
     ready: state.ready,
-    setReady: (value: 'PICKUP' | 'SHIPPING' | '') => setField('ready', value),
+    setReady,
     selectedRequestId: state.selectedRequestId,
-    setSelectedRequestId: (value: string | null) => setField('selectedRequestId', value),
+    setSelectedRequestId,
     tab: state.tab,
-    setTab: (value: TabKey) => setField('tab', value),
+    setTab,
     showRequestModal: state.showRequestModal,
-    setShowRequestModal: (value: boolean) => setField('showRequestModal', value),
+    setShowRequestModal,
     showWorkOrderModal: state.showWorkOrderModal,
-    setShowWorkOrderModal: (value: boolean) => setField('showWorkOrderModal', value),
+    setShowWorkOrderModal,
   };
 };
 

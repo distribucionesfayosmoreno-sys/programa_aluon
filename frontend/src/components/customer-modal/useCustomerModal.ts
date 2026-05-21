@@ -29,13 +29,15 @@ export const EMPTY_ADDR: DeliveryAddress = {
 interface UseCustomerModalParams {
   customer?: Customer;
   onClose: () => void;
-  onSave: (customer: Customer) => void;
+  onSave: (customer: Customer) => Promise<void>;
 }
 
 export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModalParams) => {
   const [tab, setTab] = useState<TabKey>('GENERAL');
   const [form, setForm] = useState<Customer>(() => sanitizeCustomer(customer, EMPTY_CUSTOMER));
   const [newAddr, setNewAddr] = useState<DeliveryAddress>(EMPTY_ADDR);
+  const [isSaving, setIsSaving] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const lastPostalLookupRef = useRef<string>('');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -55,10 +57,19 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
   const removeAddr = (i: number) =>
     setForm(p => ({ ...p, direccionesEntrega: p.direccionesEntrega.filter((_, j) => j !== i) }));
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    onSave(form);
-    onClose();
+    setSubmitError(null);
+    setIsSaving(true);
+    try {
+      await onSave(form);
+      onClose();
+    } catch (err) {
+      console.error('Error saving customer:', err);
+      setSubmitError(err instanceof Error ? err.message : 'Error desconocido al guardar el cliente');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const isEdit = Boolean(customer?.id);
@@ -129,5 +140,7 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
     showEmailOk,
     showIbanError,
     showIbanOk,
+    isSaving,
+    submitError,
   };
 };

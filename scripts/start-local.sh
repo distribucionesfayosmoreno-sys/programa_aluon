@@ -11,6 +11,9 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Configurar JAVA_HOME para usar OpenJDK 21 instalado mediante Homebrew
 export JAVA_HOME="/usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 
+# Configurar orígenes CORS permitidos para desarrollo local
+export APP_CORS_ALLOWED_ORIGINS="http://localhost:5173,https://app-aluon-unqc.vercel.app,https://aluondev.iconseriespeliculas.xyz"
+
 echo "🚀 Iniciando Backend (Java 21 + Spring Boot)..."
 cd "$PROJECT_ROOT/backend"
 ./mvnw spring-boot:run &

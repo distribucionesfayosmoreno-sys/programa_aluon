@@ -39,6 +39,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
     showEmailOk,
     showIbanError,
     showIbanOk,
+    isSaving,
+    submitError,
   } = useCustomerModal({ customer, onClose, onSave });
 
   const portalTarget =
@@ -111,8 +113,25 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
           ))}
         </div>
 
-        {/* Form body */}
         <form id="cm-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7 space-y-8">
+          {submitError && (
+            <div 
+              className="p-4 rounded-xl border flex items-start gap-3 animate-fade-in"
+              style={{
+                backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                borderColor: 'rgba(239, 68, 68, 0.25)',
+                color: '#ef4444'
+              }}
+            >
+              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="text-xs">
+                <div className="font-extrabold uppercase tracking-wider mb-1">Error al guardar</div>
+                <div className="font-semibold text-gray-700 leading-relaxed">{submitError}</div>
+              </div>
+            </div>
+          )}
 
           {tab === 'GENERAL' ? (
             <>
@@ -366,12 +385,44 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
         >
           <p style={{ fontSize: 10, color: '#8b949e', fontWeight: 600 }} className="hidden sm:block">* Campos obligatorios</p>
           <div className="flex items-center gap-3 ml-auto">
-            <button type="button" onClick={onClose} className="btn-ghost">Cancelar</button>
-            <button type="submit" form="cm-form" className="btn-primary">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-              {isEdit ? 'Guardar cambios' : 'Crear cliente'}
+            <button 
+              type="button" 
+              onClick={onClose} 
+              className="btn-ghost"
+              disabled={isSaving}
+              style={{ opacity: isSaving ? 0.5 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              form="cm-form" 
+              className="btn-primary"
+              disabled={isSaving}
+              style={{ 
+                opacity: isSaving ? 0.7 : 1, 
+                cursor: isSaving ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
+              {isSaving ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span>Guardando...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{isEdit ? 'Guardar cambios' : 'Crear cliente'}</span>
+                </>
+              )}
             </button>
           </div>
         </div>

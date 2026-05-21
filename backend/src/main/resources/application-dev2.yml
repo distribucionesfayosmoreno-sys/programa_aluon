@@ -34,4 +34,4 @@ spring:
 
 app:
   cors:
-    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:https://app-aluon-unqc.vercel.app,https://aluondev.iconseriespeliculas.xyz}
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,https://app-aluon-unqc.vercel.app,https://aluondev.iconseriespeliculas.xyz}

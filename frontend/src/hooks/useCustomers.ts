@@ -59,7 +59,7 @@ export const useCustomers = () => {
     }
   };
 
-  const saveCustomer = async (customer: Customer) => {
+  const saveCustomer = async (customer: Customer): Promise<void> => {
     const method = customer.id ? 'PUT' : 'POST';
     const url = customer.id ? `/api/erp/customers/${customer.id}` : '/api/erp/customers';
     
@@ -69,9 +69,13 @@ export const useCustomers = () => {
       body: JSON.stringify(customer),
     });
     
-    if (response.ok) {
-      fetchCustomers();
+    if (!response.ok) {
+      const details = await response.text().catch(() => '');
+      const message = details?.trim() || `Error guardando cliente (status ${response.status})`;
+      throw new Error(message);
     }
+    
+    await fetchCustomers();
   };
 
   const deleteCustomer = async (id: string) => {

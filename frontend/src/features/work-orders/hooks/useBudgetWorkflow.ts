@@ -58,9 +58,23 @@ export const useBudgetWorkflow = ({
 
   const selectedCustomerName = selectedCustomer?.nombreComercial || selectedCustomer?.razonSocial || '—';
 
-  const getBudgetStatus = useCallback((requestId: string | null) => (
-    requestId ? (budgetStatusByRequestId[requestId] ?? emptyBudgetStatus) : emptyBudgetStatus
-  ), [budgetStatusByRequestId]);
+  const getBudgetStatus = useCallback((requestId: string | null) => {
+    if (!requestId) return emptyBudgetStatus;
+    const baseStatus = budgetStatusByRequestId[requestId] ?? emptyBudgetStatus;
+    const req = requests.find(r => r.id === requestId);
+    if (!req) return baseStatus;
+
+    const step = req.workflowStep;
+    const hasBudget = ['BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'].includes(step);
+    const hasAdminApprove = ['VALIDATION', 'DEV', 'PROD', 'FINAL'].includes(step);
+
+    return {
+      ...baseStatus,
+      budgetGenerated: baseStatus.budgetGenerated || hasBudget,
+      accountingApproved: baseStatus.accountingApproved || hasBudget,
+      adminApproved: baseStatus.adminApproved || hasAdminApprove,
+    };
+  }, [budgetStatusByRequestId, requests]);
 
   const updateBudgetStatus = useCallback((requestId: string, patch: Partial<BudgetStatus>) => {
     setBudgetStatusByRequestId(prev => ({
@@ -113,6 +127,36 @@ export const useBudgetWorkflow = ({
 
     loadPending();
   }, []);
+
+  useEffect(() => {
+    if (requests.length === 0) return;
+    setBudgetStatusByRequestId(prev => {
+      let changed = false;
+      const next = { ...prev };
+      requests.forEach(req => {
+        const step = req.workflowStep;
+        const hasBudget = ['BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'].includes(step);
+        const hasAdminApprove = ['VALIDATION', 'DEV', 'PROD', 'FINAL'].includes(step);
+
+        const current = next[req.id] || emptyBudgetStatus;
+        const needsBudgetGen = hasBudget && !current.budgetGenerated;
+        const needsAcctApprove = hasBudget && !current.accountingApproved;
+        const needsAdminApprove = hasAdminApprove && !current.adminApproved;
+
+        if (needsBudgetGen || needsAcctApprove || needsAdminApprove) {
+          next[req.id] = {
+            ...current,
+            budgetGenerated: current.budgetGenerated || hasBudget,
+            accountingApproved: current.accountingApproved || hasBudget,
+            adminApproved: current.adminApproved || hasAdminApprove,
+          };
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [requests]);
+
 
   const budget = useMemo(() => {
     const base = selectedModel.pricePerM2;
