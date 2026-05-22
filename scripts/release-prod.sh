@@ -86,10 +86,10 @@ FRONTEND_PORT="${FRONTEND_PORT}" \
 docker compose --env-file .env -f docker-compose.yml up -d --pull always
 
 # Asegurar que la base de datos de PROD existe en el contenedor compartido de DEV2
-# NOTA: Utilizamos aluon-postgres-dev2 como contenedor anfitrión, sin el -saas-,
-# ya que en DEV2 revertiste el nombre de ese contenedor a aluon-postgres-dev2
+# NOTA: Utilizamos aluon-saas-postgres-dev2 como contenedor anfitrión, sin el -saas-,
+# ya que en DEV2 revertiste el nombre de ese contenedor a aluon-saas-postgres-dev2
 echo "  🗄️ Asegurando que la BBDD ${DB_NAME} exista..."
-docker exec aluon-postgres-dev2 psql -U aluon -d aluonbbdd -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || docker exec aluon-postgres-dev2 psql -U aluon -d aluonbbdd -c "CREATE DATABASE ${DB_NAME}" || true
+docker exec aluon-saas-postgres-dev2 psql -U aluon -d aluonbbdd -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || docker exec aluon-saas-postgres-dev2 psql -U aluon -d aluonbbdd -c "CREATE DATABASE ${DB_NAME}" || true
 DEPLOY
 
 echo ""
