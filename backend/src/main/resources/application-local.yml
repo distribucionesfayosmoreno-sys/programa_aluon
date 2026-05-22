@@ -34,3 +34,11 @@ app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,https://app-aluon-unqc.vercel.app,https://aluondev.iconseriespeliculas.xyz,https://desarrolloprogramagestionaluon.iconseriespeliculas.xyz}
 
+integrations:
+  jira:
+    enabled: ${JIRA_ENABLED:false}
+    base-url: ${JIRA_BASE_URL:${JIRA_URL:}}
+    username: ${JIRA_USERNAME:}
+    api-token: ${JIRA_API_TOKEN:}
+    project-key: ${JIRA_PROJECT_KEY:}
+    issue-type-name: ${JIRA_ISSUE_TYPE_NAME:Task}
