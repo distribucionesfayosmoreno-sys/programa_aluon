@@ -19,6 +19,7 @@ export type UseJiraCreateIssueDialogResult = {
 export const useJiraCreateIssueDialog = (
   onClose: () => void,
   context: JiraIssueContext,
+  onCreated: () => void,
 ): UseJiraCreateIssueDialogResult => {
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
@@ -43,6 +44,7 @@ export const useJiraCreateIssueDialog = (
         description: enrichedDescription,
         attachments,
       });
+      onCreated();
       onClose();
       setSummary('');
       setDescription('');
@@ -53,7 +55,7 @@ export const useJiraCreateIssueDialog = (
     } finally {
       setIsSubmitting(false);
     }
-  }, [canSubmit, summary, description, onClose, context, attachments]);
+  }, [canSubmit, summary, description, onClose, context, attachments, onCreated]);
 
   return {
     summary,

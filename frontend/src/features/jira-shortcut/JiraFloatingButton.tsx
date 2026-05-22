@@ -3,9 +3,11 @@ import type { JiraFloatingButtonProps } from './JiraFloatingButton.types';
 import { useJiraFloatingButton } from './useJiraFloatingButton';
 import { JiraCreateIssueDialog } from './JiraCreateIssueDialog';
 import { getEnvironmentName, getViewportInfo } from './jiraIssueContext';
+import { JiraToast } from './JiraToast';
 
 export const JiraFloatingButton: FC<JiraFloatingButtonProps> = ({ className, moduleKey, moduleLabel }) => {
-  const { isVisible, title, isDialogOpen, openDialog, closeDialog } = useJiraFloatingButton();
+  const { isVisible, title, isDialogOpen, openDialog, closeDialog, toastOpen, toastMessage, showToast, closeToast } =
+    useJiraFloatingButton();
 
   if (!isVisible) return null;
 
@@ -37,7 +39,13 @@ export const JiraFloatingButton: FC<JiraFloatingButtonProps> = ({ className, mod
       >
         <span className="text-2xl leading-none" aria-hidden="true">🐞</span>
       </button>
-      <JiraCreateIssueDialog open={isDialogOpen} onClose={closeDialog} context={context} />
+      <JiraCreateIssueDialog
+        open={isDialogOpen}
+        onClose={closeDialog}
+        context={context}
+        onCreated={() => showToast('Ticket creado correctamente en Jira')}
+      />
+      <JiraToast open={toastOpen} message={toastMessage} onClose={closeToast} />
     </>
   );
 };

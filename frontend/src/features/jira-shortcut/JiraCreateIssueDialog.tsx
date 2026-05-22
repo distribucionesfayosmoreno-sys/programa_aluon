@@ -3,9 +3,9 @@ import AppDialog from '../../components/feedback/AppDialog';
 import type { JiraCreateIssueDialogProps } from './JiraCreateIssueDialog.types';
 import { useJiraCreateIssueDialog } from './useJiraCreateIssueDialog';
 
-export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, onClose, context }) => {
+export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, onClose, context, onCreated }) => {
   const { summary, description, attachments, setSummary, setDescription, setAttachments, isSubmitting, canSubmit, errorMessage, submit } =
-    useJiraCreateIssueDialog(onClose, context);
+    useJiraCreateIssueDialog(onClose, context, onCreated);
 
   const icon = (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
