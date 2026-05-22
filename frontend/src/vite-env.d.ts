@@ -2,7 +2,6 @@
 
 interface ImportMetaEnv {
   readonly VITE_JIRA_ENABLED?: 'true' | 'false';
-  readonly VITE_JIRA_OPEN_URL?: string;
 }
 
 interface ImportMeta {

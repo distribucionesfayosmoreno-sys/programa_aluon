@@ -1,25 +1,25 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { getJiraShortcutConfig } from './jiraShortcutConfig';
-import { openExternalUrl } from './jiraShortcutService';
 
 export type UseJiraFloatingButtonResult = {
   isVisible: boolean;
-  onClick: () => void;
   title: string;
+  isDialogOpen: boolean;
+  openDialog: () => void;
+  closeDialog: () => void;
 };
 
 export const useJiraFloatingButton = (): UseJiraFloatingButtonResult => {
   const config = useMemo(() => getJiraShortcutConfig(), []);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const isVisible = config.enabled && config.openUrl !== null;
+  const isVisible = config.enabled;
 
   return {
     isVisible,
     title: isVisible ? 'Abrir Jira' : 'Jira no configurado',
-    onClick: () => {
-      if (!config.enabled || !config.openUrl) return;
-      openExternalUrl(config.openUrl);
-    },
+    isDialogOpen,
+    openDialog: () => setIsDialogOpen(true),
+    closeDialog: () => setIsDialogOpen(false),
   };
 };
-
