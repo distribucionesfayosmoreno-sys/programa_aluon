@@ -46,11 +46,11 @@ echo "  DB:        ${REMOTE_HOST}:${DB_PORT}/${DB_NAME}"
 step "FASE 1/3 — Build imágenes Docker"
 
 echo "  📦 Backend  → $BACKEND_IMAGE"
-docker build -t "$BACKEND_IMAGE" "$PROJECT_ROOT/backend"
+docker build --platform linux/amd64 -t "$BACKEND_IMAGE" "$PROJECT_ROOT/backend"
 ok "Backend construido"
 
 echo "  📦 Frontend → $FRONTEND_IMAGE"
-docker build -t "$FRONTEND_IMAGE" "$PROJECT_ROOT/frontend"
+docker build --platform linux/amd64 -t "$FRONTEND_IMAGE" "$PROJECT_ROOT/frontend"
 ok "Frontend construido"
 
 # ─────────────────────────────────────────────────────────────
