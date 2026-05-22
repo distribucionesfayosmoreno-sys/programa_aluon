@@ -4,7 +4,7 @@ import type { JiraCreateIssueDialogProps } from './JiraCreateIssueDialog.types';
 import { useJiraCreateIssueDialog } from './useJiraCreateIssueDialog';
 
 export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, onClose, context }) => {
-  const { summary, description, setSummary, setDescription, isSubmitting, canSubmit, errorMessage, submit } =
+  const { summary, description, attachments, setSummary, setDescription, setAttachments, isSubmitting, canSubmit, errorMessage, submit } =
     useJiraCreateIssueDialog(onClose, context);
 
   const icon = (
@@ -74,6 +74,26 @@ export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, on
             placeholder="Pasos para reproducir, contexto, etc."
             maxLength={20000}
           />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: '#6b7280' }}>
+            Imágenes adjuntas (opcional)
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={e => {
+              const list = Array.from(e.currentTarget.files ?? []);
+              setAttachments(list);
+            }}
+          />
+          {attachments.length > 0 && (
+            <div className="mt-2 text-xs" style={{ color: '#6b7280' }}>
+              {attachments.length} archivo(s) seleccionado(s)
+            </div>
+          )}
         </div>
 
         {errorMessage && (

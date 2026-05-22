@@ -1,6 +1,7 @@
 export type CreateJiraIssueRequest = {
   summary: string;
   description?: string;
+  attachments?: File[];
 };
 
 export type CreateJiraIssueResponse = {
@@ -18,4 +19,3 @@ export const isCreateJiraIssueResponse = (value: unknown): value is CreateJiraIs
     typeof record.browseUrl === 'string'
   );
 };
-
