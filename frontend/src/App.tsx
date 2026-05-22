@@ -185,7 +185,7 @@ const App = () => {
           </div>
         </main>
 
-        <JiraFloatingButton />
+        <JiraFloatingButton moduleKey={activeModule} moduleLabel={breadcrumb} />
       </div>
     </div>
   );

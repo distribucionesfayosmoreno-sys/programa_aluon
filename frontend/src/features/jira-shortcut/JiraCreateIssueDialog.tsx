@@ -3,9 +3,9 @@ import AppDialog from '../../components/feedback/AppDialog';
 import type { JiraCreateIssueDialogProps } from './JiraCreateIssueDialog.types';
 import { useJiraCreateIssueDialog } from './useJiraCreateIssueDialog';
 
-export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, onClose }) => {
+export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, onClose, context }) => {
   const { summary, description, setSummary, setDescription, isSubmitting, canSubmit, errorMessage, submit } =
-    useJiraCreateIssueDialog(onClose);
+    useJiraCreateIssueDialog(onClose, context);
 
   const icon = (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,6 +33,20 @@ export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, on
       )}
     >
       <div className="space-y-4">
+        <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: '#f3f4f6', color: '#374151' }}>
+          <div className="text-xs font-black uppercase tracking-wide" style={{ color: '#6b7280' }}>
+            Contexto
+          </div>
+          <div className="mt-2 text-sm leading-6">
+            <div><span className="font-semibold">Entorno:</span> {context.environmentName}</div>
+            <div><span className="font-semibold">Módulo:</span> {context.moduleLabel} ({context.moduleKey})</div>
+            <div>
+              <span className="font-semibold">Responsive:</span>{' '}
+              {context.viewport.category} ({context.viewport.widthPx}x{context.viewport.heightPx}, dpr {context.viewport.devicePixelRatio})
+            </div>
+          </div>
+        </div>
+
         <div>
           <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: '#6b7280' }}>
             Resumen
@@ -69,10 +83,9 @@ export const JiraCreateIssueDialog: FC<JiraCreateIssueDialogProps> = ({ open, on
         )}
 
         <div className="text-xs" style={{ color: '#6b7280' }}>
-          El ticket se crea desde el backend (las credenciales de Jira no se exponen al navegador).
+          El ticket se crea desde el backend (las credenciales de Jira no se exponen al navegador). La descripción incluirá el contexto (entorno/módulo/responsive).
         </div>
       </div>
     </AppDialog>
   );
 };
-

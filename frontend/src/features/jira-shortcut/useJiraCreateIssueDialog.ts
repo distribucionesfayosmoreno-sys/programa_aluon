@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { createJiraIssue } from './jiraIssueApi';
 import { openExternalUrl } from './jiraShortcutService';
+import type { JiraIssueContext } from './jiraIssueContext.types';
+import { formatContextMarkdown } from './jiraIssueContext';
 
 export type UseJiraCreateIssueDialogResult = {
   summary: string;
@@ -13,7 +15,10 @@ export type UseJiraCreateIssueDialogResult = {
   submit: () => Promise<void>;
 };
 
-export const useJiraCreateIssueDialog = (onClose: () => void): UseJiraCreateIssueDialogResult => {
+export const useJiraCreateIssueDialog = (
+  onClose: () => void,
+  context: JiraIssueContext,
+): UseJiraCreateIssueDialogResult => {
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +31,12 @@ export const useJiraCreateIssueDialog = (onClose: () => void): UseJiraCreateIssu
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
-      const result = await createJiraIssue({ summary: summary.trim(), description: description.trim() });
+      const enrichedDescription = [
+        description.trim(),
+        formatContextMarkdown(context),
+      ].join('\n');
+
+      const result = await createJiraIssue({ summary: summary.trim(), description: enrichedDescription });
       openExternalUrl(new URL(result.browseUrl));
       onClose();
       setSummary('');
@@ -37,7 +47,7 @@ export const useJiraCreateIssueDialog = (onClose: () => void): UseJiraCreateIssu
     } finally {
       setIsSubmitting(false);
     }
-  }, [canSubmit, summary, description, onClose]);
+  }, [canSubmit, summary, description, onClose, context]);
 
   return {
     summary,
@@ -50,4 +60,3 @@ export const useJiraCreateIssueDialog = (onClose: () => void): UseJiraCreateIssu
     submit,
   };
 };
-
