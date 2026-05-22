@@ -12,8 +12,8 @@ set -euo pipefail
 # ── Configuración ────────────────────────────────────────────
 REMOTE_HOST="${1:-192.168.99.14}"
 REMOTE_USER="${2:-root}"
-BACKEND_IMAGE="r0dr1g0m0r3n0/aluon-backend:dev2"
-FRONTEND_IMAGE="r0dr1g0m0r3n0/aluon-frontend:dev2"
+BACKEND_IMAGE="r0dr1g0m0r3n0/aluon-saas-backend:dev2"
+FRONTEND_IMAGE="r0dr1g0m0r3n0/aluon-saas-frontend:dev2"
 APP_DIR="/opt/aluon"
 DB_NAME="aluonbbdd"
 DB_USER="aluon"

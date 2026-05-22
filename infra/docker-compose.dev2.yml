@@ -7,7 +7,7 @@ x-logging: &default-logging
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: aluon-postgres-dev2
+    container_name: aluon-saas-postgres-dev2
     environment:
       POSTGRES_DB: ${DB_NAME:-aluonbbdd}
       POSTGRES_USER: ${DB_USER:-aluon}
@@ -25,8 +25,8 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    image: docker.io/r0dr1g0m0r3n0/aluon-backend:dev2
-    container_name: aluon-backend-dev2
+    image: docker.io/r0dr1g0m0r3n0/aluon-saas-backend:dev2
+    container_name: aluon-saas-backend-dev2
     environment:
       - SPRING_PROFILES_ACTIVE=dev2
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_NAME:-aluonbbdd}
@@ -53,8 +53,8 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    image: docker.io/r0dr1g0m0r3n0/aluon-frontend:dev2
-    container_name: aluon-frontend-dev2
+    image: docker.io/r0dr1g0m0r3n0/aluon-saas-frontend:dev2
+    container_name: aluon-saas-frontend-dev2
     ports:
       - "${FRONTEND_PORT:-5173}:80"
     networks:
