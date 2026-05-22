@@ -8,6 +8,7 @@ import WorkOrders from './features/work-orders/WorkOrders';
 import RegistrationRequests from './features/registration-requests/RegistrationRequests';
 import Settings from './features/settings/Settings';
 import Cutlist from './features/cutlist/Cutlist';
+import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
@@ -183,6 +184,8 @@ const App = () => {
             {activeModule === 'administracion' && <AdminManagement />}
           </div>
         </main>
+
+        <JiraFloatingButton />
       </div>
     </div>
   );
