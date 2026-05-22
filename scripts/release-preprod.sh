@@ -76,7 +76,7 @@ echo "  🐳 Levantando contenedores..."
 ssh "${REMOTE}" bash <<DEPLOY
 set -e
 cd "${APP_DIR}"
-docker volume create aluon-pgdata-preprod 2>/dev/null || true
+
 DB_NAME="${DB_NAME}" \
 DB_USER="${DB_USER}" \
 DB_PASSWORD="${DB_PASSWORD}" \
@@ -84,6 +84,10 @@ DB_PORT="${DB_PORT}" \
 BACKEND_PORT="${BACKEND_PORT}" \
 FRONTEND_PORT="${FRONTEND_PORT}" \
 docker compose --env-file .env -f docker-compose.yml up -d --pull always
+
+# Asegurar que la base de datos de PREPROD existe en el contenedor compartido de DEV2
+echo "  🗄️ Asegurando que la BBDD ${DB_NAME} exista..."
+docker exec aluon-postgres-dev2 psql -U aluon -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || docker exec aluon-postgres-dev2 psql -U aluon -c "CREATE DATABASE ${DB_NAME}" || true
 DEPLOY
 
 echo ""
