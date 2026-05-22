@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
 import { createJiraIssue } from './jiraIssueApi';
-import { openExternalUrl } from './jiraShortcutService';
 import type { JiraIssueContext } from './jiraIssueContext.types';
 import { formatContextMarkdown } from './jiraIssueContext';
 
@@ -39,12 +38,11 @@ export const useJiraCreateIssueDialog = (
         formatContextMarkdown(context),
       ].join('\n');
 
-      const result = await createJiraIssue({
+      await createJiraIssue({
         summary: summary.trim(),
         description: enrichedDescription,
         attachments,
       });
-      openExternalUrl(new URL(result.browseUrl));
       onClose();
       setSummary('');
       setDescription('');
