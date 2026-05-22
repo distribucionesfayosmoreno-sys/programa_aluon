@@ -1,0 +1,59 @@
+version: "3.8"
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aluon-postgres-preprod
+    environment:
+      POSTGRES_DB: aluonbbddpreprod
+      POSTGRES_USER: aluon
+      POSTGRES_PASSWORD: aluon
+    ports:
+      - "3000:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - aluon-network
+    restart: unless-stopped
+    logging: *default-logging
+
+  backend:
+    image: docker.io/r0dr1g0m0r3n0/aluon-backend:preprod
+    container_name: aluon-backend-preprod
+    environment:
+      - SPRING_PROFILES_ACTIVE=preprod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/aluonbbddpreprod
+      - SPRING_DATASOURCE_USERNAME=aluon
+      - SPRING_DATASOURCE_PASSWORD=aluon
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+    networks:
+      - aluon-network
+    restart: unless-stopped
+    logging: *default-logging
+
+  frontend:
+    image: docker.io/r0dr1g0m0r3n0/aluon-frontend:preprod
+    container_name: aluon-frontend-preprod
+    ports:
+      - "5174:80"
+    networks:
+      - aluon-network
+    restart: unless-stopped
+    logging: *default-logging
+
+networks:
+  aluon-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    name: aluon-pgdata-preprod
