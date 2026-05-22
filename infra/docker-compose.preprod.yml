@@ -9,8 +9,8 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
-    image: docker.io/r0dr1g0m0r3n0/aluon-backend:preprod
-    container_name: aluon-backend-preprod
+    image: docker.io/r0dr1g0m0r3n0/aluon-saas-backend:preprod
+    container_name: aluon-saas-backend-preprod
     environment:
       - SPRING_PROFILES_ACTIVE=preprod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://192.168.99.14:${DB_PORT:-3000}/${DB_NAME:-aluonbbddpreprod}
@@ -35,8 +35,8 @@ services:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    image: docker.io/r0dr1g0m0r3n0/aluon-frontend:preprod
-    container_name: aluon-frontend-preprod
+    image: docker.io/r0dr1g0m0r3n0/aluon-saas-frontend:preprod
+    container_name: aluon-saas-frontend-preprod
     ports:
       - "${FRONTEND_PORT:-5174}:80"
     networks:

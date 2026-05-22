@@ -12,8 +12,8 @@ set -euo pipefail
 # ── Configuración ────────────────────────────────────────────
 REMOTE_HOST="${1:-192.168.99.14}"
 REMOTE_USER="${2:-root}"
-BACKEND_IMAGE="r0dr1g0m0r3n0/aluon-backend:preprod"
-FRONTEND_IMAGE="r0dr1g0m0r3n0/aluon-frontend:preprod"
+BACKEND_IMAGE="r0dr1g0m0r3n0/aluon-saas-backend:preprod"
+FRONTEND_IMAGE="r0dr1g0m0r3n0/aluon-saas-frontend:preprod"
 APP_DIR="/opt/aluon-preprod"
 DB_NAME="aluonbbddpreprod"
 DB_USER="aluon"
@@ -87,7 +87,7 @@ docker compose --env-file .env -f docker-compose.yml up -d --pull always
 
 # Asegurar que la base de datos de PREPROD existe en el contenedor compartido de DEV2
 echo "  🗄️ Asegurando que la BBDD ${DB_NAME} exista..."
-docker exec aluon-postgres-dev2 psql -U aluon -d aluonbbdd -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || docker exec aluon-postgres-dev2 psql -U aluon -d aluonbbdd -c "CREATE DATABASE ${DB_NAME}" || true
+docker exec aluon-saas-postgres-dev2 psql -U aluon -d aluonbbdd -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || docker exec aluon-saas-postgres-dev2 psql -U aluon -d aluonbbdd -c "CREATE DATABASE ${DB_NAME}" || true
 DEPLOY
 
 echo ""
