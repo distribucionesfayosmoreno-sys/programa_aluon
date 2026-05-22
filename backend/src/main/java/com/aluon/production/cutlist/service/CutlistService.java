@@ -23,7 +23,7 @@ import com.aluon.production.cutlist.model.DoorType;
 import com.aluon.production.order.model.Order;
 import com.aluon.production.order.model.OrderWorkflowStep;
 import com.aluon.production.order.repository.OrderRepository;
-
+import com.aluon.production.order.service.WorkflowProgressService;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +33,7 @@ public class CutlistService {
     private final CutlistRepository cutlistRepository;
     private final CutlistCalculator cutlistCalculator;
     private final OrderRepository orderRepository;
+    private final WorkflowProgressService workflowProgress;
 
     public CutlistResponseDto generate(CutlistRequestDto request) {
         validate(request);
@@ -177,7 +178,8 @@ public class CutlistService {
                 if (request.getGroundClearanceMm() == null || request.getGroundClearanceMm() < 0) {
                     throw new IllegalArgumentException("La holgura con el suelo es obligatoria");
                 }
-                if (request.getLargueroMm() == null || (request.getLargueroMm() != 50 && request.getLargueroMm() != 80)) {
+                if (request.getLargueroMm() == null
+                        || (request.getLargueroMm() != 50 && request.getLargueroMm() != 80)) {
                     throw new IllegalArgumentException("El larguero debe ser 50 o 80 mm");
                 }
                 if (request.getTopFrame() == null) {
@@ -220,43 +222,16 @@ public class CutlistService {
         if (requestId == null || requestId.isBlank()) {
             return;
         }
-        Order order = resolveOrder(requestId.trim());
+        Order order = workflowProgress.resolveOrder(requestId.trim());
         if (order == null) {
             return;
         }
         order.setCutlist(cutlist);
-        if (isForwardTransition(order.getWorkflowStep(), OrderWorkflowStep.DEV)) {
+        if (workflowProgress.isForwardTransition(order.getWorkflowStep(), OrderWorkflowStep.DEV)) {
             order.setWorkflowStep(OrderWorkflowStep.DEV);
             order.setWorkflowStage(OrderWorkflowStep.DEV.name());
         }
         orderRepository.save(order);
-    }
-
-    private boolean isForwardTransition(OrderWorkflowStep current, OrderWorkflowStep next) {
-        List<OrderWorkflowStep> steps = List.of(
-                OrderWorkflowStep.INBOX,
-                OrderWorkflowStep.REQUEST,
-                OrderWorkflowStep.BUDGET,
-                OrderWorkflowStep.VALIDATION,
-                OrderWorkflowStep.DEV,
-                OrderWorkflowStep.PROD,
-                OrderWorkflowStep.FINAL
-        );
-        int currentIndex = steps.indexOf(current);
-        int nextIndex = steps.indexOf(next);
-        if (currentIndex == -1 || nextIndex == -1) {
-            return false;
-        }
-        return nextIndex > currentIndex;
-    }
-
-    private Order resolveOrder(String requestId) {
-        try {
-            UUID orderId = UUID.fromString(requestId);
-            return orderRepository.findById(Objects.requireNonNull(orderId, "orderId")).orElse(null);
-        } catch (IllegalArgumentException ignored) {
-            return orderRepository.findByCodigoOrden(requestId).orElse(null);
-        }
     }
 
     private String normalize(String value) {

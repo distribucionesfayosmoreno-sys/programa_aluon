@@ -3,6 +3,10 @@ import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
 import { assignWorkOrderCustomer, deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
 
+const STEP_ORDER: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
+
+const stepIndex = (step: TabKey): number => STEP_ORDER.indexOf(step);
+
 type BudgetControls = {
   budgetStatusByRequestId: Record<string, { adminApproved: boolean; budgetGenerated: boolean; accountingApproved: boolean }>;
   getBudgetStatus: (requestId: string | null) => { budgetGenerated: boolean; accountingApproved: boolean; adminApproved: boolean };
@@ -151,9 +155,14 @@ export const useWorkOrderRequests = ({
     setRequests(prev => prev.map(req => {
       const status = budget.budgetStatusByRequestId[req.id];
       if (!status) return req;
-      const nextStep = status.adminApproved
+      // Derive the budget-driven target step
+      const targetStep: TabKey = status.adminApproved
         ? 'VALIDATION'
         : (status.budgetGenerated && status.accountingApproved ? 'BUDGET' : req.workflowStep);
+      // Only advance — never downgrade (e.g. DEV/PROD/FINAL must not revert to VALIDATION)
+      const nextStep: TabKey = stepIndex(targetStep) > stepIndex(req.workflowStep)
+        ? targetStep
+        : req.workflowStep;
       return nextStep === req.workflowStep ? req : { ...req, workflowStep: nextStep };
     }));
   }, [budget.budgetStatusByRequestId, setRequests]);

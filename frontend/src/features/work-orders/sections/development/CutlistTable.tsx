@@ -20,9 +20,9 @@ export const CutlistTable = ({ cutlist, actions }: CutlistTableProps) => {
         <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f9fafb', color: uiColors.textMuted }}>
-              <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Img seccional</th>
+              <th className="text-center px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}`, width: '80px' }}>Img seccional</th>
               <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Descripción</th>
-              <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Img lateral</th>
+              <th className="text-center px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}`, width: '80px' }}>Img lateral</th>
               <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Unidades</th>
               <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Medida corte</th>
             </tr>
@@ -41,8 +41,8 @@ export const CutlistTable = ({ cutlist, actions }: CutlistTableProps) => {
                     cursor: 'pointer',
                   }}
                 >
-                  <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>
-                    <img src={seccional.src} alt={seccional.alt} className="w-10 h-10 object-cover rounded-md border" style={{ borderColor: uiColors.borderLight }} />
+                  <td className="p-1 text-center" style={{ border: `1px solid ${uiColors.borderLight}` }}>
+                    <img src={seccional.src} alt={seccional.alt} className="w-16 h-16 mx-auto object-contain bg-white rounded-md border p-0.5" style={{ borderColor: uiColors.borderLight }} />
                   </td>
                   <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>
                     <div className="flex items-center gap-2">
@@ -54,8 +54,8 @@ export const CutlistTable = ({ cutlist, actions }: CutlistTableProps) => {
                       )}
                     </div>
                   </td>
-                  <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>
-                    <img src={lateral.src} alt={lateral.alt} className="w-10 h-10 object-cover rounded-md border" style={{ borderColor: uiColors.borderLight }} />
+                  <td className="p-1 text-center" style={{ border: `1px solid ${uiColors.borderLight}` }}>
+                    <img src={lateral.src} alt={lateral.alt} className="w-16 h-16 mx-auto object-contain bg-white rounded-md border p-0.5" style={{ borderColor: uiColors.borderLight }} />
                   </td>
                   <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>{item.units}x</td>
                   <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>{item.cutMeasure}</td>

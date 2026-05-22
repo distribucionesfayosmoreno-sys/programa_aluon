@@ -43,6 +43,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
     private final UserRepository userRepository;
+    private final WorkflowProgressService workflowProgress;
 
     public List<OrderStatusDto> listOrderStatuses() {
         return orderRepository.findAllByOrderByCodigoOrdenDesc().stream()
@@ -281,7 +282,7 @@ public class OrderService {
             throw new IllegalArgumentException("El estado es obligatorio");
         }
 
-        Order order = resolveOrder(requestId.trim());
+        Order order = workflowProgress.resolveOrder(requestId.trim());
         if (order == null) {
             throw new IllegalArgumentException("Solicitud no encontrada");
         }
@@ -290,7 +291,7 @@ public class OrderService {
         if (order.getWorkflowStep() == workflowStep) {
             return;
         }
-        if (isBackwardTransition(order.getWorkflowStep(), workflowStep)
+        if (workflowProgress.isBackwardTransition(order.getWorkflowStep(), workflowStep)
                 && workflowStep != OrderWorkflowStep.INBOX) {
             validateBackwardAuthorization(authorizerUserId);
         }
@@ -301,31 +302,6 @@ public class OrderService {
                 order.getWorkflowStep(), order.getWorkflowStage());
     }
 
-    private Order resolveOrder(String requestId) {
-        try {
-            UUID orderId = UUID.fromString(requestId);
-            return orderRepository.findById(Objects.requireNonNull(orderId, "orderId")).orElse(null);
-        } catch (IllegalArgumentException ignored) {
-            return orderRepository.findByCodigoOrden(requestId).orElse(null);
-        }
-    }
-
-    private boolean isBackwardTransition(OrderWorkflowStep current, OrderWorkflowStep next) {
-        List<OrderWorkflowStep> steps = List.of(
-                OrderWorkflowStep.INBOX,
-                OrderWorkflowStep.REQUEST,
-                OrderWorkflowStep.BUDGET,
-                OrderWorkflowStep.VALIDATION,
-                OrderWorkflowStep.DEV,
-                OrderWorkflowStep.PROD,
-                OrderWorkflowStep.FINAL);
-        int currentIndex = steps.indexOf(current);
-        int nextIndex = steps.indexOf(next);
-        if (currentIndex == -1 || nextIndex == -1) {
-            return false;
-        }
-        return nextIndex < currentIndex;
-    }
 
     private void validateBackwardAuthorization(String authorizerUserId) {
         if (authorizerUserId == null || authorizerUserId.isBlank()) {

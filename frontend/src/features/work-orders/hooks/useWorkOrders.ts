@@ -58,6 +58,11 @@ export const useWorkOrders = ({
     notes,
     selectedRequest,
     selectedCustomerName: resolvedCustomerName,
+    onCutlistGenerated: (requestId: string) => {
+      setRequests(prev => prev.map(r =>
+        r.id === requestId ? { ...r, workflowStep: 'DEV' } : r,
+      ));
+    },
   });
 
   const workflow = useWorkflowProgress({
@@ -230,6 +235,18 @@ export const useWorkOrders = ({
     notes,
     base.tab,
   ]);
+
+  // Restore DEV/PROD/FINAL UI flags when selecting a request already in those stages
+  useEffect(() => {
+    if (!selectedRequest) return;
+    const step = selectedRequest.workflowStep;
+    const isDevOrLater = step === 'DEV' || step === 'PROD' || step === 'FINAL';
+    if (isDevOrLater) {
+      setDevelopmentGenerated(true);
+      cutlist.setCutlistGenerated(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRequest?.id, selectedRequest?.workflowStep]);
 
   return buildWorkOrdersResult({
     customers,

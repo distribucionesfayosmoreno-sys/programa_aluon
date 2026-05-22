@@ -20,6 +20,8 @@ type CutlistWorkflowParams = {
   notes: string;
   selectedRequest?: WorkOrderRequest | null;
   selectedCustomerName?: string;
+  /** Called with the requestId when a cutlist is successfully generated */
+  onCutlistGenerated?: (requestId: string) => void;
 };
 
 const resolveDoorModel = (request?: WorkOrderRequest | null): CutlistDoorModel | null => {
@@ -40,6 +42,7 @@ export const useCutlistWorkflow = ({
   notes,
   selectedRequest,
   selectedCustomerName,
+  onCutlistGenerated,
 }: CutlistWorkflowParams) => {
   const [cutlistGenerated, setCutlistGenerated] = useState(false);
 
@@ -275,6 +278,9 @@ export const useCutlistWorkflow = ({
       const data = await generateCutlist(buildCutlistPayload());
       setCutlistResult(data);
       setCutlistGenerated(true);
+      if (selectedRequest?.id) {
+        onCutlistGenerated?.(selectedRequest.id);
+      }
     } catch (error) {
       setCutlistGenerated(false);
       setCutlistResult(null);

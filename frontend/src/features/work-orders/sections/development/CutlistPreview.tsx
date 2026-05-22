@@ -37,16 +37,16 @@ export const CutlistPreview = ({ form, cutlist, status, actions }: CutlistPrevie
       </div>
     </div>
 
-    <div className="mt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-4">
+    <div className="mt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1.4fr)_minmax(240px,0.6fr)] gap-4">
       <div
-        className="relative rounded-xl border overflow-hidden min-h-[280px] flex items-center justify-center bg-gray-50"
+        className="relative rounded-xl border overflow-hidden min-h-[320px] md:min-h-[400px] flex items-center justify-center bg-gray-50"
         style={{ borderColor: cutlist.activeCutlistIndex !== null && cutlist.cutlistResult ? uiColors.accent : uiColors.borderLight }}
       >
         {cutlist.cutlistImages[cutlist.cutlistImageIndex] && (
           <img
             src={cutlist.cutlistImages[cutlist.cutlistImageIndex].src}
             alt={cutlist.cutlistImages[cutlist.cutlistImageIndex].alt}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain p-4"
           />
         )}
         {cutlist.activeCutlistIndex !== null && cutlist.cutlistResult && (
@@ -101,7 +101,7 @@ export const CutlistPreview = ({ form, cutlist, status, actions }: CutlistPrevie
                 boxShadow: active ? '0 6px 18px var(--accent-shadow-light)' : 'none',
               }}
             >
-              <img src={image.src} alt={image.alt} className="w-16 h-16 rounded-lg object-cover border" style={{ borderColor: uiColors.borderLight }} />
+              <img src={image.src} alt={image.alt} className="w-16 h-16 rounded-lg object-contain bg-white border p-1" style={{ borderColor: uiColors.borderLight }} />
               <div>
                 <div className="text-xs font-bold" style={{ color: uiColors.textPrimary }}>{image.label}</div>
                 <div className="text-[10px]" style={{ color: uiColors.textMuted }}>Vista técnica</div>
