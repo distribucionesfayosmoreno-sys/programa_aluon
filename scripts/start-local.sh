@@ -11,8 +11,23 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Configurar JAVA_HOME para usar OpenJDK 21 instalado mediante Homebrew
 export JAVA_HOME="/usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 
+# Cargar variables de entorno locales (Jira/DB/etc) si existe infra/.env.local
+ENV_FILE="$PROJECT_ROOT/infra/.env.local"
+if [ -f "$ENV_FILE" ]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "$ENV_FILE"
+  set +a
+  echo "✅ Variables cargadas desde infra/.env.local"
+else
+  echo "⚠️  No existe infra/.env.local (copia desde infra/.env.local.example)"
+fi
+
 # Configurar orígenes CORS permitidos para desarrollo local
 export APP_CORS_ALLOWED_ORIGINS="http://localhost:5173,https://app-aluon-unqc.vercel.app,https://aluondev.iconseriespeliculas.xyz"
+
+# Forzar perfil local por defecto (si no se define externamente)
+export SPRING_PROFILES_ACTIVE="${SPRING_PROFILES_ACTIVE:-local}"
 
 echo "🚀 Iniciando Backend (Java 21 + Spring Boot)..."
 cd "$PROJECT_ROOT/backend"
@@ -35,4 +50,3 @@ echo "--------------------------------------------------------"
 
 # Esperar a que los subprocesos terminen
 wait
-
