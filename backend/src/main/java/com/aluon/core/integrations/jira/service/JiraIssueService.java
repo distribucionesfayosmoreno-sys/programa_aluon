@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,12 +36,17 @@ public class JiraIssueService {
 
         JiraCreateIssueBody body = JiraCreateIssueBody.from(props.projectKey(), props.issueTypeName(), sanitizedSummary, sanitizedDescription);
 
-        JiraCreateIssueResponsePayload payload = jiraRestClient
-                .post()
-                .uri("/rest/api/3/issue")
-                .body(body)
-                .retrieve()
-                .body(JiraCreateIssueResponsePayload.class);
+        JiraCreateIssueResponsePayload payload;
+        try {
+            payload = jiraRestClient
+                    .post()
+                    .uri("/rest/api/3/issue")
+                    .body(body)
+                    .retrieve()
+                    .body(JiraCreateIssueResponsePayload.class);
+        } catch (RestClientResponseException ex) {
+            throw mapJiraError("crear el ticket", ex);
+        }
 
         if (payload == null || !StringUtils.hasText(payload.key())) {
             throw new IllegalArgumentException("No se ha podido crear el ticket en Jira");
@@ -109,16 +115,32 @@ public class JiraIssueService {
             var form = new org.springframework.util.LinkedMultiValueMap<String, Object>();
             form.add("file", resource);
 
-            jiraRestClient
-                    .post()
-                    .uri(path)
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .header("X-Atlassian-Token", "no-check")
-                    .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-                    .body(form)
-                    .retrieve()
-                    .toBodilessEntity();
+            try {
+                jiraRestClient
+                        .post()
+                        .uri(path)
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .header("X-Atlassian-Token", "no-check")
+                        .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                        .body(form)
+                        .retrieve()
+                        .toBodilessEntity();
+            } catch (RestClientResponseException ex) {
+                throw mapJiraError("subir adjuntos", ex);
+            }
         }
+    }
+
+    private IllegalArgumentException mapJiraError(String action, RestClientResponseException ex) {
+        String status = String.valueOf(ex.getRawStatusCode());
+        String body = "";
+        try {
+            body = ex.getResponseBodyAsString();
+        } catch (Exception ignored) {
+        }
+        String trimmed = body == null ? "" : body.trim();
+        String suffix = trimmed.isBlank() ? "" : " - " + trimmed;
+        return new IllegalArgumentException("Jira: error al " + action + " (" + status + ")" + suffix);
     }
 
     private record JiraCreateIssueResponsePayload(String id, String key, String self) {
