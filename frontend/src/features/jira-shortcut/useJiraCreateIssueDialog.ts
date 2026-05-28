@@ -1,21 +1,29 @@
 import { useCallback, useMemo, useState } from 'react';
 import { createJiraIssue } from './jiraIssueApi';
-import { openExternalUrl } from './jiraShortcutService';
+import type { JiraIssueContext } from './jiraIssueContext.types';
+import { formatContextMarkdown } from './jiraIssueContext';
 
 export type UseJiraCreateIssueDialogResult = {
   summary: string;
   description: string;
+  attachments: File[];
   setSummary: (value: string) => void;
   setDescription: (value: string) => void;
+  setAttachments: (files: File[]) => void;
   isSubmitting: boolean;
   canSubmit: boolean;
   errorMessage: string | null;
   submit: () => Promise<void>;
 };
 
-export const useJiraCreateIssueDialog = (onClose: () => void): UseJiraCreateIssueDialogResult => {
+export const useJiraCreateIssueDialog = (
+  onClose: () => void,
+  context: JiraIssueContext,
+  onCreated: () => void,
+): UseJiraCreateIssueDialogResult => {
   const [summary, setSummary] = useState('');
   const [description, setDescription] = useState('');
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -26,28 +34,39 @@ export const useJiraCreateIssueDialog = (onClose: () => void): UseJiraCreateIssu
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
-      const result = await createJiraIssue({ summary: summary.trim(), description: description.trim() });
-      openExternalUrl(new URL(result.browseUrl));
+      const enrichedDescription = [
+        description.trim(),
+        formatContextMarkdown(context),
+      ].join('\n');
+
+      await createJiraIssue({
+        summary: summary.trim(),
+        description: enrichedDescription,
+        attachments,
+      });
+      onCreated();
       onClose();
       setSummary('');
       setDescription('');
+      setAttachments([]);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error creando el ticket';
       setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
-  }, [canSubmit, summary, description, onClose]);
+  }, [canSubmit, summary, description, onClose, context, attachments, onCreated]);
 
   return {
     summary,
     description,
+    attachments,
     setSummary,
     setDescription,
+    setAttachments,
     isSubmitting,
     canSubmit,
     errorMessage,
     submit,
   };
 };
-

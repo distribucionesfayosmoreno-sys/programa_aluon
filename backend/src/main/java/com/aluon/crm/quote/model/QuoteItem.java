@@ -1,5 +1,6 @@
 package com.aluon.crm.quote.model;
 
+import com.aluon.crm.catalog.model.ProductCategory;
 import com.aluon.production.cutlist.model.DoorModel;
 import com.aluon.production.cutlist.model.DoorType;
 import jakarta.persistence.*;
@@ -40,11 +41,40 @@ public class QuoteItem {
     @Column(name = "door_type", nullable = false)
     private DoorType doorType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "product_category")
+    private ProductCategory productCategory;
+
+    @Column(name = "color_code")
+    private String colorCode;
+
+    @Column(name = "primer_required")
+    private Boolean primerRequired;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "opening_variant")
+    private DoorType openingVariant;
+
     @Column(name = "width_mm", nullable = false)
     private Integer widthMm;
 
     @Column(name = "height_mm", nullable = false)
     private Integer heightMm;
+
+    @Column(name = "floor_clearance_mm")
+    private Integer floorClearanceMm;
+
+    @Column(name = "larguero")
+    private Boolean larguero;
+
+    @Column(name = "marco_superior")
+    private Boolean marcoSuperior;
+
+    @Column(name = "bisagras")
+    private Boolean bisagras;
+
+    @Column(name = "portero_automatico")
+    private Boolean porteroAutomatico;
 
     @Column(name = "m2", nullable = false, precision = 12, scale = 4)
     private BigDecimal m2;

@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_JIRA_ENABLED?: 'true' | 'false';
+  readonly VITE_APP_ENV_NAME?: string;
 }
 
 interface ImportMeta {

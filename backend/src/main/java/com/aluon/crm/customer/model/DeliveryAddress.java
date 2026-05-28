@@ -6,7 +6,7 @@ import org.hibernate.annotations.TenantId;
 import java.util.UUID;
 
 @Entity
-@Table(name = "delivery_addresses")
+@Table(name = "aluon_saas_direcciones_entrega")
 @Getter
 @Setter
 @NoArgsConstructor
