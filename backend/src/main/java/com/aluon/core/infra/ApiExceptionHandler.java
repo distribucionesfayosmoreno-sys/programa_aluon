@@ -1,6 +1,5 @@
 package com.aluon.core.infra;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientResponseException;
@@ -21,7 +20,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(RestClientResponseException.class)
     public ResponseEntity<String> handleRestClient(RestClientResponseException ex) {
         String upstreamBody = safeBody(ex);
-        String message = "Error llamando a servicio externo (" + ex.getRawStatusCode() + "): "
+        String message = "Error llamando a servicio externo (" + ex.getStatusCode().value() + "): "
                 + (upstreamBody.isBlank() ? "respuesta vacía" : upstreamBody);
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(message);
     }
@@ -29,7 +28,8 @@ public class ApiExceptionHandler {
     private static String safeBody(RestClientResponseException ex) {
         try {
             byte[] bytes = ex.getResponseBodyAsByteArray();
-            if (bytes == null || bytes.length == 0) return "";
+            if (bytes == null || bytes.length == 0)
+                return "";
             return new String(bytes, StandardCharsets.UTF_8).trim();
         } catch (Exception ignored) {
             return "";

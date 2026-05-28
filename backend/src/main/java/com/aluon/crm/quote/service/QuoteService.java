@@ -132,7 +132,8 @@ public class QuoteService {
         Objects.requireNonNull(tariff, "tariff");
         Objects.requireNonNull(item, "item");
         DoorModel doorModel = item.getDoorModel();
-        DoorType doorType = item.getDoorType();
+        DoorType doorType = item.getDoorType() != null ? item.getDoorType() : item.getOpeningVariant();
+        DoorType openingVariant = item.getOpeningVariant() != null ? item.getOpeningVariant() : doorType;
 
         Integer widthMm = Objects.requireNonNull(item.getWidthMm(), "widthMm");
         Integer heightMm = Objects.requireNonNull(item.getHeightMm(), "heightMm");
@@ -150,8 +151,17 @@ public class QuoteService {
                 .quoteRequest(quote)
                 .doorModel(doorModel)
                 .doorType(doorType)
+                .productCategory(item.getProductCategory())
+                .colorCode(item.getColorCode())
+                .primerRequired(item.getPrimerRequired())
+                .openingVariant(openingVariant)
                 .widthMm(widthMm)
                 .heightMm(heightMm)
+                .floorClearanceMm(item.getFloorClearanceMm())
+                .larguero(item.getLarguero())
+                .marcoSuperior(item.getMarcoSuperior())
+                .bisagras(item.getBisagras())
+                .porteroAutomatico(item.getPorteroAutomatico())
                 .m2(m2)
                 .pricePerM2(pricePerM2)
                 .lineTotal(lineTotal)
@@ -181,8 +191,17 @@ public class QuoteService {
                         .map(item -> QuoteItemResponse.builder()
                                 .doorModel(item.getDoorModel())
                                 .doorType(item.getDoorType())
+                                .productCategory(item.getProductCategory())
+                                .colorCode(item.getColorCode())
+                                .primerRequired(item.getPrimerRequired())
+                                .openingVariant(item.getOpeningVariant())
                                 .widthMm(item.getWidthMm())
                                 .heightMm(item.getHeightMm())
+                                .floorClearanceMm(item.getFloorClearanceMm())
+                                .larguero(item.getLarguero())
+                                .marcoSuperior(item.getMarcoSuperior())
+                                .bisagras(item.getBisagras())
+                                .porteroAutomatico(item.getPorteroAutomatico())
                                 .m2(item.getM2())
                                 .pricePerM2(item.getPricePerM2())
                                 .lineTotal(item.getLineTotal())
@@ -214,8 +233,8 @@ public class QuoteService {
             if (item.getDoorModel() == null) {
                 throw new IllegalArgumentException("El modelo es obligatorio");
             }
-            if (item.getDoorType() == null) {
-                throw new IllegalArgumentException("El tipo de producto es obligatorio");
+            if (item.getDoorType() == null && item.getOpeningVariant() == null) {
+                throw new IllegalArgumentException("El tipo de apertura es obligatorio");
             }
             if (item.getWidthMm() == null || item.getWidthMm() <= 0) {
                 throw new IllegalArgumentException("El ancho es obligatorio");

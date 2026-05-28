@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "aluon_saas_clientes")
 @Getter
 @Setter
 @NoArgsConstructor

@@ -8,6 +8,7 @@ import WorkOrders from './features/work-orders/WorkOrders';
 import RegistrationRequests from './features/registration-requests/RegistrationRequests';
 import Settings from './features/settings/Settings';
 import Cutlist from './features/cutlist/Cutlist';
+import { BudgetWizard } from './features/budget-wizard/BudgetWizard';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
 
 const App = () => {
@@ -50,6 +51,8 @@ const App = () => {
         return 'Despiece';
       case 'registro':
         return 'Registro de Clientes';
+      case 'presupuestos':
+        return 'Presupuestos';
       case 'inscripciones':
         return 'Inscripciones Pendientes';
       case 'ajustes':
@@ -168,8 +171,9 @@ const App = () => {
 
         {/* Content */}
         <main className="flex-1 p-8 overflow-y-auto">
-          <div className="max-w-[1440px] mx-auto animate-fade-up">
+          <div className={`${activeModule === 'presupuestos' ? 'max-w-none w-[90%]' : 'max-w-[1440px]'} mx-auto animate-fade-up`}>
             {activeModule === 'clientes' && <CustomerManagement />}
+            {activeModule === 'presupuestos' && <BudgetWizard />}
             {activeModule === 'registro' && <CustomerOnboarding />}
             {activeModule === 'inscripciones' && <RegistrationRequests />}
             {activeModule === 'ordenes' && (

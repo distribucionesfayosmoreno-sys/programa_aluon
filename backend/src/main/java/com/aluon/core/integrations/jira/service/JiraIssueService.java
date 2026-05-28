@@ -132,7 +132,7 @@ public class JiraIssueService {
     }
 
     private IllegalArgumentException mapJiraError(String action, RestClientResponseException ex) {
-        String status = String.valueOf(ex.getRawStatusCode());
+        String status = String.valueOf(ex.getStatusCode().value());
         String body = "";
         try {
             body = ex.getResponseBodyAsString();
