@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -70,6 +71,43 @@ public class MailService {
             helper.setTo(safeTo);
             helper.setSubject(safeSubject);
             helper.setText(safeBodyHtml, true);
+            mailSender.send(message);
+        } catch (MailException ex) {
+            logger.error("Error enviando email a {} (MailException). Se continúa sin bloquear el flujo.", safeTo, ex);
+        } catch (MessagingException ex) {
+            logger.error("Error enviando email a {}", safeTo, ex);
+        }
+    }
+
+    public void sendHtmlWithAttachment(String to, String subject, String htmlBody, String attachmentFileName, byte[] attachmentBytes) {
+        String safeTo = Objects.requireNonNull(to, "to");
+        String safeSubject = Objects.requireNonNull(subject, "subject");
+        String safeHtmlBody = Objects.requireNonNull(htmlBody, "htmlBody");
+        String safeAttachmentFileName = Objects.requireNonNull(attachmentFileName, "attachmentFileName");
+        byte[] safeAttachmentBytes = Objects.requireNonNull(attachmentBytes, "attachmentBytes");
+
+        JavaMailSender mailSender = mailSenderProvider.getIfAvailable();
+        if (mailSender == null) {
+            logger.warn("JavaMailSender no configurado. No se enviará email a {}.", safeTo);
+            return;
+        }
+
+        if (configuredPassword == null || configuredPassword.isBlank()) {
+            logger.warn("SMTP sin contraseña configurada. Se omite el envío de email a {}.", safeTo);
+            return;
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+            String from = defaultFrom;
+            if (from != null && !from.isBlank()) {
+                helper.setFrom(from);
+            }
+            helper.setTo(safeTo);
+            helper.setSubject(safeSubject);
+            helper.setText(safeHtmlBody, true);
+            helper.addAttachment(safeAttachmentFileName, new ByteArrayResource(safeAttachmentBytes));
             mailSender.send(message);
         } catch (MailException ex) {
             logger.error("Error enviando email a {} (MailException). Se continúa sin bloquear el flujo.", safeTo, ex);

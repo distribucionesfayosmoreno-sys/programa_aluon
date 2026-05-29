@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.14</version>
+    <version>3.5.13</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>com.aluon</groupId>
@@ -78,6 +78,13 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-crypto</artifactId>
+    </dependency>
+
+    <!-- PDF -->
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.5</version>
     </dependency>
 
     <!-- Testing -->
