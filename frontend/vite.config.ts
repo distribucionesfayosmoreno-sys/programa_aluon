@@ -8,11 +8,13 @@ export default defineConfig(({ mode }) => {
   const rootDir = dirname(fileURLToPath(import.meta.url))
   const env = loadEnv(mode, rootDir, '')
   const apiTarget = (env.VITE_API_TARGET ?? '').trim() || 'http://localhost:8080'
+  const baseUrl = (env.VITE_BASE_URL ?? '').trim()
 
   console.log(`[vite] proxy /api -> ${apiTarget}`)
 
   return {
     root: rootDir,
+    base: baseUrl || undefined,
     plugins: [react()],
     server: {
       port: 5173,
