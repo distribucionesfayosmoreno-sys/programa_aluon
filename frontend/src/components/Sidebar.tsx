@@ -45,7 +45,7 @@ const Sidebar = ({ activeModule, onSelect, onNewOrder, isOpen = true, onHoverCha
       {/* Logo */}
       <div className="px-5 py-6" style={{ borderBottom: '1px solid #21262d' }}>
         <div className="h-14 flex items-center justify-center">
-          <img src={logo} alt="Aluon" className="max-h-11 w-auto object-contain brightness-110" />
+          <img src={logo} alt="Aluon" className="max-h-[55px] w-auto object-contain brightness-110" />
         </div>
       </div>
 

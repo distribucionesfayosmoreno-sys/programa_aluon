@@ -1,66 +1,88 @@
-import type { CatalogDoorProduct, CatalogModel } from '../BudgetWizard.types';
-import { productImageByCategory } from '../budgetWizardImages';
+import type { CatalogModel } from '../BudgetWizard.types';
 
 type Props = {
   model: CatalogModel;
-  products: CatalogDoorProduct[];
   loading: boolean;
   onBack: () => void;
-  onSelect: (product: CatalogDoorProduct) => void;
+  onSelect: (category: string, type: string) => void;
 };
 
-const categoryLabel = (category: CatalogDoorProduct['producto']): string => {
-  switch (category) {
-    case 'PUERTA_PASO':
-      return 'Puerta paso';
-    case 'PUERTA_GARAJE':
-      return 'Puerta garaje';
-    case 'VALLA':
-      return 'Valla';
-    case 'REJA':
-      return 'Reja';
-    default: {
-      const exhaustive: never = category;
-      return exhaustive;
-    }
+const structures = [
+  { id: 'puerta', label: 'Puerta', imageLabel: 'Puerta', category: 'PUERTA_PASO', type: 'PEATONAL' },
+  { id: 'valla', label: 'Valla', imageLabel: 'Valla', category: 'VALLA', type: 'VALLA' },
+  { id: 'corredera', label: 'Puerta Corredera', imageLabel: 'Puerta Corredera', category: 'PUERTA_GARAJE', type: 'CORREDERA' },
+  { id: 'abatible_una', label: 'Puerta Abatible Una Hoja', imageLabel: 'Puerta Abatible Una Hoja', category: 'PUERTA_PASO', type: 'ABATIBLE_UNA' },
+  { id: 'abatible_dos', label: 'Puerta Abatible Dos Hojas', imageLabel: 'Puerta Abatible Dos Hojas', category: 'PUERTA_PASO', type: 'ABATIBLE_DOS' }
+];
+
+const getProductImage = (modelo: string, imageLabel: string) => {
+  const modelCamel = modelo.charAt(0).toUpperCase() + modelo.slice(1).toLowerCase();
+  return `/ideas/aluon/images/Modelo ${modelCamel} - ${imageLabel}.png`;
+};
+
+export const BudgetWizardProductStep = ({ model, loading, onBack, onSelect }: Props) => {
+  if (loading) {
+    return <div className="text-xs text-secondary animate-pulse py-8 text-center font-body">Cargando estructuras...</div>;
   }
-};
 
-export const BudgetWizardProductStep = ({ model, products, loading, onBack, onSelect }: Props) => (
-  <section className="grid gap-4">
-    <div className="flex items-center justify-between gap-4 flex-wrap">
-      <div>
-        <h2 className="text-sm font-black uppercase" style={{ color: '#0d1117' }}>Tipo de puerta</h2>
-        <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>Modelo seleccionado: {model.modelo}</p>
-      </div>
-      <button className="btn-ghost" onClick={onBack}>Cambiar modelo</button>
-    </div>
-
-    {loading && (
-      <div className="text-xs font-semibold" style={{ color: '#9ca3af' }}>Cargando tipos…</div>
-    )}
-
-    {!loading && products.length === 0 && (
-      <div className="rounded-2xl p-6 text-xs font-semibold" style={{ background: '#ffffff', border: '1px solid #e8eaed', color: '#9ca3af' }}>
-        No hay tipos configurados para este modelo todavía. Revisa el catálogo en BBDD (tabla `aluon_saas_catalogo_puertas`).
-      </div>
-    )}
-
-    <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-      {products.map(product => (
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-[10px] uppercase tracking-widest text-blue-600 font-bold font-space">Paso 2 de 5</span>
+          <h3 className="font-headline font-bold text-2xl text-on-surface mt-0.5 font-space">Tipo de estructura</h3>
+        </div>
         <button
-          key={product.id}
-          className="text-left rounded-2xl overflow-hidden transition-all"
-          style={{ border: '1px solid #e8eaed', background: '#ffffff' }}
-          onClick={() => onSelect(product)}
+          type="button"
+          onClick={onBack}
+          className="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-1 active:scale-95 transition-transform font-space"
         >
-          <img src={productImageByCategory(product.producto)} alt={categoryLabel(product.producto)} className="h-36 w-full object-cover" />
-          <div className="p-4">
-            <div className="text-sm font-black" style={{ color: '#0d1117' }}>{categoryLabel(product.producto)}</div>
-            <div className="text-xs mt-2" style={{ color: '#9ca3af' }}>Imagen: {product.imagenModelo ?? 'default'}</div>
-          </div>
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          Volver
         </button>
-      ))}
+      </div>
+
+      <p className="text-xs text-secondary font-body">
+        Estás configurando un producto del **Modelo {model.modelo}**. Elige el tipo de estructura:
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {structures.map(structure => (
+          <button
+            key={structure.id}
+            type="button"
+            onClick={() => onSelect(structure.category, structure.type)}
+            className="group relative flex flex-col justify-end text-left bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-primary transition-all duration-200 active:scale-[0.98] shadow-sm h-80 w-full"
+          >
+            {/* Image container serving as full background */}
+            <div className="absolute inset-0 w-full h-full bg-white flex items-center justify-center overflow-hidden">
+              <img
+                src={getProductImage(model.modelo, structure.imageLabel)}
+                alt={structure.label}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.includes('Modelo Bisel')) {
+                    target.src = `/ideas/aluon/images/Modelo Bisel - ${structure.imageLabel}.png`;
+                  }
+                }}
+              />
+            </div>
+
+            {/* Text Overlay */}
+            <div className="relative z-10 p-4 pt-10 space-y-1 bg-gradient-to-t from-white via-white/90 to-transparent w-full">
+              <div className="flex items-center justify-between">
+                <span className="text-base font-black text-on-surface tracking-wider uppercase font-space">
+                  {structure.label}
+                </span>
+              </div>
+              <p className="text-[10px] leading-relaxed text-secondary font-body">
+                Especificaciones de cerramientos de aluminio y acabados de alta calidad.
+              </p>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
-  </section>
-);
+  );
+};

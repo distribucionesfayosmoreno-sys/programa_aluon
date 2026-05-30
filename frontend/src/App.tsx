@@ -173,8 +173,8 @@ const App = () => {
       </header>
 
         {/* Content */}
-        <main className={`flex-1 p-8 flex flex-col min-h-0 ${activeModule === 'simulacion-puertas' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-          <div className={`${['presupuestos', 'simulacion-puertas'].includes(activeModule) ? 'max-w-none w-full' : 'max-w-[1440px]'} mx-auto animate-fade-up flex-1 flex flex-col min-h-0`}>
+        <main className={`flex-1 p-8 flex flex-col min-h-0 ${['simulacion-puertas', 'dashboard'].includes(activeModule) ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+          <div className={`${['presupuestos', 'simulacion-puertas', 'dashboard'].includes(activeModule) ? 'max-w-none w-full' : 'max-w-[1440px] w-full'} mx-auto animate-fade-up flex-1 flex flex-col min-h-0`}>
             {activeModule === 'clientes' && <CustomerManagement />}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
             {activeModule === 'presupuestos' && <BudgetWizard />}

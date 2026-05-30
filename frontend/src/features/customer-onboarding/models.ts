@@ -40,8 +40,16 @@ export type QuoteItemDraft = {
 export type QuoteItemResponse = {
   doorModel: DoorModel;
   doorType: DoorType;
+  productCategory: string;
+  colorCode: string;
+  primerRequired: boolean;
   widthMm: number;
   heightMm: number;
+  floorClearanceMm: number;
+  larguero: boolean;
+  marcoSuperior: boolean;
+  bisagras: boolean;
+  porteroAutomatico: boolean;
   m2: number;
   pricePerM2: number;
   lineTotal: number;

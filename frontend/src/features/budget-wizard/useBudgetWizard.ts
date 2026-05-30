@@ -71,6 +71,8 @@ export const useBudgetWizard = () => {
   const [error, setError] = useState('');
 
 
+  const [postFinalizeAction, setPostFinalizeAction] = useState<'EMAIL' | 'WHATSAPP' | 'VIEW' | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -210,6 +212,28 @@ export const useBudgetWizard = () => {
     setStep('PRODUCTO');
   };
 
+  const selectStructure = async (category: string, type: string) => {
+    const prod = doorProducts.find(p => p.producto === category);
+    if (!prod) return;
+    setSelectedProduct(prod);
+
+    setLoading(true);
+    try {
+      const variantsData = await getVariantsByDoorProduct(prod.id);
+      setVariants(variantsData);
+      const vrnt = variantsData.find(v => v.variante === type);
+      if (vrnt) {
+        setSelectedVariant(vrnt);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+
+    setStep('COLOR');
+  };
+
   const selectProduct = async (product: CatalogDoorProduct) => {
     setSelectedProduct(product);
     setSelectedVariant(null);
@@ -245,6 +269,7 @@ export const useBudgetWizard = () => {
     setMarcoSuperior(defaultBooleans.marcoSuperior);
     setBisagras(defaultBooleans.bisagras);
     setPorteroAutomatico(defaultBooleans.porteroAutomatico);
+    setPostFinalizeAction(null);
   };
 
   const addCurrentItem = () => {
@@ -295,7 +320,12 @@ export const useBudgetWizard = () => {
     setStep('MEDIDAS');
   };
 
-  const finalize = async () => {
+  const finalize = async (action?: 'EMAIL' | 'WHATSAPP' | 'VIEW') => {
+    if (action) {
+      setPostFinalizeAction(action);
+    } else {
+      setPostFinalizeAction(null);
+    }
     const itemsToSubmit = [...savedItems];
     if (itemsToSubmit.length === 0) {
       if (!itemDraft) {
@@ -359,6 +389,7 @@ export const useBudgetWizard = () => {
     submitting,
     error,
     quote,
+    postFinalizeAction,
     models,
     doorProducts,
     variants,
@@ -400,6 +431,7 @@ export const useBudgetWizard = () => {
     setSelectedDeliveryAddressId,
     setStep,
     selectModel,
+    selectStructure,
     selectProduct,
     selectVariant,
     goToCustomerStep,
