@@ -2,6 +2,7 @@ package com.aluon.crm.doorsimulation.integrations;
 
 import com.aluon.crm.doorsimulation.config.DoorSimulationGoogleProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -11,6 +12,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "integrations.door-simulation.google-street-view", name = "enabled", havingValue = "true")
 public class GoogleStreetViewClient {
 
     private final DoorSimulationGoogleProperties props;
@@ -56,4 +58,3 @@ public class GoogleStreetViewClient {
         if (!StringUtils.hasText(props.apiKey())) throw new IllegalArgumentException("Google Street View no configurado: falta apiKey");
     }
 }
-

@@ -2,6 +2,7 @@ package com.aluon.crm.doorsimulation.integrations;
 
 import com.aluon.crm.doorsimulation.config.DoorSimulationStabilityProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "integrations.door-simulation.google-street-view", name = "enabled", havingValue = "true")
 public class StabilityInpaintingClient {
 
     private final DoorSimulationStabilityProperties props;
@@ -82,4 +84,3 @@ public class StabilityInpaintingClient {
         }
     }
 }
-

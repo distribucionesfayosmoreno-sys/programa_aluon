@@ -1,6 +1,7 @@
 package com.aluon.crm.doorsimulation.storage;
 
 import com.aluon.crm.doorsimulation.config.ObjectStorageProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.StringUtils;
@@ -13,13 +14,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.net.URI;
 
 @Configuration
+@ConditionalOnProperty(prefix = "integrations.door-simulation.google-street-view", name = "enabled", havingValue = "true")
 public class ObjectStorageConfig {
 
     @Bean
     S3Client doorSimulationS3Client(ObjectStorageProperties props) {
-        if (!props.enabled()) {
-            return S3Client.builder().build();
-        }
         assertConfigured(props);
 
         var builder = S3Client.builder()
@@ -42,4 +41,3 @@ public class ObjectStorageConfig {
         if (!StringUtils.hasText(props.region())) throw new IllegalArgumentException("Object storage no configurado: falta region");
     }
 }
-

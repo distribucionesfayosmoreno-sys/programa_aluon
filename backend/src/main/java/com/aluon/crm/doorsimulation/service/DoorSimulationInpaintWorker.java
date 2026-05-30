@@ -8,6 +8,7 @@ import com.aluon.crm.doorsimulation.repo.DoorVisualSimulationJobRepository;
 import com.aluon.crm.doorsimulation.storage.ObjectStorageService;
 import com.aluon.crm.doorsimulation.util.MaskPngFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "integrations.door-simulation.google-street-view", name = "enabled", havingValue = "true")
 public class DoorSimulationInpaintWorker {
 
     private final DoorVisualSimulationJobRepository repo;
@@ -96,4 +98,3 @@ public class DoorSimulationInpaintWorker {
         return trimmed;
     }
 }
-

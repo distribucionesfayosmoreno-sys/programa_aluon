@@ -8,6 +8,7 @@ import com.aluon.crm.doorsimulation.dto.StartInpaintResponse;
 import com.aluon.crm.doorsimulation.service.DoorVisualSimulationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/door-visual-simulations")
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "integrations.door-simulation.google-street-view", name = "enabled", havingValue = "true")
 public class DoorVisualSimulationController {
 
     private final DoorVisualSimulationService service;
@@ -35,4 +37,3 @@ public class DoorVisualSimulationController {
         return ResponseEntity.ok(service.getStatus(jobId));
     }
 }
-

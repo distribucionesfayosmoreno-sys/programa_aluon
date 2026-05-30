@@ -2,6 +2,7 @@ package com.aluon.crm.doorsimulation.storage;
 
 import com.aluon.crm.doorsimulation.config.ObjectStorageProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "integrations.door-simulation.google-street-view", name = "enabled", havingValue = "true")
 public class ObjectStorageService {
 
     private final ObjectStorageProperties props;
