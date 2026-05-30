@@ -47,6 +47,10 @@ export type DoorSimulationStatusResponse = {
 
 export type DoorVisualSimulationViewState = {
   address: string;
+  imageSize: '640x640' | '512x512';
+  fov: number;
+  heading: number | null;
+  pitch: number | null;
   prompt: string;
   negativePrompt: string;
   jobId: string | null;
@@ -62,6 +66,10 @@ export type DoorVisualSimulationViewState = {
 
 export type DoorVisualSimulationActions = {
   setAddress: (value: string) => void;
+  setImageSize: (value: '640x640' | '512x512') => void;
+  setFov: (value: number) => void;
+  setHeading: (value: number | null) => void;
+  setPitch: (value: number | null) => void;
   setPrompt: (value: string) => void;
   setNegativePrompt: (value: string) => void;
   setMaskRect: (value: MaskRect | null) => void;
@@ -69,4 +77,3 @@ export type DoorVisualSimulationActions = {
   startInpaint: () => Promise<void>;
   reset: () => void;
 };
-

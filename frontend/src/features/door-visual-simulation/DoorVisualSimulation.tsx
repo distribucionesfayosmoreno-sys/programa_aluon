@@ -29,7 +29,70 @@ export const DoorVisualSimulation = () => {
                 value={state.address}
                 onChange={e => actions.setAddress(e.target.value)}
                 disabled={state.processing}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void actions.loadBaseImage();
+                  }
+                }}
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Tamaño</label>
+                <select
+                  className="mt-2 w-full rounded-xl border px-4 py-3 text-sm bg-white"
+                  value={state.imageSize}
+                  disabled={state.processing}
+                  onChange={e => actions.setImageSize(e.target.value === '512x512' ? '512x512' : '640x640')}
+                >
+                  <option value="640x640">640x640</option>
+                  <option value="512x512">512x512</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>FOV</label>
+                <input
+                  className="mt-2 w-full"
+                  type="range"
+                  min={10}
+                  max={120}
+                  value={state.fov}
+                  disabled={state.processing}
+                  onChange={e => actions.setFov(Number(e.target.value))}
+                />
+                <div className="text-xs font-bold" style={{ color: '#8b949e' }}>{state.fov}</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Heading</label>
+                <input
+                  className="mt-2 w-full"
+                  type="range"
+                  min={0}
+                  max={360}
+                  value={state.heading ?? 0}
+                  disabled={state.processing}
+                  onChange={e => actions.setHeading(Number(e.target.value))}
+                />
+                <div className="text-xs font-bold" style={{ color: '#8b949e' }}>{state.heading ?? 0}</div>
+              </div>
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Pitch</label>
+                <input
+                  className="mt-2 w-full"
+                  type="range"
+                  min={-90}
+                  max={90}
+                  value={state.pitch ?? 0}
+                  disabled={state.processing}
+                  onChange={e => actions.setPitch(Number(e.target.value))}
+                />
+                <div className="text-xs font-bold" style={{ color: '#8b949e' }}>{state.pitch ?? 0}</div>
+              </div>
             </div>
 
             <button
@@ -40,6 +103,23 @@ export const DoorVisualSimulation = () => {
             >
               {state.processing ? 'PROCESANDO...' : 'CARGAR FACHADA'}
             </button>
+
+            <div className="pt-1">
+              <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+                Street View (preview)
+              </div>
+              {state.baseImageUrl ? (
+                <img
+                  src={state.baseImageUrl}
+                  alt="Google Street View"
+                  className="mt-3 w-full h-auto rounded-xl border"
+                />
+              ) : (
+                <div className="mt-3 h-[160px] flex items-center justify-center rounded-xl border border-dashed" style={{ color: '#8b949e', borderColor: '#e8eaed' }}>
+                  Sin fachada cargada
+                </div>
+              )}
+            </div>
 
             <div className="pt-2">
               <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Prompt (opcional)</label>
@@ -121,4 +201,3 @@ export const DoorVisualSimulation = () => {
     </div>
   );
 };
-

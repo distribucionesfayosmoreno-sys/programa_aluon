@@ -14,6 +14,10 @@ const validateMaskRect = (rect: MaskRect, imageWidth: number, imageHeight: numbe
 
 export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewState; actions: DoorVisualSimulationActions } => {
   const [address, setAddress] = useState('');
+  const [imageSize, setImageSize] = useState<'640x640' | '512x512'>('640x640');
+  const [fov, setFov] = useState(90);
+  const [heading, setHeading] = useState<number | null>(null);
+  const [pitch, setPitch] = useState<number | null>(null);
   const [prompt, setPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [jobId, setJobId] = useState<string | null>(null);
@@ -56,6 +60,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setStatus(null);
     setResultImageUrl(null);
     pollDelayMs.current = 1500;
+    setImageSize('640x640');
+    setFov(90);
+    setHeading(null);
+    setPitch(null);
   }, [stopPolling]);
 
   const loadBaseImage = useCallback(async () => {
@@ -66,7 +74,13 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setMaskRect(null);
     setStatus(null);
     try {
-      const resp = await createDoorSimulationJob({ address: address.trim() });
+      const resp = await createDoorSimulationJob({
+        address: address.trim(),
+        imageSize,
+        fov,
+        heading,
+        pitch,
+      });
       setJobId(resp.jobId);
       setBaseImageUrl(resp.baseImageUrl);
       setBaseImageWidth(resp.imageWidth);
@@ -78,7 +92,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     } finally {
       setProcessing(false);
     }
-  }, [address, stopPolling]);
+  }, [address, fov, heading, imageSize, pitch, stopPolling]);
 
   const pollOnce = useCallback(async (id: string) => {
     try {
@@ -151,6 +165,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
 
   const state = useMemo<DoorVisualSimulationViewState>(() => ({
     address,
+    imageSize,
+    fov,
+    heading,
+    pitch,
     prompt,
     negativePrompt,
     jobId,
@@ -162,10 +180,14 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     processing,
     resultImageUrl,
     error,
-  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, jobId, maskRect, negativePrompt, processing, prompt, resultImageUrl, status]);
+  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, fov, heading, imageSize, jobId, maskRect, negativePrompt, pitch, processing, prompt, resultImageUrl, status]);
 
   const actions = useMemo<DoorVisualSimulationActions>(() => ({
     setAddress,
+    setImageSize,
+    setFov,
+    setHeading,
+    setPitch,
     setPrompt,
     setNegativePrompt,
     setMaskRect,
@@ -176,4 +198,3 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
 
   return { state, actions };
 };
-
