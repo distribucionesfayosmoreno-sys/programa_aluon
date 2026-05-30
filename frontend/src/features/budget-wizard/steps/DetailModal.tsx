@@ -1,5 +1,5 @@
 import type { QuoteItemDraft } from "../BudgetWizard.types";
-import { budgetWizardIdeasImagePath, budgetWizardPublicPath } from '../utils/budgetWizardAssetPath';
+import { budgetWizardIdeasImagePath, budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   isOpen: boolean;
@@ -26,16 +26,20 @@ const getProductImage = (modelo: string, doorType: string) => {
 
 const getOpeningImage = (doorType: string, bisagras: boolean) => {
   if (doorType === 'VALLA') return null;
-  const isTwoLeaves = doorType === 'ABATIBLE_DOS';
-  if (!bisagras) {
-    return isTwoLeaves
-      ? budgetWizardIdeasImagePath('abatible dos hojas izquierda.avif')
-      : budgetWizardIdeasImagePath('izquierda.avif');
-  } else {
-    return isTwoLeaves
-      ? budgetWizardIdeasImagePath('abatible dos hojas derecha.jpg')
-      : budgetWizardIdeasImagePath('derecha.jpg');
+  const side: 'LEFT' | 'RIGHT' = bisagras ? 'RIGHT' : 'LEFT';
+  if (doorType === 'CORREDERA') {
+    return side === 'LEFT'
+      ? budgetWizardStaticImagePath('corredera izquierda.png')
+      : budgetWizardStaticImagePath('corredera derecha.png');
   }
+  if (doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS') {
+    return side === 'LEFT'
+      ? budgetWizardStaticImagePath('abatible dos hojas izquierda.png')
+      : budgetWizardStaticImagePath('apertura abatible dos hojas derecha.png');
+  }
+  return side === 'LEFT'
+    ? budgetWizardStaticImagePath('apertura izquierda.png')
+    : budgetWizardStaticImagePath('apertura derecha.png');
 };
 
 const yesNo = (val: boolean) => (val ? "Sí" : "No");

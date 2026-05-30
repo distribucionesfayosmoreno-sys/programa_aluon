@@ -13,6 +13,25 @@ export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendC
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState(quote.contactEmail || '');
   const [sentStatus, setSentStatus] = useState<string | null>(null);
+  const [pdfOpening, setPdfOpening] = useState(false);
+
+  const openQuotePdf = async () => {
+    if (pdfOpening) return;
+    setPdfOpening(true);
+    try {
+      const response = await fetch(`/api/quotes/${encodeURIComponent(quote.id)}/pdf`, { method: 'POST' });
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Error al generar el PDF');
+      }
+      window.open(`/api/quotes/${encodeURIComponent(quote.id)}/pdf`, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'No se pudo abrir el PDF.';
+      alert(message);
+    } finally {
+      setPdfOpening(false);
+    }
+  };
 
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +66,7 @@ export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendC
     } else if (postFinalizeAction === 'WHATSAPP') {
       handleSendWhatsapp();
     } else if (postFinalizeAction === 'VIEW') {
-      window.print();
+      openQuotePdf();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postFinalizeAction]);
@@ -207,11 +226,12 @@ export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendC
           {/* Print Button */}
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={openQuotePdf}
+            disabled={pdfOpening}
             className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-outline-variant bg-surface text-on-surface hover:bg-surface-container font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
           >
-            <span className="material-symbols-outlined text-sm">print</span>
-            Imprimir
+            <span className="material-symbols-outlined text-sm">{pdfOpening ? 'hourglass_empty' : 'picture_as_pdf'}</span>
+            {pdfOpening ? 'Generando…' : 'Ver PDF'}
           </button>
 
           {/* New Budget Button */}

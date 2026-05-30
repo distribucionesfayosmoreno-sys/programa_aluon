@@ -1,5 +1,5 @@
 import type { CatalogModel } from '../BudgetWizard.types';
-import { budgetWizardIdeasImagePath, budgetWizardPublicPath } from '../utils/budgetWizardAssetPath';
+import { budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   model: CatalogModel;
@@ -10,23 +10,34 @@ type Props = {
 };
 
 export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, onBack }: Props) => {
-  const isTwoLeaves = doorType === 'ABATIBLE_DOS';
+  const openingImage = (side: 'LEFT' | 'RIGHT'): string | null => {
+    if (doorType === 'VALLA') return null;
+    if (doorType === 'CORREDERA') {
+      return side === 'LEFT'
+        ? budgetWizardStaticImagePath('corredera izquierda.png')
+        : budgetWizardStaticImagePath('corredera derecha.png');
+    }
+    if (doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS') {
+      return side === 'LEFT'
+        ? budgetWizardStaticImagePath('abatible dos hojas izquierda.png')
+        : budgetWizardStaticImagePath('apertura abatible dos hojas derecha.png');
+    }
+    return side === 'LEFT'
+      ? budgetWizardStaticImagePath('apertura izquierda.png')
+      : budgetWizardStaticImagePath('apertura derecha.png');
+  };
 
   const options = [
     {
       value: false,
       label: 'Izquierda',
-      image: isTwoLeaves
-        ? budgetWizardIdeasImagePath('abatible dos hojas izquierda.avif')
-        : budgetWizardIdeasImagePath('izquierda.avif'),
+      image: openingImage('LEFT') ?? '',
       imgClass: ''
     },
     {
       value: true,
       label: 'Derecha',
-      image: isTwoLeaves
-        ? budgetWizardIdeasImagePath('abatible dos hojas derecha.jpg')
-        : budgetWizardIdeasImagePath('derecha.jpg'),
+      image: openingImage('RIGHT') ?? '',
       imgClass: 'transform scale-[1.65] mix-blend-multiply'
     }
   ];
