@@ -10,6 +10,7 @@ import Settings from './features/settings/Settings';
 import Cutlist from './features/cutlist/Cutlist';
 import { BudgetWizard } from './features/budget-wizard/BudgetWizard';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
+import { DoorVisualSimulation } from './features/door-visual-simulation/DoorVisualSimulation';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
@@ -53,6 +54,8 @@ const App = () => {
         return 'Registro de Clientes';
       case 'presupuestos':
         return 'Presupuestos';
+      case 'simulacion-puertas':
+        return 'Simulación Visual de Puertas';
       case 'inscripciones':
         return 'Inscripciones Pendientes';
       case 'ajustes':
@@ -173,6 +176,7 @@ const App = () => {
         <main className="flex-1 p-8 overflow-y-auto">
           <div className={`${activeModule === 'presupuestos' ? 'max-w-none w-[90%]' : 'max-w-[1440px]'} mx-auto animate-fade-up`}>
             {activeModule === 'clientes' && <CustomerManagement />}
+            {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
             {activeModule === 'presupuestos' && <BudgetWizard />}
             {activeModule === 'registro' && <CustomerOnboarding />}
             {activeModule === 'inscripciones' && <RegistrationRequests />}
