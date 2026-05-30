@@ -14,31 +14,14 @@ export const BudgetWizard = () => {
   const wizard = useBudgetWizard();
 
   return (
-    <div className="bg-slate-50 min-h-full p-4 md:p-8 flex flex-col">
-      <div className="w-full flex-1 mx-auto space-y-6">
-        {/* Page Header */}
-        <header className="flex items-center justify-between bg-white rounded-3xl p-6 shadow-sm border border-slate-200">
-          <div>
-            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Presupuestos</div>
-            <h1 className="text-3xl font-black text-slate-900 mt-1">Wizard de Puertas</h1>
-          </div>
-          <button
-            type="button"
-            onClick={wizard.reset}
-            className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest active:scale-95 transition-all shadow-sm"
-          >
-            <span className="material-symbols-outlined text-sm">refresh</span>
-            Reiniciar
-          </button>
-        </header>
-
+    <div className="flex-1 min-h-0 flex flex-col gap-6">
         {wizard.error && (
           <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-xs font-bold shadow-sm">
             {wizard.error}
           </div>
         )}
 
-        <div className="bg-white rounded-3xl p-6 md:p-10 border border-slate-200 shadow-md">
+        <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-200 shadow-md">
           {wizard.step === 'MODELO' && (
             <BudgetWizardModelStep
               models={wizard.models}
@@ -172,7 +155,6 @@ export const BudgetWizard = () => {
             />
           )}
         </div>
-      </div>
     </div>
   );
 };

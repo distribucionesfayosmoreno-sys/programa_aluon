@@ -111,21 +111,6 @@ const RegistrationRequests = () => {
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 128px)', minHeight: 400 }}>
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-1 h-5 rounded-full bg-brand" />
-            <h1 className="text-xl font-black uppercase tracking-tight" style={{ color: '#0d1117' }}>
-              Inscripciones de Clientes
-            </h1>
-          </div>
-          <p className="text-xs font-semibold uppercase tracking-wide ml-3.5 mt-0.5" style={{ color: '#9ca3af' }}>
-            CRM · Validación
-          </p>
-        </div>
-        <button className="btn-ghost" onClick={fetchData}>Actualizar</button>
-      </div>
-
       {error && (
         <div className="mb-4 px-4 py-3 rounded-xl text-xs font-bold" style={{ background: 'var(--notice-bg)', color: 'var(--notice-text)', border: '1px solid var(--notice-border)' }}>
           {error}

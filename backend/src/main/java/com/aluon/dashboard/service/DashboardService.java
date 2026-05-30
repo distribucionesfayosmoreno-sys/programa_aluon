@@ -28,49 +28,34 @@ public class DashboardService {
                 List.of(OrderWorkflowStep.INBOX, OrderWorkflowStep.REQUEST)
         );
 
-        return DashboardKpisDto.builder()
-                .ordersToPrepare(ordersToPrepare)
-                .monthlyBilling(0)
-                .criticalStockAlerts(0)
-                .crmTasksToday(0)
-                .updatedAt(OffsetDateTime.now(ZoneOffset.UTC))
-                .build();
+        return new DashboardKpisDto(
+                ordersToPrepare,
+                0,
+                0,
+                0,
+                OffsetDateTime.now(ZoneOffset.UTC)
+        );
     }
 
     public DashboardOperationsDto getOperations() {
         long inRoute = orderRepository.countByEstado(OrderStatus.EN_PRODUCCION);
         long completed = orderRepository.countByEstadoIn(List.of(OrderStatus.INSTALADA, OrderStatus.FACTURADA));
 
-        return DashboardOperationsDto.builder()
-                .inRoute(inRoute)
-                .completed(completed)
-                .avgTimeMinutes(0)
-                .updatedAt(OffsetDateTime.now(ZoneOffset.UTC))
-                .build();
+        return new DashboardOperationsDto(
+                inRoute,
+                completed,
+                0,
+                OffsetDateTime.now(ZoneOffset.UTC)
+        );
     }
 
     public DashboardAlertsDto getAlerts() {
         List<DashboardAlertDto> alerts = List.of(
-                DashboardAlertDto.builder()
-                        .title("Bombín 30/30")
-                        .detail("Stock crítico (2 uds)")
-                        .tone("danger")
-                        .build(),
-                DashboardAlertDto.builder()
-                        .title("Factura #F-1203")
-                        .detail("Pendiente de pago 15 días")
-                        .tone("warning")
-                        .build(),
-                DashboardAlertDto.builder()
-                        .title("Cliente BBVA")
-                        .detail("Nueva solicitud prioritaria")
-                        .tone("neutral")
-                        .build()
+                new DashboardAlertDto("Bombín 30/30", "Stock crítico (2 uds)", "danger"),
+                new DashboardAlertDto("Factura #F-1203", "Pendiente de pago 15 días", "warning"),
+                new DashboardAlertDto("Cliente BBVA", "Nueva solicitud prioritaria", "neutral")
         );
 
-        return DashboardAlertsDto.builder()
-                .alerts(alerts)
-                .updatedAt(OffsetDateTime.now(ZoneOffset.UTC))
-                .build();
+        return new DashboardAlertsDto(alerts, OffsetDateTime.now(ZoneOffset.UTC));
     }
 }
