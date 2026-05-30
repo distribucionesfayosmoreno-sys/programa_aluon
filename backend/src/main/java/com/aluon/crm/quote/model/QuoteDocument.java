@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -51,11 +50,9 @@ public class QuoteDocument {
     @Column(name = "sha256", nullable = false, length = 64)
     private String sha256;
 
-    @Lob
-    @Column(name = "data", nullable = false)
+    @Column(name = "data", nullable = false, columnDefinition = "bytea")
     private byte[] data;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 }
-
