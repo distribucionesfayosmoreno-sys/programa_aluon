@@ -168,8 +168,10 @@ export const DoorVisualSimulation = () => {
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-dashed bg-white" style={{ borderColor: '#e8eaed' }}>
-                {state.mapsJavaScriptApiKey ? (
+              <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-dashed bg-white relative" style={{ borderColor: '#e8eaed' }}>
+                {state.address.trim() === '' ? (
+                  <img src="/background-visor.png" alt="Background Emulador" className="w-full h-full object-fill" />
+                ) : state.mapsJavaScriptApiKey ? (
                   <GoogleStreetViewExplorer
                     apiKey={state.mapsJavaScriptApiKey}
                     address={deferredAddress}

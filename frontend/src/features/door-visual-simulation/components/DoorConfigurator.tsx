@@ -6,11 +6,30 @@ type DoorConfiguratorProps = {
 };
 
 const MODELS = [
-  { id: 'Classic', label: 'Clásico', icon: '🏛️' },
-  { id: 'Inox', label: 'Inox', icon: '✨' },
-  { id: 'Minimalist', label: 'Minimalista', icon: '🔲' },
-  { id: 'Rustic', label: 'Rústica', icon: '🪵' }
+  { id: 'Classic', label: 'Classic' },
+  { id: 'Bisel', label: 'Bisel' },
+  { id: 'Inox', label: 'Inox' },
+  { id: 'Premium', label: 'Premium' },
+  { id: 'Veneciana', label: 'Veneciana' }
 ];
+
+const getModelImage = (modelo: string) => {
+  const key = modelo.toUpperCase();
+  switch (key) {
+    case 'CLASSIC':
+      return '/legacy/aluon/images/aluonClassic.jpg';
+    case 'BISEL':
+      return '/legacy/aluon/images/aluonBisel.jpg';
+    case 'INOX':
+      return '/legacy/aluon/images/aluonInox.jpg';
+    case 'PREMIUM':
+      return '/legacy/aluon/images/aluonPremium.jpg';
+    case 'VENECIANA':
+      return '/legacy/aluon/images/aluonVeneciana.jpg';
+    default:
+      return '/legacy/aluon/images/aluonClassic.jpg';
+  }
+};
 
 const TYPES = [
   { id: 'Single Leaf', label: '1 Hoja' },
@@ -38,14 +57,30 @@ export const DoorConfigurator = ({ state, actions }: DoorConfiguratorProps) => {
             <button
               key={m.id}
               onClick={() => actions.setDoorModel(m.id)}
-              className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1 transition-all ${
+              className={`group relative flex flex-col justify-end text-left bg-white rounded-2xl overflow-hidden border hover:border-[var(--color-primary)] transition-all duration-200 active:scale-[0.98] shadow-sm h-32 w-full ${
                 state.doorModel === m.id
-                  ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)] shadow-sm'
-                  : 'border-[#e8eaed] bg-white text-[#57606a] hover:bg-gray-50'
+                  ? 'border-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/50'
+                  : 'border-slate-200'
               }`}
             >
-              <span className="text-xl">{m.icon}</span>
-              <span className="text-xs font-bold">{m.label}</span>
+              {/* Image container serving as full background */}
+              <div className="absolute inset-0 w-full h-full bg-white flex items-center justify-center overflow-hidden">
+                <img
+                  src={getModelImage(m.id)}
+                  alt={m.label}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+
+              {/* Text Overlay */}
+              <div className="relative z-10 p-3 pt-6 space-y-0.5 bg-gradient-to-t from-white via-white/90 to-transparent w-full">
+                <span className="text-sm font-black text-slate-800 tracking-wider uppercase">
+                  Serie {m.label}
+                </span>
+                <p className="text-[9px] leading-relaxed text-slate-500 hidden sm:block">
+                  Acabados en aluminio de alta durabilidad y diseño moderno.
+                </p>
+              </div>
             </button>
           ))}
         </div>
