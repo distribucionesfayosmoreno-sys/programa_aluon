@@ -3,6 +3,7 @@ package com.aluon.crm.doorsimulation.storage;
 import com.aluon.crm.doorsimulation.config.ObjectStorageProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -12,6 +13,10 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
@@ -19,8 +24,10 @@ import java.util.UUID;
 @ConditionalOnProperty(prefix = "integrations.door-simulation.google-street-view", name = "enabled", havingValue = "true")
 public class ObjectStorageService {
 
+    private static final String LOCAL_URL_PREFIX = "/api/door-visual-simulations/assets/";
+
     private final ObjectStorageProperties props;
-    private final S3Client s3;
+    private final ObjectProvider<S3Client> s3Provider;
 
     public String putPng(byte[] bytes, String keyPrefix) {
         return put(bytes, "image/png", keyPrefix, "png");
@@ -31,7 +38,6 @@ public class ObjectStorageService {
     }
 
     public String put(byte[] bytes, String contentType, String keyPrefix, String extension) {
-        assertEnabledAndConfigured();
         if (bytes == null || bytes.length == 0) throw new IllegalArgumentException("No hay datos para subir");
         if (!StringUtils.hasText(contentType)) throw new IllegalArgumentException("contentType es obligatorio");
         if (!StringUtils.hasText(extension)) throw new IllegalArgumentException("extension es obligatoria");
@@ -39,13 +45,17 @@ public class ObjectStorageService {
         String safePrefix = StringUtils.hasText(keyPrefix) ? keyPrefix.replaceAll("/+$", "") : "door-simulation";
         String key = safePrefix + "/" + UUID.randomUUID() + "." + extension;
 
+        if (!props.enabled()) {
+            return putLocal(bytes, key);
+        }
+
         PutObjectRequest req = PutObjectRequest.builder()
                 .bucket(props.bucket())
                 .key(key)
                 .contentType(contentType)
                 .build();
 
-        s3.putObject(req, RequestBody.fromBytes(bytes));
+        requiredS3().putObject(req, RequestBody.fromBytes(bytes));
         return buildPublicUrl(key);
     }
 
@@ -59,13 +69,15 @@ public class ObjectStorageService {
     }
 
     public byte[] getBytesFromUrl(String url) {
-        assertEnabledAndConfigured();
+        if (!props.enabled()) {
+            return getLocalBytes(url);
+        }
         StoredObjectRef ref = parseUrl(url);
         GetObjectRequest req = GetObjectRequest.builder()
                 .bucket(ref.bucket())
                 .key(ref.key())
                 .build();
-        ResponseBytes<GetObjectResponse> bytes = s3.getObjectAsBytes(req);
+        ResponseBytes<GetObjectResponse> bytes = requiredS3().getObjectAsBytes(req);
         return bytes.asByteArray();
     }
 
@@ -90,9 +102,58 @@ public class ObjectStorageService {
         return new StoredObjectRef(bucket, key);
     }
 
-    private void assertEnabledAndConfigured() {
-        if (!props.enabled()) throw new IllegalArgumentException("Object storage deshabilitado");
-        if (!StringUtils.hasText(props.bucket())) throw new IllegalArgumentException("Object storage no configurado: falta bucket");
+    private String putLocal(byte[] bytes, String key) {
+        Path file = localBaseDir().resolve(key).normalize();
+        ensureInsideBaseDir(file);
+        try {
+            Files.createDirectories(file.getParent());
+            Files.write(file, bytes);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("No se pudo guardar el asset localmente");
+        }
+        return LOCAL_URL_PREFIX + key;
+    }
+
+    private byte[] getLocalBytes(String url) {
+        String key = parseLocalUrl(url);
+        Path file = localBaseDir().resolve(key).normalize();
+        ensureInsideBaseDir(file);
+        try {
+            return Files.readAllBytes(file);
+        } catch (IOException ex) {
+            throw new IllegalArgumentException("No se pudo leer el asset local");
+        }
+    }
+
+    private String parseLocalUrl(String url) {
+        if (!StringUtils.hasText(url) || !url.startsWith(LOCAL_URL_PREFIX)) {
+            throw new IllegalArgumentException("URL local no reconocida");
+        }
+        String key = url.substring(LOCAL_URL_PREFIX.length());
+        if (!StringUtils.hasText(key)) {
+            throw new IllegalArgumentException("Key local inválida");
+        }
+        return key;
+    }
+
+    private Path localBaseDir() {
+        String configured = StringUtils.hasText(props.localBaseDir()) ? props.localBaseDir() : "./door-simulation-assets";
+        return Paths.get(configured).toAbsolutePath().normalize();
+    }
+
+    private void ensureInsideBaseDir(Path file) {
+        Path baseDir = localBaseDir();
+        if (!file.startsWith(baseDir)) {
+            throw new IllegalArgumentException("Ruta local inválida");
+        }
+    }
+
+    private S3Client requiredS3() {
+        S3Client client = s3Provider.getIfAvailable();
+        if (client == null) {
+            throw new IllegalArgumentException("Object storage S3/MinIO no configurado");
+        }
+        return client;
     }
 
     private record StoredObjectRef(String bucket, String key) {

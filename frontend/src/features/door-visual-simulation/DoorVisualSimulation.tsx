@@ -1,8 +1,11 @@
+import { useDeferredValue } from 'react';
 import { MaskRectSelector } from './components/MaskRectSelector';
 import { useDoorVisualSimulation } from './useDoorVisualSimulation';
 
 export const DoorVisualSimulation = () => {
   const { state, actions } = useDoorVisualSimulation();
+  const deferredAddress = useDeferredValue(state.address.trim());
+  const streetViewEmbedUrl = `https://www.google.com/maps?q=${encodeURIComponent(deferredAddress || 'Madrid')}&output=embed`;
 
   return (
     <div className="space-y-6">
@@ -167,8 +170,35 @@ export const DoorVisualSimulation = () => {
 
         <section className="lg:col-span-2 bg-white rounded-2xl p-5 border" style={{ borderColor: '#e8eaed' }}>
           {!state.baseImageUrl && (
-            <div className="h-[420px] flex items-center justify-center rounded-xl border border-dashed" style={{ color: '#8b949e', borderColor: '#e8eaed' }}>
-              Carga una fachada para empezar
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+                    Explorador manual
+                  </div>
+                  <div className="text-sm font-semibold" style={{ color: '#0d1117' }}>
+                    Usa el mapa embebido para localizar la fachada antes de cargar el snapshot.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="btn-primary px-4 py-2 rounded-xl text-xs tracking-widest"
+                  disabled={state.processing || state.address.trim().length === 0}
+                  onClick={() => void actions.loadBaseImage()}
+                >
+                  CARGAR SNAPSHOT
+                </button>
+              </div>
+
+              <div className="h-[420px] overflow-hidden rounded-xl border border-dashed bg-white" style={{ borderColor: '#e8eaed' }}>
+                <iframe
+                  title="Google Maps Street View Explorer"
+                  src={streetViewEmbedUrl}
+                  className="h-full w-full"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
             </div>
           )}
 

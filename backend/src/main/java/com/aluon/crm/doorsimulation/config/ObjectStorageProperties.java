@@ -10,7 +10,7 @@ public record ObjectStorageProperties(
         String bucket,
         String accessKey,
         String secretKey,
-        String publicBaseUrl
+        String publicBaseUrl,
+        String localBaseDir
 ) {
 }
-

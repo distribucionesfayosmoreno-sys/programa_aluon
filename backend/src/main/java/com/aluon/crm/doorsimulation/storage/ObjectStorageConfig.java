@@ -18,6 +18,7 @@ import java.net.URI;
 public class ObjectStorageConfig {
 
     @Bean
+    @ConditionalOnProperty(prefix = "integrations.door-simulation.object-storage", name = "enabled", havingValue = "true")
     S3Client doorSimulationS3Client(ObjectStorageProperties props) {
         assertConfigured(props);
 
