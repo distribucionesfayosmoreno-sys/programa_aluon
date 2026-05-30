@@ -6,27 +6,6 @@
 
 @layer base {
   :root {
-    --accent: #e5534b;
-    --accent-dark: #c7392f;
-    --accent-soft: #fff7f7;
-    --accent-soft-2: #fff1f2;
-    --accent-border: #fecdd3;
-    --accent-shadow: rgba(229, 83, 75, 0.28);
-    --accent-shadow-strong: rgba(229, 83, 75, 0.35);
-    --accent-shadow-soft: rgba(229, 83, 75, 0.30);
-    --accent-shadow-soft-2: rgba(229, 83, 75, 0.08);
-    --accent-shadow-light: rgba(229, 83, 75, 0.15);
-    --accent-focus: rgba(229, 83, 75, 0.10);
-    --notice-bg: #fff7ed;
-    --notice-text: #c2410c;
-    --notice-border: #fed7aa;
-    --danger-bg: #fff1f2;
-    --danger-text: #991b1b;
-    --danger-pill: #fecdd3;
-    --danger: #dc2626;
-    --danger-dark: #b42318;
-  }
-  :root[data-theme='blue'] {
     --accent: #2563eb;
     --accent-dark: #1d4ed8;
     --accent-soft: #f5f9ff;
