@@ -1,4 +1,5 @@
 import type { CatalogModel } from '../BudgetWizard.types';
+import { budgetWizardIdeasImagePath, budgetWizardPublicPath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   model: CatalogModel;
@@ -16,16 +17,16 @@ export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, o
       value: false,
       label: 'Izquierda',
       image: isTwoLeaves
-        ? '/ideas/aluon/images/abatible%20dos%20hojas%20izquierda.avif'
-        : '/ideas/aluon/images/izquierda.avif',
+        ? budgetWizardIdeasImagePath('abatible dos hojas izquierda.avif')
+        : budgetWizardIdeasImagePath('izquierda.avif'),
       imgClass: ''
     },
     {
       value: true,
       label: 'Derecha',
       image: isTwoLeaves
-        ? '/ideas/aluon/images/abatible%20dos%20hojas%20derecha.jpg'
-        : '/ideas/aluon/images/derecha.jpg',
+        ? budgetWizardIdeasImagePath('abatible dos hojas derecha.jpg')
+        : budgetWizardIdeasImagePath('derecha.jpg'),
       imgClass: 'transform scale-[1.65] mix-blend-multiply'
     }
   ];
@@ -67,7 +68,7 @@ export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, o
             >
               {/* Template background */}
               <img
-                src="/assets/template.png"
+                src={budgetWizardPublicPath('assets/template.png')}
                 alt="Template"
                 className="absolute inset-0 w-full h-full object-cover"
               />
@@ -102,4 +103,3 @@ export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, o
     </div>
   );
 };
-

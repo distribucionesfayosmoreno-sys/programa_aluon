@@ -1,4 +1,5 @@
 import type { CatalogModel } from '../BudgetWizard.types';
+import { budgetWizardIdeasImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   models: CatalogModel[];
@@ -10,17 +11,17 @@ const getModelImage = (modelo: string) => {
   const key = modelo.toUpperCase();
   switch (key) {
     case 'CLASSIC':
-      return '/ideas/aluon/images/aluonClassic.jpg';
+      return budgetWizardIdeasImagePath('aluonClassic.jpg');
     case 'BISEL':
-      return '/ideas/aluon/images/aluonBisel.jpg';
+      return budgetWizardIdeasImagePath('aluonBisel.jpg');
     case 'INOX':
-      return '/ideas/aluon/images/aluonInox.jpg';
+      return budgetWizardIdeasImagePath('aluonInox.jpg');
     case 'PREMIUM':
-      return '/ideas/aluon/images/aluonPremium.jpg';
+      return budgetWizardIdeasImagePath('aluonPremium.jpg');
     case 'VENECIANA':
-      return '/ideas/aluon/images/aluonVeneciana.jpg';
+      return budgetWizardIdeasImagePath('aluonVeneciana.jpg');
     default:
-      return '/ideas/aluon/images/aluonClassic.jpg';
+      return budgetWizardIdeasImagePath('aluonClassic.jpg');
   }
 };
 

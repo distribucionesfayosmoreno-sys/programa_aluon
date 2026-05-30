@@ -1,4 +1,5 @@
 import type { QuoteItemDraft } from "../BudgetWizard.types";
+import { budgetWizardIdeasImagePath, budgetWizardPublicPath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   isOpen: boolean;
@@ -20,7 +21,7 @@ const getStructureImageLabel = (doorType: string): string => {
 const getProductImage = (modelo: string, doorType: string) => {
   const modelCamel = modelo.charAt(0).toUpperCase() + modelo.slice(1).toLowerCase();
   const label = getStructureImageLabel(doorType);
-  return `/ideas/aluon/images/Modelo ${modelCamel} - ${label}.png`;
+  return budgetWizardIdeasImagePath(`Modelo ${modelCamel} - ${label}.png`);
 };
 
 const getOpeningImage = (doorType: string, bisagras: boolean) => {
@@ -28,12 +29,12 @@ const getOpeningImage = (doorType: string, bisagras: boolean) => {
   const isTwoLeaves = doorType === 'ABATIBLE_DOS';
   if (!bisagras) {
     return isTwoLeaves
-      ? '/ideas/aluon/images/abatible%20dos%20hojas%20izquierda.avif'
-      : '/ideas/aluon/images/izquierda.avif';
+      ? budgetWizardIdeasImagePath('abatible dos hojas izquierda.avif')
+      : budgetWizardIdeasImagePath('izquierda.avif');
   } else {
     return isTwoLeaves
-      ? '/ideas/aluon/images/abatible%20dos%20hojas%20derecha.jpg'
-      : '/ideas/aluon/images/derecha.jpg';
+      ? budgetWizardIdeasImagePath('abatible dos hojas derecha.jpg')
+      : budgetWizardIdeasImagePath('derecha.jpg');
   }
 };
 
@@ -80,7 +81,7 @@ export const DetailModal = ({ isOpen, onClose, items }: Props) => {
                       const target = e.currentTarget;
                       if (!target.src.includes('Modelo Bisel')) {
                         const label = getStructureImageLabel(item.doorType);
-                        target.src = `/ideas/aluon/images/Modelo Bisel - ${label}.png`;
+                        target.src = budgetWizardIdeasImagePath(`Modelo Bisel - ${label}.png`);
                       }
                     }}
                   />
@@ -93,7 +94,7 @@ export const DetailModal = ({ isOpen, onClose, items }: Props) => {
                 {item.doorType !== 'VALLA' ? (
                   <div className="relative h-24 bg-white border border-outline-variant/25 rounded-xl overflow-hidden flex flex-col items-center justify-center p-2 shadow-sm">
                     <img
-                      src="/assets/template.png"
+                      src={budgetWizardPublicPath('assets/template.png')}
                       alt="Template"
                       className="absolute inset-0 w-full h-full object-cover opacity-60"
                     />

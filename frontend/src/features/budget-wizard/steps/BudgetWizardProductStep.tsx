@@ -1,4 +1,5 @@
 import type { CatalogModel } from '../BudgetWizard.types';
+import { budgetWizardIdeasImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   model: CatalogModel;
@@ -17,7 +18,7 @@ const structures = [
 
 const getProductImage = (modelo: string, imageLabel: string) => {
   const modelCamel = modelo.charAt(0).toUpperCase() + modelo.slice(1).toLowerCase();
-  return `/ideas/aluon/images/Modelo ${modelCamel} - ${imageLabel}.png`;
+  return budgetWizardIdeasImagePath(`Modelo ${modelCamel} - ${imageLabel}.png`);
 };
 
 export const BudgetWizardProductStep = ({ model, loading, onBack, onSelect }: Props) => {
@@ -63,7 +64,7 @@ export const BudgetWizardProductStep = ({ model, loading, onBack, onSelect }: Pr
                 onError={(e) => {
                   const target = e.currentTarget;
                   if (!target.src.includes('Modelo Bisel')) {
-                    target.src = `/ideas/aluon/images/Modelo Bisel - ${structure.imageLabel}.png`;
+                    target.src = budgetWizardIdeasImagePath(`Modelo Bisel - ${structure.imageLabel}.png`);
                   }
                 }}
               />

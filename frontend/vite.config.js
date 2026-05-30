@@ -4,14 +4,16 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // https://vitejs.dev/config/
 export default defineConfig(function (_a) {
-    var _b;
+    var _b, _c;
     var mode = _a.mode;
     var rootDir = dirname(fileURLToPath(import.meta.url));
     var env = loadEnv(mode, rootDir, '');
     var apiTarget = ((_b = env.VITE_API_TARGET) !== null && _b !== void 0 ? _b : '').trim() || 'http://localhost:8080';
+    var baseUrl = ((_c = env.VITE_BASE_URL) !== null && _c !== void 0 ? _c : '').trim();
     console.log("[vite] proxy /api -> ".concat(apiTarget));
     return {
         root: rootDir,
+        base: baseUrl || undefined,
         plugins: [react()],
         server: {
             port: 5173,
