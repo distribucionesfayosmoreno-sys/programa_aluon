@@ -46,6 +46,7 @@ integrations:
     google-street-view:
       enabled: ${DOOR_SIMULATION_ENABLED:true}
       api-key: ${GOOGLE_STREET_VIEW_API_KEY:}
+      browser-api-key: ${GOOGLE_MAPS_BROWSER_API_KEY:${GOOGLE_STREET_VIEW_API_KEY:}}
       base-url: ${GOOGLE_STREET_VIEW_BASE_URL:https://maps.googleapis.com}
       default-image-size: ${DOOR_SIMULATION_DEFAULT_IMAGE_SIZE:640x640}
       default-fov: ${DOOR_SIMULATION_DEFAULT_FOV:90}

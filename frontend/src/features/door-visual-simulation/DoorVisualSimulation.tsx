@@ -1,11 +1,11 @@
 import { useDeferredValue } from 'react';
+import { GoogleStreetViewExplorer } from './components/GoogleStreetViewExplorer';
 import { MaskRectSelector } from './components/MaskRectSelector';
 import { useDoorVisualSimulation } from './useDoorVisualSimulation';
 
 export const DoorVisualSimulation = () => {
   const { state, actions } = useDoorVisualSimulation();
-  const deferredAddress = useDeferredValue(state.address.trim());
-  const streetViewEmbedUrl = `https://www.google.com/maps?q=${encodeURIComponent(deferredAddress || 'Madrid')}&output=embed`;
+  const deferredAddress = useDeferredValue(state.address);
 
   return (
     <div className="space-y-6">
@@ -183,7 +183,7 @@ export const DoorVisualSimulation = () => {
                 <button
                   type="button"
                   className="btn-primary px-4 py-2 rounded-xl text-xs tracking-widest"
-                  disabled={state.processing || state.address.trim().length === 0}
+                  disabled={state.processing || state.viewerLoading || state.address.trim().length === 0}
                   onClick={() => void actions.loadBaseImage()}
                 >
                   CARGAR SNAPSHOT
@@ -191,13 +191,25 @@ export const DoorVisualSimulation = () => {
               </div>
 
               <div className="h-[420px] overflow-hidden rounded-xl border border-dashed bg-white" style={{ borderColor: '#e8eaed' }}>
-                <iframe
-                  title="Google Maps Street View Explorer"
-                  src={streetViewEmbedUrl}
-                  className="h-full w-full"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
+                {state.mapsJavaScriptApiKey ? (
+                  <GoogleStreetViewExplorer
+                    apiKey={state.mapsJavaScriptApiKey}
+                    address={deferredAddress}
+                    heading={state.heading}
+                    pitch={state.pitch}
+                    onPositionChange={position => actions.setCoordinates(position?.lat ?? null, position?.lng ?? null)}
+                    onPovChange={pov => {
+                      actions.setHeading(pov.heading);
+                      actions.setPitch(pov.pitch);
+                    }}
+                    onLoadingChange={actions.setViewerLoading}
+                    onError={actions.setErrorMessage}
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center px-6 text-center text-sm font-semibold" style={{ color: '#8b949e' }}>
+                    Falta configurar `GOOGLE_MAPS_BROWSER_API_KEY` o `GOOGLE_STREET_VIEW_API_KEY` para el visor interactivo.
+                  </div>
+                )}
               </div>
             </div>
           )}

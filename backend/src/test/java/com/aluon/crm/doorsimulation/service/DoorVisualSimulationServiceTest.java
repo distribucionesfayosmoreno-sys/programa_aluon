@@ -27,20 +27,19 @@ class DoorVisualSimulationServiceTest {
 
     @Test
     void rejectsInvalidImageSize() {
-        DoorSimulationGoogleProperties props = new DoorSimulationGoogleProperties(true, "k", null, "640x640", 90);
+        DoorSimulationGoogleProperties props = new DoorSimulationGoogleProperties(true, "k", null, null, "640x640", 90);
         DoorVisualSimulationService service = new DoorVisualSimulationService(props, streetViewClient, objectStorageService, repo, events);
         assertThrows(IllegalArgumentException.class, () -> service.createJobAndFetchBaseImage(
-                new CreateDoorSimulationRequest("Calle Mayor 1", "800x800", null, null, null)
+                new CreateDoorSimulationRequest("Calle Mayor 1", "800x800", null, null, null, null, null)
         ));
     }
 
     @Test
     void rejectsInvalidFov() {
-        DoorSimulationGoogleProperties props = new DoorSimulationGoogleProperties(true, "k", null, "640x640", 90);
+        DoorSimulationGoogleProperties props = new DoorSimulationGoogleProperties(true, "k", null, null, "640x640", 90);
         DoorVisualSimulationService service = new DoorVisualSimulationService(props, streetViewClient, objectStorageService, repo, events);
         assertThrows(IllegalArgumentException.class, () -> service.createJobAndFetchBaseImage(
-                new CreateDoorSimulationRequest("Calle Mayor 1", "640x640", 200, null, null)
+                new CreateDoorSimulationRequest("Calle Mayor 1", "640x640", 200, null, null, null, null)
         ));
     }
 }
-

@@ -8,7 +8,8 @@ public record CreateDoorSimulationRequest(
         @Pattern(regexp = "640x640|512x512") String imageSize,
         Integer fov,
         Double heading,
-        Double pitch
+        Double pitch,
+        Double latitude,
+        Double longitude
 ) {
 }
-

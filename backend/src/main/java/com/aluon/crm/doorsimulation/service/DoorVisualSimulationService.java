@@ -3,6 +3,7 @@ package com.aluon.crm.doorsimulation.service;
 import com.aluon.crm.doorsimulation.config.DoorSimulationGoogleProperties;
 import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationRequest;
 import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationResponse;
+import com.aluon.crm.doorsimulation.dto.DoorSimulationFrontendConfigResponse;
 import com.aluon.crm.doorsimulation.dto.DoorSimulationStatusResponse;
 import com.aluon.crm.doorsimulation.dto.MaskRectDto;
 import com.aluon.crm.doorsimulation.dto.StartInpaintRequest;
@@ -44,7 +45,8 @@ public class DoorVisualSimulationService {
         if (!("640x640".equals(imageSize) || "512x512".equals(imageSize))) throw new IllegalArgumentException("imageSize inválido");
         if (fov < 10 || fov > 120) throw new IllegalArgumentException("fov inválido (10..120)");
 
-        byte[] bytes = streetViewClient.fetchStreetViewImage(address, imageSize, fov, request.heading(), request.pitch());
+        String location = resolveLocation(request, address);
+        byte[] bytes = streetViewClient.fetchStreetViewImage(location, imageSize, fov, request.heading(), request.pitch());
         if (bytes == null || bytes.length == 0) throw new IllegalArgumentException("No se pudo obtener la imagen base");
 
         String url = objectStorageService.putJpeg(bytes, "door-simulation/base");
@@ -104,6 +106,12 @@ public class DoorVisualSimulationService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public DoorSimulationFrontendConfigResponse getFrontendConfig() {
+        String browserApiKey = StringUtils.hasText(googleProps.browserApiKey()) ? googleProps.browserApiKey() : googleProps.apiKey();
+        return new DoorSimulationFrontendConfigResponse(googleProps.enabled(), browserApiKey);
+    }
+
     private static int[] parseSize(String imageSize) {
         if (!StringUtils.hasText(imageSize)) throw new IllegalArgumentException("imageSize inválido");
         String[] parts = imageSize.split("x");
@@ -116,5 +124,14 @@ public class DoorVisualSimulationService {
     private static String requireNonBlank(String value, String field) {
         if (value == null || value.isBlank()) throw new IllegalArgumentException(field + " es obligatorio");
         return value.trim();
+    }
+
+    private static String resolveLocation(CreateDoorSimulationRequest request, String fallbackAddress) {
+        Double latitude = request.latitude();
+        Double longitude = request.longitude();
+        if (latitude != null && longitude != null) {
+            return latitude + "," + longitude;
+        }
+        return fallbackAddress;
     }
 }

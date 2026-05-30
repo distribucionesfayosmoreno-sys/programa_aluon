@@ -1,6 +1,7 @@
 import type {
   CreateDoorSimulationRequest,
   CreateDoorSimulationResponse,
+  DoorSimulationFrontendConfig,
   DoorSimulationStatusResponse,
   StartInpaintRequest,
   StartInpaintResponse,
@@ -22,6 +23,12 @@ export const createDoorSimulationJob = async (payload: CreateDoorSimulationReque
   return response.json() as Promise<CreateDoorSimulationResponse>;
 };
 
+export const getDoorSimulationFrontendConfig = async (): Promise<DoorSimulationFrontendConfig> => {
+  const response = await fetch('/api/door-visual-simulations/config');
+  await assertOk(response, 'Error al cargar la configuración del visor');
+  return response.json() as Promise<DoorSimulationFrontendConfig>;
+};
+
 export const startDoorSimulationInpaint = async (jobId: string, payload: StartInpaintRequest): Promise<StartInpaintResponse> => {
   const response = await fetch(`/api/door-visual-simulations/${encodeURIComponent(jobId)}/inpaint`, {
     method: 'POST',
@@ -37,4 +44,3 @@ export const getDoorSimulationStatus = async (jobId: string): Promise<DoorSimula
   await assertOk(response, 'Error al consultar el estado');
   return response.json() as Promise<DoorSimulationStatusResponse>;
 };
-

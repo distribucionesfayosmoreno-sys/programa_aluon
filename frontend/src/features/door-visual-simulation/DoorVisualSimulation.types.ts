@@ -6,6 +6,8 @@ export type CreateDoorSimulationRequest = {
   fov?: number;
   heading?: number | null;
   pitch?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
 };
 
 export type CreateDoorSimulationResponse = {
@@ -45,12 +47,21 @@ export type DoorSimulationStatusResponse = {
   updatedAt: string;
 };
 
+export type DoorSimulationFrontendConfig = {
+  enabled: boolean;
+  mapsJavaScriptApiKey: string;
+};
+
 export type DoorVisualSimulationViewState = {
   address: string;
   imageSize: '640x640' | '512x512';
   fov: number;
   heading: number | null;
   pitch: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  mapsJavaScriptApiKey: string | null;
+  viewerLoading: boolean;
   prompt: string;
   negativePrompt: string;
   jobId: string | null;
@@ -70,6 +81,9 @@ export type DoorVisualSimulationActions = {
   setFov: (value: number) => void;
   setHeading: (value: number | null) => void;
   setPitch: (value: number | null) => void;
+  setCoordinates: (latitude: number | null, longitude: number | null) => void;
+  setViewerLoading: (value: boolean) => void;
+  setErrorMessage: (value: string | null) => void;
   setPrompt: (value: string) => void;
   setNegativePrompt: (value: string) => void;
   setMaskRect: (value: MaskRect | null) => void;

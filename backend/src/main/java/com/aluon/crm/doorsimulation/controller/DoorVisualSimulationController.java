@@ -2,6 +2,7 @@ package com.aluon.crm.doorsimulation.controller;
 
 import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationRequest;
 import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationResponse;
+import com.aluon.crm.doorsimulation.dto.DoorSimulationFrontendConfigResponse;
 import com.aluon.crm.doorsimulation.dto.DoorSimulationStatusResponse;
 import com.aluon.crm.doorsimulation.dto.StartInpaintRequest;
 import com.aluon.crm.doorsimulation.dto.StartInpaintResponse;
@@ -25,6 +26,11 @@ public class DoorVisualSimulationController {
     @PostMapping
     public ResponseEntity<CreateDoorSimulationResponse> create(@Valid @RequestBody CreateDoorSimulationRequest request) {
         return ResponseEntity.ok(service.createJobAndFetchBaseImage(request));
+    }
+
+    @GetMapping("/config")
+    public ResponseEntity<DoorSimulationFrontendConfigResponse> getConfig() {
+        return ResponseEntity.ok(service.getFrontendConfig());
     }
 
     @PostMapping("/{jobId}/inpaint")

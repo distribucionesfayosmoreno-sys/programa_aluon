@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DoorSimulationJobStatus, DoorVisualSimulationActions, DoorVisualSimulationViewState, MaskRect } from './DoorVisualSimulation.types';
-import { createDoorSimulationJob, getDoorSimulationStatus, startDoorSimulationInpaint } from './doorVisualSimulationApi';
+import { createDoorSimulationJob, getDoorSimulationFrontendConfig, getDoorSimulationStatus, startDoorSimulationInpaint } from './doorVisualSimulationApi';
 
 const clampInt = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, Math.round(value)));
 
@@ -18,6 +18,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
   const [fov, setFov] = useState(90);
   const [heading, setHeading] = useState<number | null>(null);
   const [pitch, setPitch] = useState<number | null>(null);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [mapsJavaScriptApiKey, setMapsJavaScriptApiKey] = useState<string | null>(null);
+  const [viewerLoading, setViewerLoading] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
   const [jobId, setJobId] = useState<string | null>(null);
@@ -39,6 +43,25 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
       window.clearTimeout(pollTimer.current);
       pollTimer.current = null;
     }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getDoorSimulationFrontendConfig()
+      .then(config => {
+        if (!cancelled) {
+          setMapsJavaScriptApiKey(config.mapsJavaScriptApiKey || null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMapsJavaScriptApiKey(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -64,6 +87,9 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setFov(90);
     setHeading(null);
     setPitch(null);
+    setLatitude(null);
+    setLongitude(null);
+    setViewerLoading(false);
   }, [stopPolling]);
 
   const loadBaseImage = useCallback(async () => {
@@ -80,6 +106,8 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
         fov,
         heading,
         pitch,
+        latitude,
+        longitude,
       });
       setJobId(resp.jobId);
       setBaseImageUrl(resp.baseImageUrl);
@@ -92,7 +120,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     } finally {
       setProcessing(false);
     }
-  }, [address, fov, heading, imageSize, pitch, stopPolling]);
+  }, [address, fov, heading, imageSize, latitude, longitude, pitch, stopPolling]);
 
   const pollOnce = useCallback(async (id: string) => {
     try {
@@ -169,6 +197,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     fov,
     heading,
     pitch,
+    latitude,
+    longitude,
+    mapsJavaScriptApiKey,
+    viewerLoading,
     prompt,
     negativePrompt,
     jobId,
@@ -180,7 +212,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     processing,
     resultImageUrl,
     error,
-  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, fov, heading, imageSize, jobId, maskRect, negativePrompt, pitch, processing, prompt, resultImageUrl, status]);
+  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, fov, heading, imageSize, jobId, latitude, longitude, mapsJavaScriptApiKey, maskRect, negativePrompt, pitch, processing, prompt, resultImageUrl, status, viewerLoading]);
 
   const actions = useMemo<DoorVisualSimulationActions>(() => ({
     setAddress,
@@ -188,6 +220,12 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setFov,
     setHeading,
     setPitch,
+    setCoordinates: (nextLatitude: number | null, nextLongitude: number | null) => {
+      setLatitude(nextLatitude);
+      setLongitude(nextLongitude);
+    },
+    setViewerLoading,
+    setErrorMessage: setError,
     setPrompt,
     setNegativePrompt,
     setMaskRect,

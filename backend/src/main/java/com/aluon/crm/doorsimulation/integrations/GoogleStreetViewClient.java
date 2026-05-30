@@ -18,16 +18,16 @@ public class GoogleStreetViewClient {
     private final DoorSimulationGoogleProperties props;
     private final RestClient doorSimulationRestClient;
 
-    public byte[] fetchStreetViewImage(String address, String size, int fov, Double heading, Double pitch) {
+    public byte[] fetchStreetViewImage(String location, String size, int fov, Double heading, Double pitch) {
         assertEnabledAndConfigured();
-        if (!StringUtils.hasText(address)) throw new IllegalArgumentException("address es obligatorio");
+        if (!StringUtils.hasText(location)) throw new IllegalArgumentException("location es obligatorio");
         String finalSize = StringUtils.hasText(size) ? size : props.defaultImageSize();
 
         String uri = UriComponentsBuilder
                 .fromUriString(baseUrl())
                 .path("/maps/api/streetview")
                 .queryParam("size", finalSize)
-                .queryParam("location", address)
+                .queryParam("location", location)
                 .queryParam("fov", fov)
                 .queryParam("return_error_code", "true")
                 .queryParamIfPresent("heading", heading == null ? java.util.Optional.empty() : java.util.Optional.of(heading))

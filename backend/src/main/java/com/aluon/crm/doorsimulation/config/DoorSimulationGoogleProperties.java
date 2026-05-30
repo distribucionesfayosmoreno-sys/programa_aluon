@@ -6,9 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record DoorSimulationGoogleProperties(
         boolean enabled,
         String apiKey,
+        String browserApiKey,
         String baseUrl,
         String defaultImageSize,
         int defaultFov
 ) {
 }
-
