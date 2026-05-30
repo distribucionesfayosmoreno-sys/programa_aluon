@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Formulario Pedido · Peatonal</title>
+    <link rel="stylesheet" href="./form-template.css" />
+  </head>
+  <body>
+    <main class="sheet">
+      <div class="form-canvas">
+        <img
+          class="form-bg"
+          alt="Formulario pedido peatonal"
+          src="../Formulario-pedido-Aluon-Distribuidores- PEATONAL.jpg"
+        />
+
+        <!-- Cabecera -->
+        <div id="distributor" class="field" data-field="distributor"></div>
+        <div id="quoteNumber" class="field mono" data-field="quoteNumber"></div>
+        <div id="date" class="field mono" data-field="date"></div>
+
+        <div id="doorModel" class="field" data-field="doorModel"></div>
+        <div id="colorRef" class="field" data-field="colorRef"></div>
+        <div id="finish" class="field" data-field="finish"></div>
+
+        <!-- Portero automático -->
+        <div id="porterYes" class="box" data-field="porterYes" aria-label="Portero sí"></div>
+        <div id="porterNo" class="box" data-field="porterNo" aria-label="Portero no"></div>
+
+        <!-- Bisagra -->
+        <div id="hingeLeft" class="box" data-field="hingeLeft" aria-label="Bisagra izquierda"></div>
+        <div id="hingeRight" class="box" data-field="hingeRight" aria-label="Bisagra derecha"></div>
+
+        <!-- Medidas -->
+        <div id="heightTotalCm" class="field mono" data-field="heightTotalCm"></div>
+        <div id="floorClearanceCm" class="field mono" data-field="floorClearanceCm"></div>
+        <div id="widthTotalCm" class="field mono" data-field="widthTotalCm"></div>
+
+        <!-- Observaciones / nombre -->
+        <div id="installerName" class="field" data-field="installerName"></div>
+        <div id="observations" class="field multiline" data-field="observations"></div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { mountTemplate } from "./form-template.js";
+
+      mountTemplate({
+        baseWidth: 2045,
+        baseHeight: 3043,
+        rects: {
+          distributor: { x: 30, y: 300, w: 1100, h: 70 },
+          quoteNumber: { x: 1165, y: 300, w: 470, h: 70 },
+          date: { x: 1675, y: 300, w: 350, h: 70 },
+
+          doorModel: { x: 30, y: 470, w: 1100, h: 70 },
+          colorRef: { x: 1165, y: 470, w: 470, h: 70 },
+          finish: { x: 1675, y: 470, w: 350, h: 70 },
+
+          porterYes: { x: 1685, y: 760, w: 55, h: 55 },
+          porterNo: { x: 1795, y: 760, w: 55, h: 55 },
+
+          hingeLeft: { x: 690, y: 1015, w: 55, h: 55 },
+          hingeRight: { x: 1325, y: 1015, w: 55, h: 55 },
+
+          heightTotalCm: { x: 255, y: 1595, w: 310, h: 62 },
+          floorClearanceCm: { x: 1725, y: 1740, w: 285, h: 62 },
+          widthTotalCm: { x: 1000, y: 2140, w: 310, h: 62 },
+
+          observations: { x: 20, y: 2390, w: 2005, h: 200 },
+          installerName: { x: 1400, y: 2325, w: 625, h: 62 },
+        },
+        data: {
+          distributor: "__DISTRIBUIDOR__",
+          quoteNumber: "__PRESUPUESTO__",
+          date: "__FECHA__",
+          doorModel: "__MODELO__",
+          colorRef: "__COLOR_REF__",
+          finish: "__ACABADO__",
+          porterYes: false,
+          porterNo: false,
+          hingeLeft: false,
+          hingeRight: false,
+          heightTotalCm: "__ALTURA_CM__",
+          floorClearanceCm: "__HOLGURA_CM__",
+          widthTotalCm: "__ANCHO_CM__",
+          installerName: "__NOMBRE__",
+          observations: "__OBSERVACIONES__",
+        },
+      });
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Formulario Pedido · Corredera (Parte 1)</title>
+    <link rel="stylesheet" href="./form-template.css" />
+  </head>
+  <body>
+    <main class="sheet">
+      <div class="form-canvas">
+        <img
+          class="form-bg"
+          alt="Formulario pedido corredera parte 1"
+          src="../Formulario-pedido-Aluon-Distribuidores- CORREDERA PARTE 1.jpg"
+        />
+
+        <div id="distributor" class="field" data-field="distributor"></div>
+        <div id="quoteNumber" class="field mono" data-field="quoteNumber"></div>
+        <div id="date" class="field mono" data-field="date"></div>
+
+        <div id="doorModel" class="field" data-field="doorModel"></div>
+        <div id="colorRef" class="field" data-field="colorRef"></div>
+        <div id="finish" class="field" data-field="finish"></div>
+
+        <!-- Automatización -->
+        <div id="automationYes" class="box" data-field="automationYes"></div>
+        <div id="automationNo" class="box" data-field="automationNo"></div>
+
+        <!-- Apertura -->
+        <div id="openingLeft" class="box" data-field="openingLeft"></div>
+        <div id="openingRight" class="box" data-field="openingRight"></div>
+
+        <!-- Medidas -->
+        <div id="heightTotalCm" class="field mono" data-field="heightTotalCm"></div>
+        <div id="widthLeftCm" class="field mono" data-field="widthLeftCm"></div>
+        <div id="widthRightCm" class="field mono" data-field="widthRightCm"></div>
+
+        <!-- Carril -->
+        <div id="rail16" class="box" data-field="rail16"></div>
+        <div id="rail20" class="box" data-field="rail20"></div>
+
+        <!-- Montaje -->
+        <div id="mountA" class="box" data-field="mountA"></div>
+        <div id="mountB" class="box" data-field="mountB"></div>
+
+        <div id="installerName" class="field" data-field="installerName"></div>
+        <div id="observations" class="field multiline" data-field="observations"></div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { mountTemplate } from "./form-template.js";
+
+      mountTemplate({
+        baseWidth: 2058,
+        baseHeight: 3057,
+        rects: {
+          distributor: { x: 30, y: 300, w: 1110, h: 70 },
+          quoteNumber: { x: 1175, y: 300, w: 470, h: 70 },
+          date: { x: 1685, y: 300, w: 350, h: 70 },
+
+          doorModel: { x: 30, y: 470, w: 1110, h: 70 },
+          colorRef: { x: 1175, y: 470, w: 470, h: 70 },
+          finish: { x: 1685, y: 470, w: 350, h: 70 },
+
+          automationYes: { x: 455, y: 755, w: 55, h: 55 },
+          automationNo: { x: 565, y: 755, w: 55, h: 55 },
+
+          openingLeft: { x: 250, y: 1065, w: 55, h: 55 },
+          openingRight: { x: 1700, y: 1065, w: 55, h: 55 },
+
+          heightTotalCm: { x: 1010, y: 980, w: 360, h: 62 },
+          widthLeftCm: { x: 560, y: 1475, w: 360, h: 62 },
+          widthRightCm: { x: 1300, y: 1475, w: 360, h: 62 },
+
+          rail16: { x: 1375, y: 1740, w: 55, h: 55 },
+          rail20: { x: 1565, y: 1740, w: 55, h: 55 },
+
+          mountA: { x: 170, y: 1915, w: 55, h: 55 },
+          mountB: { x: 1840, y: 1915, w: 55, h: 55 },
+
+          observations: { x: 20, y: 2770, w: 2015, h: 210 },
+          installerName: { x: 1410, y: 2705, w: 635, h: 62 },
+        },
+        data: {
+          distributor: "__DISTRIBUIDOR__",
+          quoteNumber: "__PRESUPUESTO__",
+          date: "__FECHA__",
+          doorModel: "__MODELO__",
+          colorRef: "__COLOR_REF__",
+          finish: "__ACABADO__",
+          automationYes: false,
+          automationNo: false,
+          openingLeft: false,
+          openingRight: false,
+          heightTotalCm: "__ALTURA_CM__",
+          widthLeftCm: "__ANCHO_IZQ_CM__",
+          widthRightCm: "__ANCHO_DER_CM__",
+          rail16: false,
+          rail20: false,
+          mountA: false,
+          mountB: false,
+          installerName: "__NOMBRE__",
+          observations: "__OBSERVACIONES__",
+        },
+      });
+    </script>
+  </body>
+</html>
+

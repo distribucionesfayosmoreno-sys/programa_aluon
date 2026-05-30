@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Formulario Pedido · Abatible 1 hoja</title>
+    <link rel="stylesheet" href="./form-template.css" />
+  </head>
+  <body>
+    <main class="sheet">
+      <div class="form-canvas">
+        <img
+          class="form-bg"
+          alt="Formulario pedido abatible una hoja"
+          src="../Formulario-pedido-Aluon-Distribuidores- ABATIBLE DE UNA HOJA.jpg"
+        />
+
+        <div id="distributor" class="field" data-field="distributor"></div>
+        <div id="quoteNumber" class="field mono" data-field="quoteNumber"></div>
+        <div id="date" class="field mono" data-field="date"></div>
+
+        <div id="doorModel" class="field" data-field="doorModel"></div>
+        <div id="colorRef" class="field" data-field="colorRef"></div>
+        <div id="finish" class="field" data-field="finish"></div>
+
+        <!-- Automatización -->
+        <div id="automationYes" class="box" data-field="automationYes"></div>
+        <div id="automationNo" class="box" data-field="automationNo"></div>
+
+        <!-- Bisagra -->
+        <div id="hingeLeft" class="box" data-field="hingeLeft"></div>
+        <div id="hingeRight" class="box" data-field="hingeRight"></div>
+
+        <!-- Medidas -->
+        <div id="heightLeftCm" class="field mono" data-field="heightLeftCm"></div>
+        <div id="heightRightCm" class="field mono" data-field="heightRightCm"></div>
+        <div id="floorClearance" class="field mono" data-field="floorClearance"></div>
+        <div id="widthTotalCm" class="field mono" data-field="widthTotalCm"></div>
+
+        <div id="installerName" class="field" data-field="installerName"></div>
+        <div id="observations" class="field multiline" data-field="observations"></div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { mountTemplate } from "./form-template.js";
+
+      mountTemplate({
+        baseWidth: 2043,
+        baseHeight: 3056,
+        rects: {
+          distributor: { x: 30, y: 300, w: 1100, h: 70 },
+          quoteNumber: { x: 1165, y: 300, w: 470, h: 70 },
+          date: { x: 1675, y: 300, w: 350, h: 70 },
+
+          doorModel: { x: 30, y: 470, w: 1100, h: 70 },
+          colorRef: { x: 1165, y: 470, w: 470, h: 70 },
+          finish: { x: 1675, y: 470, w: 350, h: 70 },
+
+          automationYes: { x: 455, y: 755, w: 55, h: 55 },
+          automationNo: { x: 565, y: 755, w: 55, h: 55 },
+
+          hingeLeft: { x: 520, y: 1145, w: 55, h: 55 },
+          hingeRight: { x: 1370, y: 1145, w: 55, h: 55 },
+
+          heightLeftCm: { x: 60, y: 1545, w: 300, h: 62 },
+          heightRightCm: { x: 1690, y: 1545, w: 300, h: 62 },
+          floorClearance: { x: 1060, y: 1860, w: 420, h: 62 },
+          widthTotalCm: { x: 1110, y: 2235, w: 420, h: 62 },
+
+          observations: { x: 20, y: 2395, w: 2005, h: 210 },
+          installerName: { x: 1400, y: 2330, w: 625, h: 62 },
+        },
+        data: {
+          distributor: "__DISTRIBUIDOR__",
+          quoteNumber: "__PRESUPUESTO__",
+          date: "__FECHA__",
+          doorModel: "__MODELO__",
+          colorRef: "__COLOR_REF__",
+          finish: "__ACABADO__",
+          automationYes: false,
+          automationNo: false,
+          hingeLeft: false,
+          hingeRight: false,
+          heightLeftCm: "__ALTURA_IZQ_CM__",
+          heightRightCm: "__ALTURA_DER_CM__",
+          floorClearance: "__HOLGURA_CM__",
+          widthTotalCm: "__ANCHO_CM__",
+          installerName: "__NOMBRE__",
+          observations: "__OBSERVACIONES__",
+        },
+      });
+    </script>
+  </body>
+</html>
+
