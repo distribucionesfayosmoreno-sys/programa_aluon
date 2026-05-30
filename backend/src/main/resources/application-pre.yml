@@ -27,3 +27,28 @@ spring:
     events:
       jdbc-schema-initialization:
         enabled: true
+
+integrations:
+  door-simulation:
+    google-street-view:
+      enabled: ${DOOR_SIMULATION_ENABLED:false}
+      api-key: ${GOOGLE_STREET_VIEW_API_KEY:}
+      base-url: ${GOOGLE_STREET_VIEW_BASE_URL:https://maps.googleapis.com}
+      default-image-size: ${DOOR_SIMULATION_DEFAULT_IMAGE_SIZE:640x640}
+      default-fov: ${DOOR_SIMULATION_DEFAULT_FOV:90}
+    stability:
+      enabled: ${DOOR_SIMULATION_ENABLED:false}
+      api-key: ${STABILITY_API_KEY:}
+      base-url: ${STABILITY_BASE_URL:https://api.stability.ai}
+      inpaint-path: ${STABILITY_INPAINT_PATH:/v2beta/stable-image/edit/inpaint}
+      default-prompt: ${DOOR_SIMULATION_DEFAULT_PROMPT:replace the existing door with a realistic modern door, photorealistic, consistent lighting, same perspective}
+      default-negative-prompt: ${DOOR_SIMULATION_DEFAULT_NEGATIVE_PROMPT:}
+      output-format: ${STABILITY_OUTPUT_FORMAT:png}
+    object-storage:
+      enabled: ${DOOR_SIMULATION_ENABLED:false}
+      endpoint: ${OBJECT_STORAGE_ENDPOINT:}
+      region: ${OBJECT_STORAGE_REGION:us-east-1}
+      bucket: ${OBJECT_STORAGE_BUCKET:}
+      access-key: ${OBJECT_STORAGE_ACCESS_KEY:}
+      secret-key: ${OBJECT_STORAGE_SECRET_KEY:}
+      public-base-url: ${OBJECT_STORAGE_PUBLIC_BASE_URL:}
