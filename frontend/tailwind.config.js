@@ -9,11 +9,11 @@ export default {
       fontFamily: {
         sans:    ['Fira Sans', 'system-ui', 'sans-serif'],
         mono:    ['Fira Code', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', 'monospace'],
-        headline: ["Space Grotesk"],
+        headline: ["Nexa"],
         body: ["Sora"],
         label: ["Sora"],
         inter: ["Inter"],
-        space: ["Space Grotesk"],
+        space: ["Nexa"],
         sora: ["Sora"],
       },
       colors: {
