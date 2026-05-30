@@ -2,27 +2,18 @@ import { useDeferredValue } from 'react';
 import { GoogleStreetViewExplorer } from './components/GoogleStreetViewExplorer';
 import { MaskRectSelector } from './components/MaskRectSelector';
 import { useDoorVisualSimulation } from './useDoorVisualSimulation';
+import { DoorConfigurator } from './components/DoorConfigurator';
+import { BudgetAssigner } from './components/BudgetAssigner';
 
 export const DoorVisualSimulation = () => {
   const { state, actions } = useDoorVisualSimulation();
   const deferredAddress = useDeferredValue(state.address);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-black" style={{ color: '#0d1117' }}>Simulación Visual de Puertas</h1>
-          <p className="text-xs font-semibold" style={{ color: '#8b949e' }}>
-            1) Carga fachada · 2) Marca puerta · 3) Inpainting · 4) Resultado
-          </p>
-        </div>
-        <button type="button" className="btn-secondary px-4 py-2 rounded-xl text-xs font-black tracking-widest" onClick={actions.reset}>
-          RESET
-        </button>
-      </div>
+    <div className="flex-1 flex flex-col min-h-0 gap-6">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-1 bg-white rounded-2xl p-5 border" style={{ borderColor: '#e8eaed' }}>
+      <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
+        <section className="w-full lg:w-[450px] shrink-0 min-h-0 overflow-y-auto bg-white rounded-2xl p-5 border flex flex-col" style={{ borderColor: '#e8eaed' }}>
           <div className="space-y-4">
             <div>
               <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Dirección</label>
@@ -124,26 +115,8 @@ export const DoorVisualSimulation = () => {
               )}
             </div>
 
-            <div className="pt-2">
-              <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Prompt (opcional)</label>
-              <textarea
-                className="mt-2 w-full rounded-xl border px-4 py-3 text-sm min-h-[88px]"
-                placeholder="Describe la puerta deseada..."
-                value={state.prompt}
-                onChange={e => actions.setPrompt(e.target.value)}
-                disabled={state.processing}
-              />
-            </div>
-
-            <div>
-              <label className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>Negative prompt (opcional)</label>
-              <textarea
-                className="mt-2 w-full rounded-xl border px-4 py-3 text-sm min-h-[72px]"
-                placeholder="Cosas a evitar..."
-                value={state.negativePrompt}
-                onChange={e => actions.setNegativePrompt(e.target.value)}
-                disabled={state.processing}
-              />
+            <div className="pt-4 border-t border-dashed" style={{ borderColor: '#e8eaed' }}>
+              <DoorConfigurator state={state} actions={actions} />
             </div>
 
             <button
@@ -165,24 +138,29 @@ export const DoorVisualSimulation = () => {
                 {state.error}
               </div>
             )}
+            
+            <BudgetAssigner state={state} actions={actions} />
           </div>
         </section>
 
-        <section className="lg:col-span-2 bg-white rounded-2xl p-5 border" style={{ borderColor: '#e8eaed' }}>
+        <section className="flex-1 flex flex-col min-w-0 bg-white rounded-2xl p-5 border" style={{ borderColor: '#e8eaed' }}>
           {!state.baseImageUrl && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
-                    Explorador manual
+            <div className="flex flex-col flex-1 min-h-0 space-y-4">
+              <div className="flex items-center justify-between gap-4 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#f8f9fb] flex items-center justify-center text-[#8b949e]">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                      <polyline strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" points="9 22 9 12 15 12 15 22" />
+                    </svg>
                   </div>
-                  <div className="text-sm font-semibold" style={{ color: '#0d1117' }}>
+                  <div className="text-xs font-semibold" style={{ color: '#8b949e' }}>
                     Usa el mapa embebido para localizar la fachada antes de cargar el snapshot.
                   </div>
                 </div>
                 <button
                   type="button"
-                  className="btn-primary px-4 py-2 rounded-xl text-xs tracking-widest"
+                  className="btn-primary px-4 py-2 rounded-xl text-xs tracking-widest shrink-0"
                   disabled={state.processing || state.viewerLoading || state.address.trim().length === 0}
                   onClick={() => void actions.loadBaseImage()}
                 >
@@ -190,7 +168,7 @@ export const DoorVisualSimulation = () => {
                 </button>
               </div>
 
-              <div className="h-[420px] overflow-hidden rounded-xl border border-dashed bg-white" style={{ borderColor: '#e8eaed' }}>
+              <div className="flex-1 min-h-0 overflow-hidden rounded-xl border border-dashed bg-white" style={{ borderColor: '#e8eaed' }}>
                 {state.mapsJavaScriptApiKey ? (
                   <GoogleStreetViewExplorer
                     apiKey={state.mapsJavaScriptApiKey}
@@ -215,27 +193,31 @@ export const DoorVisualSimulation = () => {
           )}
 
           {state.baseImageUrl && state.baseImageWidth && state.baseImageHeight && (
-            <div className="space-y-4">
-              <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+            <div className="flex flex-col flex-1 min-h-0 space-y-4">
+              <div className="text-xs font-black uppercase tracking-widest shrink-0" style={{ color: '#8b949e' }}>
                 Selecciona el rectángulo de la puerta
               </div>
-              <MaskRectSelector
-                imageUrl={state.baseImageUrl}
-                disabled={state.processing}
-                value={state.maskRect}
-                onChange={actions.setMaskRect}
-                imageWidth={state.baseImageWidth}
-                imageHeight={state.baseImageHeight}
-              />
+              <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden rounded-xl border bg-gray-50">
+                <MaskRectSelector
+                  imageUrl={state.baseImageUrl}
+                  disabled={state.processing}
+                  value={state.maskRect}
+                  onChange={actions.setMaskRect}
+                  imageWidth={state.baseImageWidth}
+                  imageHeight={state.baseImageHeight}
+                />
+              </div>
             </div>
           )}
 
           {state.resultImageUrl && (
-            <div className="mt-6 space-y-3">
-              <div className="text-xs font-black uppercase tracking-widest" style={{ color: '#8b949e' }}>
+            <div className="mt-6 flex flex-col flex-1 min-h-0 space-y-3">
+              <div className="text-xs font-black uppercase tracking-widest shrink-0" style={{ color: '#8b949e' }}>
                 Resultado
               </div>
-              <img src={state.resultImageUrl} alt="Resultado" className="max-w-full h-auto rounded-xl border" />
+              <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden rounded-xl border bg-gray-50">
+                <img src={state.resultImageUrl} alt="Resultado" className="max-w-full max-h-full object-contain" />
+              </div>
             </div>
           )}
         </section>

@@ -24,6 +24,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
   const [viewerLoading, setViewerLoading] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [negativePrompt, setNegativePrompt] = useState('');
+  const [doorModel, setDoorModel] = useState('');
+  const [doorType, setDoorType] = useState('');
+  const [doorColor, setDoorColor] = useState('');
+  const [selectedBudgetId, setSelectedBudgetId] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [baseImageUrl, setBaseImageUrl] = useState<string | null>(null);
   const [baseImageWidth, setBaseImageWidth] = useState<number | null>(null);
@@ -90,6 +94,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setLatitude(null);
     setLongitude(null);
     setViewerLoading(false);
+    setDoorModel('');
+    setDoorType('');
+    setDoorColor('');
+    setSelectedBudgetId(null);
   }, [stopPolling]);
 
   const loadBaseImage = useCallback(async () => {
@@ -191,6 +199,18 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     }
   }, [baseImageHeight, baseImageWidth, jobId, maskRect, negativePrompt, pollOnce, prompt, stopPolling]);
 
+  useEffect(() => {
+    if (!doorModel && !doorType && !doorColor) return;
+    
+    const elements = [];
+    if (doorModel) elements.push(`${doorModel.toLowerCase()} style`);
+    if (doorColor) elements.push(`${doorColor.toLowerCase()} color`);
+    if (doorType) elements.push(`${doorType.toLowerCase()}`);
+    
+    const newPrompt = `A high quality, realistic replacement house door, ${elements.join(', ')}, clear daytime lighting, photorealistic, 8k resolution, architectural photography`;
+    setPrompt(newPrompt);
+  }, [doorModel, doorType, doorColor]);
+
   const state = useMemo<DoorVisualSimulationViewState>(() => ({
     address,
     imageSize,
@@ -203,6 +223,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     viewerLoading,
     prompt,
     negativePrompt,
+    doorModel,
+    doorType,
+    doorColor,
+    selectedBudgetId,
     jobId,
     baseImageUrl,
     baseImageWidth,
@@ -212,7 +236,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     processing,
     resultImageUrl,
     error,
-  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, fov, heading, imageSize, jobId, latitude, longitude, mapsJavaScriptApiKey, maskRect, negativePrompt, pitch, processing, prompt, resultImageUrl, status, viewerLoading]);
+  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, fov, heading, imageSize, jobId, latitude, longitude, mapsJavaScriptApiKey, maskRect, negativePrompt, doorModel, doorType, doorColor, selectedBudgetId, pitch, processing, prompt, resultImageUrl, status, viewerLoading]);
 
   const actions = useMemo<DoorVisualSimulationActions>(() => ({
     setAddress,
@@ -228,6 +252,10 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setErrorMessage: setError,
     setPrompt,
     setNegativePrompt,
+    setDoorModel,
+    setDoorType,
+    setDoorColor,
+    setSelectedBudgetId,
     setMaskRect,
     loadBaseImage,
     startInpaint,

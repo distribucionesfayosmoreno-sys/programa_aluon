@@ -26,7 +26,8 @@ public class DoorSimulationAssetsController {
         if (!StringUtils.hasText(assetPath)) {
             return ResponseEntity.notFound().build();
         }
-        String path = "/api/door-visual-simulations/assets/" + assetPath;
+        String cleanAssetPath = assetPath.startsWith("/") ? assetPath.substring(1) : assetPath;
+        String path = "/api/door-visual-simulations/assets/" + cleanAssetPath;
         byte[] body = objectStorageService.getBytesFromUrl(path);
         MediaType mediaType = path.endsWith(".png") ? MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG;
         return ResponseEntity.ok()

@@ -64,6 +64,10 @@ export type DoorVisualSimulationViewState = {
   viewerLoading: boolean;
   prompt: string;
   negativePrompt: string;
+  doorModel: string;
+  doorType: string;
+  doorColor: string;
+  selectedBudgetId: string | null;
   jobId: string | null;
   baseImageUrl: string | null;
   baseImageWidth: number | null;
@@ -86,6 +90,10 @@ export type DoorVisualSimulationActions = {
   setErrorMessage: (value: string | null) => void;
   setPrompt: (value: string) => void;
   setNegativePrompt: (value: string) => void;
+  setDoorModel: (value: string) => void;
+  setDoorType: (value: string) => void;
+  setDoorColor: (value: string) => void;
+  setSelectedBudgetId: (value: string | null) => void;
   setMaskRect: (value: MaskRect | null) => void;
   loadBaseImage: () => Promise<void>;
   startInpaint: () => Promise<void>;

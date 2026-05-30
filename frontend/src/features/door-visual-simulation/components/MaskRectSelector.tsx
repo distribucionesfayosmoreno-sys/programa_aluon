@@ -104,7 +104,7 @@ export const MaskRectSelector = ({ imageUrl, disabled, value, onChange, imageWid
   return (
     <div
       ref={containerRef}
-      className="relative inline-block select-none"
+      className="relative flex select-none max-w-full max-h-full items-center justify-center"
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -115,7 +115,7 @@ export const MaskRectSelector = ({ imageUrl, disabled, value, onChange, imageWid
         ref={imgRef}
         src={imageUrl}
         alt="Fachada"
-        className="max-w-full h-auto rounded-xl border"
+        className="max-w-full max-h-full object-contain rounded-xl shadow-sm"
         onLoad={syncDisplaySize}
       />
       {overlayStyle && (

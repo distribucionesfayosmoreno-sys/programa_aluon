@@ -8,6 +8,14 @@ lsof -ti:5173 | xargs kill -9 2>/dev/null || true
 # Obtener la ruta raíz del proyecto
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# Cargar variables de entorno desde .env.local (si existe)
+if [ -f "$PROJECT_ROOT/.env.local" ]; then
+  echo "📦 Cargando variables desde .env.local..."
+  set -a
+  source "$PROJECT_ROOT/.env.local"
+  set +a
+fi
+
 # Configurar JAVA_HOME para usar OpenJDK 21 instalado mediante Homebrew
 export JAVA_HOME="/usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 

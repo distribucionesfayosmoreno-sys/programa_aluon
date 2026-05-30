@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type LatLng = {
   lat: number;
@@ -130,6 +130,24 @@ export const GoogleStreetViewExplorer = ({
   const geocoderRef = useRef<GeocoderHandle | null>(null);
   const [loaded, setLoaded] = useState(false);
 
+  // Stabilize callbacks via refs to prevent re-init of the panorama
+  const onPositionChangeRef = useRef(onPositionChange);
+  onPositionChangeRef.current = onPositionChange;
+
+  const onPovChangeRef = useRef(onPovChange);
+  onPovChangeRef.current = onPovChange;
+
+  const onLoadingChangeRef = useRef(onLoadingChange);
+  onLoadingChangeRef.current = onLoadingChange;
+
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
+
+  // Store initial heading/pitch for panorama creation only
+  const initialHeadingRef = useRef(heading);
+  const initialPitchRef = useRef(pitch);
+
+  // Initialize the panorama ONCE when apiKey is available
   useEffect(() => {
     let cancelled = false;
 
@@ -137,7 +155,7 @@ export const GoogleStreetViewExplorer = ({
       if (!apiKey || !containerRef.current) {
         return;
       }
-      onLoadingChange(true);
+      onLoadingChangeRef.current(true);
       try {
         const google = await loadGoogleMaps(apiKey);
         if (cancelled || !google?.maps || !containerRef.current) {
@@ -159,8 +177,8 @@ export const GoogleStreetViewExplorer = ({
           motionTracking: false,
           motionTrackingControl: false,
           pov: {
-            heading: heading ?? 0,
-            pitch: pitch ?? 0,
+            heading: initialHeadingRef.current ?? 0,
+            pitch: initialPitchRef.current ?? 0,
           },
           zoom: 0,
           visible: true,
@@ -169,25 +187,25 @@ export const GoogleStreetViewExplorer = ({
         panorama.addListener('position_changed', () => {
           const position = panorama.getPosition();
           if (!position) {
-            onPositionChange(null);
+            onPositionChangeRef.current(null);
             return;
           }
-          onPositionChange({ lat: position.lat(), lng: position.lng() });
+          onPositionChangeRef.current({ lat: position.lat(), lng: position.lng() });
         });
 
         panorama.addListener('pov_changed', () => {
           const pov = panorama.getPov();
-          onPovChange({ heading: pov.heading, pitch: pov.pitch });
+          onPovChangeRef.current({ heading: pov.heading, pitch: pov.pitch });
         });
 
         panoramaRef.current = panorama;
         setLoaded(true);
-        onError(null);
+        onErrorRef.current(null);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'No se pudo iniciar Street View';
-        onError(message);
+        onErrorRef.current(message);
       } finally {
-        onLoadingChange(false);
+        onLoadingChangeRef.current(false);
       }
     };
 
@@ -196,46 +214,60 @@ export const GoogleStreetViewExplorer = ({
     return () => {
       cancelled = true;
     };
-  }, [apiKey, heading, onError, onLoadingChange, onPositionChange, onPovChange, pitch]);
+  }, [apiKey]);
 
-  useEffect(() => {
+  // Geocode ONLY when address changes
+  const geocodeAddress = useCallback((trimmedAddress: string) => {
     const panorama = panoramaRef.current;
     const geocoder = geocoderRef.current;
-    const trimmedAddress = address.trim();
-    if (!loaded || !panorama || !geocoder || trimmedAddress.length === 0) {
+    if (!panorama || !geocoder || trimmedAddress.length === 0) {
       return;
     }
 
-    let cancelled = false;
-    onLoadingChange(true);
+    onLoadingChangeRef.current(true);
     void geocoder.geocode({ address: trimmedAddress })
       .then(result => {
-        if (cancelled || result.results.length === 0) {
+        if (result.results.length === 0) {
           return;
         }
         const location = result.results[0].geometry.location;
         panorama.setPosition({ lat: location.lat(), lng: location.lng() });
-        panorama.setPov({
-          heading: heading ?? 0,
-          pitch: pitch ?? 0,
-        });
-        onError(null);
+        // Don't override POV here so user doesn't lose orientation if geocode triggers
+        onErrorRef.current(null);
       })
       .catch(() => {
-        if (!cancelled) {
-          onError('No se pudo localizar la dirección en Street View');
-        }
+        onErrorRef.current('No se pudo localizar la dirección en Street View');
       })
       .finally(() => {
-        if (!cancelled) {
-          onLoadingChange(false);
-        }
+        onLoadingChangeRef.current(false);
       });
+  }, []);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [address, heading, loaded, onError, onLoadingChange, pitch]);
+  useEffect(() => {
+    const trimmedAddress = address.trim();
+    if (!loaded || trimmedAddress.length === 0) {
+      return;
+    }
+    geocodeAddress(trimmedAddress);
+  }, [address, loaded, geocodeAddress]);
+
+  // Handle external heading/pitch changes (like RESET) without geocoding
+  useEffect(() => {
+    const panorama = panoramaRef.current;
+    if (!loaded || !panorama) return;
+
+    const currentPov = panorama.getPov();
+    // Only update if difference is significant to avoid rounding loops
+    const hDiff = Math.abs(currentPov.heading - (heading ?? 0));
+    const pDiff = Math.abs(currentPov.pitch - (pitch ?? 0));
+    
+    if (hDiff > 0.1 || pDiff > 0.1) {
+      panorama.setPov({
+        heading: heading ?? 0,
+        pitch: pitch ?? 0,
+      });
+    }
+  }, [heading, pitch, loaded]);
 
   return <div ref={containerRef} className="h-full w-full bg-[#edf1f4]" />;
 };
