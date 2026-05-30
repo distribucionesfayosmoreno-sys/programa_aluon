@@ -7,7 +7,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -44,13 +44,13 @@ integrations:
     issue-type-name: ${JIRA_ISSUE_TYPE_NAME:Task}
   door-simulation:
     google-street-view:
-      enabled: ${DOOR_SIMULATION_ENABLED:true}
+      enabled: ${DOOR_SIMULATION_ENABLED:false}
       api-key: ${GOOGLE_STREET_VIEW_API_KEY:}
       base-url: ${GOOGLE_STREET_VIEW_BASE_URL:https://maps.googleapis.com}
       default-image-size: ${DOOR_SIMULATION_DEFAULT_IMAGE_SIZE:640x640}
       default-fov: ${DOOR_SIMULATION_DEFAULT_FOV:90}
     stability:
-      enabled: ${DOOR_SIMULATION_ENABLED:true}
+      enabled: ${DOOR_SIMULATION_ENABLED:false}
       api-key: ${STABILITY_API_KEY:}
       base-url: ${STABILITY_BASE_URL:https://api.stability.ai}
       inpaint-path: ${STABILITY_INPAINT_PATH:/v2beta/stable-image/edit/inpaint}
@@ -58,7 +58,7 @@ integrations:
       default-negative-prompt: ${DOOR_SIMULATION_DEFAULT_NEGATIVE_PROMPT:}
       output-format: ${STABILITY_OUTPUT_FORMAT:png}
     object-storage:
-      enabled: ${DOOR_SIMULATION_ENABLED:true}
+      enabled: ${DOOR_SIMULATION_ENABLED:false}
       endpoint: ${OBJECT_STORAGE_ENDPOINT:}
       region: ${OBJECT_STORAGE_REGION:us-east-1}
       bucket: ${OBJECT_STORAGE_BUCKET:}
