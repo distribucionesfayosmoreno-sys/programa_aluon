@@ -26,17 +26,59 @@ export const CutlistOptionsSection = ({
       <div className="text-xs font-bold uppercase tracking-widest text-slate-400">Paso 2</div>
     </div>
     <div className="grid md:grid-cols-2 gap-4 mt-6">
-      <div>
-        <label className="field-label">Altura total (mm)</label>
+      <div className="md:col-span-2 flex items-center gap-2 pt-2">
         <input
-          className="field"
-          value={form.heightMm}
-          onChange={event => updateField('heightMm', event.target.value)}
+          type="checkbox"
+          id="hasUnevenness"
+          className="w-4 h-4"
+          checked={form.hasUnevenness}
+          onChange={e => updateField('hasUnevenness', e.target.checked)}
           disabled={locked}
-          placeholder="Ej: 1800"
         />
+        <label htmlFor="hasUnevenness" className="text-sm font-semibold text-slate-500">
+          ¿Hueco con desnivel (falsa escuadra)?
+        </label>
       </div>
-      <div>
+
+      {!form.hasUnevenness && (
+        <div>
+          <label className="field-label">Altura total (mm)</label>
+          <input
+            className="field"
+            value={form.heightMm}
+            onChange={event => updateField('heightMm', event.target.value)}
+            disabled={locked}
+            placeholder="Ej: 1800"
+          />
+        </div>
+      )}
+      
+      {form.hasUnevenness && (
+        <>
+          <div>
+            <label className="field-label">Altura izquierda (mm)</label>
+            <input
+              className="field"
+              value={form.heightLeftMm}
+              onChange={event => updateField('heightLeftMm', event.target.value)}
+              disabled={locked}
+              placeholder="Ej: 1800"
+            />
+          </div>
+          <div>
+            <label className="field-label">Altura derecha (mm)</label>
+            <input
+              className="field"
+              value={form.heightRightMm}
+              onChange={event => updateField('heightRightMm', event.target.value)}
+              disabled={locked}
+              placeholder="Ej: 1850"
+            />
+          </div>
+        </>
+      )}
+
+      <div className={form.hasUnevenness ? "md:col-span-2" : ""}>
         <label className="field-label">Anchura total (mm)</label>
         <input
           className="field"

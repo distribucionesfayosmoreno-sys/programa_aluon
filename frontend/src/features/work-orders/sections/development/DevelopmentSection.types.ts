@@ -28,6 +28,7 @@ export type DevelopmentForm = {
   heightRightMm: number | null;
   widthLeftMm: number | null;
   widthRightMm: number | null;
+  hasUnevenness: boolean;
   doorType: CutlistDoorType;
   doorModel: CutlistDoorModel;
   widthMm: number;
@@ -81,6 +82,7 @@ export type DevelopmentActions = {
   onHeightRightChange: (value: number | null) => void;
   onWidthLeftChange: (value: number | null) => void;
   onWidthRightChange: (value: number | null) => void;
+  onHasUnevennessChange: (value: boolean) => void;
   onDoorTypeChange: (value: CutlistDoorType) => void;
   onDoorModelChange: (value: CutlistDoorModel) => void;
   onWidthChange: (value: number) => void;

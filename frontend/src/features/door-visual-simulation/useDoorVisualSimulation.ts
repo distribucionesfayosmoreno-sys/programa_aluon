@@ -32,6 +32,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
   const [baseImageUrl, setBaseImageUrl] = useState<string | null>(null);
   const [baseImageWidth, setBaseImageWidth] = useState<number | null>(null);
   const [baseImageHeight, setBaseImageHeight] = useState<number | null>(null);
+  const [showMaskSelector, setShowMaskSelector] = useState(false);
   const [maskRect, setMaskRect] = useState<MaskRect | null>(null);
   const [status, setStatus] = useState<DoorSimulationJobStatus | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -83,6 +84,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setBaseImageUrl(null);
     setBaseImageWidth(null);
     setBaseImageHeight(null);
+    setShowMaskSelector(false);
     setMaskRect(null);
     setStatus(null);
     setResultImageUrl(null);
@@ -106,6 +108,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setProcessing(true);
     setResultImageUrl(null);
     setMaskRect(null);
+    setShowMaskSelector(false);
     setStatus(null);
     try {
       const resp = await createDoorSimulationJob({
@@ -231,12 +234,13 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     baseImageUrl,
     baseImageWidth,
     baseImageHeight,
+    showMaskSelector,
     maskRect,
     status,
     processing,
     resultImageUrl,
     error,
-  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, fov, heading, imageSize, jobId, latitude, longitude, mapsJavaScriptApiKey, maskRect, negativePrompt, doorModel, doorType, doorColor, selectedBudgetId, pitch, processing, prompt, resultImageUrl, status, viewerLoading]);
+  }), [address, baseImageHeight, baseImageUrl, baseImageWidth, error, fov, heading, imageSize, jobId, latitude, longitude, mapsJavaScriptApiKey, maskRect, negativePrompt, doorModel, doorType, doorColor, selectedBudgetId, pitch, processing, prompt, resultImageUrl, showMaskSelector, status, viewerLoading]);
 
   const actions = useMemo<DoorVisualSimulationActions>(() => ({
     setAddress,
@@ -257,6 +261,7 @@ export const useDoorVisualSimulation = (): { state: DoorVisualSimulationViewStat
     setDoorColor,
     setSelectedBudgetId,
     setMaskRect,
+    setShowMaskSelector,
     loadBaseImage,
     startInpaint,
     reset,

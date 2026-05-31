@@ -38,7 +38,7 @@ export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, o
       value: true,
       label: 'Derecha',
       image: openingImage('RIGHT') ?? '',
-      imgClass: 'transform scale-[1.65] mix-blend-multiply'
+      imgClass: ''
     }
   ];
 
@@ -86,25 +86,25 @@ export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, o
 
               {/* Content Container */}
               <div className="relative z-10 flex flex-col justify-between h-full w-full">
-                {/* Image Container (top part, centered, no overlap with text) */}
-                <div className="flex-1 flex items-center justify-center p-3 min-h-0">
+                {/* Image Container (full bleed) */}
+                <div className="relative flex-1 min-h-0">
                   <img
                     src={opt.image}
                     alt={opt.label}
-                    className={`max-h-[85%] max-w-[85%] object-contain group-hover:scale-105 transition-transform duration-500 ${opt.imgClass}`}
+                    className={`absolute inset-0 w-full h-full object-contain object-center ${opt.imgClass}`}
                   />
-                </div>
 
-                {/* Text Overlay */}
-                <div className="p-3 pt-6 space-y-0.5 bg-gradient-to-t from-white via-white/95 to-transparent w-full">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-black text-on-surface tracking-wider uppercase font-space">
-                      Apertura {opt.label}
-                    </span>
+                  {/* Text Overlay (over image) */}
+                  <div className="absolute inset-x-0 bottom-0 p-3 space-y-0.5 bg-transparent">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-black text-on-surface tracking-wider uppercase font-space">
+                        Apertura {opt.label}
+                      </span>
+                    </div>
+                    <p className="text-[9px] leading-relaxed text-secondary font-body">
+                      Sentido de apertura {opt.label.toLowerCase()} según especificación.
+                    </p>
                   </div>
-                  <p className="text-[9px] leading-relaxed text-secondary font-body">
-                    Sentido de apertura {opt.label.toLowerCase()} según especificación.
-                  </p>
                 </div>
               </div>
             </button>

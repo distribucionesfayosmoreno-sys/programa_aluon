@@ -49,7 +49,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
   const content = (
     <div
       className="absolute inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-      style={{ background: 'rgba(13,17,23,0.70)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(17,24,39,0.55)', backdropFilter: 'blur(6px)' }}
       role="dialog"
       aria-modal="true"
     >
@@ -57,35 +57,51 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
 
       <div
         className="relative w-full max-w-6xl rounded-2xl flex flex-col overflow-hidden animate-fade-up"
-        style={{ background: '#ffffff', maxHeight: 'calc(100vh - 48px)', boxShadow: '0 24px 70px rgba(0,0,0,0.32)' }}
+        style={{
+          background: '#ffffff',
+          maxHeight: 'calc(100vh - 48px)',
+          border: '1px solid #e5e7eb',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+        }}
       >
         {/* Header */}
         <div
           className="flex items-center justify-between px-7 py-5"
-          style={{ background: '#0d1117', borderBottom: '1px solid #21262d' }}
+          style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}
         >
           <div className="flex items-center gap-3.5">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'var(--accent-shadow-light)' }}
+              style={{ background: 'var(--accent-soft-2)', border: '1px solid var(--accent-border)' }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--accent)' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
             <div>
-              <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <h2 style={{ fontSize: 11, fontWeight: 900, color: '#111827', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                 {isEdit ? 'Editar cliente' : 'Nuevo cliente'}
               </h2>
-              <p style={{ fontSize: 10, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
+              <p style={{ fontSize: 10, fontWeight: 700, color: '#6b7280', marginTop: 2 }}>
                 {isEdit ? form.nombreComercial : 'Completa los datos del cliente'}
               </p>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+            style={{ border: '1px solid #e5e7eb', background: '#ffffff', color: '#6b7280' }}
+            aria-label="Cerrar"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex" style={{ background: '#f8f9fb', borderBottom: '1px solid #e8eaed' }}>
+        <div className="flex" style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
           {(['GENERAL', 'ADDRESSES'] as TabKey[]).map(t => (
             <button
               key={t}
@@ -93,9 +109,9 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
               onClick={() => setTab(t)}
               className="flex items-center gap-2 px-6 py-3.5 cursor-pointer transition-all duration-200"
               style={{
-                fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.07em',
+                fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em',
                 borderBottom: `2px solid ${tab === t ? 'var(--accent)' : 'transparent'}`,
-                color: tab === t ? 'var(--accent)' : '#8b949e',
+                color: tab === t ? 'var(--accent)' : '#6b7280',
                 background: tab === t ? '#ffffff' : 'transparent',
               }}
             >
@@ -103,8 +119,8 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
               {t === 'ADDRESSES' && (
                 <span style={{
                   fontSize: 9, fontWeight: 900, padding: '2px 6px', borderRadius: 4,
-                  background: tab === 'ADDRESSES' ? 'var(--accent)' : '#e8eaed',
-                  color: tab === 'ADDRESSES' ? '#fff' : '#8b949e'
+                  background: tab === 'ADDRESSES' ? 'var(--accent)' : '#e5e7eb',
+                  color: tab === 'ADDRESSES' ? '#fff' : '#6b7280'
                 }}>
                   {form.direccionesEntrega.length}
                 </span>

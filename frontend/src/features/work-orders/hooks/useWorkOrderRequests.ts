@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
-import { assignWorkOrderCustomer, deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
+import { MODELS } from '../constants';
+import { assignWorkOrderCustomer, createWorkOrderRequest, deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
 
 const STEP_ORDER: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
 
@@ -23,7 +24,6 @@ type BudgetControls = {
 
 type UseWorkOrderRequestsParams = {
   customers: Customer[];
-  requests: WorkOrderRequest[];
   setRequests: (updater: (prev: WorkOrderRequest[]) => WorkOrderRequest[]) => void;
   selectedRequestId: string | null;
   setSelectedRequestId: (id: string | null) => void;
@@ -44,7 +44,6 @@ type UseWorkOrderRequestsParams = {
 
 export const useWorkOrderRequests = ({
   customers,
-  requests,
   setRequests,
   selectedRequestId,
   setSelectedRequestId,
@@ -108,24 +107,38 @@ export const useWorkOrderRequests = ({
     budget.setAdminApproved(status.adminApproved);
   };
 
-  const createRequest = (data: NewRequestData) => {
-    const lastId = requests
-      .map(r => Number(r.id.replace('REQ-', '')))
-      .filter(n => !Number.isNaN(n))
-      .sort((a, b) => b - a)[0] ?? 0;
-    const nextId = `REQ-${String(lastId + 1).padStart(3, '0')}`;
+  const createRequest = async (data: NewRequestData) => {
     const requestDate = new Date().toISOString().slice(0, 10);
+    const selectedModel = MODELS.find(m => m.id === data.modelId) ?? MODELS[0];
+    const created = await createWorkOrderRequest({
+      customerId: data.customerId,
+      customerName: data.customerName,
+      modeloPuerta: selectedModel.label,
+      anchoMm: data.widthMm,
+      altoMm: data.heightMm,
+      reference: data.reference,
+      notes: data.notes,
+      color: data.color,
+      installerName: data.installerName,
+    });
+
+    const uiRequestId = created.codigoOrden;
+    const orderId = created.id;
+    const m2 = Math.round(((data.widthMm * data.heightMm) / 1_000_000) * 10) / 10;
+
     setRequests(prev => ([
       {
-        id: nextId,
-        orderId: nextId,
+        id: uiRequestId,
+        orderId,
+        customerId: data.customerId || undefined,
         customerName: data.customerName,
         modelId: data.modelId,
-        m2: data.m2,
-        widthMm: 0,
-        heightMm: 0,
-        color: '',
-        installerName: '',
+        modelLabel: selectedModel.label,
+        m2,
+        widthMm: data.widthMm,
+        heightMm: data.heightMm,
+        color: data.color || undefined,
+        installerName: data.installerName || undefined,
         reference: data.reference,
         googleView: data.googleView,
         notes: data.notes,
@@ -134,10 +147,10 @@ export const useWorkOrderRequests = ({
       },
       ...prev,
     ]));
-    setSelectedRequestId(nextId);
+    setSelectedRequestId(uiRequestId);
     setShowRequestModal(false);
     setTab('INBOX');
-    budget.updateBudgetStatus(nextId, {
+    budget.updateBudgetStatus(uiRequestId, {
       budgetGenerated: false,
       accountingApproved: false,
       adminApproved: false,

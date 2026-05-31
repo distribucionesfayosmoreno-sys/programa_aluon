@@ -7,6 +7,7 @@ import org.hibernate.annotations.TenantId;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,12 @@ public class QuoteRequest {
 
     @Column(name = "quote_number", nullable = false, unique = true)
     private String quoteNumber;
+
+    @Column(name = "series_date")
+    private LocalDate seriesDate;
+
+    @Column(name = "series_sequence")
+    private Integer seriesSequence;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)

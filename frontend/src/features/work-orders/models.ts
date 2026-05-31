@@ -47,10 +47,14 @@ export type BudgetData = {
 };
 
 export type NewRequestData = {
+  customerId?: string;
   customerName: string;
   modelId: string;
-  m2: number;
+  widthMm: number;
+  heightMm: number;
   reference: string;
+  color?: string;
+  installerName?: string;
   googleView: boolean;
   notes: string;
 };

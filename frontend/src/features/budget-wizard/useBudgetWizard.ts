@@ -11,6 +11,8 @@ import type {
 import { getCatalogModels, getDoorProductsByModel, getVariantsByDoorProduct } from './services/catalogApi';
 import { listCustomers, type CustomerResponse, type DeliveryAddressResponse } from './services/customersApi';
 import { createQuote, sendQuote } from './services/quotesApi';
+import { projectStore } from '../project-management/services/projectStore';
+import { consumeBudgetWizardPrefillCustomerId } from './services/budgetWizardPrefill';
 
 const defaultBooleans = {
   primerRequired: false,
@@ -251,6 +253,10 @@ export const useBudgetWizard = () => {
     if (!customers.length) {
       await loadCustomers();
     }
+    const prefillCustomerId = consumeBudgetWizardPrefillCustomerId();
+    if (prefillCustomerId && !selectedCustomerId) {
+      setSelectedCustomerId(prefillCustomerId);
+    }
     setStep('CLIENTE');
   };
 
@@ -351,6 +357,7 @@ export const useBudgetWizard = () => {
         items: itemsToSubmit,
       });
       setQuote(response);
+      projectStore.upsertFromQuote(response);
       setStep('FINALIZADO');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al generar el presupuesto');

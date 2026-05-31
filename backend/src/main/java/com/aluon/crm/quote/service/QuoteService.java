@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -25,9 +24,14 @@ import com.aluon.crm.quote.dto.QuoteItemResponse;
 import com.aluon.crm.quote.dto.QuoteRequest;
 import com.aluon.crm.quote.repository.QuoteRequestRepository;
 import com.aluon.crm.quote.dto.QuoteResponse;
+import com.aluon.crm.quote.dto.QuoteLifecycleNumbersResponse;
 import com.aluon.crm.quote.dto.QuoteSendRequest;
 import com.aluon.crm.quote.model.QuoteStatus;
 import com.aluon.crm.quote.model.QuoteValidationMode;
+import com.aluon.crm.documents.model.DocumentPrefix;
+import com.aluon.crm.documents.model.DocumentSeries;
+import com.aluon.crm.documents.model.DocumentSeriesParser;
+import com.aluon.crm.documents.service.DocumentNumberService;
 
 
 @Service
@@ -39,6 +43,7 @@ public class QuoteService {
     private final QuoteRequestRepository quoteRequestRepository;
     private final CustomerRepository customerRepository;
     private final TariffService tariffService;
+    private final DocumentNumberService documentNumberService;
 
     @Transactional
     public QuoteResponse create(QuoteCreateRequest request) {
@@ -53,8 +58,12 @@ public class QuoteService {
         QuoteValidationMode validationMode = customer.isAutoApproveQuotes() ? QuoteValidationMode.AUTO : QuoteValidationMode.MANUAL;
         QuoteChannel channel = request.getChannel() == null ? QuoteChannel.BOTH : request.getChannel();
 
+        DocumentSeries series = documentNumberService.nextSeries();
+
         QuoteRequest quote = QuoteRequest.builder()
-                .quoteNumber(generateQuoteNumber())
+                .quoteNumber(series.format(DocumentPrefix.PTO))
+                .seriesDate(series.date())
+                .seriesSequence(series.sequence())
                 .customer(customer)
                 .tariffCode(tariff.getCode())
                 .contactEmail(customer.getEmail())
@@ -127,6 +136,34 @@ public class QuoteService {
         return toResponse(quote);
     }
 
+    @Transactional(readOnly = true)
+    public QuoteLifecycleNumbersResponse getLifecycleNumbers(UUID id) {
+        UUID quoteId = Objects.requireNonNull(id, "id");
+        QuoteRequest quote = Objects.requireNonNull(quoteRequestRepository.findById(quoteId)
+                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado")), "quote");
+
+        DocumentSeries series = resolveSeries(quote);
+        String seriesKey = series.date().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE)
+                + "-" + String.format("%04d", series.sequence());
+
+        return new QuoteLifecycleNumbersResponse(
+                seriesKey,
+                series.format(DocumentPrefix.PTO),
+                series.format(DocumentPrefix.PED),
+                series.format(DocumentPrefix.ALB),
+                series.format(DocumentPrefix.FRA),
+                series.format(DocumentPrefix.ABO)
+        );
+    }
+
+    private DocumentSeries resolveSeries(QuoteRequest quote) {
+        if (quote.getSeriesDate() != null && quote.getSeriesSequence() != null && quote.getSeriesSequence() > 0) {
+            return new DocumentSeries(quote.getSeriesDate(), quote.getSeriesSequence());
+        }
+        return DocumentSeriesParser.tryParse(quote.getQuoteNumber())
+                .orElseThrow(() -> new IllegalStateException("El presupuesto no tiene serie válida para enlazar documentos"));
+    }
+
     private QuoteItem toQuoteItem(QuoteRequest quote, Tariff tariff, QuoteItemRequest item) {
         Objects.requireNonNull(quote, "quote");
         Objects.requireNonNull(tariff, "tariff");
@@ -162,6 +199,7 @@ public class QuoteService {
                 .marcoSuperior(item.getMarcoSuperior())
                 .bisagras(item.getBisagras())
                 .porteroAutomatico(item.getPorteroAutomatico())
+                .unidades(1)
                 .m2(m2)
                 .pricePerM2(pricePerM2)
                 .lineTotal(lineTotal)
@@ -208,12 +246,6 @@ public class QuoteService {
                                 .build())
                         .toList())
                 .build();
-    }
-
-    private String generateQuoteNumber() {
-        String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String suffix = UUID.randomUUID().toString().substring(0, 6).toUpperCase();
-        return "OF-" + date + "-" + suffix;
     }
 
     private void validateCreate(QuoteCreateRequest request) {

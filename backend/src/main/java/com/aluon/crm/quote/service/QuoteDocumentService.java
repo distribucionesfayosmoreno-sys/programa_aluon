@@ -19,6 +19,7 @@ import java.util.UUID;
 public class QuoteDocumentService {
 
     private static final String PDF_CONTENT_TYPE = "application/pdf";
+    private static final String DOCUMENT_TYPE_PRESUPUESTO = "PRESUPUESTO";
 
     private final QuoteRequestRepository quoteRequestRepository;
     private final QuoteDocumentRepository quoteDocumentRepository;
@@ -32,11 +33,11 @@ public class QuoteDocumentService {
 
         byte[] pdf = quotePdfService.renderQuotePdf(quote);
         String sha256 = sha256Hex(pdf);
-        String fileName = "presupuesto-" + quote.getQuoteNumber() + ".pdf";
 
         QuoteDocument document = QuoteDocument.builder()
                 .quoteRequest(quote)
-                .fileName(fileName)
+                .tipo(DOCUMENT_TYPE_PRESUPUESTO)
+                .numeroDocumento(quote.getQuoteNumber())
                 .contentType(PDF_CONTENT_TYPE)
                 .sha256(sha256)
                 .data(pdf)

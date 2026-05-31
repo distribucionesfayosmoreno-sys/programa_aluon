@@ -14,6 +14,7 @@ type DevelopmentFormProps = {
     | 'onBudgetDateChange'
     | 'onColorChange'
     | 'onInstallerNameChange'
+    | 'onHasUnevennessChange'
     | 'onHeightLeftChange'
     | 'onHeightRightChange'
     | 'onWidthLeftChange'
@@ -116,20 +117,34 @@ export const DevelopmentForm = ({ form, needs, status, actions }: DevelopmentFor
         </div>
       )}
     </div>
-    <div>
-      <FieldLabel>Altura total (mm)</FieldLabel>
-      <Field
-        type="number"
-        min={0}
-        value={form.heightMm}
-        onChange={e => actions.onHeightChange(Number(e.target.value || 0))}
+    <div className="flex items-center gap-2 pt-8">
+      <input
+        type="checkbox"
+        id="hasUnevenness"
+        className="w-4 h-4"
+        checked={form.hasUnevenness}
+        onChange={e => actions.onHasUnevennessChange(e.target.checked)}
       />
-      {!status.canGenerateCutlist && form.heightMm <= 0 && (
-        <div className="text-[10px] font-semibold mt-1" style={{ color: uiColors.dangerDark }}>
-          Introduce una altura válida.
-        </div>
-      )}
+      <label htmlFor="hasUnevenness" className="text-sm font-semibold" style={{ color: uiColors.textMuted }}>
+        ¿Hueco con desnivel (falsa escuadra)?
+      </label>
     </div>
+    {!form.hasUnevenness && (
+      <div>
+        <FieldLabel>Altura total (mm)</FieldLabel>
+        <Field
+          type="number"
+          min={0}
+          value={form.heightMm}
+          onChange={e => actions.onHeightChange(Number(e.target.value || 0))}
+        />
+        {!status.canGenerateCutlist && form.heightMm <= 0 && (
+          <div className="text-[10px] font-semibold mt-1" style={{ color: uiColors.dangerDark }}>
+            Introduce una altura válida.
+          </div>
+        )}
+      </div>
+    )}
     {needs.needsLeftRightHeights && (
       <>
         <div>

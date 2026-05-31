@@ -23,7 +23,19 @@ class QuotePdfServiceTest {
 
     @Test
     void rendersPdfFromHtmlTemplate() {
-        QuoteTemplateProperties props = new QuoteTemplateProperties("#2563eb", "ALUON", "CERRAJERÍA", BigDecimal.ZERO);
+        QuoteTemplateProperties props = new QuoteTemplateProperties(
+                "#2563eb",
+                "ALUON",
+                "CERRAJERÍA",
+                BigDecimal.ZERO,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
         QuoteHtmlRenderer renderer = new QuoteHtmlRenderer(props);
         QuotePdfService service = new QuotePdfService(renderer);
 
@@ -42,6 +54,7 @@ class QuotePdfServiceTest {
                 .doorType(DoorType.PEATONAL)
                 .widthMm(1200)
                 .heightMm(2000)
+                .unidades(1)
                 .m2(new BigDecimal("2.40"))
                 .pricePerM2(new BigDecimal("100.00"))
                 .lineTotal(new BigDecimal("240.00"))

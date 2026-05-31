@@ -105,6 +105,14 @@
       <artifactId>spring-modulith-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
+
+    <!-- DevTools for hot-reloading -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <dependencyManagement>

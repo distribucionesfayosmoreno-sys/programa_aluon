@@ -4,6 +4,7 @@ import formAbatibleUnaImg from '../../../assets/cutlist/forms/form-abatible-una.
 import formAbatibleDosImg from '../../../assets/cutlist/forms/form-abatible-dos.jpg';
 import formCorrederaImg from '../../../assets/cutlist/forms/form-corredera.jpg';
 import type { BudgetData, CutlistDoorType, WorkOrderData } from '../models';
+import { buildBudgetPrintHtml as buildBudgetDocumentPrintHtml } from '../../documents/print-templates';
 
 type CutlistFormData = {
   doorType: CutlistDoorType;
@@ -30,79 +31,8 @@ type CutlistFormData = {
   mountingType: 'A' | 'B';
 };
 
-export const buildBudgetPrintHtml = (budgetData: BudgetData) => `<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Presupuesto ${budgetData.budgetNumber}</title>
-  <style>
-    body { font-family: Arial, sans-serif; color: #111827; margin: 24px; }
-    .row { display: flex; justify-content: space-between; gap: 24px; }
-    .small { font-size: 12px; color: #6b7280; }
-    .title { font-weight: 800; letter-spacing: 0.15em; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
-    th, td { border: 1px solid #e5e7eb; padding: 8px; vertical-align: top; }
-    th { background: #f9fafb; text-align: left; color: #6b7280; }
-    .right { text-align: right; }
-    .signature { margin-top: 32px; display: flex; justify-content: space-between; }
-  </style>
-</head>
-<body>
-  <div class="row">
-    <div>
-      <div class="title">ALUON</div>
-      <div class="small">ALUMINIO SOLDADO, S.L.</div>
-      <div class="small">Telf. 925 55 40 14</div>
-      <div class="small">Ctra. 4004 Km 29,200 · 45290 Pantoja (Toledo)</div>
-      <div class="small">info@aluon.es</div>
-    </div>
-    <div>
-      <div class="title" style="background:#111827;color:#fff;padding:8px 12px;display:inline-block;">ALUON</div>
-      <div class="small">${budgetData.customerName}</div>
-      <div class="small">${budgetData.customerAddress}</div>
-      <div class="small">Telf. ${budgetData.customerPhone}</div>
-      <div class="small">Email ${budgetData.customerEmail || '—'}</div>
-    </div>
-  </div>
-  <div class="row" style="margin-top:16px;">
-    <div class="small">${budgetData.budgetDate}</div>
-    <div><strong>Presupuesto Nº ${budgetData.budgetNumber}</strong></div>
-  </div>
-  <table>
-    <thead>
-      <tr>
-        <th>Cantidad</th>
-        <th>Descripción</th>
-        <th class="right">Precio Ud.</th>
-        <th class="right">Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>${budgetData.m2.toFixed(2)}</td>
-        <td>
-          <strong>${budgetData.modelLabel}</strong><br />
-          <span class="small">Referencia: ${budgetData.reference || '—'}</span><br />
-          <span class="small">m²: ${budgetData.m2.toFixed(2)}</span><br />
-          ${budgetData.notes ? `<span class="small">Notas: ${budgetData.notes}</span>` : ''}
-        </td>
-        <td class="right">${budgetData.pricePerM2.toFixed(2)}</td>
-        <td class="right"><strong>${budgetData.total.toFixed(2)}</strong></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="small" style="margin-top:16px;">
-    <strong style="color:#111827;">Condiciones generales</strong><br />
-    Forma de pago: a la aceptación del presupuesto 50%, resto el día anterior del suministro del material.<br />
-    Validez del presupuesto: 15 días.<br />
-    Cualquier modificación de la presente oferta llevará consigo un nuevo estudio.
-  </div>
-  <div class="signature">
-    <div class="small">Conforme el cliente</div>
-    <div class="small">Conforme la empresa</div>
-  </div>
-</body>
-</html>`;
+export const buildBudgetPrintHtml = (budgetData: BudgetData): string =>
+  buildBudgetDocumentPrintHtml(budgetData);
 
 export const buildCutlistFormPrintHtml = (data: CutlistFormData) => {
   const formConfig = {

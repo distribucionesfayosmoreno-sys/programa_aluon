@@ -38,29 +38,31 @@ public class QuoteDocumentController {
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> downloadLatestPdf(@PathVariable UUID id) {
         QuoteDocument document = quoteDocumentService.getLatest(id);
+        String filename = buildPdfFilename(document);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + document.getFileName() + "\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
                 .body(document.getData());
     }
 
     @PostMapping("/{id}/send/email")
     public ResponseEntity<Void> sendByEmail(@PathVariable UUID id, @RequestBody QuoteEmailSendRequest request) {
         QuoteDocument document = quoteDocumentService.getLatest(id);
+        String filename = buildPdfFilename(document);
         String to = Objects.requireNonNull(request.to(), "to");
         String subject = request.subject() == null || request.subject().isBlank()
-                ? "Presupuesto " + document.getFileName()
+                ? "Presupuesto " + filename
                 : request.subject();
         String message = request.message() == null ? "" : request.message();
         String html = "<p>" + escapeHtml(message) + "</p>";
-        mailService.sendHtmlWithAttachment(to, subject, html, document.getFileName(), document.getData());
+        mailService.sendHtmlWithAttachment(to, subject, html, filename, document.getData());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/send/whatsapp-link")
     public ResponseEntity<QuoteWhatsappLinkResponse> getWhatsappLink(@PathVariable UUID id) {
         QuoteDocument document = quoteDocumentService.getLatest(id);
-        String text = "Te envío el presupuesto: " + document.getFileName();
+        String text = "Te envío el presupuesto: " + buildPdfFilename(document);
         String encoded = URLEncoder.encode(text, StandardCharsets.UTF_8);
         return ResponseEntity.ok(new QuoteWhatsappLinkResponse("https://wa.me/?text=" + encoded));
     }
@@ -73,5 +75,11 @@ public class QuoteDocumentController {
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;");
     }
-}
 
+    private String buildPdfFilename(QuoteDocument document) {
+        String tipo = document.getTipo() == null ? "" : document.getTipo().trim();
+        String numero = document.getNumeroDocumento() == null ? "" : document.getNumeroDocumento().trim();
+        String base = (tipo.isBlank() || numero.isBlank()) ? "documento" : (tipo + "-" + numero);
+        return base + ".pdf";
+    }
+}

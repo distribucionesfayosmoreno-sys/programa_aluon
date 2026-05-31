@@ -20,6 +20,23 @@ type OrderStatusApi = {
   m2?: number | null;
 };
 
+type WorkOrderCreateResponseApi = {
+  id: string;
+  codigoOrden: string;
+};
+
+type WorkOrderCreatePayload = {
+  customerId?: string;
+  customerName: string;
+  modeloPuerta: string;
+  anchoMm: number;
+  altoMm: number;
+  reference: string;
+  notes: string;
+  color?: string;
+  installerName?: string;
+};
+
 const resolveModelId = (modeloPuerta?: string | null) => {
   const text = (modeloPuerta ?? '').toLowerCase();
   if (text.includes('classic')) return 'CLASSIC';
@@ -34,6 +51,29 @@ const resolveRequestDate = (value?: string | null) => {
   return value.slice(0, 10);
 };
 
+const buildNotesPayload = (reference: string, notes: string): string => {
+  const cleanReference = reference.trim();
+  const cleanNotes = notes.trim();
+  if (!cleanReference && !cleanNotes) return '';
+  if (!cleanReference) return cleanNotes;
+  if (!cleanNotes) return `REF:${cleanReference}`;
+  return `REF:${cleanReference}\n${cleanNotes}`;
+};
+
+const splitReferenceFromNotes = (notes: string, fallbackReference: string): { reference: string; notes: string } => {
+  const raw = notes.trim();
+  if (!raw) return { reference: fallbackReference, notes: '' };
+  const [firstLine, ...rest] = raw.split('\n');
+  const match = /^REF:(.+)$/.exec(firstLine.trim());
+  if (!match) return { reference: fallbackReference, notes: raw };
+  const parsedReference = match[1].trim();
+  const remainingNotes = rest.join('\n').trim();
+  return {
+    reference: parsedReference || fallbackReference,
+    notes: remainingNotes,
+  };
+};
+
 export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
   const response = await fetch('/api/orders/status');
   if (!response.ok) {
@@ -42,34 +82,66 @@ export const fetchWorkOrderRequests = async (): Promise<WorkOrderRequest[]> => {
   }
 
   const data = (await response.json()) as OrderStatusApi[];
-  const mapped = data.map(item => ({
-    id: item.codigoOrden || item.id,
-    orderId: item.id,
-    customerId: item.customerId ?? undefined,
-    customerName: item.customerName,
-    modelId: resolveModelId(item.modeloPuerta),
-    modelLabel: item.modeloPuerta ?? '—',
-    m2: item.m2 ?? 0,
-    widthMm: item.anchoMm ?? undefined,
-    heightMm: item.altoMm ?? undefined,
-    color: item.color ?? undefined,
-    installerName: item.installerName ?? undefined,
-    reference: item.codigoOrden || item.id,
-    googleView: false,
-    notes: item.notes ?? '',
-    requestDate: resolveRequestDate(item.requestDate),
-    workflowStep: (item.workflowStage as WorkOrderRequest['workflowStep'])
-      ?? (item.workflowStep as WorkOrderRequest['workflowStep'])
-      ?? 'INBOX',
-    assignedUserId: item.assignedUserId ?? undefined,
-    assignedUserName: item.assignedUserName ?? undefined,
-  }));
+  const mapped = data.map(item => {
+    const fallbackReference = item.codigoOrden || item.id;
+    const notesSplit = splitReferenceFromNotes(item.notes ?? '', fallbackReference);
+    return ({
+      id: item.codigoOrden || item.id,
+      orderId: item.id,
+      customerId: item.customerId ?? undefined,
+      customerName: item.customerName,
+      modelId: resolveModelId(item.modeloPuerta),
+      modelLabel: item.modeloPuerta ?? '—',
+      m2: item.m2 ?? 0,
+      widthMm: item.anchoMm ?? undefined,
+      heightMm: item.altoMm ?? undefined,
+      color: item.color ?? undefined,
+      installerName: item.installerName ?? undefined,
+      reference: notesSplit.reference,
+      googleView: false,
+      notes: notesSplit.notes,
+      requestDate: resolveRequestDate(item.requestDate),
+      workflowStep: (item.workflowStage as WorkOrderRequest['workflowStep'])
+        ?? (item.workflowStep as WorkOrderRequest['workflowStep'])
+        ?? 'INBOX',
+      assignedUserId: item.assignedUserId ?? undefined,
+      assignedUserName: item.assignedUserName ?? undefined,
+    });
+  });
   console.info('[work-orders] Loaded requests', mapped.length, mapped.map(item => ({
     id: item.id,
     orderId: item.orderId,
     workflowStep: item.workflowStep,
   })));
   return mapped;
+};
+
+export const createWorkOrderRequest = async (payload: WorkOrderCreatePayload): Promise<WorkOrderCreateResponseApi> => {
+  const form = new FormData();
+  if (payload.customerId) {
+    form.set('customerId', payload.customerId);
+  }
+  form.set('customerName', payload.customerName);
+  form.set('modeloPuerta', payload.modeloPuerta);
+  form.set('anchoMm', String(payload.anchoMm));
+  form.set('altoMm', String(payload.altoMm));
+  form.set('notes', buildNotesPayload(payload.reference, payload.notes));
+  if (payload.color) {
+    form.set('color', payload.color);
+  }
+  if (payload.installerName) {
+    form.set('installerName', payload.installerName);
+  }
+
+  const response = await fetch('/api/orders/requests', {
+    method: 'POST',
+    body: form,
+  });
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || 'No se pudo crear la solicitud.');
+  }
+  return (await response.json()) as WorkOrderCreateResponseApi;
 };
 
 export const deleteWorkOrderRequest = async (orderId: string): Promise<void> => {

@@ -13,7 +13,7 @@ export const CustomerOnboardingRegistration = ({
   onSubmit,
   submitting,
 }: CustomerOnboardingRegistrationProps) => (
-  <div className="grid gap-6" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
+  <div className="grid gap-6">
     <div className="rounded-2xl p-6" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
       <h2 className="text-sm font-black uppercase" style={{ color: '#0d1117' }}>Datos de empresa</h2>
       <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>Completa la información para activar tu acceso.</p>
@@ -118,19 +118,5 @@ export const CustomerOnboardingRegistration = ({
       </div>
     </div>
 
-    <div
-      className="rounded-2xl p-6"
-      style={{ background: 'linear-gradient(180deg,#0d1117 0%,#161b22 100%)', color: '#ffffff', border: '1px solid #21262d' }}
-    >
-      <h3 className="text-sm font-black uppercase">¿Qué ocurre después?</h3>
-      <ul className="mt-4 space-y-3 text-xs" style={{ color: '#c9d1d9' }}>
-        <li>Asignamos tu tarifa base según la tabla de precios.</li>
-        <li>Accedes al catálogo visual de modelos y tipos.</li>
-        <li>Generas tu primera oferta y la enviamos al validar.</li>
-      </ul>
-      <div className="mt-6 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.06)' }}>
-        <p className="text-xs">Tu solicitud quedará registrada en nuestra base de datos para seguimiento.</p>
-      </div>
-    </div>
   </div>
 );

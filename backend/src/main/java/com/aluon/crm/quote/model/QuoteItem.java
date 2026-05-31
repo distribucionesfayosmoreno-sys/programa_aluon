@@ -13,7 +13,7 @@ import com.aluon.crm.quote.dto.QuoteRequest;
 
 
 @Entity
-@Table(name = "quote_items")
+@Table(name = "aluon_saas_quote_items")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -75,6 +75,10 @@ public class QuoteItem {
 
     @Column(name = "portero_automatico")
     private Boolean porteroAutomatico;
+
+    @Column(name = "unidades", nullable = false)
+    @Builder.Default
+    private Integer unidades = 1;
 
     @Column(name = "m2", nullable = false, precision = 12, scale = 4)
     private BigDecimal m2;
