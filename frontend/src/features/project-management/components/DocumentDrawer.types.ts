@@ -10,6 +10,13 @@ export type QuoteLifecycleNumbersResponse = {
   abono: string;
 };
 
+export type QuoteDocumentRowResponse = {
+  id: string;
+  tipo: ProjectDocumentKind | string;
+  numeroDocumento: string;
+  createdAt: string;
+};
+
 export type DocumentDrawerRow = {
   projectId: string;
   quoteId: string;
@@ -29,9 +36,9 @@ export type DocumentTotals = {
 export type DocumentDrawerData = {
   quote: QuoteResponse;
   lifecycle: QuoteLifecycleNumbersResponse;
+  existingDocuments: QuoteDocumentRowResponse[];
   totals: DocumentTotals;
   items: QuoteItemResponse[];
   docTypeLabel: string;
   docNumber: string;
 };
-
