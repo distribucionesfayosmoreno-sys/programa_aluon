@@ -4,7 +4,7 @@ import type { ProjectDocumentRow, WorkOrderWorkflowStep } from '../ProjectManage
 type ProjectsTableProps = {
   rows: ProjectDocumentRow[];
   busyProjectId: string | null;
-  onView: (row: ProjectDocumentRow) => void;
+  onOpenDetails: (row: ProjectDocumentRow) => void;
   onEdit: (projectId: string) => void;
   onApproveBudget: (projectId: string) => void;
   onSetWorkOrderStep: (projectId: string, step: WorkOrderWorkflowStep) => void;
@@ -59,7 +59,10 @@ const ActionButton = ({
     className={`px-2.5 py-1 rounded-md font-semibold transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'}`}
     style={{ border: '1px solid #e5e7eb', background: '#fff', color: disabled ? '#9ca3af' : '#374151', fontSize: 10 }}
     disabled={disabled}
-    onClick={onClick}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick();
+    }}
   >
     {label}
   </button>
@@ -68,7 +71,7 @@ const ActionButton = ({
 export const ProjectsTable = ({
   rows,
   busyProjectId,
-  onView,
+  onOpenDetails,
   onEdit,
   onApproveBudget,
   onSetWorkOrderStep,
@@ -189,6 +192,7 @@ export const ProjectsTable = ({
                         background: isChecked ? 'var(--accent-soft, #eff6ff)' : 'transparent',
                         cursor: 'default',
                       }}
+                      onClick={() => onOpenDetails(row)}
                       onMouseEnter={e => { if (!isChecked) e.currentTarget.style.background = '#f9fafb'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = isChecked ? 'var(--accent-soft, #eff6ff)' : 'transparent'; }}
                     >
@@ -233,7 +237,7 @@ export const ProjectsTable = ({
                           <ActionButton
                             label={busy ? '...' : 'VER'}
                             disabled={!canView || busy}
-                            onClick={() => onView(row)}
+                            onClick={() => onOpenDetails(row)}
                           />
                           <ActionButton
                             label="EDITAR"
