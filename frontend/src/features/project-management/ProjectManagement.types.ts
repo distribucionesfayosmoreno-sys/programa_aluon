@@ -86,6 +86,7 @@ export type ProjectEntity = {
 export type ProjectDocumentRow = {
   rowId: string;
   projectId: string;
+  quoteId: string | null;
   customerName: string;
   type: ProjectDocumentKind;
   number: string;
