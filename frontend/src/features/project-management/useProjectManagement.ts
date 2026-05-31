@@ -165,7 +165,7 @@ export const useProjectManagement = () => {
     projectStore.createCreditNote(projectId);
   };
 
-  const view = async (row: ProjectDocumentRow) => {
+  const openPdf = async (row: ProjectDocumentRow) => {
     setBusyProjectId(row.projectId);
     setError('');
     try {
@@ -206,7 +206,7 @@ export const useProjectManagement = () => {
       finalizeToDeliveryNote,
       invoice,
       creditNote,
-      view,
+      openPdf,
       edit,
     },
   } as const;
