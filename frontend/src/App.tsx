@@ -27,8 +27,8 @@ const App = () => {
         return 'Órdenes de trabajo';
       case 'dashboard':
         return 'Dashboard';
-      case 'gestion-proyectos':
-        return 'Gestión Proyectos';
+      case 'gestion-documentos':
+        return 'Gestión Documentos';
       case 'despiece':
         return 'Despiece';
       case 'registro':
@@ -145,7 +145,7 @@ const App = () => {
         <main className="flex-1 p-3 md:p-4 flex flex-col min-h-0 overflow-hidden">
           <div className="w-full animate-fade-up flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
             {activeModule === 'clientes' && <CustomerManagement />}
-            {activeModule === 'gestion-proyectos' && <ProjectManagement />}
+            {activeModule === 'gestion-documentos' && <ProjectManagement />}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
             {activeModule === 'presupuestos' && <BudgetWizard />}
             {activeModule === 'registro' && <CustomerOnboarding />}
