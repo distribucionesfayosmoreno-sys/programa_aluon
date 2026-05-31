@@ -18,3 +18,5 @@ export const budgetWizardPublicPath = (relativePath: string): string => {
 export const budgetWizardIdeasImagePath = (fileName: string): string =>
   budgetWizardPublicPath(`ideas/aluon/images/${fileName}`);
 
+export const budgetWizardStaticImagePath = (fileName: string): string =>
+  budgetWizardPublicPath(`images/${fileName}`);

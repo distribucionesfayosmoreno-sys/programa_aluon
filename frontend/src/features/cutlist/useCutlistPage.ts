@@ -19,6 +19,9 @@ const emptyForm: FormState = {
   notes: '',
   widthMm: '',
   heightMm: '',
+  hasUnevenness: false,
+  heightLeftMm: '',
+  heightRightMm: '',
   groundClearanceMm: '',
   largueroMm: '',
   topFrame: '',
@@ -163,7 +166,12 @@ export const useCutlistPage = (): UseCutlistPageState => {
     requiredString(form.color, 'Color');
 
     if (selectedDoorType === 'PEATONAL') {
-      requiredNumber(form.heightMm, 'Altura total');
+      if (form.hasUnevenness) {
+        requiredNumber(form.heightLeftMm, 'Altura izquierda');
+        requiredNumber(form.heightRightMm, 'Altura derecha');
+      } else {
+        requiredNumber(form.heightMm, 'Altura total');
+      }
       requiredNumber(form.widthMm, 'Anchura total');
       requiredNumber(form.groundClearanceMm, 'Holgura con el suelo', true);
       requiredSelect(form.hingesSide, 'Bisagras');
@@ -173,7 +181,12 @@ export const useCutlistPage = (): UseCutlistPageState => {
     }
 
     if (selectedDoorType === 'ABATIBLE_UNA' || selectedDoorType === 'ABATIBLE_DOS') {
-      requiredNumber(form.heightMm, 'Altura total');
+      if (form.hasUnevenness) {
+        requiredNumber(form.heightLeftMm, 'Altura izquierda');
+        requiredNumber(form.heightRightMm, 'Altura derecha');
+      } else {
+        requiredNumber(form.heightMm, 'Altura total');
+      }
       requiredNumber(form.widthMm, 'Anchura total');
       requiredNumber(form.groundClearanceMm, 'Holgura con el suelo', true);
       requiredSelect(form.hingesSide, 'Bisagras');
@@ -184,7 +197,12 @@ export const useCutlistPage = (): UseCutlistPageState => {
     }
 
     if (selectedDoorType === 'CORREDERA') {
-      requiredNumber(form.heightMm, 'Altura total');
+      if (form.hasUnevenness) {
+        requiredNumber(form.heightLeftMm, 'Altura izquierda');
+        requiredNumber(form.heightRightMm, 'Altura derecha');
+      } else {
+        requiredNumber(form.heightMm, 'Altura total');
+      }
       requiredNumber(form.widthMm, 'Anchura total');
       requiredSelect(form.openingSide, 'Apertura');
       requiredSelect(form.railType, 'Carril');
@@ -195,15 +213,22 @@ export const useCutlistPage = (): UseCutlistPageState => {
     }
 
     if (selectedDoorType === 'VALLA') {
-      requiredNumber(form.heightMm, 'Altura total');
+      if (form.hasUnevenness) {
+        requiredNumber(form.heightLeftMm, 'Altura izquierda');
+        requiredNumber(form.heightRightMm, 'Altura derecha');
+      } else {
+        requiredNumber(form.heightMm, 'Altura total');
+      }
       requiredNumber(form.widthMm, 'Anchura total');
     }
   };
 
   const buildRequest = (): CutlistRequest => {
     const width = toNumber(form.widthMm);
-    const height = toNumber(form.heightMm);
-    if (width === null || height === null) {
+    const height = form.hasUnevenness 
+      ? Math.max(toNumber(form.heightLeftMm) ?? 0, toNumber(form.heightRightMm) ?? 0) 
+      : toNumber(form.heightMm);
+    if (width === null || height === null || height === 0) {
       throw new Error('Medidas incompletas.');
     }
 
@@ -217,6 +242,8 @@ export const useCutlistPage = (): UseCutlistPageState => {
       model: form.model as DoorModel,
       widthMm: Math.round(width),
       heightMm: Math.round(height),
+      heightLeftMm: form.hasUnevenness ? toNumber(form.heightLeftMm) : undefined,
+      heightRightMm: form.hasUnevenness ? toNumber(form.heightRightMm) : undefined,
       groundClearanceMm: toNumber(form.groundClearanceMm),
       largueroMm: form.largueroMm ? Number(form.largueroMm) : null,
       topFrame: parseBoolean(form.topFrame),

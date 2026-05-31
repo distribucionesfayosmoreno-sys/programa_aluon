@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRESUPUESTO __DOC_NUMBER__</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #ffffff;
+      color: #0b1220;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /*
+      Pixel-perfect target: `images/Imagen Plantilla Documentos.png` (636x856).
+      Esta plantilla usa px para clavar el render en navegador/PDF.
+    */
+    .page {
+      width: 636px;
+      min-height: 856px;
+      margin: 0 auto;
+      padding: 0;
+      position: relative;
+    }
+
+    /* Palette tuned to the PNG (no CSS variables: OpenHTMLtoPDF compatibility) */
+    .ink { color: #0b1220; }
+
+    /* ── Header ───────────────────────────────────────────────────────────── */
+    .hdrTable { width: 100%; border-collapse: collapse; }
+    .hdrTable td { vertical-align: top; }
+
+    .brandBlock {
+      min-height: 160px;
+    }
+
+    .brandLogo {
+      display: block;
+      height: 54px;
+      width: auto;
+      margin: 0;
+    }
+
+    .brandName {
+      font-size: 30px;
+      font-weight: 300;
+      letter-spacing: 0.2px;
+      line-height: 1;
+      margin: 0;
+    }
+
+    .brandTag {
+      font-size: 11px;
+      font-weight: 800;
+      margin: 3px 0 0 0;
+      color: #0b1220;
+    }
+
+    .companyLines {
+      margin-top: 14px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.55;
+      color: #2b62b8;
+      white-space: pre-line;
+    }
+
+    .customerBlock {
+      text-align: right;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.55;
+      color: #0b1220;
+      white-space: pre-line;
+      padding-top: 65px;
+    }
+
+    /* ── Meta (date + title) ──────────────────────────────────────────────── */
+    .meta { margin-top: 40px; }
+    .metaTable { width: 100%; border-collapse: collapse; }
+    .metaTable td { vertical-align: top; }
+
+    .dateLine {
+      font-size: 10px;
+      font-weight: 800;
+      color: #334155;
+      letter-spacing: 0.2px;
+      margin: 0;
+    }
+
+    .docTitle {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .docNumber {
+      margin-top: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    /* ── Items table ─────────────────────────────────────────────────────── */
+    .items {
+      margin-top: 50px;
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+
+    .items thead th {
+      text-align: left;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      color: #6b7280;
+      padding: 0 0 6px 0;
+    }
+
+    .items thead th.th-right { text-align: right; }
+
+    .items thead tr { border-bottom: 0; }
+
+    .items tbody { border-top: 1px solid #d7e2f3; }
+
+    .items tbody tr { border-bottom: 1px solid #d7e2f3; }
+
+    .items tbody td {
+      padding: 10px 0;
+      vertical-align: top;
+      color: #0b1220;
+      font-weight: 600;
+    }
+
+    .col-qty { width: 24mm; }
+    .col-desc { width: auto; padding-right: 8mm; }
+    .col-unit { width: 26mm; text-align: right; }
+    .col-total { width: 26mm; text-align: right; font-weight: 800; }
+
+    .itemDescTitle { font-weight: 800; margin: 0; }
+    .itemDescMeta { margin-top: 2px; color: #64748b; font-weight: 600; font-size: 9px; white-space: pre-line; }
+
+    /* Fixed large empty area like the PNG */
+    .tableSpacer {
+      height: 150px;
+      border-bottom: 1px solid #d7e2f3;
+    }
+
+    /* ── Totals ──────────────────────────────────────────────────────────── */
+    .totals {
+      margin-top: 15px;
+      margin-left: auto;
+      width: 240px;
+      font-size: 10px;
+      font-weight: 800;
+      color: #475569;
+    }
+
+    .totalsTable { width: 100%; border-collapse: collapse; }
+    .totalsTable td { padding: 4px 0; font-weight: 800; }
+    .totalsTable .k { text-align: right; color: #475569; }
+    .totalsTable .v { text-align: right; color: #0b1220; width: 120px; }
+
+    .totalsLine {
+      height: 1px;
+      background: #d7e2f3;
+      width: 120px; /* same as value column */
+      margin-left: auto;
+      margin-top: 6px;
+    }
+
+    /* ── Signatures ─────────────────────────────────────────────────────── */
+    .signatures {
+      position: fixed;
+      left: 48px;
+      right: 48px;
+      bottom: 78px;
+    }
+    .sigTable { width: 100%; border-collapse: collapse; }
+    .sigTable td { width: 50%; vertical-align: bottom; padding: 0 42px; }
+
+    .sig {
+      text-align: center;
+      font-size: 9px;
+      font-weight: 800;
+      color: #64748b;
+    }
+
+    .sigLine {
+      height: 1px;
+      background: #d7e2f3;
+      margin-bottom: 6px;
+    }
+
+    /* ── Terms ──────────────────────────────────────────────────────────── */
+    .terms {
+      position: fixed;
+      left: 48px;
+      right: 48px;
+      bottom: 8px;
+      font-size: 9px;
+      line-height: 1.55;
+    }
+
+    .termsTitle {
+      font-weight: 800;
+      font-size: 10px;
+      margin: 0 0 4px 0;
+      color: #0b1220;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .termsLines {
+      color: #475569;
+      font-weight: 600;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <table class="hdrTable">
+      <tr>
+        <td style="width: 50%; padding-right: 40px;">
+          <div class="brandBlock">
+            <img class="brandLogo" src="__LOGO_DATA_URI__" alt="ALUON" />
+            <div class="companyLines">TELF. 925 55 40 14
+CTRA. 4.004 KM. 29,200
+45290 PANTOJA (TOLEDO)
+info@aluon.es</div>
+          </div>
+        </td>
+        <td style="width: 50%;">
+          <div class="customerBlock">__CUSTOMER_BLOCK__</div>
+        </td>
+      </tr>
+    </table>
+
+    <div class="meta">
+      <table class="metaTable">
+        <tr>
+          <td style="width: 50%; padding-right: 40px;">
+            <p class="dateLine">__DOC_DATE_LONG__</p>
+            <div class="docTitle">PRESUPUESTO</div>
+            <div class="docNumber">__DOC_NUMBER__</div>
+          </td>
+          <td style="width: 50%;"></td>
+        </tr>
+      </table>
+    </div>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th class="col-qty">CANTIDAD</th>
+          <th class="col-desc">DESCRIPCIÓN</th>
+          <th class="col-unit th-right">PRECIO UD.</th>
+          <th class="col-total th-right">TOTAL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!--__ITEM_ROWS__-->
+        <tr><td class="tableSpacer" colspan="4"></td></tr>
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <table class="totalsTable">
+        <tr><td class="k">Subtotal:</td><td class="v">__SUBTOTAL__</td></tr>
+        <tr><td class="k">IVA:</td><td class="v">__VAT__</td></tr>
+      </table>
+      <div class="totalsLine"></div>
+      <table class="totalsTable" style="margin-top: 8px;">
+        <tr><td class="k" style="color: #0b1220;">Total:</td><td class="v">__TOTAL__</td></tr>
+      </table>
+    </div>
+
+    <div class="signatures">
+      <table class="sigTable">
+        <tr>
+          <td>
+            <div class="sig">
+              <div class="sigLine"></div>
+              Conforme el cliente
+            </div>
+          </td>
+          <td>
+            <div class="sig">
+              <div class="sigLine"></div>
+              Conforme la empresa
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="terms">
+      <div class="termsTitle">CONDICIONES GENERALES</div>
+      <div class="termsLines">Forma de pago: a la aceptación del presupuesto 50%, resto el día anterior del suministro del material.
+Validez del presupuesto: 15 días.
+Cualquier modificación de la presente oferta llevará consigo un nuevo estudio.</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -57,6 +57,7 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
     needsHingesSide,
     needsPorterAutomatic,
     needsOpeningSide,
+    hasUnevenness,
     needsLeftRightHeights,
     needsLeftRightWidths,
     needsRail,
@@ -73,6 +74,7 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
     setCutlistBudgetDate,
     setCutlistColor,
     setInstallerName,
+    setHasUnevenness,
     setHeightLeftMm,
     setHeightRightMm,
     setWidthLeftMm,
@@ -125,6 +127,10 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
   const handleInstallerNameChange = useCallback((value: string) => {
     setInstallerName(value);
   }, [setInstallerName]);
+
+  const handleHasUnevennessChange = useCallback((value: boolean) => {
+    setHasUnevenness(value);
+  }, [setHasUnevenness]);
 
   const handleHeightLeftChange = useCallback((value: number | null) => {
     setHeightLeftMm(value);
@@ -253,6 +259,7 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
     budgetDate: cutlistBudgetDate,
     color: cutlistColor,
     installerName,
+    hasUnevenness,
     heightLeftMm,
     heightRightMm,
     widthLeftMm,
@@ -278,6 +285,7 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
     cutlistBudgetDate,
     cutlistColor,
     installerName,
+    hasUnevenness,
     heightLeftMm,
     heightRightMm,
     widthLeftMm,
@@ -350,6 +358,7 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
     onBudgetDateChange: handleBudgetDateChange,
     onColorChange: handleColorChange,
     onInstallerNameChange: handleInstallerNameChange,
+    onHasUnevennessChange: handleHasUnevennessChange,
     onHeightLeftChange: handleHeightLeftChange,
     onHeightRightChange: handleHeightRightChange,
     onWidthLeftChange: handleWidthLeftChange,
@@ -381,6 +390,7 @@ export const useWorkOrdersViewModel = (ctx: UseWorkOrdersResult): UseWorkOrdersV
     handleBudgetDateChange,
     handleColorChange,
     handleInstallerNameChange,
+    handleHasUnevennessChange,
     handleHeightLeftChange,
     handleHeightRightChange,
     handleWidthLeftChange,

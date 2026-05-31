@@ -5,6 +5,7 @@ import type { UseCutlistWorkflowResult } from './useCutlistWorkflow';
 import type { UseWorkOrderBaseStateResult } from './useWorkOrderBaseState';
 import type { UseWorkflowProgressResult } from './useWorkflowProgress';
 import type { UseWorkOrderPrintingResult } from './useWorkOrderPrinting';
+import type { NewRequestData } from '../models';
 
 type BuildWorkOrdersResultParams = {
   customers: Customer[];
@@ -18,7 +19,7 @@ type BuildWorkOrdersResultParams = {
   workOrderData: WorkOrderData;
   printing: UseWorkOrderPrintingResult;
   applyRequest: (req: UseWorkOrderBaseStateResult['requests'][number]) => void;
-  createRequest: (data: { customerName: string; modelId: string; m2: number; reference: string; googleView: boolean; notes: string }) => void;
+  createRequest: (data: NewRequestData) => Promise<void>;
   deleteRequest: (req: UseWorkOrderBaseStateResult['requests'][number]) => Promise<void>;
   resetDownstream: (options?: { keepBudget?: boolean }) => void;
 };
@@ -80,6 +81,7 @@ export const buildWorkOrdersResult = ({
   cutlistBudgetDate: cutlist.cutlistBudgetDate,
   cutlistColor: cutlist.cutlistColor,
   installerName: cutlist.installerName,
+  hasUnevenness: cutlist.hasUnevenness,
   heightLeftMm: cutlist.heightLeftMm,
   heightRightMm: cutlist.heightRightMm,
   widthLeftMm: cutlist.widthLeftMm,
@@ -163,6 +165,7 @@ export const buildWorkOrdersResult = ({
   setCutlistBudgetDate: cutlist.setCutlistBudgetDate,
   setCutlistColor: cutlist.setCutlistColor,
   setInstallerName: cutlist.setInstallerName,
+  setHasUnevenness: cutlist.setHasUnevenness,
   setHeightLeftMm: cutlist.setHeightLeftMm,
   setHeightRightMm: cutlist.setHeightRightMm,
   setWidthLeftMm: cutlist.setWidthLeftMm,

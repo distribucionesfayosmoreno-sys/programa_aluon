@@ -36,6 +36,7 @@ public class CutlistService {
     private final WorkflowProgressService workflowProgress;
 
     public CutlistResponseDto generate(CutlistRequestDto request) {
+        System.out.println("GENERATE CUTLIST CALLED. Request: " + request);
         validate(request);
 
         List<CutlistCalculator.CutlistLine> lines = cutlistCalculator.generate(request);
@@ -147,9 +148,6 @@ public class CutlistService {
     private void validate(CutlistRequestDto request) {
         if (request == null) {
             throw new IllegalArgumentException("La solicitud de despiece es obligatoria");
-        }
-        if (request.getRequestId() == null || request.getRequestId().isBlank()) {
-            throw new IllegalArgumentException("La orden es obligatoria");
         }
         if (request.getDoorType() == null) {
             throw new IllegalArgumentException("El tipo de puerta es obligatorio");

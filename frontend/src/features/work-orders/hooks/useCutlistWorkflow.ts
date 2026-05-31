@@ -68,6 +68,7 @@ export const useCutlistWorkflow = ({
   const [cutlistHoverIndex, setCutlistHoverIndex] = useState<number | null>(null);
   const [cutlistPinnedIndex, setCutlistPinnedIndex] = useState<number | null>(null);
   const [installerName, setInstallerName] = useState('');
+  const [hasUnevenness, setHasUnevenness] = useState(false);
   const [heightLeftMm, setHeightLeftMm] = useState<number | null>(null);
   const [heightRightMm, setHeightRightMm] = useState<number | null>(null);
   const [widthLeftMm, setWidthLeftMm] = useState<number | null>(null);
@@ -84,7 +85,7 @@ export const useCutlistWorkflow = ({
   const needsPorterAutomatic = doorType === 'PEATONAL';
   const needsAutomation = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
   const needsOpeningSide = doorType === 'ABATIBLE_DOS' || doorType === 'CORREDERA';
-  const needsLeftRightHeights = doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS';
+  const needsLeftRightHeights = hasUnevenness;
   const needsLeftRightWidths = doorType === 'CORREDERA';
   const needsRail = doorType === 'CORREDERA';
   const needsMounting = doorType === 'CORREDERA';
@@ -169,7 +170,7 @@ export const useCutlistWorkflow = ({
   const canGenerateCutlist = canGenerateDevelopment
     && Boolean(selectedRequest?.id)
     && widthMm > 0
-    && heightMm > 0
+    && (heightMm > 0 || hasUnevenness)
     && cutlistDistributor.trim().length > 0
     && cutlistBudgetNumber.trim().length > 0
     && cutlistBudgetDate.trim().length > 0
@@ -198,7 +199,7 @@ export const useCutlistWorkflow = ({
     if (!canGenerateDevelopment) {
       reasons.push('Completa la aprobación del presupuesto antes de generar el despiece.');
     }
-    if (widthMm <= 0 || heightMm <= 0) {
+    if (widthMm <= 0 || (!hasUnevenness && heightMm <= 0)) {
       reasons.push('Introduce anchura y altura válidas.');
     }
     if (needsLeftRightHeights && (heightLeftMm === null || heightLeftMm <= 0 || heightRightMm === null || heightRightMm <= 0)) {
@@ -228,6 +229,7 @@ export const useCutlistWorkflow = ({
     canGenerateDevelopment,
     widthMm,
     heightMm,
+    hasUnevenness,
     needsLeftRightHeights,
     heightLeftMm,
     heightRightMm,
@@ -251,7 +253,7 @@ export const useCutlistWorkflow = ({
     doorType,
     model: doorModel,
     widthMm,
-    heightMm,
+    heightMm: hasUnevenness ? Math.max(heightLeftMm ?? 0, heightRightMm ?? 0) : heightMm,
     heightLeftMm,
     heightRightMm,
     widthLeftMm,
@@ -327,6 +329,7 @@ export const useCutlistWorkflow = ({
     cutlistBudgetDate,
     cutlistColor,
     installerName,
+    hasUnevenness,
     heightLeftMm,
     heightRightMm,
     widthLeftMm,
@@ -376,6 +379,7 @@ export const useCutlistWorkflow = ({
     setCutlistBudgetDate,
     setCutlistColor,
     setInstallerName,
+    setHasUnevenness,
     setHeightLeftMm,
     setHeightRightMm,
     setWidthLeftMm,

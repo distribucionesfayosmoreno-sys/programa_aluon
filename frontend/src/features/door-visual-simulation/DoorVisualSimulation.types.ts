@@ -72,6 +72,7 @@ export type DoorVisualSimulationViewState = {
   baseImageUrl: string | null;
   baseImageWidth: number | null;
   baseImageHeight: number | null;
+  showMaskSelector: boolean;
   maskRect: MaskRect | null;
   status: DoorSimulationJobStatus | null;
   processing: boolean;
@@ -95,6 +96,7 @@ export type DoorVisualSimulationActions = {
   setDoorColor: (value: string) => void;
   setSelectedBudgetId: (value: string | null) => void;
   setMaskRect: (value: MaskRect | null) => void;
+  setShowMaskSelector: (value: boolean) => void;
   loadBaseImage: () => Promise<void>;
   startInpaint: () => Promise<void>;
   reset: () => void;

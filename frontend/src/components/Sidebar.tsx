@@ -3,6 +3,7 @@ import logo from '../assets/logo.png';
 export type ModuleKey =
   | 'dashboard'
   | 'clientes'
+  | 'gestion-proyectos'
   | 'simulacion-puertas'
   | 'presupuestos'
   | 'registro'
@@ -45,7 +46,7 @@ const Sidebar = ({ activeModule, onSelect, onNewOrder, isOpen = true, onHoverCha
       {/* Logo */}
       <div className="px-5 py-6" style={{ borderBottom: '1px solid #21262d' }}>
         <div className="h-14 flex items-center justify-center">
-          <img src={logo} alt="Aluon" className="max-h-11 w-auto object-contain brightness-110" />
+          <img src={logo} alt="Aluon" className="max-h-[55px] w-auto object-contain brightness-110" />
         </div>
       </div>
 
@@ -63,6 +64,13 @@ const Sidebar = ({ activeModule, onSelect, onNewOrder, isOpen = true, onHoverCha
         <NavItem label="Clientes (CRM)" active={activeModule === 'clientes'} onClick={() => onSelect('clientes')} icon={
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        } />
+        <NavItem label="Gestión Proyectos" active={activeModule === 'gestion-proyectos'} onClick={() => onSelect('gestion-proyectos')} icon={
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 3h6v4H9z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 13h6M9 17h6" />
           </svg>
         } />
         <NavItem label="Simulación Puertas" active={activeModule === 'simulacion-puertas'} onClick={() => onSelect('simulacion-puertas')} icon={

@@ -10,6 +10,9 @@ export type FormState = {
   notes: string;
   widthMm: string;
   heightMm: string;
+  hasUnevenness: boolean;
+  heightLeftMm: string;
+  heightRightMm: string;
   groundClearanceMm: string;
   largueroMm: '' | '50' | '80';
   topFrame: '' | 'true' | 'false';

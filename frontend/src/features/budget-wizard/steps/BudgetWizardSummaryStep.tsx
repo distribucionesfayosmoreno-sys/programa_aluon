@@ -1,4 +1,5 @@
 import type { CatalogDoorProduct, CatalogModel, CatalogVariant } from '../BudgetWizard.types';
+import { budgetWizardIdeasImagePath, budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   model: CatalogModel;
@@ -13,14 +14,47 @@ type Props = {
   marcoSuperior: boolean;
   bisagras: boolean;
   porteroAutomatico: boolean;
-  customerName: string;
-  deliveryAddressLabel: string;
   submitting: boolean;
   onBack: () => void;
   onFinalize: () => void;
 };
 
-const yesNo = (value: boolean) => (value ? 'Sí' : 'No');
+const yesNo = (val: boolean) => (val ? 'Sí' : 'No');
+
+const getStructureImageLabel = (doorType: string): string => {
+  switch (doorType) {
+    case 'PEATONAL': return 'Puerta';
+    case 'VALLA': return 'Valla';
+    case 'CORREDERA': return 'Puerta Corredera';
+    case 'ABATIBLE_UNA': return 'Puerta Abatible Una Hoja';
+    case 'ABATIBLE_DOS': return 'Puerta Abatible Dos Hojas';
+    default: return 'Puerta';
+  }
+};
+
+const getProductImage = (modelo: string, doorType: string) => {
+  const modelCamel = modelo.charAt(0).toUpperCase() + modelo.slice(1).toLowerCase();
+  const label = getStructureImageLabel(doorType);
+  return budgetWizardIdeasImagePath(`Modelo ${modelCamel} - ${label}.png`);
+};
+
+const getOpeningImage = (doorType: string, bisagras: boolean) => {
+  if (doorType === 'VALLA') return null;
+  const side: 'LEFT' | 'RIGHT' = bisagras ? 'RIGHT' : 'LEFT';
+  if (doorType === 'CORREDERA') {
+    return side === 'LEFT'
+      ? budgetWizardStaticImagePath('corredera izquierda.png')
+      : budgetWizardStaticImagePath('corredera derecha.png');
+  }
+  if (doorType === 'ABATIBLE_UNA' || doorType === 'ABATIBLE_DOS') {
+    return side === 'LEFT'
+      ? budgetWizardStaticImagePath('abatible dos hojas izquierda.png')
+      : budgetWizardStaticImagePath('apertura abatible dos hojas derecha.png');
+  }
+  return side === 'LEFT'
+    ? budgetWizardStaticImagePath('apertura izquierda.png')
+    : budgetWizardStaticImagePath('apertura derecha.png');
+};
 
 export const BudgetWizardSummaryStep = ({
   model,
@@ -35,48 +69,139 @@ export const BudgetWizardSummaryStep = ({
   marcoSuperior,
   bisagras,
   porteroAutomatico,
-  customerName,
-  deliveryAddressLabel,
   submitting,
   onBack,
   onFinalize,
-}: Props) => (
-  <section className="grid gap-6">
-    <div className="flex items-center justify-between gap-4 flex-wrap">
-      <div>
-        <h2 className="text-sm font-black uppercase" style={{ color: '#0d1117' }}>Resumen</h2>
-        <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>Revisa la configuración antes de finalizar.</p>
+}: Props) => {
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <span className="text-[10px] uppercase tracking-widest text-blue-600 font-bold">Resumen de puerta</span>
+          <h3 className="font-headline font-bold text-2xl text-on-surface mt-0.5">Revisa el diseño</h3>
+        </div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-xs font-bold uppercase tracking-wider text-secondary flex items-center gap-1 active:scale-95 transition-transform"
+        >
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          Volver
+        </button>
       </div>
-      <button className="btn-ghost" onClick={onBack}>Volver</button>
-    </div>
 
-    <div className="rounded-2xl p-6 grid gap-3 text-xs" style={{ background: '#ffffff', border: '1px solid #e8eaed' }}>
-      <div><strong>Cliente:</strong> {customerName}</div>
-      <div><strong>Entrega:</strong> {deliveryAddressLabel}</div>
-      <div className="h-px my-2" style={{ background: '#e8eaed' }} />
+      {/* Visual Preview Cards */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Product structure image card */}
+        <div className="relative h-32 bg-white border border-outline-variant/25 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-3 shadow-sm">
+          <img
+            src={getProductImage(model.modelo, variant.variante)}
+            alt={variant.variante}
+            className="max-h-full max-w-full object-contain"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.includes('Modelo Bisel')) {
+                const label = getStructureImageLabel(variant.variante);
+                target.src = budgetWizardIdeasImagePath(`Modelo Bisel - ${label}.png`);
+              }
+            }}
+          />
+          <div className="absolute bottom-2 right-3 text-[9px] uppercase tracking-widest text-secondary font-space">
+            Estructura
+          </div>
+        </div>
 
-      <div><strong>Modelo:</strong> {model.modelo}</div>
-      <div><strong>Producto:</strong> {product.producto}</div>
-      <div><strong>Apertura:</strong> {variant.variante}</div>
-      <div><strong>Color:</strong> {color}</div>
-      <div><strong>Imprimación:</strong> {yesNo(primerRequired)}</div>
-      <div className="h-px my-2" style={{ background: '#e8eaed' }} />
+        {/* Opening image card */}
+        {variant.variante !== 'VALLA' ? (
+          <div className="relative h-32 bg-white border border-outline-variant/25 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-3 shadow-sm">
+            <img
+              src={budgetWizardPublicPath('assets/template.png')}
+              alt="Template"
+              className="absolute inset-0 w-full h-full object-cover opacity-60"
+            />
+            <img
+              src={getOpeningImage(variant.variante, bisagras) || ''}
+              alt="Sentido de Apertura"
+              className={`max-h-[80%] max-w-[85%] object-contain relative z-10 ${
+                bisagras ? 'transform scale-[1.65] mix-blend-multiply' : ''
+              }`}
+            />
+            <div className="absolute bottom-2 right-3 text-[9px] uppercase tracking-widest text-secondary font-space z-10">
+              Apertura
+            </div>
+          </div>
+        ) : (
+          <div className="h-32 bg-surface-container/50 border border-outline-variant/20 rounded-2xl flex flex-col items-center justify-center p-3 text-center">
+            <span className="material-symbols-outlined text-secondary text-lg">block</span>
+            <span className="text-[9px] uppercase tracking-wider text-secondary font-space mt-1">Sin apertura</span>
+          </div>
+        )}
+      </div>
 
-      <div><strong>Anchura total:</strong> {widthMm} mm</div>
-      <div><strong>Altura total:</strong> {heightMm} mm</div>
-      <div><strong>Holgura suelo:</strong> {floorClearanceMm} mm</div>
-      <div><strong>Larguero:</strong> {yesNo(larguero)}</div>
-      <div><strong>Marco superior:</strong> {yesNo(marcoSuperior)}</div>
-      <div><strong>Bisagras:</strong> {yesNo(bisagras)}</div>
-      <div><strong>Portero automático:</strong> {yesNo(porteroAutomatico)}</div>
-    </div>
+      <div className="bg-surface-container rounded-2xl p-4 border border-outline-variant/20 space-y-4 text-xs text-on-surface">
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Modelo</span>
+          <span className="font-bold">{model.modelo}</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Tipo Cerramiento</span>
+          <span className="font-bold">{product.producto.replace('_', ' ')}</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Apertura</span>
+          <span className="font-bold">{variant.variante}</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Color Acabado</span>
+          <div className="flex items-center gap-2">
+            <span className="font-bold">{color}</span>
+            <div className="w-4 h-4 rounded-full border border-outline-variant/40" style={{ backgroundColor: color }} />
+          </div>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Imprimación</span>
+          <span className="font-bold">{yesNo(primerRequired)}</span>
+        </div>
 
-    <div className="flex gap-2">
-      <button className="btn-primary" disabled={submitting} onClick={onFinalize}>
-        {submitting ? 'Generando…' : 'Finalizar presupuesto'}
+        <div className="h-px bg-outline-variant/20" />
+
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Dimensiones</span>
+          <span className="font-bold">{widthMm} x {heightMm} mm</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Holgura suelo</span>
+          <span className="font-bold">{floorClearanceMm} mm</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Larguero de refuerzo</span>
+          <span className="font-bold">{yesNo(larguero)}</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Marco superior</span>
+          <span className="font-bold">{yesNo(marcoSuperior)}</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Bisagras</span>
+          <span className="font-bold">{yesNo(bisagras)}</span>
+        </div>
+        <div className="flex justify-between py-1">
+          <span className="text-secondary font-medium">Portero automático</span>
+          <span className="font-bold">{yesNo(porteroAutomatico)}</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        disabled={submitting}
+        onClick={onFinalize}
+        className="w-full py-3.5 px-6 bg-blue-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-md hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+      >
+
+        {submitting ? 'Guardando...' : 'Aceptar y Guardar Puerta'}
+        <span className="material-symbols-outlined text-sm">done_all</span>
       </button>
-      <button className="btn-ghost" type="button" onClick={() => window.print()}>Imprimir</button>
     </div>
-  </section>
-);
-
+  );
+};

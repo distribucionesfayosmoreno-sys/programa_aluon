@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './features/customer-management/CustomerManagement';
 import CustomerOnboarding from './features/customer-onboarding/CustomerOnboarding';
@@ -11,11 +11,15 @@ import Cutlist from './features/cutlist/Cutlist';
 import { BudgetWizard } from './features/budget-wizard/BudgetWizard';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
 import { DoorVisualSimulation } from './features/door-visual-simulation/DoorVisualSimulation';
+import { ProjectManagement } from './features/project-management/ProjectManagement';
+import { onNavigateToModule } from './services/moduleNavigation';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  useEffect(() => onNavigateToModule(setActiveModule), []);
 
   const breadcrumb = useMemo(() => {
     switch (activeModule) {
@@ -23,6 +27,8 @@ const App = () => {
         return 'Órdenes de trabajo';
       case 'dashboard':
         return 'Dashboard';
+      case 'gestion-proyectos':
+        return 'Gestión Proyectos';
       case 'despiece':
         return 'Despiece';
       case 'registro':
@@ -136,9 +142,10 @@ const App = () => {
       </header>
 
         {/* Content */}
-        <main className={`flex-1 p-3 md:p-4 flex flex-col min-h-0 ${['simulacion-puertas', 'dashboard'].includes(activeModule) ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-          <div className="w-full animate-fade-up flex-1 flex flex-col min-h-0">
+        <main className="flex-1 p-3 md:p-4 flex flex-col min-h-0 overflow-hidden">
+          <div className="w-full animate-fade-up flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
             {activeModule === 'clientes' && <CustomerManagement />}
+            {activeModule === 'gestion-proyectos' && <ProjectManagement />}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
             {activeModule === 'presupuestos' && <BudgetWizard />}
             {activeModule === 'registro' && <CustomerOnboarding />}

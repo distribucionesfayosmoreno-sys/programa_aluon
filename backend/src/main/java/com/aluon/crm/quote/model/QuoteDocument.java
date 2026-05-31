@@ -41,8 +41,11 @@ public class QuoteDocument {
     @JoinColumn(name = "quote_request_id", nullable = false)
     private QuoteRequest quoteRequest;
 
-    @Column(name = "file_name", nullable = false, length = 180)
-    private String fileName;
+    @Column(name = "tipo", nullable = false, length = 40)
+    private String tipo;
+
+    @Column(name = "numero_documento", nullable = false, length = 80)
+    private String numeroDocumento;
 
     @Column(name = "content_type", nullable = false, length = 80)
     private String contentType;

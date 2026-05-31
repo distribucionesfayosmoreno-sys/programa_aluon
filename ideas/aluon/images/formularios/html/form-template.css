@@ -1,0 +1,86 @@
+:root {
+  --page-width: 210mm;
+  --ink: #111827;
+  --field-bg: rgba(255, 255, 255, 0.72);
+  --field-border: rgba(15, 23, 42, 0.32);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #f1f5f9;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+}
+
+.sheet {
+  width: var(--page-width);
+  margin: 16px auto;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.18);
+}
+
+.form-canvas {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.form-bg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.field {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1;
+  background: var(--field-bg);
+  border: 1px dashed var(--field-border);
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.field.multiline {
+  align-items: flex-start;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.box {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(17, 24, 39, 0.55);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.box.checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0px;
+  width: 6px;
+  height: 12px;
+  border-right: 3px solid #111827;
+  border-bottom: 3px solid #111827;
+  transform: rotate(45deg);
+}
+
+@media print {
+  html, body { background: #fff; }
+  .sheet { margin: 0; box-shadow: none; width: 210mm; }
+  .field { border: none; background: transparent; padding: 0; }
+  .box { background: transparent; }
+}
+

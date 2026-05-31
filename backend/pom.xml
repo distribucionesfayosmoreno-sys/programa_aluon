@@ -83,9 +83,9 @@
 
     <!-- PDF -->
     <dependency>
-      <groupId>org.apache.pdfbox</groupId>
-      <artifactId>pdfbox</artifactId>
-      <version>3.0.5</version>
+      <groupId>com.openhtmltopdf</groupId>
+      <artifactId>openhtmltopdf-pdfbox</artifactId>
+      <version>1.0.10</version>
     </dependency>
 
     <!-- Object Storage (S3/MinIO via AWS SDK v2) -->
@@ -104,6 +104,14 @@
       <groupId>org.springframework.modulith</groupId>
       <artifactId>spring-modulith-starter-test</artifactId>
       <scope>test</scope>
+    </dependency>
+
+    <!-- DevTools for hot-reloading -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-devtools</artifactId>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 

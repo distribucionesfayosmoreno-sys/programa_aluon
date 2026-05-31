@@ -14,6 +14,20 @@ public class CutlistCalculator {
     public record CutlistLine(String description, int units, String cutMeasure) {
     }
 
+    private record UnevennessInfo(boolean present, int altoIzq, int altoDer, double anchoInclinado, String angleStr, double tanSlope) {}
+
+    private UnevennessInfo getUnevenness(CutlistRequestDto request) {
+        boolean present = request.getHeightLeftMm() != null && request.getHeightRightMm() != null 
+            && !request.getHeightLeftMm().equals(request.getHeightRightMm());
+        if (!present) {
+            return new UnevennessInfo(false, request.getHeightMm(), request.getHeightMm(), request.getWidthMm(), "45.00º", 0.0);
+        }
+        int diff = Math.abs(request.getHeightLeftMm() - request.getHeightRightMm());
+        double ang = 90.0 - Math.toDegrees(Math.atan2(diff, request.getWidthMm()));
+        double tanSlope = (double) diff / request.getWidthMm();
+        return new UnevennessInfo(true, request.getHeightLeftMm(), request.getHeightRightMm(), Math.hypot(request.getWidthMm(), diff), String.format(java.util.Locale.US, "%.2fº", ang), tanSlope);
+    }
+
     public List<CutlistLine> generate(CutlistRequestDto request) {
         return switch (request.getDoorType()) {
             case PEATONAL -> generatePeatonal(request);
@@ -89,7 +103,7 @@ public class CutlistCalculator {
             }
         }
 
-        addLamas(items, modelo, numeroDeLamasEntero, lamaRestante, medidaAnchoInterior - holguraLamasHorizontal);
+        addLamas(items, modelo, numeroDeLamasEntero, lamaRestante, medidaAnchoInterior - holguraLamasHorizontal, getUnevenness(request));
         return items;
     }
 
@@ -127,22 +141,45 @@ public class CutlistCalculator {
 
         List<CutlistLine> items = new ArrayList<>();
 
+        UnevennessInfo uInfo = getUnevenness(request);
+
         if (marcoSuperior) {
-            if (perfilPuerta == 50) {
-                addItem(items, "Larguero Vertical 50x50 con pestaña con corte recto e inglete 45º", 2, alto);
-                addItem(items, "Larguero Vertical 50x50 con pestaña con corte recto inglete 45º Contrario", 1, ancho);
+            if (uInfo.present) {
+                if (perfilPuerta == 50) {
+                    addItem(items, "Larguero Vertical Izq 50x50 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoIzq);
+                    addItem(items, "Larguero Vertical Der 50x50 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoDer);
+                    addItem(items, "Larguero Horizontal Sup 50x50 con pestaña con corte recto inglete " + uInfo.angleStr + " Contrario", 1, uInfo.anchoInclinado);
+                } else {
+                    addItem(items, "Larguero Vertical Izq 50x80 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoIzq);
+                    addItem(items, "Larguero Vertical Der 50x80 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoDer);
+                    addItem(items, "Larguero Horizontal Sup 50x80 con pestaña con corte recto inglete " + uInfo.angleStr + " Contrario", 1, uInfo.anchoInclinado);
+                }
+                if (modelo == DoorModel.VENECIANA) {
+                    addMarcoInteriorVeneciana(items,
+                            "Marco Horizontal Sup 50x50 troquelado con corte inglete " + uInfo.angleStr + " Contrario",
+                            "Marco Vertical 50x50 troquelado con corte inglete " + uInfo.angleStr + " Contrario",
+                            uInfo.anchoInclinado,
+                            medidaAlturaInterior);
+                } else {
+                    addMarcoInterior(items, modelo, (int) uInfo.anchoInclinado, medidaAlturaInterior); // simplified for unevenness
+                }
             } else {
-                addItem(items, "Larguero Vertical 50x80 con pestaña con corte recto e inglete 45º", 2, alto);
-                addItem(items, "Larguero Vertical 50x80 con pestaña con corte inglete 45º Contrario", 1, ancho);
-            }
-            if (modelo == DoorModel.VENECIANA) {
-                addMarcoInteriorVeneciana(items,
-                        "Marco Horizontal 50x50 troquelado con corte inglete 45º Contrario",
-                        "Marco Vertical 50x50 troquelado con corte inglete 45º Contrario",
-                        medidaAnchoInterior,
-                        medidaAlturaInterior);
-            } else {
-                addMarcoInterior(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+                if (perfilPuerta == 50) {
+                    addItem(items, "Larguero Vertical 50x50 con pestaña con corte recto e inglete 45º", 2, alto);
+                    addItem(items, "Larguero Horizontal Sup 50x50 con pestaña con corte recto inglete 45º Contrario", 1, ancho);
+                } else {
+                    addItem(items, "Larguero Vertical 50x80 con pestaña con corte recto e inglete 45º", 2, alto);
+                    addItem(items, "Larguero Horizontal Sup 50x80 con pestaña con corte inglete 45º Contrario", 1, ancho);
+                }
+                if (modelo == DoorModel.VENECIANA) {
+                    addMarcoInteriorVeneciana(items,
+                            "Marco Horizontal 50x50 troquelado con corte inglete 45º Contrario",
+                            "Marco Vertical 50x50 troquelado con corte inglete 45º Contrario",
+                            medidaAnchoInterior,
+                            medidaAlturaInterior);
+                } else {
+                    addMarcoInterior(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+                }
             }
         } else {
             if (modelo == DoorModel.VENECIANA) {
@@ -160,7 +197,7 @@ public class CutlistCalculator {
             }
         }
 
-        addLamas(items, modelo, numeroDeLamasEntero, lamaRestante, medidaAnchoInterior - holguraLamasHorizontal);
+        addLamas(items, modelo, numeroDeLamasEntero, lamaRestante, medidaAnchoInterior - holguraLamasHorizontal, uInfo);
 
         if (refuerzo) {
             if (modelo == DoorModel.INOX) {
@@ -207,15 +244,31 @@ public class CutlistCalculator {
 
         List<CutlistLine> items = new ArrayList<>();
 
+        UnevennessInfo uInfo = getUnevenness(request);
+
         if (marcoSuperior) {
-            if (perfilPuerta == 50) {
-                addItem(items, "Larguero Vertical 50x50 con pestaña con corte recto e inglete 45º", 2, alto);
-                addItem(items, "Larguero Horizontal 50x50 con pestaña con corte recto inglete 45º Contrario", 1, ancho);
-                addMarcoInteriorDoble(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+            if (uInfo.present) {
+                if (perfilPuerta == 50) {
+                    addItem(items, "Larguero Vertical Izq 50x50 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoIzq);
+                    addItem(items, "Larguero Vertical Der 50x50 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoDer);
+                    addItem(items, "Larguero Horizontal Sup 50x50 con pestaña con corte recto inglete " + uInfo.angleStr + " Contrario", 1, uInfo.anchoInclinado);
+                    addMarcoInteriorDoble(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+                } else {
+                    addItem(items, "Larguero Vertical Izq 50x80 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoIzq);
+                    addItem(items, "Larguero Vertical Der 50x80 con pestaña con corte recto e inglete " + uInfo.angleStr, 1, uInfo.altoDer);
+                    addItem(items, "Larguero Horizontal Sup 50x80 con pestaña con corte inglete " + uInfo.angleStr + " Contrario", 1, uInfo.anchoInclinado);
+                    addMarcoInteriorDoble(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+                }
             } else {
-                addItem(items, "Larguero Vertical 50x80 con pestaña con corte recto e inglete 45º", 2, alto);
-                addItem(items, "Larguero Horizontal 50x80 con pestaña con corte inglete 45º Contrario", 1, ancho);
-                addMarcoInteriorDoble(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+                if (perfilPuerta == 50) {
+                    addItem(items, "Larguero Vertical 50x50 con pestaña con corte recto e inglete 45º", 2, alto);
+                    addItem(items, "Larguero Horizontal Sup 50x50 con pestaña con corte recto inglete 45º Contrario", 1, ancho);
+                    addMarcoInteriorDoble(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+                } else {
+                    addItem(items, "Larguero Vertical 50x80 con pestaña con corte recto e inglete 45º", 2, alto);
+                    addItem(items, "Larguero Horizontal Sup 50x80 con pestaña con corte inglete 45º Contrario", 1, ancho);
+                    addMarcoInteriorDoble(items, modelo, medidaAnchoInterior, medidaAlturaInterior);
+                }
             }
         } else {
             if (perfilPuerta == 50) {
@@ -228,7 +281,7 @@ public class CutlistCalculator {
         }
 
         addLamasDoble(items, modelo, numeroDeLamasEntero, lamaRestante,
-                (medidaAnchoInterior / 2.0) - holguraLamasHorizontal);
+                (medidaAnchoInterior / 2.0) - holguraLamasHorizontal, uInfo);
 
         if (refuerzo) {
             if (modelo == DoorModel.INOX) {
@@ -386,7 +439,7 @@ public class CutlistCalculator {
             addItem(items, "Marco Vertical 80x50 con ranura con corte inglete 45º Contrario", 2, ancho);
         }
 
-        addLamas(items, modelo, numeroDeLamasEntero, lamaRestante, medidaAnchoInterior);
+        addLamas(items, modelo, numeroDeLamasEntero, lamaRestante, medidaAnchoInterior, getUnevenness(request));
 
         return items;
     }
@@ -438,49 +491,75 @@ public class CutlistCalculator {
     }
 
     private void addLamas(List<CutlistLine> items, DoorModel modelo, int numeroDeLamasEntero, int lamaRestante,
-            double medidaAncho) {
+            double medidaAncho, UnevennessInfo uInfo) {
+        int lamaSize = lamaForModelo(modelo);
+        if (uInfo != null && uInfo.present && lamaRestante == 0 && numeroDeLamasEntero > 0) {
+            lamaRestante = lamaSize;
+            numeroDeLamasEntero -= 1;
+        }
+        String corteAdicional;
+        if (uInfo != null && uInfo.present) {
+            long drop = Math.round(medidaAncho * uInfo.tanSlope);
+            long parteInferior = Math.max(0, lamaRestante - drop);
+            corteAdicional = String.format("corte inglete %s (superior: %dmm, inferior: %dmm)", uInfo.angleStr, lamaRestante, parteInferior);
+        } else {
+            corteAdicional = "corte recto";
+        }
         if (modelo == DoorModel.PREMIUM) {
             addItem(items, "Lama 200x20 corte recto", numeroDeLamasEntero, medidaAncho);
             if (lamaRestante > 0) {
-                addItem(items, "Lama adicional Lama 200x20 corte recto", 1,
+                addItem(items, "Lama adicional Lama 200x20 " + corteAdicional, 1,
                         lamaRestante + "mm X " + formatNumber(medidaAncho));
             }
         } else if (modelo == DoorModel.CLASSIC) {
             addItem(items, "Lama 100x20 corte recto", numeroDeLamasEntero, medidaAncho);
             if (lamaRestante > 0) {
-                addItem(items, "Lama adicional Lama 100x20 corte recto", 1,
+                addItem(items, "Lama adicional Lama 100x20 " + corteAdicional, 1,
                         lamaRestante + "mm X " + formatNumber(medidaAncho));
             }
         } else if (modelo == DoorModel.INOX) {
             double medidaAnchoInox = medidaAncho - 35;
             addItem(items, "Lama 200x26 corte recto", numeroDeLamasEntero, medidaAnchoInox);
             if (lamaRestante > 0) {
-                addItem(items, "Lama adicional Lama 200x26 corte recto", 1,
+                addItem(items, "Lama adicional Lama 200x26 " + corteAdicional, 1,
                         lamaRestante + "mm X " + formatNumber(medidaAnchoInox));
             }
             addItem(items, "Tubo Inoxidable 60x20 corte recto", numeroDeLamasEntero, medidaAnchoInox);
         } else if (modelo == DoorModel.VENECIANA) {
             addItem(items, "Lama 100 Avión corte recto", numeroDeLamasEntero, medidaAncho);
             if (lamaRestante > 0) {
-                addItem(items, "Lama adicional Lama 100 Avión corte recto", 1,
+                addItem(items, "Lama adicional Lama 100 Avión " + corteAdicional, 1,
                         lamaRestante + "mm X " + formatNumber(medidaAncho));
             }
         }
     }
 
     private void addLamasDoble(List<CutlistLine> items, DoorModel modelo, int numeroDeLamasEntero, int lamaRestante,
-            double medidaAncho) {
+            double medidaAncho, UnevennessInfo uInfo) {
+        int lamaSize = lamaForModelo(modelo);
+        if (uInfo != null && uInfo.present && lamaRestante == 0 && numeroDeLamasEntero > 0) {
+            lamaRestante = lamaSize;
+            numeroDeLamasEntero -= 1;
+        }
+        String corteAdicional;
+        if (uInfo != null && uInfo.present) {
+            long drop = Math.round(medidaAncho * uInfo.tanSlope);
+            long parteInferior = Math.max(0, lamaRestante - drop);
+            corteAdicional = String.format("corte inglete %s (superior: %dmm, inferior: %dmm)", uInfo.angleStr, lamaRestante, parteInferior);
+        } else {
+            corteAdicional = "corte recto";
+        }
         int totalLamas = numeroDeLamasEntero * 2;
         if (modelo == DoorModel.PREMIUM) {
             addItem(items, "Lama 200x20 corte recto", totalLamas, medidaAncho);
             if (lamaRestante > 0) {
-                addItem(items, "Lama adicional Lama 200x20 corte recto", 2,
+                addItem(items, "Lama adicional Lama 200x20 " + corteAdicional, 2,
                         lamaRestante + "mm X " + formatNumber(medidaAncho));
             }
         } else if (modelo == DoorModel.CLASSIC) {
             addItem(items, "Lama 100x20 corte recto", totalLamas, medidaAncho);
             if (lamaRestante > 0) {
-                addItem(items, "Lama adicional Lama 100x20 corte recto", 2,
+                addItem(items, "Lama adicional Lama 100x20 " + corteAdicional, 2,
                         lamaRestante + "mm X " + formatNumber(medidaAncho));
             }
         } else if (modelo == DoorModel.INOX) {

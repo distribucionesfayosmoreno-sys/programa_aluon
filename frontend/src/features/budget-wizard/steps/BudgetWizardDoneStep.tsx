@@ -1,27 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { QuoteResponse } from '../../customer-onboarding/models';
 
 type Props = {
   quote: QuoteResponse;
+  postFinalizeAction?: 'EMAIL' | 'WHATSAPP' | 'VIEW' | null;
   onNew: () => void;
   onSendChannel: (channel: 'EMAIL' | 'WHATSAPP' | 'BOTH') => Promise<void>;
   submitting: boolean;
 };
 
-export const BudgetWizardDoneStep = ({ quote, onNew, onSendChannel, submitting }: Props) => {
+export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendChannel, submitting }: Props) => {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState(quote.contactEmail || '');
   const [sentStatus, setSentStatus] = useState<string | null>(null);
+  const [pdfOpening, setPdfOpening] = useState(false);
+
+  const openQuotePdf = async () => {
+    if (pdfOpening) return;
+    setPdfOpening(true);
+    try {
+      const response = await fetch(`/api/quotes/${encodeURIComponent(quote.id)}/pdf`, { method: 'POST' });
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Error al generar el PDF');
+      }
+      window.open(`/api/quotes/${encodeURIComponent(quote.id)}/pdf`, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'No se pudo abrir el PDF.';
+      alert(message);
+    } finally {
+      setPdfOpening(false);
+    }
+  };
 
   const handleSendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setSentStatus('Enviando...');
       await onSendChannel('EMAIL');
-      setSentStatus('¡Presupuesto enviado por Email con éxito!');
+      setSentStatus('¡Enviado con éxito!');
       setTimeout(() => setEmailModalOpen(false), 2000);
     } catch {
-      setSentStatus('Error al enviar el email.');
+      setSentStatus('Error al enviar.');
     }
   };
 
@@ -38,80 +58,166 @@ export const BudgetWizardDoneStep = ({ quote, onNew, onSendChannel, submitting }
     }
   };
 
+  useEffect(() => {
+    if (!postFinalizeAction) return;
+
+    if (postFinalizeAction === 'EMAIL') {
+      setEmailModalOpen(true);
+    } else if (postFinalizeAction === 'WHATSAPP') {
+      handleSendWhatsapp();
+    } else if (postFinalizeAction === 'VIEW') {
+      openQuotePdf();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [postFinalizeAction]);
+
   return (
-    <section className="grid gap-6 max-w-xl mx-auto w-full">
+    <div className="space-y-6">
       {/* Visual Header */}
       <div className="text-center">
         <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto text-green-600 shadow-sm animate-bounce">
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-          </svg>
+          <span className="material-symbols-outlined text-3xl font-black">done</span>
         </div>
-        <h2 className="text-xl font-black text-gray-900 mt-4">¡Presupuesto Generado con Éxito!</h2>
-        <p className="text-xs text-gray-500 mt-1">El presupuesto se ha guardado en la base de datos.</p>
+        <h3 className="font-headline font-bold text-2xl text-on-surface mt-4">¡Presupuesto Generado!</h3>
+        <p className="text-xs text-secondary mt-1">El presupuesto se ha guardado en tu cuenta.</p>
       </div>
 
       {/* Info Card */}
-      <div className="bg-white rounded-2xl border border-gray-150 p-6 shadow-sm space-y-4">
+      <div className="bg-surface-container rounded-2xl border border-outline-variant/20 p-5 space-y-4">
         <div className="flex justify-between items-center text-xs">
-          <span className="text-gray-400 font-bold uppercase tracking-wider">Número de Presupuesto</span>
-          <span className="font-black text-gray-900 bg-gray-100 py-1 px-3 rounded-lg">{quote.quoteNumber}</span>
+          <span className="text-secondary font-bold uppercase tracking-wider">Nº Presupuesto</span>
+          <span className="font-black text-on-surface bg-surface-container-high py-1 px-3 rounded-lg">
+            {quote.quoteNumber}
+          </span>
         </div>
 
-        <div className="h-px bg-gray-100" />
+        <div className="h-px bg-outline-variant/20" />
 
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div>
-            <span className="text-gray-400 font-bold block uppercase tracking-wider text-[10px]">Cliente</span>
-            <span className="font-black text-gray-900 mt-1 block">{quote.customerName}</span>
+            <span className="text-secondary font-bold block uppercase tracking-wider text-[10px]">Cliente</span>
+            <span className="font-black text-on-surface mt-1 block">{quote.customerName}</span>
           </div>
           <div className="text-right">
-            <span className="text-gray-400 font-bold block uppercase tracking-wider text-[10px]">Importe Total</span>
-            <span className="text-lg font-black text-brand mt-0.5 block">{quote.total.toFixed(2)} €</span>
+            <span className="text-secondary font-bold block uppercase tracking-wider text-[10px]">Importe Total</span>
+            <span className="text-lg font-black text-blue-600 mt-0.5 block">{quote.total.toFixed(2)} €</span>
           </div>
         </div>
 
-        <div className="h-px bg-gray-100" />
+        <div className="h-px bg-outline-variant/20" />
 
         <div className="flex justify-between items-center text-xs">
-          <span className="text-gray-400 font-bold uppercase tracking-wider">Estado Actual</span>
-          <span className="font-black px-2.5 py-1 rounded-full uppercase tracking-widest text-[9px]"
-            style={{
-              backgroundColor: quote.status === 'ENVIADO' ? '#ecfdf5' : '#fffbeb',
-              color: quote.status === 'ENVIADO' ? '#047857' : '#b45309',
-            }}
-          >
+          <span className="text-secondary font-bold uppercase tracking-wider">Estado</span>
+          <span className="font-black px-2.5 py-1 rounded-full uppercase tracking-widest text-[9px] bg-green-50 text-green-700">
             {quote.status}
           </span>
         </div>
       </div>
 
+      {/* Detailed Budget Lines - "El Presupuesto Real" */}
+      <div className="bg-surface rounded-3xl border border-outline-variant/35 p-5 space-y-4 shadow-sm print:border-none print:shadow-none">
+        <h4 className="font-space font-black text-xs uppercase tracking-wider text-blue-600">Detalle del Presupuesto</h4>
+        
+        <div className="divide-y divide-outline-variant/20">
+          {quote.items.map((item, idx) => (
+            <div key={idx} className="py-3.5 space-y-2 first:pt-0 last:pb-0">
+              <div className="flex justify-between items-start gap-4">
+                <div>
+                  <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest bg-blue-600/10 px-2 py-0.5 rounded-full">
+                    Línea {idx + 1}
+                  </span>
+                  <div className="text-xs font-black text-on-surface mt-1.5 font-space">
+                    Modelo {item.doorModel} — {item.doorType.replace('_', ' ')}
+                  </div>
+                  <div className="text-[10px] text-secondary mt-1 font-body">
+                    Categoría: {item.productCategory.replace('_', ' ')} · Medidas: {item.widthMm} x {item.heightMm} mm ({item.m2.toFixed(2)} m²)
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-black text-on-surface font-space">
+                    {item.lineTotal.toFixed(2)} €
+                  </div>
+                  <div className="text-[9px] text-secondary mt-0.5">
+                    {item.pricePerM2.toFixed(2)} € / m²
+                  </div>
+                </div>
+              </div>
+
+              {/* Specs Badge list */}
+              <div className="flex flex-wrap gap-1.5 pt-1.5">
+                <span className="text-[8px] font-bold text-secondary uppercase bg-surface-container px-2 py-0.5 rounded font-space flex items-center gap-1">
+                  Color: {item.colorCode}
+                  <div className="w-2 h-2 rounded-full border border-outline-variant/30" style={{ backgroundColor: item.colorCode }} />
+                </span>
+                {item.primerRequired && (
+                  <span className="text-[8px] font-bold text-secondary uppercase bg-surface-container px-2 py-0.5 rounded font-space">
+                    Imprimación
+                  </span>
+                )}
+                {item.larguero && (
+                  <span className="text-[8px] font-bold text-secondary uppercase bg-surface-container px-2 py-0.5 rounded font-space">
+                    Larguero
+                  </span>
+                )}
+                {item.marcoSuperior && (
+                  <span className="text-[8px] font-bold text-secondary uppercase bg-surface-container px-2 py-0.5 rounded font-space">
+                    Marco Sup.
+                  </span>
+                )}
+                {item.bisagras && (
+                  <span className="text-[8px] font-bold text-secondary uppercase bg-surface-container px-2 py-0.5 rounded font-space">
+                    Apertura: Derecha
+                  </span>
+                )}
+                {item.porteroAutomatico && (
+                  <span className="text-[8px] font-bold text-secondary uppercase bg-surface-container px-2 py-0.5 rounded font-space">
+                    Portero Auto.
+                  </span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="h-px bg-outline-variant/20 pt-1" />
+
+        {/* Totals Summary */}
+        <div className="flex justify-between items-center text-xs font-space pt-1">
+          <span className="text-secondary font-black uppercase tracking-wider">Subtotal</span>
+          <span className="font-bold text-on-surface">{(quote.total / 1.21).toFixed(2)} €</span>
+        </div>
+        <div className="flex justify-between items-center text-xs font-space">
+          <span className="text-secondary font-black uppercase tracking-wider">I.V.A. (21%)</span>
+          <span className="font-bold text-on-surface">{(quote.total - (quote.total / 1.21)).toFixed(2)} €</span>
+        </div>
+        <div className="flex justify-between items-center text-sm font-space pt-1.5 border-t border-dashed border-outline-variant/30">
+          <span className="text-on-surface font-black uppercase tracking-wider">Total Presupuestado</span>
+          <span className="text-base font-black text-blue-600">{quote.total.toFixed(2)} €</span>
+        </div>
+      </div>
+
       {/* Share / Action Buttons */}
       <div className="space-y-3">
-        <span className="text-[10px] uppercase tracking-widest text-gray-400 font-bold block">Compartir o Descargar</span>
+        <span className="text-[10px] uppercase tracking-widest text-secondary font-bold block">Compartir o Descargar</span>
 
         <div className="grid grid-cols-2 gap-3">
           {/* Email Button */}
           <button
             type="button"
             onClick={() => setEmailModalOpen(true)}
-            className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-outline-variant bg-surface text-on-surface hover:bg-surface-container font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
           >
-            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            Enviar por Email
+            <span className="material-symbols-outlined text-sm">mail</span>
+            Email
           </button>
 
           {/* WhatsApp Button */}
           <button
             type="button"
             onClick={handleSendWhatsapp}
-            className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-outline-variant bg-surface text-on-surface hover:bg-surface-container font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
           >
-            <svg className="w-4.5 h-4.5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.167 1.451 4.793 1.452 5.503 0 9.98-4.482 9.983-9.992.002-2.67-1.04-5.18-2.93-7.073-1.89-1.892-4.407-2.933-7.078-2.934-5.515 0-10.003 4.479-10.006 9.988-.001 1.77.464 3.491 1.348 5.009L.914 21.12l5.733-1.966z" />
-            </svg>
+            <span className="material-symbols-outlined text-sm text-green-600">chat</span>
             WhatsApp
           </button>
         </div>
@@ -120,22 +226,21 @@ export const BudgetWizardDoneStep = ({ quote, onNew, onSendChannel, submitting }
           {/* Print Button */}
           <button
             type="button"
-            onClick={() => window.print()}
-            className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
+            onClick={openQuotePdf}
+            disabled={pdfOpening}
+            className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-outline-variant bg-surface text-on-surface hover:bg-surface-container font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
           >
-            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            Imprimir
+            <span className="material-symbols-outlined text-sm">{pdfOpening ? 'hourglass_empty' : 'picture_as_pdf'}</span>
+            {pdfOpening ? 'Generando…' : 'Ver PDF'}
           </button>
 
           {/* New Budget Button */}
           <button
             type="button"
             onClick={onNew}
-            className="flex items-center justify-center gap-2 p-3.5 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 p-3.5 rounded-xl bg-on-surface hover:bg-on-surface/90 text-surface font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
           >
-            Nuevo Presupuesto
+            Nuevo Flujo
           </button>
         </div>
       </div>
@@ -143,22 +248,22 @@ export const BudgetWizardDoneStep = ({ quote, onNew, onSendChannel, submitting }
       {/* Email Modal overlay */}
       {emailModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-gray-100">
-            <h3 className="text-sm font-black text-gray-900">Enviar presupuesto por email</h3>
-            <p className="text-[10px] text-gray-500 mt-1">Introduce el correo electrónico de destino.</p>
+          <div className="bg-surface rounded-2xl max-w-sm w-full p-6 shadow-xl border border-outline-variant/30">
+            <h3 className="text-sm font-black text-on-surface">Enviar por email</h3>
+            <p className="text-[10px] text-secondary mt-1">Introduce el correo electrónico.</p>
 
             <form onSubmit={handleSendEmail} className="mt-4 space-y-4">
               <input
                 type="email"
                 required
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs focus:ring-1 focus:ring-brand outline-none"
+                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs focus:ring-1 focus:ring-primary outline-none"
                 placeholder="correo@ejemplo.com"
                 value={targetEmail}
                 onChange={e => setTargetEmail(e.target.value)}
               />
 
               {sentStatus && (
-                <div className="text-[10px] font-semibold text-center text-brand">
+                <div className="text-[10px] font-semibold text-center text-blue-600">
                   {sentStatus}
                 </div>
               )}
@@ -167,15 +272,14 @@ export const BudgetWizardDoneStep = ({ quote, onNew, onSendChannel, submitting }
                 <button
                   type="button"
                   onClick={() => setEmailModalOpen(false)}
-                  className="px-4 py-2 border border-gray-200 text-gray-500 hover:bg-gray-50 rounded-xl text-[10px] font-bold uppercase tracking-wider"
+                  className="px-4 py-2 border border-outline-variant/30 text-secondary hover:bg-surface-container rounded-xl text-[10px] font-bold uppercase tracking-wider"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-brand text-white hover:bg-brand/90 rounded-xl text-[10px] font-bold uppercase tracking-wider"
-                  style={{ backgroundColor: '#a92f32' }}
+                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-wider"
                 >
                   {submitting ? 'Enviando...' : 'Enviar'}
                 </button>
@@ -184,6 +288,6 @@ export const BudgetWizardDoneStep = ({ quote, onNew, onSendChannel, submitting }
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 };
