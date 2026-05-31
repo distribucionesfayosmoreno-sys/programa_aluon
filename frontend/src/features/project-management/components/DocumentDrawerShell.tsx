@@ -12,7 +12,7 @@ export const DocumentDrawerShell = ({ open, title, subtitle, onClose, children }
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
         className="absolute inset-0"
         style={{ background: 'rgba(15, 23, 42, 0.45)' }}
@@ -20,12 +20,8 @@ export const DocumentDrawerShell = ({ open, title, subtitle, onClose, children }
       />
 
       <aside
-        className="absolute right-0 top-0 h-full w-[50vw] min-w-[620px] max-w-[820px] bg-white shadow-2xl flex flex-col"
-        style={{
-          transform: 'translateX(0)',
-          transition: 'transform 220ms ease',
-          borderLeft: '1px solid #e5e7eb',
-        }}
+        className="relative bg-white shadow-2xl flex flex-col w-full max-w-6xl max-h-[92vh] overflow-hidden"
+        style={{ border: '1px solid #e5e7eb', borderRadius: 16 }}
         aria-label="Detalle del documento"
       >
         <div className="flex items-start justify-between gap-4 px-5 py-4" style={{ borderBottom: '1px solid #e5e7eb' }}>
@@ -60,4 +56,3 @@ export const DocumentDrawerShell = ({ open, title, subtitle, onClose, children }
     </div>
   );
 };
-
