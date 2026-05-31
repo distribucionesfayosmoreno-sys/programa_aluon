@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ProjectDocumentRow } from '../ProjectManagement.types';
 import type { DocumentDrawerRow } from './DocumentDrawer.types';
 import { DocumentDrawerShell } from './DocumentDrawerShell';
@@ -45,9 +45,11 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
   const drawerRow = useMemo(() => toDrawerRow(row), [row]);
   const { loading, error, data } = useDocumentDrawer(drawerRow);
   const [isConverting, setIsConverting] = useState(false);
+  const [activeTipo, setActiveTipo] = useState<string | null>(null);
+  const [optimisticByTipo, setOptimisticByTipo] = useState<Record<string, string>>({});
 
   const subtitle = row ? `${row.customerName} · ${row.createdAt}` : '';
-  const title = data ? `${data.docTypeLabel} #${data.docNumber}` : (row ? `${row.type} #${row.number}` : 'Documento');
+  const effectiveTipo = (activeTipo ?? row?.type ?? '').toString().toUpperCase();
 
   const existingByTipo = useMemo(() => {
     const map = new Map<string, string>();
@@ -56,21 +58,63 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
       if (!doc?.tipo || !doc?.numeroDocumento) continue;
       map.set(String(doc.tipo).toUpperCase(), doc.numeroDocumento);
     }
+    for (const [tipo, numeroDocumento] of Object.entries(optimisticByTipo)) {
+      if (!tipo || !numeroDocumento) continue;
+      map.set(tipo.toUpperCase(), numeroDocumento);
+    }
+    return map;
+  }, [data, optimisticByTipo]);
+
+  const lifecycleByTipo = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!data) return map;
+    map.set('PRESUPUESTO', data.lifecycle.presupuesto);
+    map.set('PEDIDO', data.lifecycle.pedido);
+    map.set('ALBARAN', data.lifecycle.albaran);
+    map.set('FACTURA', data.lifecycle.factura);
+    map.set('ABONO', data.lifecycle.abono);
     return map;
   }, [data]);
+
+  const title = useMemo(() => {
+    if (!data || !row) return row ? `${row.type} #${row.number}` : 'Documento';
+    const label =
+      effectiveTipo === 'PRESUPUESTO' ? 'Presupuesto'
+        : effectiveTipo === 'PEDIDO' ? 'Pedido'
+          : effectiveTipo === 'ALBARAN' ? 'Albarán'
+            : effectiveTipo === 'FACTURA' ? 'Factura'
+              : effectiveTipo === 'ABONO' ? 'Abono'
+                : effectiveTipo;
+    const number = existingByTipo.get(effectiveTipo) ?? lifecycleByTipo.get(effectiveTipo) ?? row.number;
+    return `${label} #${number}`;
+  }, [data, row, effectiveTipo, existingByTipo, lifecycleByTipo]);
 
   const openStoredPdf = (tipo: string) => {
     if (!row?.quoteId) return;
     window.open(quoteDocumentPdfUrl(row.quoteId, tipo), '_blank', 'noopener,noreferrer');
   };
 
-  const convertTo = async (tipo: string) => {
+  const canEmit = (tipo: string): boolean => {
+    const t = tipo.toUpperCase();
+    if (t === 'PRESUPUESTO') return false;
+    if (t === 'PEDIDO') return true;
+    if (t === 'ALBARAN') return existingByTipo.has('PEDIDO');
+    if (t === 'FACTURA') return existingByTipo.has('ALBARAN');
+    if (t === 'ABONO') return existingByTipo.has('FACTURA');
+    return false;
+  };
+
+  const emitAndActivate = async (tipo: string) => {
     if (!row?.quoteId) return;
     if (isConverting) return;
     setIsConverting(true);
     try {
-      await emitQuoteDocument(row.quoteId, tipo);
-      openStoredPdf(tipo);
+      const created = await emitQuoteDocument(row.quoteId, tipo);
+      setOptimisticByTipo(prev => ({
+        ...prev,
+        [String(created.tipo).toUpperCase()]: created.numeroDocumento,
+      }));
+      setActiveTipo(String(created.tipo).toUpperCase());
     } catch (err) {
       alert(err instanceof Error ? err.message : 'No se pudo generar el documento.');
     } finally {
@@ -85,6 +129,30 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
     { tipo: 'FACTURA', label: 'Factura', color: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-500 hover:bg-emerald-100' },
     { tipo: 'ABONO', label: 'Abono', color: 'bg-red-50 text-red-700 border-red-200 hover:border-red-500 hover:bg-red-100' },
   ] as const), []);
+
+  // Reset navigation when opening a new document/quote.
+  useEffect(() => {
+    if (!row) return;
+    setActiveTipo(row.type);
+    setOptimisticByTipo({});
+  }, [row]);
+
+  const handleView = async () => {
+    if (!row?.quoteId) return;
+    const tipo = effectiveTipo || row.type;
+    const upperTipo = tipo.toUpperCase();
+
+    if (upperTipo === 'PRESUPUESTO') {
+      onOpenPdf({ ...row, type: 'PRESUPUESTO' });
+      return;
+    }
+
+    if (!existingByTipo.has(upperTipo)) {
+      if (!canEmit(upperTipo)) return;
+      await emitAndActivate(upperTipo);
+    }
+    openStoredPdf(upperTipo);
+  };
 
   return (
     <DocumentDrawerShell open={open} title={title} subtitle={subtitle} onClose={onClose}>
@@ -108,27 +176,42 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
             <div className="flex flex-wrap gap-2">
               {traceTypes.map(t => {
                 const emittedNumber = existingByTipo.get(t.tipo);
-                const lifecycleNumber =
-                  t.tipo === 'PRESUPUESTO' ? data.lifecycle.presupuesto
-                    : t.tipo === 'PEDIDO' ? data.lifecycle.pedido
-                      : t.tipo === 'ALBARAN' ? data.lifecycle.albaran
-                        : t.tipo === 'FACTURA' ? data.lifecycle.factura
-                          : data.lifecycle.abono;
+                const lifecycleNumber = lifecycleByTipo.get(t.tipo) ?? '';
                 const code = emittedNumber ?? lifecycleNumber;
                 const emitted = Boolean(emittedNumber);
+                const isActive = effectiveTipo === t.tipo;
+                const allowEmit = canEmit(t.tipo);
+                const clickable = emitted || t.tipo === 'PRESUPUESTO' || allowEmit;
                 return (
                   <button
                     key={t.tipo}
                     type="button"
                     className={`text-[10px] font-black px-3 py-1.5 rounded-xl border flex items-center gap-2 transition-all ${t.color}`}
-                    title={emitted ? `Abrir ${t.label}: ${code}` : `${t.label} no emitido`}
-                    onClick={() => (emitted ? openStoredPdf(t.tipo) : undefined)}
-                    disabled={!emitted}
-                    style={{ opacity: emitted ? 1 : 0.5, cursor: emitted ? 'pointer' : 'not-allowed' }}
+                    title={emitted ? `Ver ${t.label}: ${code}` : allowEmit ? `Emitir ${t.label}` : `${t.label} no disponible`}
+                    onClick={() => {
+                      if (t.tipo === 'PRESUPUESTO') {
+                        setActiveTipo('PRESUPUESTO');
+                        return;
+                      }
+                      if (emitted) {
+                        setActiveTipo(t.tipo);
+                        return;
+                      }
+                      if (allowEmit) {
+                        void emitAndActivate(t.tipo);
+                      }
+                    }}
+                    disabled={!clickable || isConverting}
+                    style={{
+                      opacity: clickable ? 1 : 0.45,
+                      cursor: clickable ? 'pointer' : 'not-allowed',
+                      outline: isActive ? '2px solid rgba(59,130,246,0.35)' : 'none',
+                      outlineOffset: 1,
+                    }}
                   >
                     <span className="uppercase tracking-wide">{t.label}</span>
                     <span className="font-bold">{code}</span>
-                    {emitted ? <span className="text-[10px] opacity-40">⌊</span> : <span className="text-[9px] opacity-70">NO</span>}
+                    {emitted ? <span className="text-[10px] opacity-40">⌊</span> : allowEmit ? <span className="text-[9px] opacity-70">→</span> : <span className="text-[9px] opacity-70">NO</span>}
                   </button>
                 );
               })}
@@ -202,77 +285,27 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
             </div>
           </Section>
 
-          <Section title="Acciones">
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
-                style={{ background: 'var(--accent)', color: '#ffffff' }}
-                onClick={() => onOpenPdf(row)}
-              >
-                Abrir PDF
-              </button>
-
-              {row.type === 'PRESUPUESTO' && !existingByTipo.get('PEDIDO') ? (
-                <button
-                  type="button"
-                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
-                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
-                  disabled={isConverting}
-                  onClick={() => void convertTo('PEDIDO')}
-                >
-                  {isConverting ? 'Generando…' : 'Convertir a Pedido'}
-                </button>
-              ) : null}
-
-              {row.type === 'PEDIDO' && !existingByTipo.get('ALBARAN') ? (
-                <button
-                  type="button"
-                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
-                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
-                  disabled={isConverting}
-                  onClick={() => void convertTo('ALBARAN')}
-                >
-                  {isConverting ? 'Generando…' : 'Convertir a Albarán'}
-                </button>
-              ) : null}
-
-              {row.type === 'ALBARAN' && !existingByTipo.get('FACTURA') ? (
-                <button
-                  type="button"
-                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
-                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
-                  disabled={isConverting}
-                  onClick={() => void convertTo('FACTURA')}
-                >
-                  {isConverting ? 'Generando…' : 'Convertir a Factura'}
-                </button>
-              ) : null}
-
-              {row.type === 'FACTURA' && !existingByTipo.get('ABONO') ? (
-                <button
-                  type="button"
-                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
-                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
-                  disabled={isConverting}
-                  onClick={() => void convertTo('ABONO')}
-                >
-                  {isConverting ? 'Generando…' : 'Crear Abono'}
-                </button>
-              ) : null}
-
-              {row.type === 'PRESUPUESTO' ? (
-                <button
-                  type="button"
-                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
-                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
-                  onClick={() => onEdit(row.projectId)}
-                >
-                  Editar
-                </button>
-              ) : null}
-            </div>
-          </Section>
+          <div className="sticky bottom-0 bg-white px-5 py-4 flex items-center justify-end gap-2" style={{ borderTop: '1px solid #e5e7eb' }}>
+            <button
+              type="button"
+              className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
+              style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
+              disabled={effectiveTipo !== 'PRESUPUESTO'}
+              onClick={() => onEdit(row.projectId)}
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wide flex items-center gap-2"
+              style={{ background: 'var(--accent)', color: '#ffffff' }}
+              disabled={isConverting}
+              onClick={() => void handleView()}
+            >
+              {isConverting ? <span className="w-3.5 h-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" /> : null}
+              Ver
+            </button>
+          </div>
         </>
       ) : null}
     </DocumentDrawerShell>
