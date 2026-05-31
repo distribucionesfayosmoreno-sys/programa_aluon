@@ -31,7 +31,13 @@ public final class QuoteHtmlRenderer {
     }
 
     public String render(QuoteRequest quoteRequest) {
+        return render(quoteRequest, null, null);
+    }
+
+    public String render(QuoteRequest quoteRequest, String docType, String docNumber) {
         QuoteRequest quote = Objects.requireNonNull(quoteRequest, "quoteRequest");
+        String type = (docType == null || docType.isBlank()) ? "PRESUPUESTO" : docType.toUpperCase();
+        String number = (docNumber == null || docNumber.isBlank()) ? quote.getQuoteNumber() : docNumber;
         String template = loadTemplate();
 
         String customerName = quote.getCustomer() != null
@@ -59,7 +65,8 @@ public final class QuoteHtmlRenderer {
                 .replace("__LOGO_DATA_URI__", HtmlEscaper.escape(loadLogoDataUri()))
                 .replace("__CUSTOMER_BLOCK__", HtmlEscaper.escape(renderCustomerBlock(quote, customerName)))
                 .replace("__DOC_DATE_LONG__", HtmlEscaper.escape(createdAtLong))
-                .replace("__DOC_NUMBER__", HtmlEscaper.escape(quote.getQuoteNumber()))
+                .replace("__DOC_TYPE__", HtmlEscaper.escape(type))
+                .replace("__DOC_NUMBER__", HtmlEscaper.escape(number))
                 .replace("<!--__ITEM_ROWS__-->", rowsHtml)
                 .replace("__SUBTOTAL__", HtmlEscaper.escape(money.formatEur(subtotal)))
                 .replace("__VAT__", HtmlEscaper.escape(money.formatEur(vatAmount)))

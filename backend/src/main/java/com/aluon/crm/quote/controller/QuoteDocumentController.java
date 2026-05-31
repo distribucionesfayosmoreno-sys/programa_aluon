@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URLEncoder;
@@ -36,7 +37,22 @@ public class QuoteDocumentController {
     }
 
     @GetMapping("/{id}/pdf")
-    public ResponseEntity<byte[]> downloadLatestPdf(@PathVariable UUID id) {
+    public ResponseEntity<byte[]> downloadLatestPdf(
+            @PathVariable UUID id,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String number) {
+        
+        if (type != null && !type.isBlank() && !type.equalsIgnoreCase("PRESUPUESTO")) {
+            byte[] pdf = quoteDocumentService.generateOnTheFly(id, type, number);
+            String safeType = type.trim();
+            String safeNum = (number == null || number.isBlank()) ? "documento" : number.trim();
+            String filename = safeType + "-" + safeNum + ".pdf";
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                    .body(pdf);
+        }
+
         QuoteDocument document = quoteDocumentService.getLatest(id);
         String filename = buildPdfFilename(document);
         return ResponseEntity.ok()

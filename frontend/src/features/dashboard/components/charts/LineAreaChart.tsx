@@ -7,10 +7,23 @@ type Props = {
   className?: string;
 };
 
-const toCoords = (points: number[], width: number, height: number) => {
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
+const toCoords = (rawPoints: number[], width: number, height: number) => {
+  const points = rawPoints.filter(isFiniteNumber);
+  if (points.length === 0) return [];
+
   const min = Math.min(...points);
   const max = Math.max(...points);
   const range = max - min || 1;
+
+  if (points.length === 1) {
+    const value = points[0];
+    const y = height - ((value - min) / range) * height;
+    return [{ x: 0, y }];
+  }
+
   return points.map((value, idx) => {
     const x = (idx / (points.length - 1)) * width;
     const y = height - ((value - min) / range) * height;
@@ -21,7 +34,7 @@ const toCoords = (points: number[], width: number, height: number) => {
 export const LineAreaChart = ({ width, height, points, className }: Props) => {
   const coords = toCoords(points, width, height);
   const line = coords.map(p => `${p.x},${p.y}`).join(' ');
-  const area = `${line} ${width},${height} 0,${height}`;
+  const area = line.length > 0 ? `${line} ${width},${height} 0,${height}` : '';
 
   return (
     <svg
@@ -51,8 +64,17 @@ export const LineAreaChart = ({ width, height, points, className }: Props) => {
         ))}
       </g>
 
-      <polygon points={area} fill="url(#trendFill)" />
-      <polyline points={line} fill="none" stroke="#4da3ff" strokeWidth={2.5} strokeLinejoin="round" strokeLinecap="round" />
+      {area.length > 0 ? <polygon points={area} fill="url(#trendFill)" /> : null}
+      {line.length > 0 ? (
+        <polyline
+          points={line}
+          fill="none"
+          stroke="#4da3ff"
+          strokeWidth={2.5}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      ) : null}
     </svg>
   );
 };

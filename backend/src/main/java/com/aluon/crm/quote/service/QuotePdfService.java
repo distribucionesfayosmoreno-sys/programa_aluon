@@ -20,8 +20,12 @@ public class QuotePdfService {
     }
 
     public byte[] renderQuotePdf(QuoteRequest quoteRequest) {
+        return renderQuotePdf(quoteRequest, null, null);
+    }
+
+    public byte[] renderQuotePdf(QuoteRequest quoteRequest, String docType, String docNumber) {
         QuoteRequest quote = Objects.requireNonNull(quoteRequest, "quoteRequest");
-        String html = htmlRenderer.render(quote);
+        String html = htmlRenderer.render(quote, docType, docNumber);
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PdfRendererBuilder builder = new PdfRendererBuilder();

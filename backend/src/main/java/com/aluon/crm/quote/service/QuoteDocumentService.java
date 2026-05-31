@@ -56,6 +56,14 @@ public class QuoteDocumentService {
                 .orElseThrow(() -> new IllegalArgumentException("No hay PDF guardado para este presupuesto"));
     }
 
+    @Transactional(readOnly = true)
+    public byte[] generateOnTheFly(UUID quoteId, String type, String number) {
+        UUID id = Objects.requireNonNull(quoteId, "quoteId");
+        QuoteRequest quote = quoteRequestRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado"));
+        return quotePdfService.renderQuotePdf(quote, type, number);
+    }
+
     private String sha256Hex(byte[] bytes) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

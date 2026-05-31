@@ -17,7 +17,7 @@ interface ValidationHintProps {
 
 export const ValidationHint = ({ status, hint }: ValidationHintProps) => (
   <div
-    className="mt-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide"
+    className="validation-hint mt-0.5 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide"
     style={{
       color:
         status === 'error'
