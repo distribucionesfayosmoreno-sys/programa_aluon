@@ -10,11 +10,13 @@ import { setBudgetWizardPrefillCustomerId } from '../budget-wizard/services/budg
 
 const toDocumentRows = (project: ProjectEntity): ProjectDocumentRow[] => {
   const rows: ProjectDocumentRow[] = [];
+  const quoteId = project.documents.presupuesto?.quoteId ?? null;
 
   if (project.documents.presupuesto) {
     rows.push({
       rowId: `${project.id}:PRESUPUESTO`,
       projectId: project.id,
+      quoteId,
       customerName: project.customerName,
       type: 'PRESUPUESTO',
       number: project.documents.presupuesto.quoteNumber,
@@ -27,6 +29,7 @@ const toDocumentRows = (project: ProjectEntity): ProjectDocumentRow[] => {
     rows.push({
       rowId: `${project.id}:PEDIDO`,
       projectId: project.id,
+      quoteId,
       customerName: project.customerName,
       type: 'PEDIDO',
       number: project.documents.pedido.orderNumber,
@@ -40,6 +43,7 @@ const toDocumentRows = (project: ProjectEntity): ProjectDocumentRow[] => {
     rows.push({
       rowId: `${project.id}:ALBARAN`,
       projectId: project.id,
+      quoteId,
       customerName: project.customerName,
       type: 'ALBARAN',
       number: project.documents.albaran.deliveryNoteNumber,
@@ -52,6 +56,7 @@ const toDocumentRows = (project: ProjectEntity): ProjectDocumentRow[] => {
     rows.push({
       rowId: `${project.id}:FACTURA`,
       projectId: project.id,
+      quoteId,
       customerName: project.customerName,
       type: 'FACTURA',
       number: project.documents.factura.invoiceNumber,
@@ -64,6 +69,7 @@ const toDocumentRows = (project: ProjectEntity): ProjectDocumentRow[] => {
     rows.push({
       rowId: `${project.id}:ABONO`,
       projectId: project.id,
+      quoteId,
       customerName: project.customerName,
       type: 'ABONO',
       number: project.documents.abono.creditNoteNumber,
@@ -96,6 +102,7 @@ export const useProjectManagement = () => {
         const mapped: ProjectDocumentRow[] = orders.map(order => ({
           rowId: `order:${order.id}`,
           projectId: `order:${order.id}`,
+          quoteId: null,
           customerName: order.customerName,
           type: 'PEDIDO',
           number: order.codigoOrden,
@@ -158,15 +165,22 @@ export const useProjectManagement = () => {
     projectStore.createCreditNote(projectId);
   };
 
-  const view = async (projectId: string) => {
-    setBusyProjectId(projectId);
+  const view = async (row: ProjectDocumentRow) => {
+    setBusyProjectId(row.projectId);
     setError('');
     try {
-      const project = projectStore.getById(projectId);
-      const quoteId = project?.documents.presupuesto?.quoteId;
-      if (!quoteId) throw new Error('Este proyecto no tiene presupuesto.');
-      await ensureQuotePdfGenerated(quoteId);
-      window.open(quotePdfUrl(quoteId), '_blank', 'noopener,noreferrer');
+      if (!row.quoteId) {
+        throw new Error('No se puede abrir el documento porque no está vinculado a un presupuesto.');
+      }
+
+      if (row.type === 'PRESUPUESTO') {
+        await ensureQuotePdfGenerated(row.quoteId);
+        window.open(quotePdfUrl(row.quoteId), '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      const pdfUrl = `/api/quotes/${encodeURIComponent(row.quoteId)}/pdf?type=${encodeURIComponent(row.type)}&number=${encodeURIComponent(row.number)}`;
+      window.open(pdfUrl, '_blank', 'noopener,noreferrer');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo abrir el PDF.');
     } finally {

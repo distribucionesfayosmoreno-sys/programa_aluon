@@ -4,7 +4,7 @@ import type { ProjectDocumentRow, WorkOrderWorkflowStep } from '../ProjectManage
 type ProjectsTableProps = {
   rows: ProjectDocumentRow[];
   busyProjectId: string | null;
-  onView: (projectId: string) => void;
+  onView: (row: ProjectDocumentRow) => void;
   onEdit: (projectId: string) => void;
   onApproveBudget: (projectId: string) => void;
   onSetWorkOrderStep: (projectId: string, step: WorkOrderWorkflowStep) => void;
@@ -32,6 +32,7 @@ const TypeBadge = ({ type }: { type: string }) => {
     'PEDIDO': { bg: '#fef3c7', color: '#92400e' }, // yellow
     'ALBARAN': { bg: '#f0fdf4', color: '#15803d' }, // green
     'FACTURA': { bg: '#fae8ff', color: '#7c3aed' }, // purple
+    'ABONO': { bg: '#ffe4e6', color: '#9f1239' }, // rose
   };
   const style = map[type] || { bg: '#f3f4f6', color: '#374151' };
   return (
@@ -117,7 +118,7 @@ export const ProjectsTable = ({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
-              placeholder="Buscar proyecto..."
+              placeholder="Buscar documento..."
               className="pl-9 pr-4 py-2 rounded-xl text-sm border"
               style={{ border: '1px solid #e5e7eb', fontSize: 12, outline: 'none', background: '#fff', width: '100%' }}
             />
@@ -172,7 +173,7 @@ export const ProjectsTable = ({
                 rows.map(row => {
                   const busy = busyProjectId === row.projectId;
                   const canApprove = row.type === 'PRESUPUESTO';
-                  const canView = row.type === 'PRESUPUESTO';
+                  const canView = row.quoteId !== null;
                   const canEdit = row.type === 'PRESUPUESTO';
                   const canFinalize = row.type === 'PEDIDO';
                   const canInvoice = row.type === 'ALBARAN';
@@ -232,7 +233,7 @@ export const ProjectsTable = ({
                           <ActionButton
                             label={busy ? '...' : 'VER'}
                             disabled={!canView || busy}
-                            onClick={() => onView(row.projectId)}
+                            onClick={() => onView(row)}
                           />
                           <ActionButton
                             label="EDITAR"

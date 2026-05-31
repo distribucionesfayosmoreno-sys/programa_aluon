@@ -15,7 +15,7 @@ export const ProjectManagement = () => {
       <ProjectsTable
         rows={vm.rows}
         busyProjectId={vm.busyProjectId}
-        onView={projectId => void vm.actions.view(projectId)}
+        onView={row => void vm.actions.view(row)}
         onEdit={projectId => vm.actions.edit(projectId)}
         onApproveBudget={projectId => void vm.actions.approveBudget(projectId)}
         onSetWorkOrderStep={vm.actions.markWorkOrderStep}
