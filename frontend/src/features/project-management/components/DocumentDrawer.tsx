@@ -89,6 +89,22 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
     return `${label} #${number}`;
   }, [data, row, effectiveTipo, existingByTipo, lifecycleByTipo]);
 
+  const headerBg = useMemo(() => {
+    switch (effectiveTipo) {
+      case 'FACTURA':
+        return '#16a34a';
+      case 'ALBARAN':
+        return '#7c3aed';
+      case 'PEDIDO':
+        return '#f97316';
+      case 'ABONO':
+        return '#e11d48';
+      case 'PRESUPUESTO':
+      default:
+        return '#0f172a';
+    }
+  }, [effectiveTipo]);
+
   const openStoredPdf = (tipo: string) => {
     if (!row?.quoteId) return;
     window.open(quoteDocumentPdfUrl(row.quoteId, tipo), '_blank', 'noopener,noreferrer');
@@ -155,7 +171,7 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
   };
 
   return (
-    <DocumentDrawerShell open={open} title={title} subtitle={subtitle} onClose={onClose}>
+    <DocumentDrawerShell open={open} title={title} subtitle={subtitle} headerBg={headerBg} onClose={onClose}>
       {loading ? (
         <div className="px-5 py-6 text-sm font-semibold" style={{ color: '#64748b' }}>
           Cargando…
