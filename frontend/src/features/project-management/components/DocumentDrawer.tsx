@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { ProjectDocumentRow } from '../ProjectManagement.types';
 import type { DocumentDrawerRow } from './DocumentDrawer.types';
 import { DocumentDrawerShell } from './DocumentDrawerShell';
 import { useDocumentDrawer } from './useDocumentDrawer';
+import { emitQuoteDocument, quoteDocumentPdfUrl } from '../services/quoteDetailsApi';
 
 type Props = {
   open: boolean;
@@ -43,9 +44,47 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props) => {
   const drawerRow = useMemo(() => toDrawerRow(row), [row]);
   const { loading, error, data } = useDocumentDrawer(drawerRow);
+  const [isConverting, setIsConverting] = useState(false);
 
   const subtitle = row ? `${row.customerName} · ${row.createdAt}` : '';
   const title = data ? `${data.docTypeLabel} #${data.docNumber}` : (row ? `${row.type} #${row.number}` : 'Documento');
+
+  const existingByTipo = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!data) return map;
+    for (const doc of data.existingDocuments) {
+      if (!doc?.tipo || !doc?.numeroDocumento) continue;
+      map.set(String(doc.tipo).toUpperCase(), doc.numeroDocumento);
+    }
+    return map;
+  }, [data]);
+
+  const openStoredPdf = (tipo: string) => {
+    if (!row?.quoteId) return;
+    window.open(quoteDocumentPdfUrl(row.quoteId, tipo), '_blank', 'noopener,noreferrer');
+  };
+
+  const convertTo = async (tipo: string) => {
+    if (!row?.quoteId) return;
+    if (isConverting) return;
+    setIsConverting(true);
+    try {
+      await emitQuoteDocument(row.quoteId, tipo);
+      openStoredPdf(tipo);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'No se pudo generar el documento.');
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  const traceTypes = useMemo(() => ([
+    { tipo: 'PRESUPUESTO', label: 'Presupuesto', color: 'bg-blue-50 text-blue-700 border-blue-200 hover:border-blue-500 hover:bg-blue-100' },
+    { tipo: 'PEDIDO', label: 'Pedido', color: 'bg-orange-50 text-orange-700 border-orange-200 hover:border-orange-500 hover:bg-orange-100' },
+    { tipo: 'ALBARAN', label: 'Albarán', color: 'bg-purple-50 text-purple-700 border-purple-200 hover:border-purple-500 hover:bg-purple-100' },
+    { tipo: 'FACTURA', label: 'Factura', color: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-500 hover:bg-emerald-100' },
+    { tipo: 'ABONO', label: 'Abono', color: 'bg-red-50 text-red-700 border-red-200 hover:border-red-500 hover:bg-red-100' },
+  ] as const), []);
 
   return (
     <DocumentDrawerShell open={open} title={title} subtitle={subtitle} onClose={onClose}>
@@ -65,6 +104,37 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
 
       {data && row ? (
         <>
+          <Section title="Trazabilidad">
+            <div className="flex flex-wrap gap-2">
+              {traceTypes.map(t => {
+                const emittedNumber = existingByTipo.get(t.tipo);
+                const lifecycleNumber =
+                  t.tipo === 'PRESUPUESTO' ? data.lifecycle.presupuesto
+                    : t.tipo === 'PEDIDO' ? data.lifecycle.pedido
+                      : t.tipo === 'ALBARAN' ? data.lifecycle.albaran
+                        : t.tipo === 'FACTURA' ? data.lifecycle.factura
+                          : data.lifecycle.abono;
+                const code = emittedNumber ?? lifecycleNumber;
+                const emitted = Boolean(emittedNumber);
+                return (
+                  <button
+                    key={t.tipo}
+                    type="button"
+                    className={`text-[10px] font-black px-3 py-1.5 rounded-xl border flex items-center gap-2 transition-all ${t.color}`}
+                    title={emitted ? `Abrir ${t.label}: ${code}` : `${t.label} no emitido`}
+                    onClick={() => (emitted ? openStoredPdf(t.tipo) : undefined)}
+                    disabled={!emitted}
+                    style={{ opacity: emitted ? 1 : 0.5, cursor: emitted ? 'pointer' : 'not-allowed' }}
+                  >
+                    <span className="uppercase tracking-wide">{t.label}</span>
+                    <span className="font-bold">{code}</span>
+                    {emitted ? <span className="text-[10px] opacity-40">⌊</span> : <span className="text-[9px] opacity-70">NO</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </Section>
+
           <Section title="Resumen">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl border p-3" style={{ borderColor: '#e5e7eb', background: '#ffffff' }}>
@@ -143,6 +213,54 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
                 Abrir PDF
               </button>
 
+              {row.type === 'PRESUPUESTO' && !existingByTipo.get('PEDIDO') ? (
+                <button
+                  type="button"
+                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
+                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
+                  disabled={isConverting}
+                  onClick={() => void convertTo('PEDIDO')}
+                >
+                  {isConverting ? 'Generando…' : 'Convertir a Pedido'}
+                </button>
+              ) : null}
+
+              {row.type === 'PEDIDO' && !existingByTipo.get('ALBARAN') ? (
+                <button
+                  type="button"
+                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
+                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
+                  disabled={isConverting}
+                  onClick={() => void convertTo('ALBARAN')}
+                >
+                  {isConverting ? 'Generando…' : 'Convertir a Albarán'}
+                </button>
+              ) : null}
+
+              {row.type === 'ALBARAN' && !existingByTipo.get('FACTURA') ? (
+                <button
+                  type="button"
+                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
+                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
+                  disabled={isConverting}
+                  onClick={() => void convertTo('FACTURA')}
+                >
+                  {isConverting ? 'Generando…' : 'Convertir a Factura'}
+                </button>
+              ) : null}
+
+              {row.type === 'FACTURA' && !existingByTipo.get('ABONO') ? (
+                <button
+                  type="button"
+                  className="px-3 py-2 rounded-xl text-xs font-black uppercase tracking-wide"
+                  style={{ background: '#ffffff', border: '1px solid #e5e7eb', color: '#0f172a' }}
+                  disabled={isConverting}
+                  onClick={() => void convertTo('ABONO')}
+                >
+                  {isConverting ? 'Generando…' : 'Crear Abono'}
+                </button>
+              ) : null}
+
               {row.type === 'PRESUPUESTO' ? (
                 <button
                   type="button"
@@ -160,4 +278,3 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onEdit }: Props)
     </DocumentDrawerShell>
   );
 };
-

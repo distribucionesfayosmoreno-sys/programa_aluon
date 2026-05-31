@@ -1,5 +1,5 @@
 import type { QuoteResponse } from '../../customer-onboarding/models';
-import type { QuoteLifecycleNumbersResponse } from '../components/DocumentDrawer.types';
+import type { QuoteDocumentRowResponse, QuoteLifecycleNumbersResponse } from '../components/DocumentDrawer.types';
 
 const parseJsonOrThrow = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
@@ -22,3 +22,24 @@ export const fetchLifecycleNumbers = async (
   return parseJsonOrThrow<QuoteLifecycleNumbersResponse>(response);
 };
 
+export const listQuoteDocuments = async (quoteId: string, signal?: AbortSignal): Promise<QuoteDocumentRowResponse[]> => {
+  const response = await fetch(`/api/quotes/${encodeURIComponent(quoteId)}/documents`, { signal });
+  return parseJsonOrThrow<QuoteDocumentRowResponse[]>(response);
+};
+
+export const emitQuoteDocument = async (
+  quoteId: string,
+  tipo: string,
+  signal?: AbortSignal,
+): Promise<QuoteDocumentRowResponse> => {
+  const response = await fetch(`/api/quotes/${encodeURIComponent(quoteId)}/documents`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tipo }),
+    signal,
+  });
+  return parseJsonOrThrow<QuoteDocumentRowResponse>(response);
+};
+
+export const quoteDocumentPdfUrl = (quoteId: string, tipo: string): string =>
+  `/api/quotes/${encodeURIComponent(quoteId)}/documents/${encodeURIComponent(tipo)}/pdf`;

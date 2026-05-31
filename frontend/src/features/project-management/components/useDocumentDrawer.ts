@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { DocumentDrawerData, DocumentDrawerRow, QuoteLifecycleNumbersResponse } from './DocumentDrawer.types';
-import { fetchLifecycleNumbers, fetchQuoteById } from '../services/quoteDetailsApi';
+import { fetchLifecycleNumbers, fetchQuoteById, listQuoteDocuments } from '../services/quoteDetailsApi';
 
 const VAT_RATE_DEFAULT = 0.21;
 
@@ -60,9 +60,10 @@ export const useDocumentDrawer = (row: DocumentDrawerRow | null) => {
 
     const run = async () => {
       try {
-        const [quote, lifecycle] = await Promise.all([
+        const [quote, lifecycle, existingDocuments] = await Promise.all([
           fetchQuoteById(row.quoteId, controller.signal),
           fetchLifecycleNumbers(row.quoteId, controller.signal),
+          listQuoteDocuments(row.quoteId, controller.signal),
         ]);
 
         const items = quote.items ?? [];
@@ -77,6 +78,7 @@ export const useDocumentDrawer = (row: DocumentDrawerRow | null) => {
         setData({
           quote,
           lifecycle,
+          existingDocuments,
           items,
           totals: { subtotal, vatRate, vatAmount, total },
           docTypeLabel,

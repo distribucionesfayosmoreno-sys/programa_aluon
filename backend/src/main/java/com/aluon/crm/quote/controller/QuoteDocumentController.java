@@ -26,7 +26,6 @@ import java.util.UUID;
 @RequestMapping("/api/quotes")
 @RequiredArgsConstructor
 public class QuoteDocumentController {
-
     private final QuoteDocumentService quoteDocumentService;
     private final MailService mailService;
 
