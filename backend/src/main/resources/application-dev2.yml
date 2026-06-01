@@ -24,13 +24,13 @@ spring:
       ddl-auto: validate
     show-sql: true
     properties:
-      hibernate:
-        format_sql: true
-        tenant_identifier_resolver: com.aluon.core.tenant.service.CurrentTenantIdentifierResolverImpl
+      "[hibernate.format_sql]": true
+      "[hibernate.tenant_identifier_resolver]": com.aluon.core.tenant.service.CurrentTenantIdentifierResolverImpl
   modulith:
     events:
-      jdbc-schema-initialization:
-        enabled: true
+      jdbc:
+        schema-initialization:
+          enabled: true
 
 app:
   cors:

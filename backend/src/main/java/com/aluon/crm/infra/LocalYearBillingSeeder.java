@@ -70,26 +70,33 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
         }
 
         LocalDateTime startOfYear = LocalDateTime.of(2026, 1, 1, 0, 0);
-        LocalDateTime endExclusive = LocalDateTime.of(today.getYear(), today.getMonth(), today.getDayOfMonth(), 0, 0).plusDays(1);
+        LocalDateTime endExclusive = LocalDateTime.of(today.getYear(), today.getMonth(), today.getDayOfMonth(), 0, 0)
+                .plusDays(1);
 
-        long currentInvoices = quoteDocumentRepository.countByTipoIgnoreCaseAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(
-                DOC_TIPO_FACTURA,
-                startOfYear,
-                endExclusive
-        );
+        long currentInvoices = quoteDocumentRepository
+                .countByTipoIgnoreCaseAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(
+                        DOC_TIPO_FACTURA,
+                        startOfYear,
+                        endExclusive);
 
         int missing = (int) Math.max(0, TARGET_INVOICES_MIN_YTD - currentInvoices);
         if (missing == 0) {
             return;
         }
 
-        Customer customerA = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.junio@aluon.local"), "demo.junio@aluon.local", "600 000 001");
-        Customer customerB = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.b@aluon.local"), "demo.b@aluon.local", "600 000 002");
-        Customer customerC = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.c@aluon.local"), "demo.c@aluon.local", "600 000 003");
-        Customer customerD = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.d@aluon.local"), "demo.d@aluon.local", "600 000 004");
-        Customer customerE = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.e@aluon.local"), "demo.e@aluon.local", "600 000 005");
+        Customer customerA = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.junio@aluon.local"),
+                "demo.junio@aluon.local", "600 000 001");
+        Customer customerB = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.b@aluon.local"),
+                "demo.b@aluon.local", "600 000 002");
+        Customer customerC = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.c@aluon.local"),
+                "demo.c@aluon.local", "600 000 003");
+        Customer customerD = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.d@aluon.local"),
+                "demo.d@aluon.local", "600 000 004");
+        Customer customerE = ensureCustomer(LocalSeedNames.companyNameForSeed("demo.e@aluon.local"),
+                "demo.e@aluon.local", "600 000 005");
 
-        int maxExistingInvoiceSeq = quoteDocumentRepository.findMaxSequenceForDocumentPrefix(DOC_TIPO_FACTURA, "FA-2026-%");
+        int maxExistingInvoiceSeq = quoteDocumentRepository.findMaxSequenceForDocumentPrefix(DOC_TIPO_FACTURA,
+                "FA-2026-%");
         int startInvoiceSeq = Math.max(101, maxExistingInvoiceSeq + 1);
         int maxExistingQuoteSeq = quoteRequestRepository.findMaxSequenceForQuoteNumberPrefix("PT-2026-%");
         int startQuoteSeq = Math.max(101, maxExistingQuoteSeq + 1);
@@ -99,8 +106,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                 startInvoiceSeq,
                 startQuoteSeq,
                 missing,
-                today
-        );
+                today);
 
         List<QuoteItem> allItems = new ArrayList<>();
         List<QuoteDocument> allDocs = new ArrayList<>();
@@ -112,8 +118,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                     plan.quoteCreatedAt,
                     QuoteStatus.ENVIADO,
                     plan.total,
-                    plan.seriesDate
-            ));
+                    plan.seriesDate));
 
             for (SeedItemPlan item : plan.items) {
                 allItems.add(quoteItem(
@@ -124,8 +129,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                         item.heightMm,
                         item.m2,
                         item.pricePerM2,
-                        item.lineTotal
-                ));
+                        item.lineTotal));
             }
 
             allDocs.add(invoiceDoc(quote, plan.invoiceNumber, plan.invoiceCreatedAt));
@@ -138,24 +142,24 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
     private Customer ensureCustomer(String nombreComercial, String email, String telefono) {
         return customerService.findFirstActiveByEmail(email)
                 .map(existing -> {
-                    String currentName = existing.getNombreComercial() == null ? "" : existing.getNombreComercial().trim();
+                    String currentName = existing.getNombreComercial() == null ? ""
+                            : existing.getNombreComercial().trim();
                     if (currentName.toLowerCase().contains("cliente demo")) {
                         existing.setNombreComercial(LocalSeedNames.companyNameForSeed(email));
                         existing.setPersonaContacto(LocalSeedNames.contactPersonForSeed(email));
-                        if (existing.getTelefono() == null || existing.getTelefono().isBlank()) existing.setTelefono(telefono);
+                        if (existing.getTelefono() == null || existing.getTelefono().isBlank())
+                            existing.setTelefono(telefono);
                         return customerService.save(existing);
                     }
                     return existing;
                 })
-                .orElseGet(() ->
-                        customerService.save(Customer.builder()
-                                .nombreComercial(nombreComercial)
-                                .personaContacto(LocalSeedNames.contactPersonForSeed(email))
-                                .email(email)
-                                .telefono(telefono)
-                                .active(true)
-                                .build())
-                );
+                .orElseGet(() -> customerService.save(Customer.builder()
+                        .nombreComercial(nombreComercial)
+                        .personaContacto(LocalSeedNames.contactPersonForSeed(email))
+                        .email(email)
+                        .telefono(telefono)
+                        .active(true)
+                        .build()));
     }
 
     private static QuoteRequest newQuote(
@@ -164,8 +168,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
             LocalDateTime createdAt,
             QuoteStatus status,
             BigDecimal total,
-            LocalDate seriesDate
-    ) {
+            LocalDate seriesDate) {
         LocalDateTime validatedAt = status == QuoteStatus.PENDIENTE_VALIDACION ? null : createdAt.plusHours(3);
         LocalDateTime sentAt = status == QuoteStatus.ENVIADO ? createdAt.plusDays(1) : null;
 
@@ -195,8 +198,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
             int heightMm,
             BigDecimal m2,
             BigDecimal pricePerM2,
-            BigDecimal lineTotal
-    ) {
+            BigDecimal lineTotal) {
         return QuoteItem.builder()
                 .quoteRequest(quote)
                 .doorModel(doorModel)
@@ -237,8 +239,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
             int startInvoiceSeq,
             int startQuoteSeq,
             int invoicesToGenerate,
-            LocalDate today
-    ) {
+            LocalDate today) {
         Random random = new Random(20260601L);
 
         int endMonth = today.getYear() == 2026 ? today.getMonthValue() : 12;
@@ -257,7 +258,8 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
             if (month == today.getMonthValue() && today.getYear() == 2026) {
                 maxDay = Math.min(maxDay, today.getDayOfMonth());
             }
-            if (maxDay <= 0) continue;
+            if (maxDay <= 0)
+                continue;
 
             int invoicesThisMonth = Math.min(remaining, 8 + random.nextInt(8)); // 8..15
             remaining -= invoicesThisMonth;
@@ -270,7 +272,8 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                 LocalDateTime quoteCreatedAt = LocalDateTime.of(2026, month, day, hour, minute);
                 int deltaDays = 1 + random.nextInt(5);
                 int invoiceDay = Math.min(day + deltaDays, maxDay);
-                LocalDateTime invoiceCreatedAt = LocalDateTime.of(2026, month, invoiceDay, 9 + random.nextInt(8), random.nextInt(60));
+                LocalDateTime invoiceCreatedAt = LocalDateTime.of(2026, month, invoiceDay, 9 + random.nextInt(8),
+                        random.nextInt(60));
 
                 Customer customer = customers.get((month + i) % customers.size());
                 String invoiceNumber = String.format("FA-2026-%04d", invoiceSeq++);
@@ -282,7 +285,8 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                     items.add(randomItemPlan(random));
                 }
 
-                out.add(plan(customer, quoteNumber, quoteCreatedAt, invoiceNumber, invoiceCreatedAt, Month.of(month), items));
+                out.add(plan(customer, quoteNumber, quoteCreatedAt, invoiceNumber, invoiceCreatedAt, Month.of(month),
+                        items));
             }
         }
 
@@ -296,8 +300,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
             String invoiceNumber,
             LocalDateTime invoiceCreatedAt,
             Month month,
-            List<SeedItemPlan> items
-    ) {
+            List<SeedItemPlan> items) {
         BigDecimal total = items.stream()
                 .map(i -> i.lineTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -310,28 +313,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                 invoiceCreatedAt,
                 LocalDate.of(2026, month, 1),
                 total,
-                items
-        );
-    }
-
-    private static SeedItemPlan item(
-            DoorModel model,
-            DoorType type,
-            int widthMm,
-            int heightMm,
-            String m2,
-            String pricePerM2,
-            String lineTotal
-    ) {
-        return new SeedItemPlan(
-                model,
-                type,
-                widthMm,
-                heightMm,
-                new BigDecimal(m2),
-                new BigDecimal(pricePerM2),
-                new BigDecimal(lineTotal)
-        );
+                items);
     }
 
     private static SeedItemPlan randomItemPlan(Random random) {
@@ -368,8 +350,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
             LocalDateTime invoiceCreatedAt,
             LocalDate seriesDate,
             BigDecimal total,
-            List<SeedItemPlan> items
-    ) {
+            List<SeedItemPlan> items) {
     }
 
     private record SeedItemPlan(
@@ -379,7 +360,6 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
             int heightMm,
             BigDecimal m2,
             BigDecimal pricePerM2,
-            BigDecimal lineTotal
-    ) {
+            BigDecimal lineTotal) {
     }
 }

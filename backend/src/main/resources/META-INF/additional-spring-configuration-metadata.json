@@ -1,0 +1,128 @@
+{
+  "properties": [
+    {
+      "name": "spring.mail.from",
+      "type": "java.lang.String",
+      "description": "Custom property for mail from address."
+    },
+    {
+      "name": "app.cors.allowed-origins",
+      "type": "java.lang.String",
+      "description": "Allowed CORS origins."
+    },
+    {
+      "name": "integrations.jira.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable Jira integration."
+    },
+    {
+      "name": "integrations.jira.base-url",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.jira.username",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.jira.api-token",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.jira.project-key",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.jira.issue-type-name",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.google-street-view.enabled",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "name": "integrations.door-simulation.google-street-view.api-key",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.google-street-view.browser-api-key",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.google-street-view.base-url",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.google-street-view.default-image-size",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.google-street-view.default-fov",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.stability.enabled",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "name": "integrations.door-simulation.stability.api-key",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.stability.base-url",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.stability.inpaint-path",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.stability.default-prompt",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.stability.default-negative-prompt",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.stability.output-format",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.enabled",
+      "type": "java.lang.Boolean"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.endpoint",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.region",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.bucket",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.access-key",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.secret-key",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.public-base-url",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "integrations.door-simulation.object-storage.local-base-dir",
+      "type": "java.lang.String"
+    },
+    {
+      "name": "spring.modulith.events.jdbc.schema-initialization.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Initialize JDBC schema for Modulith events."
+    }
+  ]
+}

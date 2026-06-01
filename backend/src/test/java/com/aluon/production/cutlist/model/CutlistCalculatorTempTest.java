@@ -2,14 +2,21 @@ package com.aluon.production.cutlist.model;
 
 import com.aluon.production.cutlist.dto.CutlistRequestDto;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@SpringBootTest
 public class CutlistCalculatorTempTest {
+
+    @Autowired
+    private CutlistCalculator calculator;
 
     @Test
     public void test() {
-        CutlistCalculator calculator = new CutlistCalculator();
         CutlistRequestDto req = new CutlistRequestDto();
         req.setDoorType(DoorType.ABATIBLE_DOS);
         req.setModel(DoorModel.PREMIUM);
@@ -21,9 +28,9 @@ public class CutlistCalculatorTempTest {
         req.setLargueroMm(50);
         req.setGroundClearanceMm(0);
 
-        List<CutlistCalculator.CutlistLine> lines = calculator.generate(req);
+        List<CutlistLine> lines = calculator.generate(req);
         boolean foundAngledLama = false;
-        for (CutlistCalculator.CutlistLine line : lines) {
+        for (CutlistLine line : lines) {
             System.out.println(line.description());
             if (line.description().contains("inglete")) {
                 foundAngledLama = true;
