@@ -29,6 +29,23 @@ public interface QuoteItemRepository extends JpaRepository<QuoteItem, UUID> {
             @Param("end") LocalDateTime end
     );
 
+    @Query("""
+            select i.doorModel as doorModel, coalesce(sum(i.lineTotal), 0) as total
+            from QuoteDocument d
+            join d.quoteRequest q
+            join q.items i
+            where upper(d.tipo) = upper(:tipo)
+              and d.createdAt >= :start
+              and d.createdAt < :end
+            group by i.doorModel
+            order by sum(i.lineTotal) desc
+            """)
+    java.util.List<DoorModelTotalRow> sumLineTotalByDoorModelForDocumentTipo(
+            @Param("tipo") String tipo,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
     interface DoorModelTotalRow {
         DoorModel doorModel();
 

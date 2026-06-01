@@ -1,96 +1,30 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ProjectDocumentRow, ProjectEntity, WorkOrderWorkflowStep } from './ProjectManagement.types';
-import { onProjectsChanged } from './services/projectEvents';
+import type { ProjectDocumentRow, WorkOrderWorkflowStep } from './ProjectManagement.types';
 import { fetchOrderStatuses } from './services/ordersApi';
-import { validateQuote } from './services/quotesApi';
-import { projectStore } from './services/projectStore';
 import { ensureQuotePdfGenerated, quotePdfUrl } from './services/quotePdf';
-import { navigateToModule } from '../../services/moduleNavigation';
-import { setBudgetWizardPrefillCustomerId } from '../budget-wizard/services/budgetWizardPrefill';
-
-const toDocumentRows = (project: ProjectEntity): ProjectDocumentRow[] => {
-  const rows: ProjectDocumentRow[] = [];
-  const quoteId = project.documents.presupuesto?.quoteId ?? null;
-
-  if (project.documents.presupuesto) {
-    rows.push({
-      rowId: `${project.id}:PRESUPUESTO`,
-      projectId: project.id,
-      quoteId,
-      customerName: project.customerName,
-      type: 'PRESUPUESTO',
-      number: project.documents.presupuesto.quoteNumber,
-      statusLabel: project.documents.presupuesto.status,
-      createdAt: project.documents.presupuesto.createdAt,
-    });
-  }
-
-  if (project.documents.pedido) {
-    rows.push({
-      rowId: `${project.id}:PEDIDO`,
-      projectId: project.id,
-      quoteId,
-      customerName: project.customerName,
-      type: 'PEDIDO',
-      number: project.documents.pedido.orderNumber,
-      statusLabel: project.documents.pedido.status,
-      createdAt: project.documents.pedido.createdAt,
-      workOrderStep: project.workOrder?.workflowStep,
-    });
-  }
-
-  if (project.documents.albaran) {
-    rows.push({
-      rowId: `${project.id}:ALBARAN`,
-      projectId: project.id,
-      quoteId,
-      customerName: project.customerName,
-      type: 'ALBARAN',
-      number: project.documents.albaran.deliveryNoteNumber,
-      statusLabel: project.documents.albaran.status,
-      createdAt: project.documents.albaran.createdAt,
-    });
-  }
-
-  if (project.documents.factura) {
-    rows.push({
-      rowId: `${project.id}:FACTURA`,
-      projectId: project.id,
-      quoteId,
-      customerName: project.customerName,
-      type: 'FACTURA',
-      number: project.documents.factura.invoiceNumber,
-      statusLabel: project.documents.factura.status,
-      createdAt: project.documents.factura.createdAt,
-    });
-  }
-
-  if (project.documents.abono) {
-    rows.push({
-      rowId: `${project.id}:ABONO`,
-      projectId: project.id,
-      quoteId,
-      customerName: project.customerName,
-      type: 'ABONO',
-      number: project.documents.abono.creditNoteNumber,
-      statusLabel: project.documents.abono.status,
-      createdAt: project.documents.abono.createdAt,
-    });
-  }
-
-  return rows;
-};
+import { fetchDocumentManagementRows } from './services/documentManagementApi';
 
 export const useProjectManagement = () => {
-  const [projects, setProjects] = useState<ProjectEntity[]>(() => projectStore.list());
+  const [documentRows, setDocumentRows] = useState<ProjectDocumentRow[]>([]);
   const [orderDocs, setOrderDocs] = useState<ProjectDocumentRow[]>([]);
   const [busyProjectId, setBusyProjectId] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    const refresh = () => setProjects(projectStore.list());
-    const unsubscribe = onProjectsChanged(refresh);
-    return unsubscribe;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setError('');
+        const rows = await fetchDocumentManagementRows();
+        if (!cancelled) setDocumentRows(rows);
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : 'No se pudo cargar Gestión Documentos.');
+      }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -127,43 +61,9 @@ export const useProjectManagement = () => {
 
   const rows = useMemo(
     () =>
-      [...projects.flatMap(toDocumentRows), ...orderDocs].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    [projects, orderDocs],
+      [...documentRows, ...orderDocs].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [documentRows, orderDocs],
   );
-
-  const approveBudget = async (projectId: string) => {
-    setBusyProjectId(projectId);
-    setError('');
-    try {
-      const project = projects.find(item => item.id === projectId);
-      const quoteId = project?.documents.presupuesto?.quoteId;
-      if (!quoteId) throw new Error('El proyecto no tiene presupuesto.');
-
-      const validated = await validateQuote(quoteId);
-      projectStore.upsertFromQuote(validated);
-      projectStore.approveQuoteToOrder(projectId);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo aprobar el presupuesto.');
-    } finally {
-      setBusyProjectId(null);
-    }
-  };
-
-  const markWorkOrderStep = (projectId: string, step: WorkOrderWorkflowStep) => {
-    projectStore.updateWorkOrderStep(projectId, step);
-  };
-
-  const finalizeToDeliveryNote = (projectId: string) => {
-    projectStore.finalizeWorkOrderToDeliveryNote(projectId);
-  };
-
-  const invoice = (projectId: string) => {
-    projectStore.invoiceFromDeliveryNote(projectId);
-  };
-
-  const creditNote = (projectId: string) => {
-    projectStore.createCreditNote(projectId);
-  };
 
   const openPdf = async (row: ProjectDocumentRow) => {
     setBusyProjectId(row.projectId);
@@ -188,26 +88,12 @@ export const useProjectManagement = () => {
     }
   };
 
-  const edit = (projectId: string) => {
-    const project = projectStore.getById(projectId);
-    const customerId = project?.customerId;
-    if (customerId) setBudgetWizardPrefillCustomerId(customerId);
-    navigateToModule('presupuestos');
-  };
-
   return {
     rows,
-    projects,
     busyProjectId,
     error,
     actions: {
-      approveBudget,
-      markWorkOrderStep,
-      finalizeToDeliveryNote,
-      invoice,
-      creditNote,
       openPdf,
-      edit,
     },
   } as const;
 };

@@ -27,15 +27,16 @@ public class DashboardFinanceService {
         private final QuoteRequestRepository quoteRequestRepository;
         private final QuoteItemRepository quoteItemRepository;
         private final Clock clock = Clock.systemDefaultZone();
+        private static final String DOC_TIPO_FACTURA = "FACTURA";
 
         public DashboardFinanceResponse getFinance(DashboardRange range) {
                 LocalDateTime start = range.start(clock);
                 LocalDateTime end = range.endExclusive(clock);
 
-                BigDecimal incomeTotal = quoteRequestRepository.sumTotalByStatusAndCreatedAtBetween(QuoteStatus.ENVIADO,
-                                start, end);
+                BigDecimal incomeTotal = quoteRequestRepository.sumTotalByDocumentTipoAndCreatedAtBetween(
+                                DOC_TIPO_FACTURA, start, end);
                 List<DashboardFinanceResponse.Slice> incomeSlices = quoteItemRepository
-                                .sumLineTotalByDoorModel(QuoteStatus.ENVIADO, start, end)
+                                .sumLineTotalByDoorModelForDocumentTipo(DOC_TIPO_FACTURA, start, end)
                                 .stream()
                                 .limit(8)
                                 .map(row -> new DashboardFinanceResponse.Slice(
@@ -61,7 +62,7 @@ public class DashboardFinanceService {
                                 new DashboardFinanceResponse.Tile("investments", "Inversiones", BigDecimal.ZERO));
 
                 List<DashboardFinanceResponse.Point> trendPoints = quoteRequestRepository
-                                .sumDailyTotalsByStatusAndCreatedAtBetween(QuoteStatus.ENVIADO, start, end)
+                                .sumDailyTotalsByDocumentTipoAndCreatedAtBetween(DOC_TIPO_FACTURA, start, end)
                                 .stream()
                                 .map(row -> new DashboardFinanceResponse.Point(row.day(), row.total()))
                                 .toList();
@@ -71,7 +72,7 @@ public class DashboardFinanceService {
 
                 var pageable = PageRequest.of(0, 6, Sort.by(Sort.Direction.DESC, "createdAt"));
                 List<DashboardFinanceResponse.Transaction> transactions = quoteRequestRepository
-                                .findRecentByStatusAndCreatedAtBetween(QuoteStatus.ENVIADO, start, end, pageable)
+                                .findRecentByDocumentTipoAndCreatedAtBetween(DOC_TIPO_FACTURA, start, end, pageable)
                                 .stream()
                                 .map(row -> new DashboardFinanceResponse.Transaction(
                                                 row.id().toString(),
@@ -100,7 +101,7 @@ public class DashboardFinanceService {
                                                                 QuoteStatus.ENVIADO, start, end)));
 
                 List<DashboardFinanceResponse.HistogramRow> histogram = quoteRequestRepository
-                                .topCustomersByTotal(QuoteStatus.ENVIADO, start, end, PageRequest.of(0, 6))
+                                .topCustomersByDocumentTipoTotal(DOC_TIPO_FACTURA, start, end, PageRequest.of(0, 6))
                                 .stream()
                                 .map(row -> new DashboardFinanceResponse.HistogramRow(
                                                 row.customerName().toLowerCase().replace(' ', '-'),

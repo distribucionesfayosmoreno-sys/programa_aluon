@@ -1,6 +1,7 @@
 package com.aluon.crm.quote.service;
 
 import com.aluon.crm.customer.model.Customer;
+import com.aluon.crm.customer.model.DeliveryAddress;
 import com.aluon.crm.customer.repository.CustomerRepository;
 import com.aluon.crm.pricing.model.Tariff;
 import com.aluon.crm.pricing.service.TariffService;
@@ -26,6 +27,7 @@ import com.aluon.crm.quote.repository.QuoteRequestRepository;
 import com.aluon.crm.quote.dto.QuoteResponse;
 import com.aluon.crm.quote.dto.QuoteLifecycleNumbersResponse;
 import com.aluon.crm.quote.dto.QuoteSendRequest;
+import com.aluon.crm.quote.dto.QuoteUpdateRequest;
 import com.aluon.crm.quote.model.QuoteStatus;
 import com.aluon.crm.quote.model.QuoteValidationMode;
 import com.aluon.crm.documents.model.DocumentPrefix;
@@ -128,6 +130,55 @@ public class QuoteService {
         return toResponse(Objects.requireNonNull(quoteRequestRepository.save(quote), "quote"));
     }
 
+    @Transactional
+    public QuoteResponse update(UUID id, QuoteUpdateRequest request) {
+        UUID quoteId = Objects.requireNonNull(id, "id");
+        QuoteUpdateRequest safeRequest = Objects.requireNonNull(request, "request");
+
+        QuoteRequest quote = Objects.requireNonNull(quoteRequestRepository.findById(quoteId)
+                .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado")), "quote");
+
+        Customer customer = Objects.requireNonNull(quote.getCustomer(), "customer");
+
+        if (safeRequest.getCustomerNombreComercial() != null) customer.setNombreComercial(safeRequest.getCustomerNombreComercial());
+        if (safeRequest.getCustomerTelefono() != null) customer.setTelefono(safeRequest.getCustomerTelefono());
+        if (safeRequest.getCustomerDireccion() != null) customer.setDireccion(safeRequest.getCustomerDireccion());
+        if (safeRequest.getCustomerCp() != null) customer.setCp(safeRequest.getCustomerCp());
+        if (safeRequest.getCustomerPoblacion() != null) customer.setPoblacion(safeRequest.getCustomerPoblacion());
+        if (safeRequest.getCustomerProvincia() != null) customer.setProvincia(safeRequest.getCustomerProvincia());
+
+        boolean touchesDelivery =
+                safeRequest.getDeliveryDireccionEntrega() != null
+                        || safeRequest.getDeliveryCp() != null
+                        || safeRequest.getDeliveryPoblacion() != null
+                        || safeRequest.getDeliveryProvincia() != null;
+
+        if (touchesDelivery) {
+            DeliveryAddress delivery = null;
+            if (customer.getDireccionesEntrega() != null && !customer.getDireccionesEntrega().isEmpty()) {
+                delivery = customer.getDireccionesEntrega().get(0);
+            }
+            if (delivery == null) {
+                delivery = DeliveryAddress.builder()
+                        .nombreAlias("Principal")
+                        .build();
+                customer.addDireccion(delivery);
+            }
+
+            if (safeRequest.getDeliveryDireccionEntrega() != null) delivery.setDireccion(safeRequest.getDeliveryDireccionEntrega());
+            if (safeRequest.getDeliveryCp() != null) delivery.setCp(safeRequest.getDeliveryCp());
+            if (safeRequest.getDeliveryPoblacion() != null) delivery.setPoblacion(safeRequest.getDeliveryPoblacion());
+            if (safeRequest.getDeliveryProvincia() != null) delivery.setProvincia(safeRequest.getDeliveryProvincia());
+        }
+
+        if (safeRequest.getContactEmail() != null) quote.setContactEmail(safeRequest.getContactEmail());
+        if (safeRequest.getContactWhatsapp() != null) quote.setContactWhatsapp(safeRequest.getContactWhatsapp());
+
+        customerRepository.save(customer);
+        QuoteRequest saved = quoteRequestRepository.save(quote);
+        return toResponse(Objects.requireNonNull(saved, "saved"));
+    }
+
     @Transactional(readOnly = true)
     public QuoteResponse getById(UUID id) {
         UUID quoteId = Objects.requireNonNull(id, "id");
@@ -208,6 +259,10 @@ public class QuoteService {
 
     private QuoteResponse toResponse(QuoteRequest quote) {
         Customer customer = quote.getCustomer();
+        DeliveryAddress delivery = null;
+        if (customer != null && customer.getDireccionesEntrega() != null && !customer.getDireccionesEntrega().isEmpty()) {
+            delivery = customer.getDireccionesEntrega().get(0);
+        }
         return QuoteResponse.builder()
                 .id(quote.getId())
                 .quoteNumber(quote.getQuoteNumber())
@@ -215,6 +270,16 @@ public class QuoteService {
                 .customerName(customer != null
                         ? (customer.getNombreComercial() != null ? customer.getNombreComercial() : customer.getRazonSocial())
                         : null)
+                .customerNombreComercial(customer != null ? customer.getNombreComercial() : null)
+                .customerTelefono(customer != null ? customer.getTelefono() : null)
+                .customerDireccion(customer != null ? customer.getDireccion() : null)
+                .customerCp(customer != null ? customer.getCp() : null)
+                .customerPoblacion(customer != null ? customer.getPoblacion() : null)
+                .customerProvincia(customer != null ? customer.getProvincia() : null)
+                .deliveryDireccionEntrega(delivery != null ? delivery.getDireccion() : null)
+                .deliveryCp(delivery != null ? delivery.getCp() : null)
+                .deliveryPoblacion(delivery != null ? delivery.getPoblacion() : null)
+                .deliveryProvincia(delivery != null ? delivery.getProvincia() : null)
                 .contactEmail(quote.getContactEmail())
                 .contactWhatsapp(quote.getContactWhatsapp())
                 .tariffCode(quote.getTariffCode())

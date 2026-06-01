@@ -1,16 +1,12 @@
-import { useState } from 'react';
-import type { ProjectDocumentRow, WorkOrderWorkflowStep } from '../ProjectManagement.types';
+import { useEffect, useMemo, useState } from 'react';
+import type { ProjectDocumentRow } from '../ProjectManagement.types';
+import { ProjectsTableFiltersBar } from './ProjectsTableFilters';
+import { useProjectsTableFiltering } from './useProjectsTableFiltering';
 
 type ProjectsTableProps = {
   rows: ProjectDocumentRow[];
   busyProjectId: string | null;
   onOpenDetails: (row: ProjectDocumentRow) => void;
-  onEdit: (projectId: string) => void;
-  onApproveBudget: (projectId: string) => void;
-  onSetWorkOrderStep: (projectId: string, step: WorkOrderWorkflowStep) => void;
-  onFinalizeToDeliveryNote: (projectId: string) => void;
-  onInvoice: (projectId: string) => void;
-  onCreditNote: (projectId: string) => void;
 };
 
 // ─── Column header ────────────────────────────────────────────────────────────
@@ -72,14 +68,23 @@ export const ProjectsTable = ({
   rows,
   busyProjectId,
   onOpenDetails,
-  onEdit,
-  onApproveBudget,
-  onSetWorkOrderStep,
-  onFinalizeToDeliveryNote,
-  onInvoice,
-  onCreditNote,
 }: ProjectsTableProps) => {
+  const filtering = useProjectsTableFiltering(rows);
+  const visibleRows = filtering.filteredRows;
   const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const visibleRowIds = useMemo(() => new Set(visibleRows.map(r => r.rowId)), [visibleRows]);
+
+  useEffect(() => {
+    setSelected(prev => {
+      if (prev.size === 0) return prev;
+      const next = new Set<string>();
+      for (const id of prev) {
+        if (visibleRowIds.has(id)) next.add(id);
+      }
+      return next.size === prev.size ? prev : next;
+    });
+  }, [visibleRowIds]);
 
   const toggleRow = (id: string) => {
     setSelected(prev => {
@@ -90,19 +95,19 @@ export const ProjectsTable = ({
   };
 
   const toggleAll = () => {
-    if (selected.size === rows.length) {
+    if (selected.size === visibleRows.length) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(rows.map(r => r.rowId)));
+      setSelected(new Set(visibleRows.map(r => r.rowId)));
     }
   };
 
-  const allSelected = rows.length > 0 && selected.size === rows.length;
+  const allSelected = visibleRows.length > 0 && selected.size === visibleRows.length;
 
   return (
     <div className="flex flex-col h-full min-h-[400px]">
       {/* ── Toolbar ── */}
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center justify-between gap-4 mb-3">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {selected.size > 0 && (
             <div
@@ -110,23 +115,24 @@ export const ProjectsTable = ({
               style={{ background: 'var(--notice-bg, #f0fdf4)', color: 'var(--notice-text, #15803d)', border: '1px solid var(--notice-border, #bbf7d0)' }}
             >
               {selected.size} seleccionado{selected.size > 1 ? 's' : ''}
-              <button
-                onClick={() => setSelected(new Set())}
-                className="ml-1 opacity-60 hover:opacity-100"
-              >✕</button>
+              <button onClick={() => setSelected(new Set())} className="ml-1 opacity-60 hover:opacity-100">✕</button>
             </div>
           )}
-          <div className="relative hidden md:block flex-1 min-w-0 max-w-sm">
-            <svg className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#9ca3af' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              placeholder="Buscar documento..."
-              className="pl-9 pr-4 py-2 rounded-xl text-sm border"
-              style={{ border: '1px solid #e5e7eb', fontSize: 12, outline: 'none', background: '#fff', width: '100%' }}
-            />
+          <div className="text-xs font-bold" style={{ color: '#6b7280' }}>
+            Mostrando <span style={{ color: '#111827' }}>{filtering.matchCount}</span> de{' '}
+            <span style={{ color: '#111827' }}>{rows.length}</span>
           </div>
         </div>
+      </div>
+
+      <div className="mb-4">
+        <ProjectsTableFiltersBar
+          filters={filtering.filters}
+          onChange={filtering.setFilters}
+          onReset={filtering.resetFilters}
+          typeOptions={filtering.typeOptions}
+          statusOptions={filtering.statusOptions}
+        />
       </div>
 
       {/* ── Table container ── */}
@@ -156,7 +162,7 @@ export const ProjectsTable = ({
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
+              {visibleRows.length === 0 ? (
                 <tr>
                   <td colSpan={7}>
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -166,21 +172,16 @@ export const ProjectsTable = ({
                         </svg>
                       </div>
                       <div className="text-center">
-                        <p className="font-bold text-sm" style={{ color: '#374151' }}>No hay proyectos</p>
-                        <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>Genera un presupuesto y guárdalo para que aparezca aquí.</p>
+                        <p className="font-bold text-sm" style={{ color: '#374151' }}>Sin resultados</p>
+                        <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>Ajusta los filtros para ver documentos.</p>
                       </div>
                     </div>
                   </td>
                 </tr>
               ) : (
-                rows.map(row => {
+                visibleRows.map(row => {
                   const busy = busyProjectId === row.projectId;
-                  const canApprove = row.type === 'PRESUPUESTO';
                   const canView = row.quoteId !== null;
-                  const canEdit = row.type === 'PRESUPUESTO';
-                  const canFinalize = row.type === 'PEDIDO';
-                  const canInvoice = row.type === 'ALBARAN';
-                  const canCredit = row.type === 'FACTURA';
                   const isChecked = selected.has(row.rowId);
 
                   return (
@@ -238,41 +239,6 @@ export const ProjectsTable = ({
                             label={busy ? '...' : 'VER'}
                             disabled={!canView || busy}
                             onClick={() => onOpenDetails(row)}
-                          />
-                          <ActionButton
-                            label="EDITAR"
-                            disabled={!canEdit || busy}
-                            onClick={() => onEdit(row.projectId)}
-                          />
-                          <ActionButton
-                            label={busy ? '...' : 'Aprobar'}
-                            disabled={!canApprove || busy}
-                            onClick={() => onApproveBudget(row.projectId)}
-                          />
-                          <ActionButton
-                            label="OT: DEV"
-                            disabled={row.type !== 'PEDIDO' || busy}
-                            onClick={() => onSetWorkOrderStep(row.projectId, 'DEV')}
-                          />
-                          <ActionButton
-                            label="OT: PROD"
-                            disabled={row.type !== 'PEDIDO' || busy}
-                            onClick={() => onSetWorkOrderStep(row.projectId, 'PROD')}
-                          />
-                          <ActionButton
-                            label="Finalizar"
-                            disabled={!canFinalize || busy}
-                            onClick={() => onFinalizeToDeliveryNote(row.projectId)}
-                          />
-                          <ActionButton
-                            label="Facturar"
-                            disabled={!canInvoice || busy}
-                            onClick={() => onInvoice(row.projectId)}
-                          />
-                          <ActionButton
-                            label="Abonar"
-                            disabled={!canCredit || busy}
-                            onClick={() => onCreditNote(row.projectId)}
                           />
                         </div>
                       </td>

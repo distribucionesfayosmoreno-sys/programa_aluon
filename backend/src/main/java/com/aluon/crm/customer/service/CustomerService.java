@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import com.aluon.crm.customer.model.Customer;
 import com.aluon.crm.customer.repository.CustomerRepository;
@@ -20,6 +21,15 @@ public class CustomerService {
 
     public List<Customer> findAll() {
         return customerRepository.findAllByActiveTrue();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Customer> findFirstActiveByEmail(String email) {
+        String normalizedEmail = Objects.requireNonNull(email, "email").trim();
+        if (normalizedEmail.isBlank()) {
+            return Optional.empty();
+        }
+        return customerRepository.findFirstByEmailIgnoreCaseAndActiveTrue(normalizedEmail);
     }
 
     public Customer findById(UUID id) {

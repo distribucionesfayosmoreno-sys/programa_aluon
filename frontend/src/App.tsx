@@ -12,7 +12,6 @@ import { BudgetWizard } from './features/budget-wizard/BudgetWizard';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
 import { DoorVisualSimulation } from './features/door-visual-simulation/DoorVisualSimulation';
 import { ProjectManagement } from './features/project-management/ProjectManagement';
-import { ProjectsOverviewPage } from './features/project-overview/ProjectsOverviewPage';
 import { onNavigateToModule } from './services/moduleNavigation';
 
 const App = () => {
@@ -28,8 +27,6 @@ const App = () => {
         return 'Órdenes de trabajo';
       case 'dashboard':
         return 'Dashboard';
-      case 'gestion-proyectos':
-        return 'Gestión Proyectos';
       case 'gestion-documentos':
         return 'Gestión Documentos';
       case 'despiece':
@@ -145,10 +142,9 @@ const App = () => {
       </header>
 
         {/* Content */}
-        <main className="flex-1 p-3 md:p-4 flex flex-col min-h-0 overflow-hidden">
-          <div className="w-full animate-fade-up flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
+        <main className="relative flex-1 flex flex-col min-h-0 overflow-hidden">
+          <div className="w-full p-3 md:p-4 animate-fade-up flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
             {activeModule === 'clientes' && <CustomerManagement />}
-            {activeModule === 'gestion-proyectos' && <ProjectsOverviewPage />}
             {activeModule === 'gestion-documentos' && <ProjectManagement />}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
             {activeModule === 'presupuestos' && <BudgetWizard />}
