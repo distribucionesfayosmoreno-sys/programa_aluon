@@ -9,6 +9,7 @@ import com.aluon.crm.quote.dto.QuoteCreateRequest;
 import com.aluon.crm.quote.dto.QuoteLifecycleNumbersResponse;
 import com.aluon.crm.quote.dto.QuoteResponse;
 import com.aluon.crm.quote.dto.QuoteSendRequest;
+import com.aluon.crm.quote.dto.QuoteUpdateRequest;
 import com.aluon.crm.quote.service.QuoteService;
 
 
@@ -37,6 +38,11 @@ public class QuoteController {
     @GetMapping("/{id}")
     public ResponseEntity<QuoteResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(quoteService.getById(id));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<QuoteResponse> update(@PathVariable UUID id, @RequestBody QuoteUpdateRequest request) {
+        return ResponseEntity.ok(quoteService.update(id, request));
     }
 
     @GetMapping("/{id}/lifecycle-numbers")

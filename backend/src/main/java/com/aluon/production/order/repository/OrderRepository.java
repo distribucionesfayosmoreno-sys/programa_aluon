@@ -59,28 +59,28 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<RecentOrderRow> findRecent(Pageable pageable);
 
     interface OrderStepCountRow {
-        OrderWorkflowStep step();
+        OrderWorkflowStep getStep();
 
-        long count();
+        long getCount();
     }
 
     interface OrderStatusCountRow {
-        OrderStatus status();
+        OrderStatus getStatus();
 
-        long count();
+        long getCount();
     }
 
     interface RecentOrderRow {
-        String codigoOrden();
+        String getCodigoOrden();
 
-        OrderStatus status();
+        OrderStatus getStatus();
 
-        String workflowStage();
+        String getWorkflowStage();
 
-        String customerName();
+        String getCustomerName();
 
-        LocalDateTime createdAt();
+        LocalDateTime getCreatedAt();
 
-        String assignedUserName();
+        String getAssignedUserName();
     }
 }

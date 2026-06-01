@@ -54,8 +54,8 @@ public class DashboardWorkflowService {
 
         Map<OrderWorkflowStep, Long> stepCounts = orderRepository.countByWorkflowStepAll().stream()
                 .collect(Collectors.toMap(
-                        OrderRepository.OrderStepCountRow::step,
-                        OrderRepository.OrderStepCountRow::count
+                        OrderRepository.OrderStepCountRow::getStep,
+                        OrderRepository.OrderStepCountRow::getCount
                 ));
 
         List<DashboardWorkflowResponse.OrderStepCount> orderByStep = List.of(OrderWorkflowStep.values()).stream()
@@ -64,8 +64,8 @@ public class DashboardWorkflowService {
 
         Map<OrderStatus, Long> statusCounts = orderRepository.countByStatusAll().stream()
                 .collect(Collectors.toMap(
-                        OrderRepository.OrderStatusCountRow::status,
-                        OrderRepository.OrderStatusCountRow::count
+                        OrderRepository.OrderStatusCountRow::getStatus,
+                        OrderRepository.OrderStatusCountRow::getCount
                 ));
 
         List<DashboardWorkflowResponse.OrderStatusCount> orderByStatus = List.of(OrderStatus.values()).stream()
@@ -75,12 +75,12 @@ public class DashboardWorkflowService {
         var recentOrders = orderRepository.findRecent(PageRequest.of(0, 8, Sort.by(Sort.Direction.DESC, "createdAt")));
         List<DashboardWorkflowResponse.OrderRow> orderRows = recentOrders.stream()
                 .map(row -> new DashboardWorkflowResponse.OrderRow(
-                        row.codigoOrden(),
-                        row.status(),
-                        row.workflowStage(),
-                        row.customerName(),
-                        row.createdAt(),
-                        row.assignedUserName()
+                        row.getCodigoOrden(),
+                        row.getStatus(),
+                        row.getWorkflowStage(),
+                        row.getCustomerName(),
+                        row.getCreatedAt(),
+                        row.getAssignedUserName()
                 ))
                 .toList();
 

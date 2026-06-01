@@ -14,4 +14,6 @@ public interface QuoteDocumentRepository extends JpaRepository<QuoteDocument, UU
     Optional<QuoteDocument> findTopByQuoteRequestAndTipoOrderByCreatedAtDesc(QuoteRequest quoteRequest, String tipo);
 
     List<QuoteDocument> findByQuoteRequestOrderByCreatedAtDesc(QuoteRequest quoteRequest);
+
+    List<QuoteDocument> findByQuoteRequestIdInOrderByCreatedAtDesc(List<UUID> quoteRequestIds);
 }

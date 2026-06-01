@@ -19,6 +19,16 @@ public class QuoteResponse {
     private String quoteNumber;
     private UUID customerId;
     private String customerName;
+    private String customerNombreComercial;
+    private String customerTelefono;
+    private String customerDireccion;
+    private String customerCp;
+    private String customerPoblacion;
+    private String customerProvincia;
+    private String deliveryDireccionEntrega;
+    private String deliveryCp;
+    private String deliveryPoblacion;
+    private String deliveryProvincia;
     private String contactEmail;
     private String contactWhatsapp;
     private String tariffCode;

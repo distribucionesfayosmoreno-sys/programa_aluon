@@ -1,62 +1,63 @@
-import type { ReactNode } from 'react';
+import React from 'react';
 
 type Props = {
   open: boolean;
-  title: string;
-  subtitle?: string;
-  headerBg?: string;
   onClose: () => void;
-  children: ReactNode;
+  children: React.ReactNode;
 };
 
-export const DocumentDrawerShell = ({ open, title, subtitle, headerBg, onClose, children }: Props) => {
+export const DocumentDrawerShell = ({ open, onClose, children }: Props) => {
+  const [entered, setEntered] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!open) {
+      setEntered(false);
+      return;
+    }
+    const id = window.requestAnimationFrame(() => setEntered(true));
+    return () => window.cancelAnimationFrame(id);
+  }, [open]);
+
   if (!open) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="absolute inset-0 z-50 flex items-stretch justify-stretch"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Detalle del documento"
     >
       <div
         className="absolute inset-0"
-        style={{ background: 'rgba(15, 23, 42, 0.45)' }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+        style={{
+          background: 'rgba(17,24,39,0.55)',
+          backdropFilter: 'blur(6px)',
+          opacity: entered ? 1 : 0,
+          transition: 'opacity 220ms ease-out',
+        }}
       />
 
-      <aside
-        className="relative bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
-        style={{ border: '1px solid #e5e7eb' }}
-        aria-label="Detalle del documento"
+      <div
+        className="relative m-2 md:m-3 w-full h-full flex flex-col overflow-hidden"
+        style={{
+          background: '#ffffff',
+          width: '100%',
+          maxWidth: 'none',
+          height: '100%',
+          border: '1px solid #e5e7eb',
+          borderRadius: 14,
+          boxShadow: '0 30px 80px rgba(15,23,42,0.28)',
+          transform: entered ? 'translateY(0)' : 'translateY(4px)',
+          opacity: entered ? 1 : 0,
+          transition: 'transform 220ms ease-out, opacity 220ms ease-out',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className="flex items-start justify-between gap-4 px-5 py-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.15)', background: headerBg ?? '#0f172a', color: '#ffffff' }}
-        >
-          <div className="min-w-0">
-            <div className="text-sm font-black truncate">{title}</div>
-            {subtitle ? (
-              <div className="text-xs font-semibold mt-1 truncate" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                {subtitle}
-              </div>
-            ) : null}
-          </div>
-          <button
-            type="button"
-            className="w-9 h-9 rounded-xl flex items-center justify-center transition-all text-white/90 hover:text-white"
-            onClick={onClose}
-            aria-label="Cerrar"
-            title="Cerrar"
-          >
-            <span className="text-2xl leading-none font-black">×</span>
-          </button>
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50/50">
-          {children}
-        </div>
-      </aside>
+        {children}
+      </div>
     </div>
   );
 };

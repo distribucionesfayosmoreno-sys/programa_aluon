@@ -66,6 +66,16 @@ export type QuoteResponse = {
   quoteNumber: string;
   customerId: string;
   customerName: string;
+  customerNombreComercial: string | null;
+  customerTelefono: string | null;
+  customerDireccion: string | null;
+  customerCp: string | null;
+  customerPoblacion: string | null;
+  customerProvincia: string | null;
+  deliveryDireccionEntrega: string | null;
+  deliveryCp: string | null;
+  deliveryPoblacion: string | null;
+  deliveryProvincia: string | null;
   contactEmail: string;
   contactWhatsapp: string;
   tariffCode: string;

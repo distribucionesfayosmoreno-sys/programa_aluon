@@ -22,12 +22,6 @@ export const ProjectManagement = () => {
         rows={vm.rows}
         busyProjectId={vm.busyProjectId}
         onOpenDetails={row => setDrawerRow(row)}
-        onEdit={projectId => vm.actions.edit(projectId)}
-        onApproveBudget={projectId => void vm.actions.approveBudget(projectId)}
-        onSetWorkOrderStep={vm.actions.markWorkOrderStep}
-        onFinalizeToDeliveryNote={vm.actions.finalizeToDeliveryNote}
-        onInvoice={vm.actions.invoice}
-        onCreditNote={vm.actions.creditNote}
       />
 
       <DocumentDrawer
@@ -35,7 +29,6 @@ export const ProjectManagement = () => {
         row={drawerRow}
         onClose={() => setDrawerRow(null)}
         onOpenPdf={(row) => void vm.actions.openPdf(row)}
-        onEdit={vm.actions.edit}
       />
     </div>
   );

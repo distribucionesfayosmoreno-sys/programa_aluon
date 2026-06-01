@@ -32,6 +32,20 @@ public interface QuoteRequestRepository extends JpaRepository<QuoteRequest, UUID
     );
 
     @Query("""
+            select coalesce(sum(q.total), 0)
+            from QuoteDocument d
+            join d.quoteRequest q
+            where upper(d.tipo) = upper(:tipo)
+              and d.createdAt >= :start
+              and d.createdAt < :end
+            """)
+    BigDecimal sumTotalByDocumentTipoAndCreatedAtBetween(
+            @Param("tipo") String tipo,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
             select count(q)
             from QuoteRequest q
             where q.status = :status
@@ -76,6 +90,22 @@ public interface QuoteRequestRepository extends JpaRepository<QuoteRequest, UUID
     );
 
     @Query("""
+            select function('date', d.createdAt) as day, coalesce(sum(q.total), 0) as total
+            from QuoteDocument d
+            join d.quoteRequest q
+            where upper(d.tipo) = upper(:tipo)
+              and d.createdAt >= :start
+              and d.createdAt < :end
+            group by function('date', d.createdAt)
+            order by function('date', d.createdAt)
+            """)
+    List<DailyTotalRow> sumDailyTotalsByDocumentTipoAndCreatedAtBetween(
+            @Param("tipo") String tipo,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
             select c.nombreComercial as customerName, coalesce(sum(q.total), 0) as total
             from QuoteRequest q
             join q.customer c
@@ -87,6 +117,41 @@ public interface QuoteRequestRepository extends JpaRepository<QuoteRequest, UUID
             """)
     List<CustomerTotalRow> topCustomersByTotal(
             @Param("status") QuoteStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            Pageable pageable
+    );
+
+    @Query("""
+            select c.nombreComercial as customerName, coalesce(sum(q.total), 0) as total
+            from QuoteDocument d
+            join d.quoteRequest q
+            join q.customer c
+            where upper(d.tipo) = upper(:tipo)
+              and d.createdAt >= :start
+              and d.createdAt < :end
+            group by c.nombreComercial
+            order by sum(q.total) desc
+            """)
+    List<CustomerTotalRow> topCustomersByDocumentTipoTotal(
+            @Param("tipo") String tipo,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            Pageable pageable
+    );
+
+    @Query("""
+            select q.id as id, q.quoteNumber as quoteNumber, d.createdAt as createdAt, q.total as total, c.nombreComercial as customerName
+            from QuoteDocument d
+            join d.quoteRequest q
+            join q.customer c
+            where upper(d.tipo) = upper(:tipo)
+              and d.createdAt >= :start
+              and d.createdAt < :end
+            order by d.createdAt desc
+            """)
+    List<RecentQuoteRow> findRecentByDocumentTipoAndCreatedAtBetween(
+            @Param("tipo") String tipo,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             Pageable pageable
@@ -109,6 +174,23 @@ public interface QuoteRequestRepository extends JpaRepository<QuoteRequest, UUID
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
             Pageable pageable
+    );
+
+    @Query("""
+            select q.id as id,
+                   q.quoteNumber as quoteNumber,
+                   q.createdAt as createdAt,
+                   q.status as status,
+                   c.nombreComercial as customerName
+            from QuoteRequest q
+            join q.customer c
+            where q.createdAt >= :start
+              and q.createdAt < :end
+            order by q.createdAt desc
+            """)
+    List<DocumentManagementQuoteRow> findForDocumentManagement(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
     );
 
     interface RecentQuoteRow {
@@ -147,5 +229,17 @@ public interface QuoteRequestRepository extends JpaRepository<QuoteRequest, UUID
         QuoteStatus status();
 
         String customerName();
+    }
+
+    interface DocumentManagementQuoteRow {
+        UUID getId();
+
+        String getQuoteNumber();
+
+        LocalDateTime getCreatedAt();
+
+        QuoteStatus getStatus();
+
+        String getCustomerName();
     }
 }

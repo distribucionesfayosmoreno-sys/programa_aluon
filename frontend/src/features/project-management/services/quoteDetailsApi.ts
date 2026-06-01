@@ -1,6 +1,23 @@
 import type { QuoteResponse } from '../../customer-onboarding/models';
 import type { QuoteDocumentRowResponse, QuoteLifecycleNumbersResponse } from '../components/DocumentDrawer.types';
 
+export type QuoteUpdateRequest = Partial<{
+  customerNombreComercial: string | null;
+  customerTelefono: string | null;
+  customerDireccion: string | null;
+  customerCp: string | null;
+  customerPoblacion: string | null;
+  customerProvincia: string | null;
+
+  deliveryDireccionEntrega: string | null;
+  deliveryCp: string | null;
+  deliveryPoblacion: string | null;
+  deliveryProvincia: string | null;
+
+  contactEmail: string;
+  contactWhatsapp: string;
+}>;
+
 const parseJsonOrThrow = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const message = await response.text();
@@ -39,6 +56,20 @@ export const emitQuoteDocument = async (
     signal,
   });
   return parseJsonOrThrow<QuoteDocumentRowResponse>(response);
+};
+
+export const patchQuoteById = async (
+  quoteId: string,
+  payload: QuoteUpdateRequest,
+  signal?: AbortSignal,
+): Promise<QuoteResponse> => {
+  const response = await fetch(`/api/quotes/${encodeURIComponent(quoteId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal,
+  });
+  return parseJsonOrThrow<QuoteResponse>(response);
 };
 
 export const quoteDocumentPdfUrl = (quoteId: string, tipo: string): string =>
