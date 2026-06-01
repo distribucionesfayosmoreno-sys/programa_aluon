@@ -119,12 +119,22 @@ public class QuoteService {
         QuoteRequest quote = Objects.requireNonNull(quoteRequestRepository.findById(quoteId)
                 .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado")), "quote");
 
+        QuoteChannel channel = request != null && request.getChannel() != null ? request.getChannel() : quote.getChannel();
+        quote.setChannel(channel);
+
+        if (quote.getStatus() == QuoteStatus.PENDIENTE_VALIDACION) {
+            // Mobile flow: el cliente "envía" la solicitud, pero el SaaS la valida posteriormente.
+            // No marcamos como ENVIADO para no saltarnos el proceso de validación.
+            if (quote.getSentAt() == null) {
+                quote.setSentAt(LocalDateTime.now());
+            }
+            return toResponse(Objects.requireNonNull(quoteRequestRepository.save(quote), "quote"));
+        }
+
         if (quote.getStatus() != QuoteStatus.VALIDADO && quote.getStatus() != QuoteStatus.ENVIADO) {
             throw new IllegalArgumentException("El presupuesto debe estar validado antes de enviar");
         }
 
-        QuoteChannel channel = request != null && request.getChannel() != null ? request.getChannel() : quote.getChannel();
-        quote.setChannel(channel);
         quote.setStatus(QuoteStatus.ENVIADO);
         quote.setSentAt(LocalDateTime.now());
         return toResponse(Objects.requireNonNull(quoteRequestRepository.save(quote), "quote"));
