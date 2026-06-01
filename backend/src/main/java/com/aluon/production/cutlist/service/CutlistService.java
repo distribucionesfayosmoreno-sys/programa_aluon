@@ -14,6 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 import com.aluon.production.cutlist.model.Cutlist;
 import com.aluon.production.cutlist.model.CutlistCalculator;
+import com.aluon.production.cutlist.model.CutlistLine;
 import com.aluon.production.cutlist.model.CutlistItem;
 import com.aluon.production.cutlist.dto.CutlistItemDto;
 import com.aluon.production.cutlist.repository.CutlistRepository;
@@ -39,7 +40,7 @@ public class CutlistService {
         System.out.println("GENERATE CUTLIST CALLED. Request: " + request);
         validate(request);
 
-        List<CutlistCalculator.CutlistLine> lines = cutlistCalculator.generate(request);
+        List<CutlistLine> lines = cutlistCalculator.generate(request);
         if (lines.isEmpty()) {
             throw new IllegalArgumentException("No se pudo generar el despiece con los parámetros indicados");
         }
@@ -80,7 +81,7 @@ public class CutlistService {
 
         List<CutlistItem> items = IntStream.range(0, lines.size())
                 .mapToObj(index -> {
-                    CutlistCalculator.CutlistLine line = lines.get(index);
+                    CutlistLine line = lines.get(index);
                     return CutlistItem.builder()
                             .sortIndex(index)
                             .description(line.description())
