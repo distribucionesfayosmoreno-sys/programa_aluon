@@ -1,4 +1,4 @@
-package com.aluon.core.infra;
+package com.aluon.crm.infra;
 
 import com.aluon.core.tenant.service.CurrentTenantIdentifierResolverImpl;
 import com.aluon.crm.customer.model.Customer;
@@ -34,7 +34,6 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -87,17 +86,24 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
                 .active(true)
                 .build());
 
-        QuoteRequest q1 = quoteRequestRepository.save(newQuote(customerA, "P-2026-0601", "2026-06-03T10:30:00", QuoteStatus.ENVIADO, new BigDecimal("1250.00")));
-        QuoteRequest q2 = quoteRequestRepository.save(newQuote(customerA, "P-2026-0602", "2026-06-10T09:15:00", QuoteStatus.VALIDADO, new BigDecimal("890.00")));
-        QuoteRequest q3 = quoteRequestRepository.save(newQuote(customerB, "P-2026-0603", "2026-06-14T12:05:00", QuoteStatus.ENVIADO, new BigDecimal("2100.00")));
-        QuoteRequest q4 = quoteRequestRepository.save(newQuote(customerB, "P-2026-0604", "2026-06-22T17:40:00", QuoteStatus.ENVIADO, new BigDecimal("560.00")));
+        QuoteRequest q1 = quoteRequestRepository.save(newQuote(customerA, "P-2026-0601", "2026-06-03T10:30:00",
+                QuoteStatus.ENVIADO, new BigDecimal("1250.00")));
+        QuoteRequest q2 = quoteRequestRepository.save(newQuote(customerA, "P-2026-0602", "2026-06-10T09:15:00",
+                QuoteStatus.VALIDADO, new BigDecimal("890.00")));
+        QuoteRequest q3 = quoteRequestRepository.save(newQuote(customerB, "P-2026-0603", "2026-06-14T12:05:00",
+                QuoteStatus.ENVIADO, new BigDecimal("2100.00")));
+        QuoteRequest q4 = quoteRequestRepository.save(newQuote(customerB, "P-2026-0604", "2026-06-22T17:40:00",
+                QuoteStatus.ENVIADO, new BigDecimal("560.00")));
 
         quoteItemRepository.saveAll(List.of(
-                quoteItem(q1, DoorModel.PREMIUM, DoorType.CORREDERA, 2500, 2200, new BigDecimal("5.50"), new BigDecimal("227.27"), q1.getTotal()),
-                quoteItem(q2, DoorModel.CLASSIC, DoorType.PEATONAL, 1000, 2100, new BigDecimal("2.10"), new BigDecimal("423.81"), q2.getTotal()),
-                quoteItem(q3, DoorModel.INOX, DoorType.ABATIBLE_UNA, 1800, 2200, new BigDecimal("3.96"), new BigDecimal("530.30"), q3.getTotal()),
-                quoteItem(q4, DoorModel.VENECIANA, DoorType.VALLA, 3000, 1200, new BigDecimal("3.60"), new BigDecimal("155.56"), q4.getTotal())
-        ));
+                quoteItem(q1, DoorModel.PREMIUM, DoorType.CORREDERA, 2500, 2200, new BigDecimal("5.50"),
+                        new BigDecimal("227.27"), q1.getTotal()),
+                quoteItem(q2, DoorModel.CLASSIC, DoorType.PEATONAL, 1000, 2100, new BigDecimal("2.10"),
+                        new BigDecimal("423.81"), q2.getTotal()),
+                quoteItem(q3, DoorModel.INOX, DoorType.ABATIBLE_UNA, 1800, 2200, new BigDecimal("3.96"),
+                        new BigDecimal("530.30"), q3.getTotal()),
+                quoteItem(q4, DoorModel.VENECIANA, DoorType.VALLA, 3000, 1200, new BigDecimal("3.60"),
+                        new BigDecimal("155.56"), q4.getTotal())));
 
         quoteDocumentRepository.saveAll(List.of(
                 doc(q1, "PEDIDO", "PE-2026-0001", "2026-06-05T08:00:00"),
@@ -109,18 +115,21 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
                 doc(q3, "FACTURA", "FA-2026-0002", "2026-06-21T10:15:00"),
 
                 doc(q4, "PEDIDO", "PE-2026-0003", "2026-06-24T09:00:00"),
-                doc(q4, "FACTURA", "FA-2026-0003", "2026-06-27T13:05:00")
-        ));
+                doc(q4, "FACTURA", "FA-2026-0003", "2026-06-27T13:05:00")));
 
         orderRepository.saveAll(List.of(
-                order(customerA, "OT-2026-0601", "Premium corredera", 2500, 2200, "2026-06-05T08:10:00", OrderStatus.EN_PRODUCCION, OrderWorkflowStep.PROD),
-                order(customerA, "OT-2026-0602", "Classic peatonal", 1000, 2100, "2026-06-11T09:40:00", OrderStatus.PRESUPUESTO, OrderWorkflowStep.BUDGET),
-                order(customerB, "OT-2026-0603", "Inox abatible", 1800, 2200, "2026-06-16T11:30:00", OrderStatus.LISTO_MONTAJE, OrderWorkflowStep.FINAL),
-                order(customerB, "OT-2026-0604", "Veneciana valla", 3000, 1200, "2026-06-24T09:20:00", OrderStatus.PENDIENTE_MATERIAL, OrderWorkflowStep.REQUEST)
-        ));
+                order(customerA, "OT-2026-0601", "Premium corredera", 2500, 2200, "2026-06-05T08:10:00",
+                        OrderStatus.EN_PRODUCCION, OrderWorkflowStep.PROD),
+                order(customerA, "OT-2026-0602", "Classic peatonal", 1000, 2100, "2026-06-11T09:40:00",
+                        OrderStatus.PRESUPUESTO, OrderWorkflowStep.BUDGET),
+                order(customerB, "OT-2026-0603", "Inox abatible", 1800, 2200, "2026-06-16T11:30:00",
+                        OrderStatus.LISTO_MONTAJE, OrderWorkflowStep.FINAL),
+                order(customerB, "OT-2026-0604", "Veneciana valla", 3000, 1200, "2026-06-24T09:20:00",
+                        OrderStatus.PENDIENTE_MATERIAL, OrderWorkflowStep.REQUEST)));
     }
 
-    private static QuoteRequest newQuote(Customer customer, String quoteNumber, String createdAt, QuoteStatus status, BigDecimal total) {
+    private static QuoteRequest newQuote(Customer customer, String quoteNumber, String createdAt, QuoteStatus status,
+            BigDecimal total) {
         LocalDateTime created = LocalDateTime.parse(createdAt);
         LocalDateTime validatedAt = status == QuoteStatus.PENDIENTE_VALIDACION ? null : created.plusHours(4);
         LocalDateTime sentAt = status == QuoteStatus.ENVIADO ? created.plusDays(1) : null;
@@ -152,8 +161,7 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
             int heightMm,
             BigDecimal m2,
             BigDecimal pricePerM2,
-            BigDecimal lineTotal
-    ) {
+            BigDecimal lineTotal) {
         return QuoteItem.builder()
                 .tenantId(DEMO_TENANT_ID)
                 .quoteRequest(quote)
@@ -190,8 +198,7 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
             int altoMm,
             String createdAt,
             OrderStatus estado,
-            OrderWorkflowStep step
-    ) {
+            OrderWorkflowStep step) {
         return Order.builder()
                 .tenantId(DEMO_TENANT_ID)
                 .customer(customer)
