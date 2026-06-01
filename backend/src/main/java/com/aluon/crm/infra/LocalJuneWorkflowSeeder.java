@@ -41,8 +41,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LocalJuneWorkflowSeeder implements ApplicationRunner {
 
-    private static final UUID DEMO_TENANT_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID DEMO_TENANT_ID = new UUID(0L, 0L);
     private static final String SEED_MARKER_EMAIL = "demo.junio@aluon.local";
+    private static final String RUNTIME_TENANT_ID_PROP = "APP_TENANT_RUNTIME_ID";
 
     private final CustomerService customerService;
     private final QuoteRequestRepository quoteRequestRepository;
@@ -53,14 +54,15 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (alreadySeeded()) {
-            return;
-        }
-
         CurrentTenantIdentifierResolverImpl.setTenantId(DEMO_TENANT_ID);
+        System.setProperty(RUNTIME_TENANT_ID_PROP, DEMO_TENANT_ID.toString());
         try {
+            if (alreadySeeded()) {
+                return;
+            }
             seedJune2026();
         } finally {
+            System.clearProperty(RUNTIME_TENANT_ID_PROP);
             CurrentTenantIdentifierResolverImpl.clear();
         }
     }
@@ -70,17 +72,20 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
     }
 
     private void seedJune2026() {
+        String companyA = LocalSeedNames.companyNameForSeed(SEED_MARKER_EMAIL);
         Customer customerA = customerService.save(Customer.builder()
-                .tenantId(DEMO_TENANT_ID)
-                .nombreComercial("Cliente Demo A")
+                .nombreComercial(companyA)
+                .personaContacto(LocalSeedNames.contactPersonForSeed(SEED_MARKER_EMAIL))
                 .email(SEED_MARKER_EMAIL)
                 .telefono("600 000 001")
                 .active(true)
                 .build());
 
+        String emailB = "demo.b@aluon.local";
+        String companyB = LocalSeedNames.companyNameForSeed(emailB);
         Customer customerB = customerService.save(Customer.builder()
-                .tenantId(DEMO_TENANT_ID)
-                .nombreComercial("Cliente Demo B")
+                .nombreComercial(companyB)
+                .personaContacto(LocalSeedNames.contactPersonForSeed(emailB))
                 .email("demo.b@aluon.local")
                 .telefono("600 000 002")
                 .active(true)
@@ -135,7 +140,6 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
         LocalDateTime sentAt = status == QuoteStatus.ENVIADO ? created.plusDays(1) : null;
 
         return QuoteRequest.builder()
-                .tenantId(DEMO_TENANT_ID)
                 .quoteNumber(quoteNumber)
                 .seriesDate(LocalDate.of(2026, Month.JUNE, 1))
                 .seriesSequence(null)
@@ -163,7 +167,6 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
             BigDecimal pricePerM2,
             BigDecimal lineTotal) {
         return QuoteItem.builder()
-                .tenantId(DEMO_TENANT_ID)
                 .quoteRequest(quote)
                 .doorModel(doorModel)
                 .doorType(doorType)
@@ -179,7 +182,6 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
     private static QuoteDocument doc(QuoteRequest quote, String tipo, String numero, String createdAt) {
         byte[] data = ("demo-" + tipo + "-" + numero).getBytes(StandardCharsets.UTF_8);
         return QuoteDocument.builder()
-                .tenantId(DEMO_TENANT_ID)
                 .quoteRequest(quote)
                 .tipo(tipo)
                 .numeroDocumento(numero)
@@ -200,7 +202,6 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
             OrderStatus estado,
             OrderWorkflowStep step) {
         return Order.builder()
-                .tenantId(DEMO_TENANT_ID)
                 .customer(customer)
                 .assignedUser(null)
                 .codigoOrden(codigoOrden)

@@ -44,11 +44,11 @@ public class DashboardWorkflowService {
         var recentBudgets = quoteRequestRepository.findRecentBudgetsBetween(start, end, PageRequest.of(0, 6));
         List<DashboardWorkflowResponse.BudgetRow> budgetRows = recentBudgets.stream()
                 .map(row -> new DashboardWorkflowResponse.BudgetRow(
-                        row.quoteNumber(),
-                        row.status(),
-                        row.customerName(),
-                        row.total(),
-                        row.createdAt()
+                        row.getQuoteNumber(),
+                        row.getStatus(),
+                        row.getCustomerName(),
+                        row.getTotal(),
+                        row.getCreatedAt()
                 ))
                 .toList();
 

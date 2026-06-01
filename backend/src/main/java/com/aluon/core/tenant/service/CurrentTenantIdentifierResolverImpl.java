@@ -10,6 +10,7 @@ public class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentif
 
     // Helper ThreadLocal para guardar el TenantId del request actual
     private static final ThreadLocal<UUID> tenantId = new ThreadLocal<>();
+    private static final String RUNTIME_TENANT_ID_PROP = "APP_TENANT_RUNTIME_ID";
 
     public static void setTenantId(UUID tenant) {
         tenantId.set(tenant);
@@ -25,14 +26,28 @@ public class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentif
         if (currentTenant != null) {
             return currentTenant;
         }
-        // Retornamos un UUID "default" genérico para operaciones globales 
-        // o logica de control si el Tenant no fue provisto (por ejemplo en login)
-        // UUID(0L, 0L) es solo para ilustrar.
+        UUID runtimeTenant = parseUuidOrNull(System.getProperty(RUNTIME_TENANT_ID_PROP));
+        if (runtimeTenant != null) {
+            return runtimeTenant;
+        }
+        // When no tenant is provided (e.g., unauthenticated requests), fall back to a global UUID.
+        // A request filter is expected to set the tenant for tenant-scoped operations.
         return new UUID(0L, 0L);
     }
 
     @Override
     public boolean validateExistingCurrentSessions() {
         return true;
+    }
+
+    private static UUID parseUuidOrNull(String raw) {
+        if (raw == null) return null;
+        String trimmed = raw.trim();
+        if (trimmed.isEmpty()) return null;
+        try {
+            return UUID.fromString(trimmed);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
     }
 }

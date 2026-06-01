@@ -193,42 +193,49 @@ public interface QuoteRequestRepository extends JpaRepository<QuoteRequest, UUID
             @Param("end") LocalDateTime end
     );
 
+    @Query(value = """
+            select coalesce(max(cast(substring(q.quote_number from 9) as int)), 0)
+            from quote_requests q
+            where q.quote_number like :prefixLike
+            """, nativeQuery = true)
+    int findMaxSequenceForQuoteNumberPrefix(@Param("prefixLike") String prefixLike);
+
     interface RecentQuoteRow {
-        UUID id();
+        UUID getId();
 
-        String quoteNumber();
+        String getQuoteNumber();
 
-        LocalDateTime createdAt();
+        LocalDateTime getCreatedAt();
 
-        BigDecimal total();
+        BigDecimal getTotal();
 
-        String customerName();
+        String getCustomerName();
     }
 
     interface DailyTotalRow {
-        LocalDate day();
+        LocalDate getDay();
 
-        BigDecimal total();
+        BigDecimal getTotal();
     }
 
     interface CustomerTotalRow {
-        String customerName();
+        String getCustomerName();
 
-        BigDecimal total();
+        BigDecimal getTotal();
     }
 
     interface RecentBudgetRow {
-        UUID id();
+        UUID getId();
 
-        String quoteNumber();
+        String getQuoteNumber();
 
-        LocalDateTime createdAt();
+        LocalDateTime getCreatedAt();
 
-        BigDecimal total();
+        BigDecimal getTotal();
 
-        QuoteStatus status();
+        QuoteStatus getStatus();
 
-        String customerName();
+        String getCustomerName();
     }
 
     interface DocumentManagementQuoteRow {

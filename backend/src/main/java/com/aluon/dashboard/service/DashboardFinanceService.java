@@ -40,9 +40,9 @@ public class DashboardFinanceService {
                                 .stream()
                                 .limit(8)
                                 .map(row -> new DashboardFinanceResponse.Slice(
-                                                row.doorModel().name().toLowerCase(),
-                                                prettyEnum(row.doorModel().name()),
-                                                row.total()))
+                                                row.getDoorModel().name().toLowerCase(),
+                                                prettyEnum(row.getDoorModel().name()),
+                                                row.getTotal()))
                                 .toList();
 
                 DashboardFinanceResponse.Donut income = new DashboardFinanceResponse.Donut("Ingresos", incomeTotal,
@@ -64,7 +64,7 @@ public class DashboardFinanceService {
                 List<DashboardFinanceResponse.Point> trendPoints = quoteRequestRepository
                                 .sumDailyTotalsByDocumentTipoAndCreatedAtBetween(DOC_TIPO_FACTURA, start, end)
                                 .stream()
-                                .map(row -> new DashboardFinanceResponse.Point(row.day(), row.total()))
+                                .map(row -> new DashboardFinanceResponse.Point(row.getDay(), row.getTotal()))
                                 .toList();
 
                 DashboardFinanceResponse.Trend trend = new DashboardFinanceResponse.Trend(labelFor(range, clock),
@@ -75,11 +75,11 @@ public class DashboardFinanceService {
                                 .findRecentByDocumentTipoAndCreatedAtBetween(DOC_TIPO_FACTURA, start, end, pageable)
                                 .stream()
                                 .map(row -> new DashboardFinanceResponse.Transaction(
-                                                row.id().toString(),
-                                                row.customerName(),
-                                                row.quoteNumber(),
-                                                row.total(),
-                                                row.createdAt().toLocalDate(),
+                                                row.getId().toString(),
+                                                row.getCustomerName(),
+                                                row.getQuoteNumber(),
+                                                row.getTotal(),
+                                                row.getCreatedAt().toLocalDate(),
                                                 "in"))
                                 .toList();
 
@@ -104,9 +104,9 @@ public class DashboardFinanceService {
                                 .topCustomersByDocumentTipoTotal(DOC_TIPO_FACTURA, start, end, PageRequest.of(0, 6))
                                 .stream()
                                 .map(row -> new DashboardFinanceResponse.HistogramRow(
-                                                row.customerName().toLowerCase().replace(' ', '-'),
-                                                row.customerName(),
-                                                row.total()))
+                                                row.getCustomerName().toLowerCase().replace(' ', '-'),
+                                                row.getCustomerName(),
+                                                row.getTotal()))
                                 .toList();
 
                 return new DashboardFinanceResponse(income, expenses, tiles, trend, transactions, paymentIssues,

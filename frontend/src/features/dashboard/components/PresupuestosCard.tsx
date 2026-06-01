@@ -1,5 +1,6 @@
 import { DashboardCard } from './DashboardCard';
 import { dashboardTheme } from '../dashboardTheme';
+import { navigateToModule } from '../../../services/moduleNavigation';
 
 type Count = { id: string; label: string; value: number };
 type Recent = { id: string; label: string; estado: string; total: number; fechaIso: string };
@@ -20,7 +21,19 @@ export const PresupuestosCard = ({ counts, recent, formatCurrency }: Props) => {
   const max = Math.max(...counts.map(c => c.value), 1);
 
   return (
-    <DashboardCard title="Presupuestos" accentColor={dashboardTheme.accentBars.expenses}>
+    <DashboardCard
+      title="Presupuestos"
+      accentColor={dashboardTheme.accentBars.expenses}
+      right={(
+        <button
+          type="button"
+          className="btn-ghost px-3 py-2 text-[10px] font-extrabold uppercase tracking-wider"
+          onClick={() => navigateToModule('presupuestos')}
+        >
+          Ver módulo
+        </button>
+      )}
+    >
       <div className="grid gap-5">
         <div className="grid grid-cols-3 gap-4 items-end">
           {counts.slice(0, 3).map((bar, idx) => {
@@ -74,4 +87,3 @@ export const PresupuestosCard = ({ counts, recent, formatCurrency }: Props) => {
     </DashboardCard>
   );
 };
-

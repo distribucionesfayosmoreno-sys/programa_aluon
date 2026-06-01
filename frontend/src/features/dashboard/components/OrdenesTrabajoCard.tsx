@@ -1,5 +1,6 @@
 import { DashboardCard } from './DashboardCard';
 import { dashboardTheme } from '../dashboardTheme';
+import { navigateToModule } from '../../../services/moduleNavigation';
 
 type Count = { id: string; label: string; value: number };
 type Recent = { id: string; codigo: string; cliente: string; etapa: string; estado: string; fechaIso: string; asignadoA: string | null };
@@ -20,7 +21,19 @@ export const OrdenesTrabajoCard = ({ byStep, recent }: Props) => {
   const colors = ['#22c55e', '#3aa0ff', '#a855f7', '#f59e0b', '#ef4444', '#6366f1', '#14b8a6'];
 
   return (
-    <DashboardCard title="Órdenes de trabajo" accentColor={dashboardTheme.accentBars.income}>
+    <DashboardCard
+      title="Órdenes de trabajo"
+      accentColor={dashboardTheme.accentBars.income}
+      right={(
+        <button
+          type="button"
+          className="btn-ghost px-3 py-2 text-[10px] font-extrabold uppercase tracking-wider"
+          onClick={() => navigateToModule('ordenes')}
+        >
+          Ver módulo
+        </button>
+      )}
+    >
       <div className="grid gap-5">
         <div className="grid grid-cols-4 gap-4 items-end">
           {byStep.slice(0, 4).map((bar, idx) => {
@@ -64,4 +77,3 @@ export const OrdenesTrabajoCard = ({ byStep, recent }: Props) => {
     </DashboardCard>
   );
 };
-

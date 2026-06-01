@@ -47,8 +47,8 @@ public interface QuoteItemRepository extends JpaRepository<QuoteItem, UUID> {
     );
 
     interface DoorModelTotalRow {
-        DoorModel doorModel();
+        DoorModel getDoorModel();
 
-        BigDecimal total();
+        BigDecimal getTotal();
     }
 }
