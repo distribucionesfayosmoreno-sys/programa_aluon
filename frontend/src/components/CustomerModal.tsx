@@ -4,6 +4,7 @@ import type { CustomerModalProps } from './customer-modal/customerModalTypes';
 import { CustomerDrawerShell } from './customer-modal/CustomerDrawerShell';
 import { CustomerModalForm } from './customer-modal/CustomerModalForm';
 import { useCustomerModal } from './customer-modal/useCustomerModal';
+import WarningDialog from './feedback/WarningDialog';
 
 const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave }) => {
   const {
@@ -27,6 +28,10 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
     showIbanOk,
     isSaving,
     submitError,
+    validationDialogOpen,
+    validationDialogItems,
+    validationFocusTargetId,
+    closeValidationDialog,
   } = useCustomerModal({ customer, onClose, onSave });
 
   const portalTarget =
@@ -54,7 +59,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
           <button
             type="submit"
             form="customer-modal-form"
-            disabled={isSaving || !form.nombreComercial}
+            disabled={isSaving}
             className="px-4 py-2 rounded-xl text-[9px] font-semibold flex items-center gap-2"
             style={{ background: isSaving ? '#94a3b8' : 'var(--accent)', color: '#ffffff' }}
           >
@@ -83,6 +88,20 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
         showIbanError={showIbanError}
         showIbanOk={showIbanOk}
         submitError={submitError ?? ''}
+      />
+      <WarningDialog
+        open={validationDialogOpen}
+        title="Faltan o hay datos incorrectos"
+        description="Corrige estos campos antes de crear/guardar el cliente."
+        items={validationDialogItems}
+        detail={validationDialogItems.some(i => i.includes('documento')) ? docHint : undefined}
+        primaryLabel="Revisar"
+        onPrimary={() => {
+          if (!validationFocusTargetId) return;
+          const el = document.getElementById(validationFocusTargetId);
+          if (el && 'focus' in el) (el as HTMLInputElement).focus();
+        }}
+        onClose={closeValidationDialog}
       />
     </CustomerDrawerShell>
   );

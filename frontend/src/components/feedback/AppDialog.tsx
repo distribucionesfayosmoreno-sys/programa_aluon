@@ -13,6 +13,7 @@ interface AppDialogProps {
   onClose: () => void;
   children?: React.ReactNode;
   maxWidthClassName?: string;
+  headerVariant?: 'bar' | 'none';
 }
 
 const toneStyles: Record<DialogTone, { header: string; accent: string; iconBg: string }> = {
@@ -32,6 +33,7 @@ const AppDialog: React.FC<AppDialogProps> = ({
   onClose,
   children,
   maxWidthClassName = 'max-w-xl',
+  headerVariant = 'bar',
 }) => {
   const styles = toneStyles[tone];
 
@@ -67,43 +69,56 @@ const AppDialog: React.FC<AppDialogProps> = ({
         className={`relative w-full ${maxWidthClassName} rounded-2xl flex flex-col overflow-hidden animate-fade-up`}
         style={{ background: '#ffffff', maxHeight: 'calc(100vh - 48px)', boxShadow: '0 24px 70px rgba(0,0,0,0.32)' }}
       >
-        <div
-          className="flex items-center justify-between px-7 py-5"
-          style={{ background: styles.header, borderBottom: '1px solid #21262d' }}
-        >
-          <div className="flex items-center gap-3.5">
-            {icon && (
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: styles.iconBg, color: styles.accent }}
-              >
-                {icon}
-              </div>
-            )}
-            <div>
-              <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {title}
-              </h2>
-              {subtitle && (
-                <p style={{ fontSize: 10, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
-                  {subtitle}
-                </p>
+        {headerVariant === 'bar' ? (
+          <div
+            className="flex items-center justify-between px-7 py-5"
+            style={{ background: styles.header, borderBottom: '1px solid #21262d' }}
+          >
+            <div className="flex items-center gap-3.5">
+              {icon && (
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: styles.iconBg, color: styles.accent }}
+                >
+                  {icon}
+                </div>
               )}
+              <div>
+                <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {title}
+                </h2>
+                {subtitle && (
+                  <p style={{ fontSize: 10, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
+                    {subtitle}
+                  </p>
+                )}
+              </div>
             </div>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
+              style={{ color: '#8b949e' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
+              aria-label="Cerrar"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
+        ) : (
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
-            style={{ color: '#8b949e' }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
+            className="absolute top-4 right-4 z-10 w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
             aria-label="Cerrar"
+            type="button"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-        </div>
+        )}
         <div className="flex-1 overflow-y-auto p-7">
           {children}
         </div>

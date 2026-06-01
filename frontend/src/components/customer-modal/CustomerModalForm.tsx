@@ -87,7 +87,7 @@ export const CustomerModalForm = ({
         <div className="grid grid-cols-1 md:grid-cols-6 gap-x-6 gap-y-4">
           <div className="md:col-span-3">
             <FL>Nombre Comercial *</FL>
-            <FI name="nombreComercial" value={form.nombreComercial} onChange={handleChange} required />
+            <FI id="customer-nombre-comercial" name="nombreComercial" value={form.nombreComercial} onChange={handleChange} required />
           </div>
           <div className="md:col-span-3">
             <FL>Razón Social</FL>
@@ -107,9 +107,10 @@ export const CustomerModalForm = ({
             </select>
           </div>
           <div className="md:col-span-2">
-            <FL>Número de Documento</FL>
+            <FL>Número de Documento *</FL>
             <div className="relative">
               <FI
+                id="customer-numero-documento"
                 name="numeroDocumento"
                 value={form.numeroDocumento}
                 onChange={e => setForm(p => ({ ...p, numeroDocumento: normalizeDocumentNumber(e.target.value) }))}
@@ -139,6 +140,7 @@ export const CustomerModalForm = ({
           <div className="md:col-span-2">
             <FL>Teléfono</FL>
             <FI
+              id="customer-telefono"
               name="telefono"
               inputMode="tel"
               value={form.telefono}
@@ -159,6 +161,7 @@ export const CustomerModalForm = ({
           <div className="md:col-span-2">
             <FL>Email</FL>
             <FI
+              id="customer-email"
               name="email"
               type="email"
               inputMode="email"
@@ -221,6 +224,7 @@ export const CustomerModalForm = ({
           <div className="md:col-span-4">
             <FL>IBAN</FL>
             <FI
+              id="customer-iban"
               name="iban"
               value={form.iban}
               onChange={e => setForm(p => ({ ...p, iban: normalizeIban(e.target.value) }))}
