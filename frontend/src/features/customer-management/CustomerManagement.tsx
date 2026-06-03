@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useCustomers, Customer } from '../../hooks/useCustomers';
 import CustomerModal from '../../components/CustomerModal';
 import ConfirmDialog from '../../components/feedback/ConfirmDialog';
 import ErrorDialog from '../../components/feedback/ErrorDialog';
+import CustomerManagementEmptyState from './CustomerManagementEmptyState';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -105,38 +106,41 @@ const SkeletonRows = () => (
   </>
 );
 
-// ─── Empty state ──────────────────────────────────────────────────────────────
-const EmptyState = ({ onAdd }: { onAdd: () => void }) => (
-  <tr>
-    <td colSpan={10}>
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: '#f9fafb', border: '1px solid #e5e7eb' }}>
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#9ca3af' }}>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </div>
-        <div className="text-center">
-          <p className="font-bold text-sm" style={{ color: '#374151' }}>No hay clientes</p>
-          <p className="text-xs mt-1" style={{ color: '#9ca3af' }}>Añade tu primer cliente para empezar.</p>
-        </div>
-        <button onClick={onAdd} className="btn-primary text-sm px-4 py-2">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-          Añadir cliente
-        </button>
-      </div>
-    </td>
-  </tr>
-);
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 const CustomerManagement: React.FC = () => {
   const { customers, loading, saveCustomer, deleteCustomer } = useCustomers();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | undefined>();
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [searchTerm, setSearchTerm] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<Customer | null>(null);
   const [deleteError, setDeleteError] = useState<{ title: string; description: string; detail?: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const visibleCustomers = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      return customers;
+    }
+
+    return customers.filter(customer => {
+      const fields = [
+        customer.nombreComercial,
+        customer.razonSocial,
+        customer.personaContacto,
+        customer.tarifa,
+        customer.formaPago,
+        customer.poblacion,
+        customer.provincia,
+        customer.telefono,
+        customer.email,
+        customer.numeroDocumento,
+        customer.cp,
+      ];
+
+      return fields.some(value => value?.toLowerCase().includes(term));
+    });
+  }, [customers, searchTerm]);
 
   const handleEdit = (c: Customer) => { setSelectedCustomer(c); setIsModalOpen(true); };
   const handleCreate = () => { setSelectedCustomer(undefined); setIsModalOpen(true); };
@@ -176,14 +180,22 @@ const CustomerManagement: React.FC = () => {
   };
 
   const toggleAll = () => {
-    if (selected.size === customers.length) {
-      setSelected(new Set());
-    } else {
-      setSelected(new Set(customers.map(c => c.id ?? '')));
-    }
+    const visibleIds = visibleCustomers.map(customer => customer.id ?? '');
+    const allVisibleSelected = visibleIds.length > 0 && visibleIds.every(id => selected.has(id));
+
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (allVisibleSelected) {
+        visibleIds.forEach(id => next.delete(id));
+      } else {
+        visibleIds.forEach(id => next.add(id));
+      }
+      return next;
+    });
   };
 
-  const allSelected = customers.length > 0 && selected.size === customers.length;
+  const allSelected = visibleCustomers.length > 0
+    && visibleCustomers.every(customer => selected.has(customer.id ?? ''));
 
   return (
     <div className="flex flex-col" style={{ height: 'calc(100vh - 128px)', minHeight: 400 }}>
@@ -212,6 +224,8 @@ const CustomerManagement: React.FC = () => {
               placeholder="Buscar cliente..."
               className="pl-9 pr-4 py-2 rounded-xl text-sm border"
               style={{ border: '1px solid #e5e7eb', fontSize: 12, outline: 'none', background: '#fff', width: '100%' }}
+              value={searchTerm}
+              onChange={event => setSearchTerm(event.target.value)}
             />
           </div>
         </div>
@@ -259,12 +273,12 @@ const CustomerManagement: React.FC = () => {
             </thead>
 
             {/* Body */}
-            <tbody>
+              <tbody>
               {loading
                 ? <SkeletonRows />
-                : customers.length === 0
-                  ? <EmptyState onAdd={handleCreate} />
-                  : customers.map((c, idx) => {
+                : visibleCustomers.length === 0
+                  ? <CustomerManagementEmptyState onAdd={handleCreate} filtered={searchTerm.trim().length > 0} />
+                  : visibleCustomers.map((c, idx) => {
                     const id = c.id ?? idx.toString();
                     const isChecked = selected.has(id);
 
@@ -399,7 +413,13 @@ const CustomerManagement: React.FC = () => {
         >
           <div className="flex items-center gap-4 text-xs" style={{ color: '#6b7280' }}>
             <span>
-              <strong style={{ color: '#111827' }}>{customers.length}</strong> clientes
+              <strong style={{ color: '#111827' }}>{visibleCustomers.length}</strong> clientes
+              {searchTerm.trim() ? (
+                <span>
+                  {' '}
+                  de <strong style={{ color: '#111827' }}>{customers.length}</strong>
+                </span>
+              ) : null}
             </span>
             {selected.size > 0 && (
               <span style={{ color: 'var(--accent)', fontWeight: 700 }}>

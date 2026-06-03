@@ -1,27 +1,11 @@
 import type { QuoteItemDraft } from "../BudgetWizard.types";
-import { budgetWizardIdeasImagePath, budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
+import { resolveChildCardImage } from '../budgetWizardCatalogMedia';
+import { budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   items: QuoteItemDraft[];
-};
-
-const getStructureImageLabel = (doorType: string): string => {
-  switch (doorType) {
-    case 'PEATONAL': return 'Puerta';
-    case 'VALLA': return 'Valla';
-    case 'CORREDERA': return 'Puerta Corredera';
-    case 'ABATIBLE_UNA': return 'Puerta Abatible Una Hoja';
-    case 'ABATIBLE_DOS': return 'Puerta Abatible Dos Hojas';
-    default: return 'Puerta';
-  }
-};
-
-const getProductImage = (modelo: string, doorType: string) => {
-  const modelCamel = modelo.charAt(0).toUpperCase() + modelo.slice(1).toLowerCase();
-  const label = getStructureImageLabel(doorType);
-  return budgetWizardIdeasImagePath(`Modelo ${modelCamel} - ${label}.png`);
 };
 
 const getOpeningImage = (doorType: string, bisagras: boolean) => {
@@ -70,7 +54,7 @@ export const DetailModal = ({ isOpen, onClose, items }: Props) => {
           {items.map((item, idx) => (
             <div key={idx} className="border-b border-outline-variant/10 pb-5 last:border-0 last:pb-0 space-y-4">
               <div className="text-[10px] font-black uppercase tracking-wider text-blue-600">
-                Puerta #{idx + 1} — {item.productCategory.replace('_', ' ')}
+                Línea #{idx + 1} — {item.familyName}
               </div>
 
               {/* Visual Preview Cards */}
@@ -78,16 +62,17 @@ export const DetailModal = ({ isOpen, onClose, items }: Props) => {
                 {/* Product structure image card */}
                 <div className="relative h-24 bg-white border border-outline-variant/25 rounded-xl overflow-hidden flex flex-col items-center justify-center p-2 shadow-sm">
                   <img
-                    src={getProductImage(item.doorModel, item.doorType)}
-                    alt={item.doorType}
+                    src={resolveChildCardImage({
+                      id: item.catalogChildId,
+                      familyId: item.catalogFamilyId,
+                      productCategory: item.productCategory,
+                      doorType: item.doorType,
+                      name: item.childName,
+                      description: null,
+                      imageUrl: null,
+                    })}
+                    alt={item.childName}
                     className="max-h-full max-w-full object-contain"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (!target.src.includes('Modelo Bisel')) {
-                        const label = getStructureImageLabel(item.doorType);
-                        target.src = budgetWizardIdeasImagePath(`Modelo Bisel - ${label}.png`);
-                      }
-                    }}
                   />
                   <div className="absolute bottom-1 right-2 text-[8px] uppercase tracking-widest text-secondary font-space">
                     Estructura
@@ -123,15 +108,15 @@ export const DetailModal = ({ isOpen, onClose, items }: Props) => {
 
               {/* Data Table */}
               <div className="bg-surface-container rounded-xl p-3 border border-outline-variant/20">
-                <div className="divide-y divide-outline-variant/10 text-xs text-secondary">
-                  <div className="flex justify-between py-2 px-1">
-                    <span>Modelo</span>
-                    <span className="font-bold text-on-surface">{item.doorModel}</span>
-                  </div>
-                  <div className="flex justify-between py-2 px-1">
-                    <span>Apertura</span>
-                    <span className="font-bold text-on-surface">{item.doorType}</span>
-                  </div>
+                  <div className="divide-y divide-outline-variant/10 text-xs text-secondary">
+                    <div className="flex justify-between py-2 px-1">
+                    <span>Familia</span>
+                    <span className="font-bold text-on-surface">{item.familyName}</span>
+                    </div>
+                    <div className="flex justify-between py-2 px-1">
+                    <span>Tipo</span>
+                    <span className="font-bold text-on-surface">{item.childName}</span>
+                    </div>
                   <div className="flex justify-between py-2 px-1">
                     <span>Medidas</span>
                     <span className="font-bold text-on-surface">{item.widthMm} x {item.heightMm} mm</span>

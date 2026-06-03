@@ -7,6 +7,21 @@ export type CreateQuotePayload = {
   items: QuoteItemDraft[];
 };
 
+type QuoteItemRequestPayload = {
+  doorModel: QuoteItemDraft['doorModel'];
+  doorType: QuoteItemDraft['doorType'];
+  productCategory: QuoteItemDraft['productCategory'];
+  colorCode: QuoteItemDraft['colorCode'];
+  primerRequired: QuoteItemDraft['primerRequired'];
+  widthMm: QuoteItemDraft['widthMm'];
+  heightMm: QuoteItemDraft['heightMm'];
+  floorClearanceMm: QuoteItemDraft['floorClearanceMm'];
+  larguero: QuoteItemDraft['larguero'];
+  marcoSuperior: QuoteItemDraft['marcoSuperior'];
+  bisagras: QuoteItemDraft['bisagras'];
+  porteroAutomatico: QuoteItemDraft['porteroAutomatico'];
+};
+
 const readTextError = async (response: Response): Promise<string> => {
   try {
     const text = await response.text();
@@ -17,10 +32,25 @@ const readTextError = async (response: Response): Promise<string> => {
 };
 
 export const createQuote = async (payload: CreateQuotePayload): Promise<QuoteResponse> => {
+  const items: QuoteItemRequestPayload[] = payload.items.map(item => ({
+    doorModel: item.doorModel,
+    doorType: item.doorType,
+    productCategory: item.productCategory,
+    colorCode: item.colorCode,
+    primerRequired: item.primerRequired,
+    widthMm: item.widthMm,
+    heightMm: item.heightMm,
+    floorClearanceMm: item.floorClearanceMm,
+    larguero: item.larguero,
+    marcoSuperior: item.marcoSuperior,
+    bisagras: item.bisagras,
+    porteroAutomatico: item.porteroAutomatico,
+  }));
+
   const response = await fetch('/api/quotes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, items }),
   });
   if (!response.ok) throw new Error(await readTextError(response));
   return (await response.json()) as QuoteResponse;
@@ -35,5 +65,4 @@ export const sendQuote = async (id: string, channel: 'EMAIL' | 'WHATSAPP' | 'BOT
   if (!response.ok) throw new Error(await readTextError(response));
   return (await response.json()) as QuoteResponse;
 };
-
 

@@ -24,22 +24,23 @@ export const BudgetWizard = () => {
         <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-200 shadow-md">
           {wizard.step === 'MODELO' && (
             <BudgetWizardModelStep
-              models={wizard.models}
+              families={wizard.families}
               loading={wizard.loading}
-              onSelect={wizard.selectModel}
+              onSelect={wizard.selectFamily}
             />
           )}
 
-          {wizard.step === 'PRODUCTO' && wizard.selectedModel && (
+          {wizard.step === 'PRODUCTO' && wizard.selectedFamily && (
             <BudgetWizardProductStep
-              model={wizard.selectedModel}
+              family={wizard.selectedFamily}
+              children={wizard.children}
               loading={wizard.loading}
               onBack={() => wizard.setStep('MODELO')}
-              onSelect={wizard.selectStructure}
+              onSelect={wizard.selectChild}
             />
           )}
 
-          {wizard.step === 'COLOR' && wizard.selectedModel && wizard.selectedProduct && (
+          {wizard.step === 'COLOR' && wizard.selectedFamily && wizard.selectedChild && (
             <BudgetWizardColorStep
               color={wizard.color}
               primerRequired={wizard.primerRequired}
@@ -47,7 +48,7 @@ export const BudgetWizard = () => {
               onPrimerChange={wizard.setPrimerRequired}
               onBack={() => wizard.setStep('PRODUCTO')}
               onNext={() => {
-                if (wizard.selectedProduct?.producto === 'VALLA') {
+                if (wizard.selectedChild?.doorType === 'VALLA') {
                   wizard.setStep('MEDIDAS');
                 } else {
                   wizard.setStep('APERTURA');
@@ -56,10 +57,10 @@ export const BudgetWizard = () => {
             />
           )}
 
-          {wizard.step === 'APERTURA' && wizard.selectedModel && wizard.selectedVariant && (
+          {wizard.step === 'APERTURA' && wizard.selectedFamily && wizard.selectedChild && (
             <BudgetWizardVariantStep
-              model={wizard.selectedModel}
-              doorType={wizard.selectedVariant.variante}
+              family={wizard.selectedFamily}
+              doorType={wizard.selectedChild.doorType}
               bisagras={wizard.bisagras}
               onSelect={(val: boolean) => {
                 wizard.setBisagras(val);
@@ -69,7 +70,7 @@ export const BudgetWizard = () => {
             />
           )}
 
-          {wizard.step === 'MEDIDAS' && wizard.selectedModel && wizard.selectedVariant && (
+          {wizard.step === 'MEDIDAS' && wizard.selectedFamily && wizard.selectedChild && (
             <BudgetWizardMeasurementsStep
               widthMm={wizard.widthMm}
               heightMm={wizard.heightMm}
@@ -84,7 +85,7 @@ export const BudgetWizard = () => {
               onMarcoSuperiorChange={wizard.setMarcoSuperior}
               onPorteroAutomaticoChange={wizard.setPorteroAutomatico}
               onBack={() => {
-                if (wizard.selectedProduct?.producto === 'VALLA') {
+                if (wizard.selectedChild?.doorType === 'VALLA') {
                   wizard.setStep('COLOR');
                 } else {
                   wizard.setStep('APERTURA');
@@ -111,11 +112,10 @@ export const BudgetWizard = () => {
             />
           )}
 
-          {wizard.step === 'RESUMEN' && wizard.selectedModel && wizard.selectedProduct && wizard.selectedVariant && (
+          {wizard.step === 'RESUMEN' && wizard.selectedFamily && wizard.selectedChild && (
             <BudgetWizardSummaryStep
-              model={wizard.selectedModel}
-              product={wizard.selectedProduct}
-              variant={wizard.selectedVariant}
+              family={wizard.selectedFamily}
+              child={wizard.selectedChild}
               color={wizard.color}
               primerRequired={wizard.primerRequired}
               widthMm={wizard.widthMm}
@@ -135,7 +135,7 @@ export const BudgetWizard = () => {
             <BudgetWizardOptionsStep
               savedItems={wizard.savedItems}
               itemDraft={wizard.itemDraft}
-              onAddDoor={wizard.addCurrentItem}
+              onAddDoor={wizard.startNewDoor}
               onRemoveDoor={wizard.removeItem}
               onEditDoor={wizard.editItem}
               onReset={wizard.reset}
@@ -148,6 +148,7 @@ export const BudgetWizard = () => {
           {wizard.step === 'FINALIZADO' && wizard.quote && (
             <BudgetWizardDoneStep
               quote={wizard.quote}
+              submittedItems={wizard.submittedItems}
               postFinalizeAction={wizard.postFinalizeAction}
               onNew={wizard.reset}
               onSendChannel={wizard.sendQuoteChannel}

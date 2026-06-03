@@ -8,10 +8,10 @@ import formAbatibleDosImg from '../../assets/cutlist/forms/form-abatible-dos.jpg
 import formCorrederaImg from '../../assets/cutlist/forms/form-corredera.jpg';
 import formVallaImg from '../../assets/cutlist/forms/form-vallas.jpg';
 
-import type { DoorModel, DoorType } from '../customer-onboarding/models';
+import type { DoorType } from '../customer-onboarding/models';
 import type { ProductCategory } from './BudgetWizard.types';
 
-export const modelImageByDoorModel = (modelo: DoorModel): string => {
+export const modelImageByDoorModel = (modelo: string): string => {
   switch (modelo) {
     case 'PREMIUM':
       return aluonPremiumImg;
@@ -21,10 +21,8 @@ export const modelImageByDoorModel = (modelo: DoorModel): string => {
       return aluonInoxImg;
     case 'VENECIANA':
       return aluonVenecianaImg;
-    default: {
-      const exhaustive: never = modelo;
-      return exhaustive;
-    }
+    default:
+      return aluonPremiumImg;
   }
 };
 
@@ -63,4 +61,3 @@ export const variantImageByDoorType = (variant: DoorType): string => {
     }
   }
 };
-

@@ -1,6 +1,8 @@
 package com.aluon.crm.catalog.controller;
 
 import com.aluon.crm.catalog.dto.CatalogDoorProductResponse;
+import com.aluon.crm.catalog.dto.CatalogFamilyChildResponse;
+import com.aluon.crm.catalog.dto.CatalogFamilyResponse;
 import com.aluon.crm.catalog.dto.CatalogProductModelResponse;
 import com.aluon.crm.catalog.dto.CatalogProductVariantResponse;
 import com.aluon.crm.catalog.service.CatalogService;
@@ -21,6 +23,16 @@ public class CatalogController {
 
     private final CatalogService catalogService;
 
+    @GetMapping("/families")
+    public ResponseEntity<List<CatalogFamilyResponse>> listFamilies() {
+        return ResponseEntity.ok(catalogService.listFamilies());
+    }
+
+    @GetMapping("/children")
+    public ResponseEntity<List<CatalogFamilyChildResponse>> listFamilyChildren(@RequestParam UUID familyId) {
+        return ResponseEntity.ok(catalogService.listFamilyChildren(familyId));
+    }
+
     @GetMapping("/models")
     public ResponseEntity<List<CatalogProductModelResponse>> listModels() {
         return ResponseEntity.ok(catalogService.listModels());
@@ -36,4 +48,3 @@ public class CatalogController {
         return ResponseEntity.ok(catalogService.listVariants(puertaId));
     }
 }
-

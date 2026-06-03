@@ -1,15 +1,15 @@
-import type { CatalogModel } from '../BudgetWizard.types';
+import type { CatalogFamily } from '../BudgetWizard.types';
 import { budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
-  model: CatalogModel;
+  family: CatalogFamily;
   doorType: string;
   bisagras: boolean;
   onSelect: (val: boolean) => void;
   onBack: () => void;
 };
 
-export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, onBack }: Props) => {
+export const BudgetWizardVariantStep = ({ family, doorType, bisagras, onSelect, onBack }: Props) => {
   const openingImage = (side: 'LEFT' | 'RIGHT'): string | null => {
     if (doorType === 'VALLA') return null;
     if (doorType === 'CORREDERA') {
@@ -60,7 +60,7 @@ export const BudgetWizardVariantStep = ({ model, doorType, bisagras, onSelect, o
       </div>
 
       <p className="text-xs text-secondary font-body">
-        Selecciona el sentido de apertura o lado de bisagras para tu cerramiento modelo **{model.modelo}**:
+        Selecciona el sentido de apertura o lado de bisagras para <strong>{family.name}</strong>:
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

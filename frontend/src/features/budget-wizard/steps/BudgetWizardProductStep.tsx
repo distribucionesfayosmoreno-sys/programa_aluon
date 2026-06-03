@@ -1,29 +1,17 @@
-import type { CatalogModel } from '../BudgetWizard.types';
-import { budgetWizardIdeasImagePath } from '../utils/budgetWizardAssetPath';
+import type { CatalogFamily, CatalogFamilyChild } from '../BudgetWizard.types';
+import { resolveChildCardImage } from '../budgetWizardCatalogMedia';
 
 type Props = {
-  model: CatalogModel;
+  family: CatalogFamily;
+  children: CatalogFamilyChild[];
   loading: boolean;
   onBack: () => void;
-  onSelect: (category: string, type: string) => void;
+  onSelect: (child: CatalogFamilyChild) => void;
 };
 
-const structures = [
-  { id: 'puerta', label: 'Puerta', imageLabel: 'Puerta', category: 'PUERTA_PASO', type: 'PEATONAL' },
-  { id: 'valla', label: 'Valla', imageLabel: 'Valla', category: 'VALLA', type: 'VALLA' },
-  { id: 'corredera', label: 'Puerta Corredera', imageLabel: 'Puerta Corredera', category: 'PUERTA_GARAJE', type: 'CORREDERA' },
-  { id: 'abatible_una', label: 'Puerta Abatible Una Hoja', imageLabel: 'Puerta Abatible Una Hoja', category: 'PUERTA_PASO', type: 'ABATIBLE_UNA' },
-  { id: 'abatible_dos', label: 'Puerta Abatible Dos Hojas', imageLabel: 'Puerta Abatible Dos Hojas', category: 'PUERTA_PASO', type: 'ABATIBLE_DOS' }
-];
-
-const getProductImage = (modelo: string, imageLabel: string) => {
-  const modelCamel = modelo.charAt(0).toUpperCase() + modelo.slice(1).toLowerCase();
-  return budgetWizardIdeasImagePath(`Modelo ${modelCamel} - ${imageLabel}.png`);
-};
-
-export const BudgetWizardProductStep = ({ model, loading, onBack, onSelect }: Props) => {
+export const BudgetWizardProductStep = ({ family, children, loading, onBack, onSelect }: Props) => {
   if (loading) {
-    return <div className="text-xs text-secondary animate-pulse py-8 text-center font-body">Cargando estructuras...</div>;
+    return <div className="text-xs text-secondary animate-pulse py-8 text-center font-body">Cargando hijos de la familia...</div>;
   }
 
   return (
@@ -44,41 +32,33 @@ export const BudgetWizardProductStep = ({ model, loading, onBack, onSelect }: Pr
       </div>
 
       <p className="text-xs text-secondary font-body">
-        Estás configurando un producto del **Modelo {model.modelo}**. Elige el tipo de estructura:
+        Estás configurando la familia <strong>{family.name}</strong>. Elige el tipo que aparecerá en el siguiente paso:
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {structures.map(structure => (
+        {children.map(child => (
           <button
-            key={structure.id}
+            key={child.id}
             type="button"
-            onClick={() => onSelect(structure.category, structure.type)}
+            onClick={() => onSelect(child)}
             className="group relative flex flex-col justify-end text-left bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-primary transition-all duration-200 active:scale-[0.98] shadow-sm h-80 w-full"
           >
-            {/* Image container serving as full background */}
             <div className="absolute inset-0 w-full h-full bg-white flex items-center justify-center overflow-hidden">
               <img
-                src={getProductImage(model.modelo, structure.imageLabel)}
-                alt={structure.label}
+                src={resolveChildCardImage(child)}
+                alt={child.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (!target.src.includes('Modelo Bisel')) {
-                    target.src = budgetWizardIdeasImagePath(`Modelo Bisel - ${structure.imageLabel}.png`);
-                  }
-                }}
               />
             </div>
 
-            {/* Text Overlay */}
             <div className="relative z-10 p-4 pt-10 space-y-1 bg-gradient-to-t from-white via-white/90 to-transparent w-full">
               <div className="flex items-center justify-between">
                 <span className="text-base font-black text-on-surface tracking-wider uppercase font-space">
-                  {structure.label}
+                  {child.name}
                 </span>
               </div>
               <p className="text-[10px] leading-relaxed text-secondary font-body">
-                Especificaciones de cerramientos de aluminio y acabados de alta calidad.
+                {child.description || 'Opción configurable desde administración.'}
               </p>
             </div>
           </button>

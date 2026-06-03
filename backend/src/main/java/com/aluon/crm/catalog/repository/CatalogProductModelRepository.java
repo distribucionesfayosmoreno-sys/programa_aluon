@@ -8,4 +8,8 @@ import java.util.UUID;
 
 public interface CatalogProductModelRepository extends JpaRepository<CatalogProductModel, UUID> {
     List<CatalogProductModel> findAllByOrderByModeloAsc();
+
+    List<CatalogProductModel> findAllByActivoTrueOrderByOrdenAscNombreAsc();
+
+    List<CatalogProductModel> findAllByOrderByOrdenAscNombreAsc();
 }

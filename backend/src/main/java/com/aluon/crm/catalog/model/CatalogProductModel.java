@@ -1,10 +1,7 @@
 package com.aluon.crm.catalog.model;
 
-import com.aluon.production.cutlist.model.DoorModel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,11 +32,24 @@ public class CatalogProductModel {
     @Column(name = "tenant_id", nullable = false)
     private UUID tenantId;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "modelo", nullable = false)
-    private DoorModel modelo;
+    private String modelo;
 
-    @Column(name = "imagen_modelo")
+    @Column(name = "imagen_modelo", columnDefinition = "TEXT")
     private String imagenModelo;
-}
 
+    @Column(name = "nombre", nullable = false)
+    private String nombre;
+
+    @Column(name = "descripcion")
+    private String descripcion;
+
+    @Column(name = "imagen_card", columnDefinition = "TEXT")
+    private String imagenCard;
+
+    @Column(name = "orden", nullable = false)
+    private Integer orden;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo;
+}

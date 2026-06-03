@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ALUON · Formulario de pedido · Puerta abatible dos hojas</title>
+    <link rel="stylesheet" href="./aluon-puerta-abatible-dos.css" />
+  </head>
+  <body>
+    <main class="page" aria-label="Formulario de pedido">
+      <div class="canvas" aria-label="Lienzo A4">
+        <img class="bg-img" src="./assets/puerta-abatible-dos-hojas.jpg" alt="Fondo del formulario" />
+
+        <!-- Top -->
+        <input class="abs top-distrib" data-field="distribuidor" type="text" aria-label="Distribuidor" />
+        <input class="abs top-presu" data-field="presupuesto_num" type="text" aria-label="Nº Presupuesto" />
+        <input class="abs top-fecha" data-field="fecha" type="text" aria-label="Fecha" />
+        <input class="abs top-modelo" data-field="modelo" type="text" aria-label="Modelo Aluon" />
+        <input class="abs top-ref" data-field="ref_color" type="text" aria-label="Referencia Color" />
+        <input class="abs top-acab" data-field="acabado" type="text" aria-label="Acabado" />
+        
+        <!-- Mid -->
+        <input class="abs mid-auto-si" data-field="automatizacion_si" type="text" value="SI" />
+        <input class="abs mid-auto-no" data-field="automatizacion_no" type="text" value="NO" />
+        <input class="abs mid-izq" data-field="hoja1_izq" type="text" />
+        <input class="abs mid-der" data-field="hoja1_der" type="text" />
+        <input class="abs mid-alt-izq" data-field="altura_izq_mm" type="text" />
+        <input class="abs mid-alt-der" data-field="altura_der_mm" type="text" />
+        <input class="abs mid-holg" data-field="holgura_mm" type="text" />
+        <input class="abs mid-anch" data-field="anchura_mm" type="text" />
+        
+        <!-- Bot -->
+        <input class="abs bot-nombre" data-field="nombre_instalador" type="text" aria-label="Nombre instalador" />
+        <textarea class="abs bot-obs" data-field="observaciones" aria-label="Observaciones"></textarea>
+    
+      </div>
+    </main>
+  </body>
+</html>

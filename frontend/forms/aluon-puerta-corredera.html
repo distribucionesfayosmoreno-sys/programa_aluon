@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ALUON · Formulario de pedido · Puerta corredera</title>
+    <link rel="stylesheet" href="./aluon-puerta-corredera.css" />
+  </head>
+  <body>
+    <main class="page" aria-label="Formulario de pedido">
+      <div class="canvas" aria-label="Lienzo A4">
+        <img class="bg-img" src="./assets/puerta-corredera.jpg" alt="Fondo del formulario" />
+
+        <!-- Top -->
+        <input class="abs top-distrib" data-field="distribuidor" type="text" />
+        <input class="abs top-presu" data-field="presupuesto_num" type="text" />
+        <input class="abs top-fecha" data-field="fecha" type="text" />
+        <input class="abs top-modelo" data-field="modelo" type="text" />
+        <input class="abs top-ref" data-field="ref_color" type="text" />
+        <input class="abs top-acab" data-field="acabado" type="text" />
+        
+        <!-- Mid -->
+        <input class="abs mid-auto-si" data-field="automatizacion_si" type="text" value="SI" />
+        <input class="abs mid-auto-no" data-field="automatizacion_no" type="text" value="NO" />
+        <input class="abs mid-alt-tot" data-field="altura_total_cm" type="text" />
+        <input class="abs mid-apert-izq" data-field="apertura_izq" type="text" />
+        <input class="abs mid-apert-der" data-field="apertura_der" type="text" />
+        <input class="abs mid-anch-izq" data-field="anchura_izq_cm" type="text" />
+        <input class="abs mid-anch-der" data-field="anchura_der_cm" type="text" />
+        
+        <!-- Carril -->
+        <input class="abs mid-carril-16" data-field="carril_16" type="text" />
+        <input class="abs mid-carril-20" data-field="carril_20" type="text" />
+        
+        <!-- Montaje -->
+        <input class="abs mid-montaje-a" data-field="montaje_a" type="text" />
+        <input class="abs mid-montaje-b" data-field="montaje_b" type="text" />
+        
+        <!-- Bot -->
+        <input class="abs bot-nombre" data-field="nombre_instalador" type="text" />
+        <textarea class="abs bot-obs" data-field="observaciones"></textarea>
+    
+      </div>
+    </main>
+  </body>
+</html>

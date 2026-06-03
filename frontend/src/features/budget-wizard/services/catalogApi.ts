@@ -1,4 +1,4 @@
-import type { CatalogDoorProduct, CatalogModel, CatalogVariant } from '../BudgetWizard.types';
+import type { CatalogFamily, CatalogFamilyChild } from '../BudgetWizard.types';
 
 const readTextError = async (response: Response): Promise<string> => {
   try {
@@ -9,21 +9,14 @@ const readTextError = async (response: Response): Promise<string> => {
   }
 };
 
-export const getCatalogModels = async (): Promise<CatalogModel[]> => {
-  const response = await fetch('/api/catalog/models');
+export const getCatalogFamilies = async (): Promise<CatalogFamily[]> => {
+  const response = await fetch('/api/catalog/families');
   if (!response.ok) throw new Error(await readTextError(response));
-  return (await response.json()) as CatalogModel[];
+  return (await response.json()) as CatalogFamily[];
 };
 
-export const getDoorProductsByModel = async (modeloId: string): Promise<CatalogDoorProduct[]> => {
-  const response = await fetch(`/api/catalog/door-products?modeloId=${encodeURIComponent(modeloId)}`);
+export const getCatalogChildrenByFamily = async (familyId: string): Promise<CatalogFamilyChild[]> => {
+  const response = await fetch(`/api/catalog/children?familyId=${encodeURIComponent(familyId)}`);
   if (!response.ok) throw new Error(await readTextError(response));
-  return (await response.json()) as CatalogDoorProduct[];
+  return (await response.json()) as CatalogFamilyChild[];
 };
-
-export const getVariantsByDoorProduct = async (puertaId: string): Promise<CatalogVariant[]> => {
-  const response = await fetch(`/api/catalog/variants?puertaId=${encodeURIComponent(puertaId)}`);
-  if (!response.ok) throw new Error(await readTextError(response));
-  return (await response.json()) as CatalogVariant[];
-};
-

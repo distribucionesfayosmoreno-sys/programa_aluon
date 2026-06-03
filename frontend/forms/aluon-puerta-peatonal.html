@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ALUON · Formulario de pedido · Puerta peatonal (vista interior)</title>
+    <link rel="stylesheet" href="./aluon-puerta-peatonal.css" />
+  </head>
+  <body>
+    <main class="page" aria-label="Formulario de pedido">
+      <div class="canvas" aria-label="Lienzo A4">
+        <!-- Imagen embebida como fondo -->
+        <img class="bg-img" src="./assets/ref.jpg" alt="Fondo del formulario" />
+
+        <!-- Inputs interactivos posicionados sobre las cajas -->
+        <input class="abs abs--distrib" data-field="distribuidor" type="text" aria-label="Distribuidor" />
+        <input class="abs abs--presu" data-field="presupuesto_num" type="text" aria-label="Nº Presupuesto" />
+        <input class="abs abs--fecha" data-field="fecha" type="text" aria-label="Fecha" />
+        
+        <input class="abs abs--modelo" data-field="modelo" type="text" aria-label="Modelo Aluon" />
+        <input class="abs abs--ref" data-field="ref_color" type="text" aria-label="Referencia Color" />
+        <input class="abs abs--acab" data-field="acabado" type="text" aria-label="Acabado" />
+        
+        <!-- Cajas de Portero Automático -->
+        <input class="abs abs--porteroL" data-field="portero_box_left" type="text" />
+        <input class="abs abs--porteroSI" data-field="portero_si" type="text" value="SI" />
+        <input class="abs abs--porteroNO" data-field="portero_no" type="text" value="NO" />
+        <input class="abs abs--porteroR" data-field="portero_box_right" type="text" />
+        
+        <!-- Cajas de Bisagras -->
+        <input class="abs abs--bisI" data-field="bisagra_izquierda" type="text" aria-label="Bisagra Izquierda" />
+        <input class="abs abs--bisD" data-field="bisagra_derecha" type="text" aria-label="Bisagra Derecha" />
+        
+        <!-- Medidas -->
+        <input class="abs abs--altura" data-field="altura_total_cm" type="text" aria-label="Altura total" />
+        <input class="abs abs--holgura" data-field="holgura_suelo_cm" type="text" aria-label="Holgura con el suelo" />
+        <input class="abs abs--anchura" data-field="anchura_total_cm" type="text" aria-label="Anchura total" />
+        
+        <!-- Observaciones -->
+        <input class="abs abs--nombre" data-field="nombre_instalador" type="text" aria-label="Nombre instalador" />
+        <textarea class="abs abs--obs" data-field="observaciones" aria-label="Observaciones"></textarea>
+      </div>
+    </main>
+  </body>
+</html>

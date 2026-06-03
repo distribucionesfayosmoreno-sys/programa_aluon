@@ -46,7 +46,21 @@ public class CatalogProductVariant {
     @Column(name = "variante", nullable = false)
     private DoorType variante;
 
-    @Column(name = "imagen_variante")
+    @Column(name = "imagen_variante", columnDefinition = "TEXT")
     private String imagenVariante;
-}
 
+    @Column(name = "nombre", nullable = false)
+    private String nombre;
+
+    @Column(name = "descripcion")
+    private String descripcion;
+
+    @Column(name = "imagen_card", columnDefinition = "TEXT")
+    private String imagenCard;
+
+    @Column(name = "orden", nullable = false)
+    private Integer orden;
+
+    @Column(name = "activo", nullable = false)
+    private Boolean activo;
+}

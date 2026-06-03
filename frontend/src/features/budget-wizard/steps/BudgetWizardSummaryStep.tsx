@@ -1,10 +1,10 @@
-import type { CatalogDoorProduct, CatalogModel, CatalogVariant } from '../BudgetWizard.types';
-import { budgetWizardIdeasImagePath, budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
+import type { CatalogFamily, CatalogFamilyChild } from '../BudgetWizard.types';
+import { resolveChildCardImage } from '../budgetWizardCatalogMedia';
+import { budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
-  model: CatalogModel;
-  product: CatalogDoorProduct;
-  variant: CatalogVariant;
+  family: CatalogFamily;
+  child: CatalogFamilyChild;
   color: string;
   primerRequired: boolean;
   widthMm: number;
@@ -20,23 +20,6 @@ type Props = {
 };
 
 const yesNo = (val: boolean) => (val ? 'Sí' : 'No');
-
-const getStructureImageLabel = (doorType: string): string => {
-  switch (doorType) {
-    case 'PEATONAL': return 'Puerta';
-    case 'VALLA': return 'Valla';
-    case 'CORREDERA': return 'Puerta Corredera';
-    case 'ABATIBLE_UNA': return 'Puerta Abatible Una Hoja';
-    case 'ABATIBLE_DOS': return 'Puerta Abatible Dos Hojas';
-    default: return 'Puerta';
-  }
-};
-
-const getProductImage = (modelo: string, doorType: string) => {
-  const modelCamel = modelo.charAt(0).toUpperCase() + modelo.slice(1).toLowerCase();
-  const label = getStructureImageLabel(doorType);
-  return budgetWizardIdeasImagePath(`Modelo ${modelCamel} - ${label}.png`);
-};
 
 const getOpeningImage = (doorType: string, bisagras: boolean) => {
   if (doorType === 'VALLA') return null;
@@ -57,9 +40,8 @@ const getOpeningImage = (doorType: string, bisagras: boolean) => {
 };
 
 export const BudgetWizardSummaryStep = ({
-  model,
-  product,
-  variant,
+  family,
+  child,
   color,
   primerRequired,
   widthMm,
@@ -96,16 +78,9 @@ export const BudgetWizardSummaryStep = ({
         {/* Product structure image card */}
         <div className="relative h-32 bg-white border border-outline-variant/25 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-3 shadow-sm">
           <img
-            src={getProductImage(model.modelo, variant.variante)}
-            alt={variant.variante}
+            src={resolveChildCardImage(child)}
+            alt={child.name}
             className="max-h-full max-w-full object-contain"
-            onError={(e) => {
-              const target = e.currentTarget;
-              if (!target.src.includes('Modelo Bisel')) {
-                const label = getStructureImageLabel(variant.variante);
-                target.src = budgetWizardIdeasImagePath(`Modelo Bisel - ${label}.png`);
-              }
-            }}
           />
           <div className="absolute bottom-2 right-3 text-[9px] uppercase tracking-widest text-secondary font-space">
             Estructura
@@ -113,7 +88,7 @@ export const BudgetWizardSummaryStep = ({
         </div>
 
         {/* Opening image card */}
-        {variant.variante !== 'VALLA' ? (
+        {child.doorType !== 'VALLA' ? (
           <div className="relative h-32 bg-white border border-outline-variant/25 rounded-2xl overflow-hidden flex flex-col items-center justify-center p-3 shadow-sm">
             <img
               src={budgetWizardPublicPath('assets/template.png')}
@@ -121,7 +96,7 @@ export const BudgetWizardSummaryStep = ({
               className="absolute inset-0 w-full h-full object-cover opacity-60"
             />
             <img
-              src={getOpeningImage(variant.variante, bisagras) || ''}
+              src={getOpeningImage(child.doorType, bisagras) || ''}
               alt="Sentido de Apertura"
               className={`max-h-[80%] max-w-[85%] object-contain relative z-10 ${
                 bisagras ? 'transform scale-[1.65] mix-blend-multiply' : ''
@@ -141,16 +116,16 @@ export const BudgetWizardSummaryStep = ({
 
       <div className="bg-surface-container rounded-2xl p-4 border border-outline-variant/20 space-y-4 text-xs text-on-surface">
         <div className="flex justify-between py-1">
-          <span className="text-secondary font-medium">Modelo</span>
-          <span className="font-bold">{model.modelo}</span>
+          <span className="text-secondary font-medium">Familia</span>
+          <span className="font-bold">{family.name}</span>
         </div>
         <div className="flex justify-between py-1">
-          <span className="text-secondary font-medium">Tipo Cerramiento</span>
-          <span className="font-bold">{product.producto.replace('_', ' ')}</span>
+          <span className="text-secondary font-medium">Tipo</span>
+          <span className="font-bold">{child.name}</span>
         </div>
         <div className="flex justify-between py-1">
           <span className="text-secondary font-medium">Apertura</span>
-          <span className="font-bold">{variant.variante}</span>
+          <span className="font-bold">{child.doorType}</span>
         </div>
         <div className="flex justify-between py-1">
           <span className="text-secondary font-medium">Color Acabado</span>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ALUON · Formulario de pedido · Vallas</title>
+    <link rel="stylesheet" href="./aluon-vallas.css" />
+  </head>
+  <body>
+    <main class="page" aria-label="Formulario de pedido">
+      <div class="canvas" aria-label="Lienzo A4">
+        <img class="bg-img" src="./assets/vallas.jpg" alt="Fondo del formulario" />
+
+        <!-- Top -->
+        <input class="abs top-distrib" data-field="distribuidor" type="text" />
+        <input class="abs top-presu" data-field="presupuesto_num" type="text" />
+        <input class="abs top-fecha" data-field="fecha" type="text" />
+        <input class="abs top-modelo" data-field="modelo" type="text" />
+        <input class="abs top-ref" data-field="ref_color" type="text" />
+        <input class="abs top-acab" data-field="acabado" type="text" />
+        
+        <!-- Mid (No boxes exist, we place inputs next to arrows) -->
+        <input class="abs mid-alto" data-field="alto" type="text" placeholder="Alto" />
+        <input class="abs mid-ancho" data-field="ancho" type="text" placeholder="Ancho" />
+        
+        <!-- Bot -->
+        <input class="abs bot-nombre" data-field="nombre_instalador" type="text" />
+        <textarea class="abs bot-obs" data-field="observaciones"></textarea>
+    
+      </div>
+    </main>
+  </body>
+</html>

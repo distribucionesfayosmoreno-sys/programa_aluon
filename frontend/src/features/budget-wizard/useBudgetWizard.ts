@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { QuoteResponse } from '../customer-onboarding/models';
 import type {
-  CatalogDoorProduct,
-  CatalogModel,
-  CatalogVariant,
+  CatalogFamily,
+  CatalogFamilyChild,
   ColorHex,
   QuoteItemDraft,
-  Step,
 } from './BudgetWizard.types';
-import { getCatalogModels, getDoorProductsByModel, getVariantsByDoorProduct } from './services/catalogApi';
-import { listCustomers, type CustomerResponse, type DeliveryAddressResponse } from './services/customersApi';
-import { createQuote, sendQuote } from './services/quotesApi';
-import { projectStore } from '../project-management/services/projectStore';
+import { getCatalogChildrenByFamily, getCatalogFamilies } from './services/catalogApi';
 import { consumeBudgetWizardPrefillCustomerId } from './services/budgetWizardPrefill';
+import { listCustomers, type CustomerResponse, type DeliveryAddressResponse } from './services/customersApi';
+import { projectStore } from '../project-management/services/projectStore';
+import { createQuote, sendQuote } from './services/quotesApi';
+import { useBudgetWizardStepHistory } from './useBudgetWizardStepHistory';
+import { resolveDoorModelForQuote } from './budgetWizardDoorModel';
 
 const defaultBooleans = {
   primerRequired: false,
@@ -25,19 +25,14 @@ const defaultBooleans = {
 const isHexColor = (value: string): value is ColorHex => /^#[0-9a-fA-F]{6}$/.test(value);
 
 export const useBudgetWizard = () => {
-  const [step, setStep] = useState<Step>('MODELO');
+  const { step, setStep } = useBudgetWizardStepHistory();
+  const [families, setFamilies] = useState<CatalogFamily[]>([]);
+  const [children, setChildren] = useState<CatalogFamilyChild[]>([]);
+  const [selectedFamily, setSelectedFamily] = useState<CatalogFamily | null>(null);
+  const [selectedChild, setSelectedChild] = useState<CatalogFamilyChild | null>(null);
 
-  const [models, setModels] = useState<CatalogModel[]>([]);
-  const [doorProducts, setDoorProducts] = useState<CatalogDoorProduct[]>([]);
-  const [variants, setVariants] = useState<CatalogVariant[]>([]);
-
-  const [selectedModel, setSelectedModel] = useState<CatalogModel | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<CatalogDoorProduct | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<CatalogVariant | null>(null);
-
-  const [color, setColor] = useState<ColorHex>('#ffffff');
+  const [color, setColorState] = useState<ColorHex>('#ffffff');
   const [primerRequired, setPrimerRequired] = useState(defaultBooleans.primerRequired);
-
   const [widthMm, setWidthMm] = useState(0);
   const [heightMm, setHeightMm] = useState(0);
   const [floorClearanceMm, setFloorClearanceMm] = useState(0);
@@ -47,13 +42,24 @@ export const useBudgetWizard = () => {
   const [porteroAutomatico, setPorteroAutomatico] = useState(defaultBooleans.porteroAutomatico);
 
   const [customers, setCustomers] = useState<CustomerResponse[]>([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
-  const [selectedDeliveryAddressId, setSelectedDeliveryAddressId] = useState<string>('');
-
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [selectedDeliveryAddressId, setSelectedDeliveryAddressId] = useState('');
   const [savedItems, setSavedItems] = useState<QuoteItemDraft[]>([]);
+  const [submittedItems, setSubmittedItems] = useState<QuoteItemDraft[]>([]);
+
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [postFinalizeAction, setPostFinalizeAction] = useState<'EMAIL' | 'WHATSAPP' | 'VIEW' | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const selectedFamilyQuoteDoorModel = useMemo(
+    () => (selectedFamily ? resolveDoorModelForQuote(selectedFamily.technicalModel) : null),
+    [selectedFamily],
+  );
 
   const selectedCustomer = useMemo(
-    () => customers.find(c => c.id === selectedCustomerId) ?? null,
+    () => customers.find(customer => customer.id === selectedCustomerId) ?? null,
     [customers, selectedCustomerId],
   );
 
@@ -63,60 +69,81 @@ export const useBudgetWizard = () => {
   );
 
   const selectedDeliveryAddress = useMemo(
-    () => deliveryAddresses.find(a => a.id === selectedDeliveryAddressId) ?? null,
+    () => deliveryAddresses.find(address => address.id === selectedDeliveryAddressId) ?? null,
     [deliveryAddresses, selectedDeliveryAddressId],
   );
 
-  const [quote, setQuote] = useState<QuoteResponse | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-
-  const [postFinalizeAction, setPostFinalizeAction] = useState<'EMAIL' | 'WHATSAPP' | 'VIEW' | null>(null);
+  const itemDraft = useMemo<QuoteItemDraft | null>(() => {
+    if (!selectedFamily || !selectedChild || !selectedFamilyQuoteDoorModel) {
+      return null;
+    }
+    return {
+      catalogFamilyId: selectedFamily.id,
+      catalogChildId: selectedChild.id,
+      familyName: selectedFamily.name,
+      childName: selectedChild.name,
+      doorModel: selectedFamilyQuoteDoorModel,
+      doorType: selectedChild.doorType,
+      productCategory: selectedChild.productCategory,
+      colorCode: color,
+      primerRequired,
+      widthMm,
+      heightMm,
+      floorClearanceMm,
+      larguero,
+      marcoSuperior,
+      bisagras,
+      porteroAutomatico,
+    };
+  }, [
+    bisagras,
+    color,
+    floorClearanceMm,
+    heightMm,
+    larguero,
+    marcoSuperior,
+    porteroAutomatico,
+    primerRequired,
+    selectedChild,
+    selectedFamily,
+    selectedFamilyQuoteDoorModel,
+    widthMm,
+  ]);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getCatalogModels()
+    getCatalogFamilies()
       .then(data => {
-        if (cancelled) return;
-        setModels(data);
+        if (!cancelled) {
+          setFamilies(data);
+        }
       })
       .catch(err => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Error al cargar catálogo');
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Error al cargar el catálogo');
+        }
       })
       .finally(() => {
-        if (cancelled) return;
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const loadDoorProducts = async (modeloId: string) => {
+  const loadChildren = async (familyId: string): Promise<CatalogFamilyChild[]> => {
     setLoading(true);
     setError('');
     try {
-      const data = await getDoorProductsByModel(modeloId);
-      setDoorProducts(data);
+      const data = await getCatalogChildrenByFamily(familyId);
+      setChildren(data);
+      return data;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar productos');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadVariants = async (puertaId: string) => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await getVariantsByDoorProduct(puertaId);
-      setVariants(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al cargar variantes');
+      setError(err instanceof Error ? err.message : 'Error al cargar los hijos de la familia');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -135,118 +162,47 @@ export const useBudgetWizard = () => {
     }
   };
 
-  const modelLabel = useMemo(() => {
-    const fallback = selectedModel?.modelo ?? null;
-    if (!fallback) return '';
-    return `Modelo ${fallback}`;
-  }, [selectedModel]);
+  const resetCurrentDoor = () => {
+    setChildren([]);
+    setSelectedFamily(null);
+    setSelectedChild(null);
+    setColorState('#ffffff');
+    setPrimerRequired(defaultBooleans.primerRequired);
+    setWidthMm(0);
+    setHeightMm(0);
+    setFloorClearanceMm(0);
+    setLarguero(defaultBooleans.larguero);
+    setMarcoSuperior(defaultBooleans.marcoSuperior);
+    setBisagras(defaultBooleans.bisagras);
+    setPorteroAutomatico(defaultBooleans.porteroAutomatico);
+    setPostFinalizeAction(null);
+  };
 
-  const productLabel = useMemo(() => {
-    switch (selectedProduct?.producto) {
-      case 'PUERTA_PASO':
-        return 'Puerta paso';
-      case 'PUERTA_GARAJE':
-        return 'Puerta garaje';
-      case 'VALLA':
-        return 'Valla';
-      case 'REJA':
-        return 'Reja';
-      default:
-        return '';
-    }
-  }, [selectedProduct]);
+  const restoreItemState = (item: QuoteItemDraft) => {
+    setColorState(item.colorCode);
+    setPrimerRequired(item.primerRequired);
+    setWidthMm(item.widthMm);
+    setHeightMm(item.heightMm);
+    setFloorClearanceMm(item.floorClearanceMm);
+    setLarguero(item.larguero);
+    setMarcoSuperior(item.marcoSuperior);
+    setBisagras(item.bisagras);
+    setPorteroAutomatico(item.porteroAutomatico);
+  };
 
-  const variantLabel = useMemo(() => {
-    switch (selectedVariant?.variante) {
-      case 'PEATONAL':
-        return 'Peatonal';
-      case 'ABATIBLE_UNA':
-        return 'Abatible (1 hoja)';
-      case 'ABATIBLE_DOS':
-        return 'Abatible (2 hojas)';
-      case 'CORREDERA':
-        return 'Corredera';
-      case 'VALLA':
-        return 'Valla';
-      default:
-        return '';
-    }
-  }, [selectedVariant]);
-
-  const itemDraft = useMemo<QuoteItemDraft | null>(() => {
-    if (!selectedModel || !selectedProduct || !selectedVariant) return null;
-    return {
-      doorModel: selectedModel.modelo,
-      doorType: selectedVariant.variante,
-      productCategory: selectedProduct.producto,
-      colorCode: color,
-      primerRequired,
-      widthMm,
-      heightMm,
-      floorClearanceMm,
-      larguero,
-      marcoSuperior,
-      bisagras,
-      porteroAutomatico,
-    };
-  }, [
-    selectedModel,
-    selectedProduct,
-    selectedVariant,
-    color,
-    primerRequired,
-    widthMm,
-    heightMm,
-    floorClearanceMm,
-    larguero,
-    marcoSuperior,
-    bisagras,
-    porteroAutomatico,
-  ]);
-
-  const selectModel = async (model: CatalogModel) => {
-    setSelectedModel(model);
-    setSelectedProduct(null);
-    setSelectedVariant(null);
-    setDoorProducts([]);
-    setVariants([]);
-    await loadDoorProducts(model.id);
+  const selectFamily = async (family: CatalogFamily) => {
+    setSelectedFamily(family);
+    setSelectedChild(null);
+    resetCurrentDoor();
+    setSelectedFamily(family);
+    await loadChildren(family.id);
     setStep('PRODUCTO');
   };
 
-  const selectStructure = async (category: string, type: string) => {
-    const prod = doorProducts.find(p => p.producto === category);
-    if (!prod) return;
-    setSelectedProduct(prod);
-
-    setLoading(true);
-    try {
-      const variantsData = await getVariantsByDoorProduct(prod.id);
-      setVariants(variantsData);
-      const vrnt = variantsData.find(v => v.variante === type);
-      if (vrnt) {
-        setSelectedVariant(vrnt);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-
+  const selectChild = (child: CatalogFamilyChild) => {
+    setSelectedChild(child);
+    setBisagras(defaultBooleans.bisagras);
     setStep('COLOR');
-  };
-
-  const selectProduct = async (product: CatalogDoorProduct) => {
-    setSelectedProduct(product);
-    setSelectedVariant(null);
-    setVariants([]);
-    await loadVariants(product.id);
-    setStep('COLOR');
-  };
-
-  const selectVariant = (variant: CatalogVariant) => {
-    setSelectedVariant(variant);
-    setStep('MEDIDAS');
   };
 
   const goToCustomerStep = async () => {
@@ -260,69 +216,52 @@ export const useBudgetWizard = () => {
     setStep('CLIENTE');
   };
 
-  const resetCurrentDoor = () => {
-    setDoorProducts([]);
-    setVariants([]);
-    setSelectedModel(null);
-    setSelectedProduct(null);
-    setSelectedVariant(null);
-    setColor('#ffffff');
-    setPrimerRequired(defaultBooleans.primerRequired);
-    setWidthMm(0);
-    setHeightMm(0);
-    setFloorClearanceMm(0);
-    setLarguero(defaultBooleans.larguero);
-    setMarcoSuperior(defaultBooleans.marcoSuperior);
-    setBisagras(defaultBooleans.bisagras);
-    setPorteroAutomatico(defaultBooleans.porteroAutomatico);
-    setPostFinalizeAction(null);
-  };
-
   const addCurrentItem = () => {
-    if (!itemDraft) return;
+    if (!itemDraft) {
+      if (selectedFamily && selectedChild && !selectedFamilyQuoteDoorModel) {
+        setError(`El modelo técnico "${selectedFamily.technicalModel}" no está soportado para presupuestos.`);
+      }
+      return;
+    }
     setSavedItems(prev => [...prev, itemDraft]);
     resetCurrentDoor();
     setStep('ACCIONES');
   };
 
+  const startNewDoor = () => {
+    setError('');
+    resetCurrentDoor();
+    setStep('MODELO');
+  };
+
   const removeItem = (index: number) => {
-    setSavedItems(prev => prev.filter((_, i) => i !== index));
+    setSavedItems(prev => prev.filter((_, itemIndex) => itemIndex !== index));
   };
 
   const editItem = async (index: number) => {
     const item = savedItems[index];
-    if (!item) return;
-
-    setSavedItems(prev => prev.filter((_, i) => i !== index));
-
-    // Cargar modelo
-    const model = models.find(m => m.modelo === item.doorModel);
-    if (model) {
-      setSelectedModel(model);
-      const productsData = await getDoorProductsByModel(model.id);
-      setDoorProducts(productsData);
-      const prod = productsData.find(p => p.producto === item.productCategory);
-      if (prod) {
-        setSelectedProduct(prod);
-        const variantsData = await getVariantsByDoorProduct(prod.id);
-        setVariants(variantsData);
-        const vrnt = variantsData.find(v => v.variante === item.doorType);
-        if (vrnt) {
-          setSelectedVariant(vrnt);
-        }
-      }
+    if (!item) {
+      return;
     }
 
-    setColor(item.colorCode);
-    setPrimerRequired(item.primerRequired);
-    setWidthMm(item.widthMm);
-    setHeightMm(item.heightMm);
-    setFloorClearanceMm(item.floorClearanceMm);
-    setLarguero(item.larguero);
-    setMarcoSuperior(item.marcoSuperior);
-    setBisagras(item.bisagras);
-    setPorteroAutomatico(item.porteroAutomatico);
+    setSavedItems(prev => prev.filter((_, itemIndex) => itemIndex !== index));
 
+    const family = families.find(entry => entry.id === item.catalogFamilyId)
+      ?? families.find(entry => entry.technicalModel === item.doorModel);
+    if (!family) {
+      return;
+    }
+
+    setSelectedFamily(family);
+    const familyChildren = await loadChildren(family.id);
+    const child = familyChildren.find(entry => entry.id === item.catalogChildId)
+      ?? familyChildren.find(entry => entry.productCategory === item.productCategory && entry.doorType === item.doorType);
+    if (!child) {
+      return;
+    }
+
+    setSelectedChild(child);
+    restoreItemState(item);
     setStep('MEDIDAS');
   };
 
@@ -332,24 +271,30 @@ export const useBudgetWizard = () => {
     } else {
       setPostFinalizeAction(null);
     }
-    const itemsToSubmit = [...savedItems];
-    if (itemsToSubmit.length === 0) {
-      if (!itemDraft) {
-        setError('Completa el flujo antes de finalizar.');
+
+    const itemsToSubmit = savedItems.length > 0
+      ? [...savedItems]
+      : itemDraft
+        ? [itemDraft]
+        : [];
+
+    if (!itemsToSubmit.length) {
+      if (selectedFamily && selectedChild && !selectedFamilyQuoteDoorModel) {
+        setError(`El modelo técnico "${selectedFamily.technicalModel}" no está soportado para presupuestos.`);
         return;
       }
-      if (widthMm <= 0 || heightMm <= 0) {
-        setError('Introduce medidas válidas (mm).');
-        return;
-      }
-      itemsToSubmit.push(itemDraft);
+      setError('Completa el flujo antes de finalizar.');
+      return;
     }
     if (!selectedCustomerId) {
       setError('Selecciona un cliente.');
       return;
     }
+
     setSubmitting(true);
     setError('');
+    setSubmittedItems(itemsToSubmit);
+
     try {
       const response = await createQuote({
         customerId: selectedCustomerId,
@@ -367,7 +312,9 @@ export const useBudgetWizard = () => {
   };
 
   const sendQuoteChannel = async (channel: 'EMAIL' | 'WHATSAPP' | 'BOTH') => {
-    if (!quote) return;
+    if (!quote) {
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
@@ -384,6 +331,7 @@ export const useBudgetWizard = () => {
     setStep('MODELO');
     resetCurrentDoor();
     setSavedItems([]);
+    setSubmittedItems([]);
     setSelectedCustomerId('');
     setSelectedDeliveryAddressId('');
     setQuote(null);
@@ -397,12 +345,10 @@ export const useBudgetWizard = () => {
     error,
     quote,
     postFinalizeAction,
-    models,
-    doorProducts,
-    variants,
-    selectedModel,
-    selectedProduct,
-    selectedVariant,
+    families,
+    children,
+    selectedFamily,
+    selectedChild,
     color,
     primerRequired,
     widthMm,
@@ -418,13 +364,13 @@ export const useBudgetWizard = () => {
     selectedCustomer,
     selectedDeliveryAddress,
     deliveryAddresses,
-    modelLabel,
-    productLabel,
-    variantLabel,
     savedItems,
+    submittedItems,
     itemDraft,
     setColor: (value: ColorHex) => {
-      if (isHexColor(value)) setColor(value);
+      if (isHexColor(value)) {
+        setColorState(value);
+      }
     },
     setPrimerRequired,
     setWidthMm,
@@ -437,12 +383,11 @@ export const useBudgetWizard = () => {
     setSelectedCustomerId,
     setSelectedDeliveryAddressId,
     setStep,
-    selectModel,
-    selectStructure,
-    selectProduct,
-    selectVariant,
+    selectFamily,
+    selectChild,
     goToCustomerStep,
     addCurrentItem,
+    startNewDoor,
     removeItem,
     editItem,
     finalize,

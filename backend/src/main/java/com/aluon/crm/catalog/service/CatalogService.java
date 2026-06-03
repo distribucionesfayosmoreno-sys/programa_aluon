@@ -1,10 +1,13 @@
 package com.aluon.crm.catalog.service;
 
 import com.aluon.crm.catalog.dto.CatalogDoorProductResponse;
+import com.aluon.crm.catalog.dto.CatalogFamilyChildResponse;
+import com.aluon.crm.catalog.dto.CatalogFamilyResponse;
 import com.aluon.crm.catalog.dto.CatalogProductModelResponse;
 import com.aluon.crm.catalog.dto.CatalogProductVariantResponse;
 import com.aluon.crm.catalog.model.CatalogDoorProduct;
 import com.aluon.crm.catalog.model.CatalogProductModel;
+import com.aluon.crm.catalog.model.CatalogProductVariant;
 import com.aluon.crm.catalog.repository.CatalogDoorProductRepository;
 import com.aluon.crm.catalog.repository.CatalogProductModelRepository;
 import com.aluon.crm.catalog.repository.CatalogProductVariantRepository;
@@ -25,8 +28,31 @@ public class CatalogService {
     private final CatalogProductVariantRepository variantRepository;
 
     @Transactional(readOnly = true)
+    public List<CatalogFamilyResponse> listFamilies() {
+        return modelRepository.findAllByActivoTrueOrderByOrdenAscNombreAsc()
+                .stream()
+                .map(model -> new CatalogFamilyResponse(
+                        model.getId(),
+                        model.getModelo(),
+                        model.getNombre(),
+                        model.getDescripcion(),
+                        resolveImage(model.getImagenCard(), model.getImagenModelo())
+                ))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CatalogFamilyChildResponse> listFamilyChildren(UUID familyId) {
+        UUID id = Objects.requireNonNull(familyId, "familyId");
+        return variantRepository.findActiveByFamilyId(id)
+                .stream()
+                .map(this::toFamilyChildResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<CatalogProductModelResponse> listModels() {
-        return modelRepository.findAllByOrderByModeloAsc()
+        return modelRepository.findAllByOrderByOrdenAscNombreAsc()
                 .stream()
                 .map(model -> new CatalogProductModelResponse(model.getId(), model.getModelo(), model.getImagenModelo()))
                 .toList();
@@ -63,5 +89,25 @@ public class CatalogService {
                 ))
                 .toList();
     }
-}
 
+    private CatalogFamilyChildResponse toFamilyChildResponse(CatalogProductVariant variant) {
+        CatalogDoorProduct doorProduct = variant.getPuerta();
+        CatalogProductModel family = doorProduct.getModelo();
+        return new CatalogFamilyChildResponse(
+                variant.getId(),
+                family.getId(),
+                doorProduct.getProducto(),
+                variant.getVariante(),
+                variant.getNombre(),
+                variant.getDescripcion(),
+                resolveImage(variant.getImagenCard(), variant.getImagenVariante())
+        );
+    }
+
+    private String resolveImage(String cardImage, String legacyImage) {
+        if (cardImage != null && !cardImage.isBlank()) {
+            return cardImage;
+        }
+        return legacyImage;
+    }
+}

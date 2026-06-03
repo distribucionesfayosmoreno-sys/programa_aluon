@@ -45,7 +45,6 @@ public class CatalogDoorProduct {
     @Column(name = "producto", nullable = false)
     private ProductCategory producto;
 
-    @Column(name = "imagen_modelo")
+    @Column(name = "imagen_modelo", columnDefinition = "TEXT")
     private String imagenModelo;
 }
-

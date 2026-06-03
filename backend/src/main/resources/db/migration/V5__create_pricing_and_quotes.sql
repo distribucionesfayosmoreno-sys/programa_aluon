@@ -17,6 +17,44 @@ CREATE TABLE IF NOT EXISTS tariff_prices (
     UNIQUE (tariff_id, door_model, door_type)
 );
 
+CREATE TABLE IF NOT EXISTS customers (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL,
+    nombre_comercial VARCHAR(255) NOT NULL,
+    razon_social VARCHAR(255),
+    persona_contacto VARCHAR(255),
+    tarifa VARCHAR(50),
+    tipo_documento VARCHAR(32),
+    numero_documento VARCHAR(100),
+    telefono VARCHAR(40),
+    email VARCHAR(160),
+    password_hash VARCHAR(255),
+    direccion VARCHAR(255),
+    cp VARCHAR(20),
+    poblacion VARCHAR(120),
+    provincia VARCHAR(120),
+    pais VARCHAR(120),
+    iban VARCHAR(64),
+    forma_pago VARCHAR(64),
+    dias_vencimiento INTEGER,
+    auto_approve_quotes BOOLEAN NOT NULL DEFAULT FALSE,
+    remanente NUMERIC(19, 4),
+    active BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+CREATE TABLE IF NOT EXISTS delivery_addresses (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL,
+    customer_id UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
+    nombre_alias VARCHAR(150) NOT NULL,
+    direccion VARCHAR(255),
+    cp VARCHAR(20),
+    poblacion VARCHAR(120),
+    provincia VARCHAR(120),
+    telefono VARCHAR(40),
+    contacto VARCHAR(150)
+);
+
 CREATE TABLE IF NOT EXISTS quote_requests (
     id UUID PRIMARY KEY,
     tenant_id UUID NOT NULL,

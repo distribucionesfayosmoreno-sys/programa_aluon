@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import type { QuoteResponse } from '../../customer-onboarding/models';
+import type { QuoteItemDraft } from '../BudgetWizard.types';
 
 type Props = {
   quote: QuoteResponse;
+  submittedItems: QuoteItemDraft[];
   postFinalizeAction?: 'EMAIL' | 'WHATSAPP' | 'VIEW' | null;
   onNew: () => void;
   onSendChannel: (channel: 'EMAIL' | 'WHATSAPP' | 'BOTH') => Promise<void>;
   submitting: boolean;
 };
 
-export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendChannel, submitting }: Props) => {
+export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction, onNew, onSendChannel, submitting }: Props) => {
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState(quote.contactEmail || '');
   const [sentStatus, setSentStatus] = useState<string | null>(null);
@@ -119,7 +121,12 @@ export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendC
         <h4 className="font-space font-black text-xs uppercase tracking-wider text-blue-600">Detalle del Presupuesto</h4>
         
         <div className="divide-y divide-outline-variant/20">
-          {quote.items.map((item, idx) => (
+          {quote.items.map((item, idx) => {
+            const submittedItem = submittedItems[idx];
+            const familyLabel = submittedItem?.familyName ?? `Modelo ${item.doorModel}`;
+            const childLabel = submittedItem?.childName ?? item.doorType.replace('_', ' ');
+
+            return (
             <div key={idx} className="py-3.5 space-y-2 first:pt-0 last:pb-0">
               <div className="flex justify-between items-start gap-4">
                 <div>
@@ -127,7 +134,7 @@ export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendC
                     Línea {idx + 1}
                   </span>
                   <div className="text-xs font-black text-on-surface mt-1.5 font-space">
-                    Modelo {item.doorModel} — {item.doorType.replace('_', ' ')}
+                    {familyLabel} — {childLabel}
                   </div>
                   <div className="text-[10px] text-secondary mt-1 font-body">
                     Categoría: {item.productCategory.replace('_', ' ')} · Medidas: {item.widthMm} x {item.heightMm} mm ({item.m2.toFixed(2)} m²)
@@ -176,7 +183,8 @@ export const BudgetWizardDoneStep = ({ quote, postFinalizeAction, onNew, onSendC
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="h-px bg-outline-variant/20 pt-1" />

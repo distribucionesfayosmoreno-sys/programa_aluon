@@ -26,6 +26,7 @@ export const BudgetWizardOptionsStep = ({
   submitting,
 }: Props) => {
   const [detailOpen, setDetailOpen] = useState(false);
+  const canFinalize = savedItems.length > 0;
 
   const allItems = [...savedItems];
   if (itemDraft && allItems.length === 0) {
@@ -48,12 +49,12 @@ export const BudgetWizardOptionsStep = ({
         <span className="text-[10px] uppercase tracking-widest text-secondary font-bold block">Continuar</span>
         <button
           type="button"
-          disabled={submitting}
+          disabled={submitting || !canFinalize}
           onClick={onFinalize}
           className="w-full flex items-center justify-center gap-3 py-3.5 px-6 rounded-2xl text-white font-black text-xs uppercase tracking-widest bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all duration-200 shadow-md shadow-primary/20"
         >
           <span className="material-symbols-outlined text-sm">save</span>
-          {submitting ? 'Guardando...' : 'GUARDAR PRESUPUESTO'}
+          {submitting ? 'Guardando...' : 'FINALIZAR PRESUPUESTO'}
         </button>
 
         {/* Action Buttons underneath save button */}
@@ -115,10 +116,10 @@ export const BudgetWizardOptionsStep = ({
                   </div>
                   <div>
                     <div className="text-xs font-black text-on-surface">
-                      Portón/berja {idx + 1} — {item.doorModel}
+                      Línea {idx + 1} — {item.familyName}
                     </div>
                     <div className="text-[10px] text-secondary mt-0.5 uppercase tracking-wide">
-                      {item.productCategory.replace('_', ' ')} · {item.doorType} · {item.widthMm}x{item.heightMm} mm
+                      {item.childName} · {item.widthMm}x{item.heightMm} mm
                     </div>
                   </div>
                 </div>

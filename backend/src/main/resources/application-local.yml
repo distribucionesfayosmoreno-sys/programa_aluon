@@ -3,6 +3,10 @@ spring:
     restart:
       enabled: false
       exclude: com/aluon/core/tenant/**
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    validate-on-migrate: false
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://192.168.99.14:3000/aluonbbdd}
     driver-class-name: ${SPRING_DATASOURCE_DRIVER:org.postgresql.Driver}
