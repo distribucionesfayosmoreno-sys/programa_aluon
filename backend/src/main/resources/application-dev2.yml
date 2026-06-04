@@ -38,7 +38,7 @@ app:
 
 integrations:
   jira:
-    enabled: ${JIRA_ENABLED:false}
+    enabled: ${JIRA_ENABLED:TRUE}
     base-url: ${JIRA_BASE_URL:${JIRA_URL:}}
     username: ${JIRA_USERNAME:}
     api-token: ${JIRA_API_TOKEN:}
