@@ -15,6 +15,7 @@ export type CustomerResponse = {
   razonSocial?: string | null;
   email?: string | null;
   telefono?: string | null;
+  tarifa?: string | null;
   direccionesEntrega: DeliveryAddressResponse[];
 };
 
@@ -32,4 +33,3 @@ export const listCustomers = async (): Promise<CustomerResponse[]> => {
   if (!response.ok) throw new Error(await readTextError(response));
   return (await response.json()) as CustomerResponse[];
 };
-

@@ -12,6 +12,7 @@ import { DocumentDrawerTotalsPanel } from './DocumentDrawerTotalsPanel';
 import { useDocumentDrawer } from './useDocumentDrawer';
 import { useDocumentDrawerEdit } from './useDocumentDrawerEdit';
 import { emitQuoteDocument, quoteDocumentPdfUrl } from '../services/quoteDetailsApi';
+import { documentManagementTheme } from '../documentManagementTheme';
 
 type Props = {
   open: boolean;
@@ -38,9 +39,12 @@ const toDrawerRow = (row: ProjectDocumentRow | null): DocumentDrawerRow | null =
 };
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className="px-5 py-4" style={{ borderBottom: '1px solid #e5e7eb' }}>
+  <div
+    className="px-5 py-4"
+    style={{ borderBottom: `1px solid ${documentManagementTheme.border}` }}
+  >
     <div className="flex items-center justify-between">
-      <div className="text-xs font-black uppercase tracking-wide" style={{ color: '#475569' }}>
+      <div className="text-xs font-black uppercase tracking-wide" style={{ color: documentManagementTheme.muted }}>
         {title}
       </div>
     </div>
@@ -180,22 +184,29 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf }: Props) => {
     <DocumentDrawerShell open={open} onClose={onClose}>
       <DocumentDrawerHeader
         title={title}
+        subtitle={row?.customerName ?? undefined}
         badge={effectiveTipo || row?.type || ''}
         subview={subview}
         onChangeSubview={setSubview}
         onClose={onClose}
       />
 
-      <div className="flex-1 min-h-0 overflow-y-auto bg-white p-2">
+      <div
+        className="flex-1 min-h-0 overflow-y-auto p-2"
+        style={{ background: documentManagementTheme.panelSoftBg }}
+      >
         {loading ? (
-          <div className="px-3 py-4 text-sm font-semibold" style={{ color: '#64748b' }}>
+          <div className="px-3 py-4 text-sm font-semibold" style={{ color: documentManagementTheme.muted }}>
             Cargando…
           </div>
         ) : null}
 
         {error ? (
           <div className="px-3 py-3">
-            <div className="rounded-xl border px-4 py-3 text-sm" style={{ borderColor: '#fecaca', background: '#fef2f2', color: '#991b1b' }}>
+            <div
+              className="rounded-xl border px-4 py-3 text-sm"
+              style={{ borderColor: '#fecaca', background: '#fff1f2', color: '#9f1239' }}
+            >
               {error}
             </div>
           </div>

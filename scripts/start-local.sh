@@ -26,6 +26,23 @@ if [ -f "$PROJECT_ROOT/.env.local" ]; then
   COMPOSE_ENV_ARGS=(--env-file "$PROJECT_ROOT/.env.local")
 fi
 
+# Cargar variables específicas del perfil actual si existen.
+PROFILE_ENV_FILE="$PROJECT_ROOT/infra/.env.${ACTIVE_PROFILE}"
+if [ -f "$PROFILE_ENV_FILE" ]; then
+  echo "📦 Cargando variables desde ${PROFILE_ENV_FILE#$PROJECT_ROOT/}..."
+  set -a
+  source "$PROFILE_ENV_FILE"
+  set +a
+fi
+
+# Compatibilidad con el perfil local, donde Jira vive en infra/.env.local.
+if [ "$ACTIVE_PROFILE" = "local" ] && [ -f "$PROJECT_ROOT/infra/.env.local" ]; then
+  echo "📦 Cargando variables desde infra/.env.local..."
+  set -a
+  source "$PROJECT_ROOT/infra/.env.local"
+  set +a
+fi
+
 # Configurar JAVA_HOME para usar OpenJDK 21 instalado mediante Homebrew
 export JAVA_HOME="/usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 

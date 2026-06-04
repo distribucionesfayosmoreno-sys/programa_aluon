@@ -14,6 +14,7 @@ interface AppDialogProps {
   children?: React.ReactNode;
   maxWidthClassName?: string;
   headerVariant?: 'bar' | 'none';
+  bodyClassName?: string;
 }
 
 const toneStyles: Record<DialogTone, { header: string; accent: string; iconBg: string }> = {
@@ -34,6 +35,7 @@ const AppDialog: React.FC<AppDialogProps> = ({
   children,
   maxWidthClassName = 'max-w-xl',
   headerVariant = 'bar',
+  bodyClassName = 'p-7',
 }) => {
   const styles = toneStyles[tone];
 
@@ -119,7 +121,7 @@ const AppDialog: React.FC<AppDialogProps> = ({
             </svg>
           </button>
         )}
-        <div className="flex-1 overflow-y-auto p-7">
+        <div className={`flex-1 overflow-y-auto ${bodyClassName}`}>
           {children}
         </div>
         {actions && (

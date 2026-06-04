@@ -1,5 +1,6 @@
 import type { ProjectDocumentKind } from '../ProjectManagement.types';
 import type { ProjectsTableFilters } from './ProjectsTableFilters.types';
+import { documentManagementTheme } from '../documentManagementTheme';
 
 type Props = {
   filters: ProjectsTableFilters;
@@ -10,7 +11,7 @@ type Props = {
 };
 
 const controlBase =
-  'rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100';
+  'rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2';
 
 export const ProjectsTableFiltersBar = ({
   filters,
@@ -21,7 +22,13 @@ export const ProjectsTableFiltersBar = ({
 }: Props) => (
   <div
     className="flex flex-col gap-2 md:flex-row md:items-end md:gap-3"
-    style={{ border: '1px solid #e5e7eb', background: '#ffffff', borderRadius: 16, padding: 12 }}
+    style={{
+      border: `1px solid ${documentManagementTheme.border}`,
+      background: documentManagementTheme.panelBg,
+      borderRadius: 18,
+      padding: 12,
+      boxShadow: documentManagementTheme.shadowSoft,
+    }}
   >
     <div className="flex-1 min-w-0">
       <label className="block text-[10px] font-black uppercase tracking-widest mb-1" style={{ color: '#6b7280' }}>
@@ -32,7 +39,13 @@ export const ProjectsTableFiltersBar = ({
         onChange={(e) => onChange({ ...filters, query: e.target.value })}
         placeholder="Cliente, número, tipo o estado..."
         className={`${controlBase} w-full`}
-        style={{ borderColor: '#e5e7eb', fontSize: 12, background: '#fff' }}
+        style={{
+          borderColor: documentManagementTheme.border,
+          fontSize: 12,
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+          boxShadow: '0 0 0 0 rgba(0,0,0,0)',
+        }}
       />
     </div>
 
@@ -44,7 +57,12 @@ export const ProjectsTableFiltersBar = ({
         value={filters.type}
         onChange={(e) => onChange({ ...filters, type: e.target.value as ProjectsTableFilters['type'] })}
         className={`${controlBase} w-full`}
-        style={{ borderColor: '#e5e7eb', fontSize: 12, background: '#fff' }}
+        style={{
+          borderColor: documentManagementTheme.border,
+          fontSize: 12,
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+        }}
       >
         <option value="ALL">Todos</option>
         {typeOptions.map((t) => (
@@ -61,7 +79,12 @@ export const ProjectsTableFiltersBar = ({
         value={filters.status}
         onChange={(e) => onChange({ ...filters, status: e.target.value })}
         className={`${controlBase} w-full`}
-        style={{ borderColor: '#e5e7eb', fontSize: 12, background: '#fff' }}
+        style={{
+          borderColor: documentManagementTheme.border,
+          fontSize: 12,
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+        }}
       >
         <option value="ALL">Todos</option>
         {statusOptions.map((s) => (
@@ -79,7 +102,12 @@ export const ProjectsTableFiltersBar = ({
         value={filters.dateFrom}
         onChange={(e) => onChange({ ...filters, dateFrom: e.target.value })}
         className={`${controlBase} w-full`}
-        style={{ borderColor: '#e5e7eb', fontSize: 12, background: '#fff' }}
+        style={{
+          borderColor: documentManagementTheme.border,
+          fontSize: 12,
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+        }}
       />
     </div>
 
@@ -92,7 +120,12 @@ export const ProjectsTableFiltersBar = ({
         value={filters.dateTo}
         onChange={(e) => onChange({ ...filters, dateTo: e.target.value })}
         className={`${controlBase} w-full`}
-        style={{ borderColor: '#e5e7eb', fontSize: 12, background: '#fff' }}
+        style={{
+          borderColor: documentManagementTheme.border,
+          fontSize: 12,
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+        }}
       />
     </div>
 
@@ -101,11 +134,16 @@ export const ProjectsTableFiltersBar = ({
         type="button"
         onClick={onReset}
         className="px-3 py-2 rounded-xl font-bold"
-        style={{ border: '1px solid #e5e7eb', background: '#fff', color: '#374151', fontSize: 12 }}
+        style={{
+          border: `1px solid ${documentManagementTheme.border}`,
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+          fontSize: 12,
+          boxShadow: documentManagementTheme.shadowSoft,
+        }}
       >
         Limpiar
       </button>
     </div>
   </div>
 );
-

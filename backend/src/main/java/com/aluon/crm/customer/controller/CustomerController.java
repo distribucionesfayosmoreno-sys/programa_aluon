@@ -36,13 +36,13 @@ public class CustomerController {
 
     @PostMapping
     public CustomerResponse create(@RequestBody CustomerRequest request) {
-        Customer created = customerService.save(customerMapper.toEntity(request, null));
+        Customer created = customerService.save(customerMapper.toEntity(request, null), request.password());
         return customerMapper.toResponse(created);
     }
 
     @PutMapping("/{id}")
     public CustomerResponse update(@PathVariable UUID id, @RequestBody CustomerRequest request) {
-        Customer updated = customerService.save(customerMapper.toEntity(request, id));
+        Customer updated = customerService.save(customerMapper.toEntity(request, id), request.password());
         return customerMapper.toResponse(updated);
     }
 

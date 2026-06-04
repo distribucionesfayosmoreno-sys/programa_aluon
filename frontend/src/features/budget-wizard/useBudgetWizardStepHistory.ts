@@ -12,6 +12,18 @@ const isStep = (value: string | null): value is Step =>
   || value === 'ACCIONES'
   || value === 'FINALIZADO';
 
+const isHistoryStateRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const readStepFromHistory = (): Step => {
+  const historyState = window.history.state;
+  if (isHistoryStateRecord(historyState) && isStep(typeof historyState.budgetWizardStep === 'string' ? historyState.budgetWizardStep : null)) {
+    return historyState.budgetWizardStep as Step;
+  }
+
+  return 'MODELO';
+};
+
 export const useBudgetWizardStepHistory = () => {
   const [step, setStepState] = useState<Step>('MODELO');
   const stepRef = useRef(step);
@@ -22,18 +34,12 @@ export const useBudgetWizardStepHistory = () => {
 
   useEffect(() => {
     const syncStepFromHistory = () => {
-      const params = new URLSearchParams(window.location.search);
-      const urlStep = params.get('step');
-      const parsedStep = isStep(urlStep) ? urlStep : 'MODELO';
-
-      if (!urlStep || !isStep(urlStep)) {
-        params.set('step', parsedStep);
-        window.history.replaceState(
-          { ...(window.history.state ?? {}), budgetWizardStep: parsedStep },
-          '',
-          `${window.location.pathname}?${params.toString()}${window.location.hash}`,
-        );
-      }
+      const parsedStep = readStepFromHistory();
+      window.history.replaceState(
+        { ...(isHistoryStateRecord(window.history.state) ? window.history.state : {}), budgetWizardStep: parsedStep },
+        '',
+        `${window.location.pathname}${window.location.hash}`,
+      );
 
       if (parsedStep !== stepRef.current) {
         setStepState(parsedStep);
@@ -50,12 +56,10 @@ export const useBudgetWizardStepHistory = () => {
       return;
     }
     setStepState(nextStep);
-    const params = new URLSearchParams(window.location.search);
-    params.set('step', nextStep);
     window.history.pushState(
-      { ...(window.history.state ?? {}), budgetWizardStep: nextStep },
+      { ...(isHistoryStateRecord(window.history.state) ? window.history.state : {}), budgetWizardStep: nextStep },
       '',
-      `${window.location.pathname}?${params.toString()}${window.location.hash}`,
+      `${window.location.pathname}${window.location.hash}`,
     );
   };
 

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import CustomerManagement from './features/customer-management/CustomerManagement';
-import CustomerOnboarding from './features/customer-onboarding/CustomerOnboarding';
 import Dashboard from './features/dashboard/Dashboard';
 import AdminManagement from './features/admin-management/AdminManagement';
 import WorkOrders from './features/work-orders/WorkOrders';
@@ -13,13 +12,27 @@ import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton'
 import { DoorVisualSimulation } from './features/door-visual-simulation/DoorVisualSimulation';
 import { ProjectManagement } from './features/project-management/ProjectManagement';
 import { onNavigateToModule } from './services/moduleNavigation';
+import { onBudgetWizardLaunch, startBudgetWizard } from './features/budget-wizard/services/budgetWizardLaunch';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [budgetWizardSessionKey, setBudgetWizardSessionKey] = useState(0);
 
   useEffect(() => onNavigateToModule(setActiveModule), []);
+  useEffect(() => onBudgetWizardLaunch(() => {
+    setBudgetWizardSessionKey(session => session + 1);
+  }), []);
+
+  const handleSelectModule = (module: ModuleKey) => {
+    if (module === 'presupuestos') {
+      startBudgetWizard();
+      setActiveModule('presupuestos');
+      return;
+    }
+    setActiveModule(module);
+  };
 
   const breadcrumb = useMemo(() => {
     switch (activeModule) {
@@ -31,8 +44,6 @@ const App = () => {
         return 'Gestión Documentos';
       case 'despiece':
         return 'Despiece';
-      case 'registro':
-        return 'Registro de Clientes';
       case 'presupuestos':
         return 'Presupuestos';
       case 'simulacion-puertas':
@@ -53,7 +64,7 @@ const App = () => {
     <div className="flex h-screen overflow-hidden font-sans" style={{ backgroundColor: '#f8f9fb' }}>
       <Sidebar
         activeModule={activeModule}
-        onSelect={setActiveModule}
+        onSelect={handleSelectModule}
         onNewOrder={() => {
           setActiveModule('ordenes');
           setOpenNewRequest(true);
@@ -147,8 +158,7 @@ const App = () => {
             {activeModule === 'clientes' && <CustomerManagement />}
             {activeModule === 'gestion-documentos' && <ProjectManagement />}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
-            {activeModule === 'presupuestos' && <BudgetWizard />}
-            {activeModule === 'registro' && <CustomerOnboarding />}
+            {activeModule === 'presupuestos' && <BudgetWizard key={budgetWizardSessionKey} />}
             {activeModule === 'inscripciones' && <RegistrationRequests />}
             {activeModule === 'ordenes' && (
               <WorkOrders

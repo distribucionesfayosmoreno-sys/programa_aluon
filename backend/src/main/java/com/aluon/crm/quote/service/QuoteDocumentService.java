@@ -2,7 +2,7 @@ package com.aluon.crm.quote.service;
 
 import com.aluon.crm.documents.model.DocumentPrefix;
 import com.aluon.crm.documents.model.DocumentSeries;
-import com.aluon.crm.documents.model.DocumentSeriesParser;
+import com.aluon.crm.documents.model.QuoteSeriesResolver;
 import com.aluon.crm.documents.service.DocumentNumberService;
 import com.aluon.crm.quote.dto.QuoteRequest;
 import com.aluon.crm.quote.model.QuoteDocument;
@@ -143,11 +143,7 @@ public class QuoteDocumentService {
     }
 
     private DocumentSeries resolveSeries(QuoteRequest quote) {
-        if (quote.getSeriesDate() != null && quote.getSeriesSequence() != null && quote.getSeriesSequence() > 0) {
-            return new DocumentSeries(quote.getSeriesDate(), quote.getSeriesSequence());
-        }
-        return DocumentSeriesParser.tryParse(quote.getQuoteNumber())
-                .orElseThrow(() -> new IllegalStateException("El presupuesto no tiene serie válida para enlazar documentos"));
+        return QuoteSeriesResolver.resolve(quote);
     }
 
     private String sha256Hex(byte[] bytes) {

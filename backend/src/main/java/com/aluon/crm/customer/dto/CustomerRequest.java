@@ -14,6 +14,7 @@ public record CustomerRequest(
         String numeroDocumento,
         String telefono,
         String email,
+        String password,
         String direccion,
         String cp,
         String poblacion,

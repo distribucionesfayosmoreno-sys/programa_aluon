@@ -1,13 +1,19 @@
 import type { DocumentDrawerMetaGridProps } from './DocumentDrawerMetaGrid.types';
+import { documentManagementTheme } from '../documentManagementTheme';
 
 const Card = ({ label, value }: { label: string; value: string }) => (
   <div className="col-span-3">
-    <div className="text-[10px] font-black uppercase tracking-wide mb-1" style={{ color: '#64748b' }}>
+    <div className="text-[10px] font-black uppercase tracking-wide mb-1" style={{ color: documentManagementTheme.muted }}>
       {label}
     </div>
     <div
       className="w-full rounded-md border px-2 py-1.5 text-xs font-semibold truncate"
-      style={{ borderColor: '#d1d5db', background: '#ffffff', color: '#0f172a' }}
+      style={{
+        borderColor: documentManagementTheme.border,
+        background: documentManagementTheme.panelBg,
+        color: documentManagementTheme.text,
+        boxShadow: documentManagementTheme.shadowSoft,
+      }}
       title={value}
     >
       {value || '—'}
@@ -18,16 +24,16 @@ const Card = ({ label, value }: { label: string; value: string }) => (
 const InputCard = ({
   label,
   value,
-  onChange,
-  placeholder,
-}: {
+    onChange,
+    placeholder,
+  }: {
   label: string;
   value: string;
   onChange: (next: string) => void;
   placeholder?: string;
 }) => (
   <div className="col-span-3">
-    <div className="text-[10px] font-black uppercase tracking-wide mb-1" style={{ color: '#64748b' }}>
+    <div className="text-[10px] font-black uppercase tracking-wide mb-1" style={{ color: documentManagementTheme.muted }}>
       {label}
     </div>
     <input
@@ -35,15 +41,24 @@ const InputCard = ({
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
       className="w-full rounded-md border px-2 py-1.5 text-xs font-semibold"
-      style={{ borderColor: '#d1d5db', background: '#ffffff', color: '#0f172a' }}
+      style={{
+        borderColor: documentManagementTheme.border,
+        background: documentManagementTheme.panelBg,
+        color: documentManagementTheme.text,
+        boxShadow: documentManagementTheme.shadowSoft,
+      }}
     />
   </div>
 );
 
 export const DocumentDrawerMetaGrid = ({ mode, values, onChange }: DocumentDrawerMetaGridProps) => (
   <div
-    className="grid grid-cols-12 gap-2 mb-2 p-2 border rounded-lg"
-    style={{ borderColor: '#bfdbfe', background: '#f8fafc' }}
+    className="grid grid-cols-12 gap-2 mb-2 p-3 border rounded-2xl"
+    style={{
+      borderColor: '#dbe4f0',
+      background: documentManagementTheme.panelSoftBg,
+      boxShadow: documentManagementTheme.shadowSoft,
+    }}
   >
     {mode === 'edit' && onChange ? (
       <>

@@ -1,6 +1,7 @@
 package com.aluon.crm.customer.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import com.aluon.crm.customer.repository.CustomerRepository;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<Customer> findAll() {
         return customerRepository.findAllByActiveTrue();
@@ -39,10 +41,27 @@ public class CustomerService {
     }
 
     public Customer save(Customer customer) {
+        return save(customer, null);
+    }
+
+    public Customer save(Customer customer, String rawPassword) {
         Objects.requireNonNull(customer, "customer");
         if (customer.getId() == null) {
             customer.setActive(true);
         }
+
+        String normalizedPassword = rawPassword == null ? "" : rawPassword.trim();
+        if (!normalizedPassword.isBlank()) {
+            if (normalizedPassword.length() < 8) {
+                throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres.");
+            }
+            customer.setPasswordHash(passwordEncoder.encode(normalizedPassword));
+        } else if (customer.getId() != null) {
+            Customer existing = customerRepository.findById(customer.getId())
+                    .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+            customer.setPasswordHash(existing.getPasswordHash());
+        }
+
         // Asegurar la relación bidireccional en las direcciones al guardar
         if (customer.getDireccionesEntrega() != null) {
             customer.getDireccionesEntrega().forEach(dir -> dir.setCustomer(customer));

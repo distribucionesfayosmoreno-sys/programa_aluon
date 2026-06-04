@@ -271,6 +271,8 @@ export const sanitizeCustomer = (
     numeroDocumento: sanitize(customer.numeroDocumento),
     telefono: sanitize(customer.telefono),
     email: sanitize(customer.email),
+    password: '',
+    hasPassword: customer.hasPassword ?? false,
     direccion: sanitize(customer.direccion),
     cp: sanitize(customer.cp),
     poblacion: sanitize(customer.poblacion),

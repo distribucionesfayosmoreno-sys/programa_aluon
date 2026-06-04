@@ -15,56 +15,10 @@ import {
   validatePhone,
 } from './customerModalValidators';
 
-const isLocalUiSession = (): boolean => {
-  const envName = (import.meta.env.VITE_APP_ENV_NAME ?? import.meta.env.MODE ?? '').toLowerCase();
-  if (envName === 'local') return true;
-  if (envName !== 'development') return false;
-  if (typeof window === 'undefined') return false;
-  const host = window.location.hostname.toLowerCase();
-  return host === 'localhost' || host === '127.0.0.1';
-};
-
-const padLeft = (value: string, length: number, padChar: string): string =>
-  value.length >= length ? value : `${padChar.repeat(length - value.length)}${value}`;
-
-const buildValidDniFromNumber = (value: number): string => {
-  const digits = padLeft(String(Math.abs(Math.trunc(value)) % 100000000), 8, '0');
-  const letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
-  const idx = Number(digits) % 23;
-  return `${digits}${letters[idx]}`;
-};
-
-const createLocalPrefillCustomer = (): Customer => {
-  const now = Date.now();
-  const suffix = padLeft(String(now % 10000), 4, '0');
-  const dni = buildValidDniFromNumber(now);
-
-  return {
-    ...EMPTY_CUSTOMER,
-    nombreComercial: `PRUEBA CLIENTE ${suffix}`,
-    razonSocial: `PRUEBA CLIENTE ${suffix} S.L.`,
-    personaContacto: 'RODRIGO',
-    tarifa: 'GENERAL',
-    tipoDocumento: 'DNI',
-    numeroDocumento: dni,
-    telefono: '612345678',
-    email: `prueba+${suffix}@example.com`,
-    direccion: 'CALLE PRUEBA 1',
-    cp: '',
-    poblacion: '',
-    provincia: '',
-    pais: 'ESPAÑA',
-    iban: '',
-    formaPago: 'TRANSFERENCIA',
-    diasVencimiento: 30,
-    remanente: 0,
-    direccionesEntrega: [],
-  };
-};
-
 export const EMPTY_CUSTOMER: Customer = {
   nombreComercial: '', razonSocial: '', personaContacto: '',
   tarifa: '', tipoDocumento: 'CIF', numeroDocumento: '', telefono: '', email: '',
+  password: '', hasPassword: false,
   direccion: '', cp: '', poblacion: '', provincia: '', pais: 'ESPAÑA',
   iban: '', formaPago: '', diasVencimiento: 0, remanente: 0, direccionesEntrega: [],
 };
@@ -72,6 +26,29 @@ export const EMPTY_CUSTOMER: Customer = {
 export const EMPTY_ADDR: DeliveryAddress = {
   nombreAlias: '', direccion: '', cp: '', poblacion: '', provincia: '', telefono: '', contacto: '',
 };
+
+const createBlankCustomer = (): Customer => ({
+  nombreComercial: '',
+  razonSocial: '',
+  personaContacto: '',
+  tarifa: '',
+  tipoDocumento: '' as Customer['tipoDocumento'],
+  numeroDocumento: '',
+  telefono: '',
+  email: '',
+  password: '',
+  hasPassword: false,
+  direccion: '',
+  cp: '',
+  poblacion: '',
+  provincia: '',
+  pais: '',
+  iban: '',
+  formaPago: '',
+  diasVencimiento: 0,
+  remanente: 0,
+  direccionesEntrega: [],
+});
 
 interface UseCustomerModalParams {
   customer?: Customer;
@@ -82,7 +59,7 @@ interface UseCustomerModalParams {
 export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModalParams) => {
   const [tab, setTab] = useState<TabKey>('GENERAL');
   const [form, setForm] = useState<Customer>(() => {
-    if (!customer?.id && isLocalUiSession()) return createLocalPrefillCustomer();
+    if (!customer?.id) return createBlankCustomer();
     return sanitizeCustomer(customer, EMPTY_CUSTOMER);
   });
   const [newAddr, setNewAddr] = useState<DeliveryAddress>(EMPTY_ADDR);
@@ -93,9 +70,25 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
   const [validationFocusTargetId, setValidationFocusTargetId] = useState<string>('');
   const lastPostalLookupRef = useRef<string>('');
 
+  useEffect(() => {
+    if (!customer?.id) {
+      setForm(createBlankCustomer());
+      setNewAddr(EMPTY_ADDR);
+      setTab('GENERAL');
+      return;
+    }
+
+    setForm(sanitizeCustomer(customer, EMPTY_CUSTOMER));
+    setNewAddr(EMPTY_ADDR);
+    setTab('GENERAL');
+  }, [customer]);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm(p => ({ ...p, [name]: value.toUpperCase() }));
+    setForm(p => ({
+      ...p,
+      [name]: name === 'password' ? value : value.toUpperCase(),
+    }));
   };
 
   const handleAddrField = (name: keyof DeliveryAddress, value: string) =>

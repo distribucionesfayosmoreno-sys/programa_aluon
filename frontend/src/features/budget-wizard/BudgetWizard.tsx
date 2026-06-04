@@ -108,7 +108,10 @@ export const BudgetWizard = () => {
               }}
               onDeliveryAddressChange={wizard.setSelectedDeliveryAddressId}
               onBack={() => wizard.setStep('MEDIDAS')}
-              onNext={() => wizard.setStep('RESUMEN')}
+              onNext={() => {
+                const hasPendingDoor = Boolean(wizard.itemDraft) || wizard.savedItems.length > 0;
+                wizard.setStep(hasPendingDoor ? 'RESUMEN' : 'MODELO');
+              }}
             />
           )}
 

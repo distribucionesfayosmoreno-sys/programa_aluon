@@ -16,6 +16,7 @@ public record CustomerResponse(
         String numeroDocumento,
         String telefono,
         String email,
+        boolean hasPassword,
         String direccion,
         String cp,
         String poblacion,

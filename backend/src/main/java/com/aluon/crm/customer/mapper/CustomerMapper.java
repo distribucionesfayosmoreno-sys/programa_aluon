@@ -33,6 +33,7 @@ public class CustomerMapper {
                 customer.getNumeroDocumento(),
                 customer.getTelefono(),
                 customer.getEmail(),
+                customer.getPasswordHash() != null && !customer.getPasswordHash().isBlank(),
                 customer.getDireccion(),
                 customer.getCp(),
                 customer.getPoblacion(),

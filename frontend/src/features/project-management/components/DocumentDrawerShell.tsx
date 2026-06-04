@@ -1,4 +1,5 @@
 import React from 'react';
+import { documentManagementTheme } from '../documentManagementTheme';
 
 type Props = {
   open: boolean;
@@ -33,26 +34,27 @@ export const DocumentDrawerShell = ({ open, onClose, children }: Props) => {
           if (e.target === e.currentTarget) onClose();
         }}
         style={{
-          background: 'rgba(17,24,39,0.55)',
-          backdropFilter: 'blur(6px)',
+          background: 'rgba(15,23,42,0.62)',
+          backdropFilter: 'blur(10px)',
           opacity: entered ? 1 : 0,
           transition: 'opacity 220ms ease-out',
         }}
       />
 
       <div
-        className="relative m-2 md:m-3 w-full h-full flex flex-col overflow-hidden"
+        className="relative w-full h-full flex flex-col overflow-hidden"
         style={{
-          background: '#ffffff',
+          background: `linear-gradient(180deg, ${documentManagementTheme.panelBg} 0%, ${documentManagementTheme.panelSoftBg} 100%)`,
           width: '100%',
           maxWidth: 'none',
           height: '100%',
-          border: '1px solid #e5e7eb',
-          borderRadius: 14,
-          boxShadow: '0 30px 80px rgba(15,23,42,0.28)',
+          border: `1px solid ${documentManagementTheme.border}`,
+          borderRadius: 20,
+          boxShadow: '0 36px 90px rgba(15,23,42,0.30)',
           transform: entered ? 'translateY(0)' : 'translateY(4px)',
           opacity: entered ? 1 : 0,
           transition: 'transform 220ms ease-out, opacity 220ms ease-out',
+          overflow: 'hidden',
         }}
         onClick={(e) => e.stopPropagation()}
       >

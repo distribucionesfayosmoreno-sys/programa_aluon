@@ -21,6 +21,8 @@ export interface Customer {
   numeroDocumento: string;
   telefono: string;
   email: string;
+  password?: string;
+  hasPassword?: boolean;
   direccion: string;
   cp: string;
   poblacion: string;

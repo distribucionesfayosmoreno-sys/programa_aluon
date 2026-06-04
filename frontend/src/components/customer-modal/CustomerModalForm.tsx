@@ -52,6 +52,8 @@ export const CustomerModalForm = ({
   submitError,
   onSubmit,
 }: Props) => {
+  const [showPassword, setShowPassword] = React.useState(false);
+
   return (
     <form id="customer-modal-form" onSubmit={onSubmit} className="space-y-4">
       {submitError ? (
@@ -101,6 +103,7 @@ export const CustomerModalForm = ({
           <div className="md:col-span-2">
             <FL>Tipo de Documento</FL>
             <select name="tipoDocumento" value={form.tipoDocumento} onChange={handleChange} className="field">
+              <option value="">Selecciona…</option>
               {['CIF', 'DNI', 'NIE', 'PASAPORTE'].map(v => (
                 <option key={v}>{v}</option>
               ))}
@@ -179,6 +182,37 @@ export const CustomerModalForm = ({
               aria-invalid={showEmailError}
             />
             <ValidationHint status={showEmailError ? 'error' : showEmailOk ? 'ok' : 'neutral'} hint={emailPatternHint} />
+          </div>
+          <div className="md:col-span-2">
+            <div className="flex items-center justify-between gap-3">
+              <FL>Contraseña</FL>
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: form.hasPassword ? '#16a34a' : '#94a3b8' }}>
+                {form.hasPassword ? 'Configurada' : 'Sin contraseña'}
+              </span>
+            </div>
+            <div className="relative">
+              <FI
+                id="customer-password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={form.password ?? ''}
+                onChange={handleChange}
+                placeholder={form.hasPassword ? 'Deja vacío para mantenerla' : 'Escribe una nueva contraseña'}
+                autoComplete="new-password"
+                style={{ paddingRight: 84 }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(prev => !prev)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg px-2.5 py-1 text-[9px] font-semibold"
+                style={{ background: '#f8fafc', color: '#475569', border: '1px solid #e2e8f0' }}
+              >
+                {showPassword ? 'Ocultar' : 'Ver'}
+              </button>
+            </div>
+            <div className="mt-1 text-[10px] font-semibold uppercase tracking-wider" style={{ color: '#94a3b8' }}>
+              Se guarda cifrada. Si la dejas en blanco, no se modifica.
+            </div>
           </div>
           <div className="md:col-span-2">
             <FL>Tarifa</FL>

@@ -1,3 +1,5 @@
+import { documentManagementTheme } from '../documentManagementTheme';
+
 type FooterDocType = 'PEDIDO' | 'ALBARAN' | 'FACTURA';
 
 type Props = {
@@ -18,9 +20,9 @@ type Props = {
 };
 
 const typeColors: Record<FooterDocType, string> = {
-  PEDIDO: 'bg-orange-50 text-orange-700 border-orange-200 hover:border-orange-500 hover:bg-orange-100',
-  ALBARAN: 'bg-purple-50 text-purple-700 border-purple-200 hover:border-purple-500 hover:bg-purple-100',
-  FACTURA: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-500 hover:bg-emerald-100',
+  PEDIDO: 'bg-amber-50 text-amber-700 border-amber-200 hover:border-amber-400 hover:bg-amber-100',
+  ALBARAN: 'bg-violet-50 text-violet-700 border-violet-200 hover:border-violet-400 hover:bg-violet-100',
+  FACTURA: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-100',
 };
 
 const labelColors: Record<FooterDocType, string> = {
@@ -46,12 +48,22 @@ export const DocumentDrawerFooter = ({
   onNavigateRelated,
 }: Props) => (
   <div
-    className="px-3 py-1 border-t border-gray-200 flex gap-2 items-center justify-between shrink-0 z-30 relative h-12"
-    style={{ background: '#ffffff', borderTop: '1px solid #e5e7eb' }}
+    className="px-3 py-1 border-t flex gap-2 items-center justify-between shrink-0 z-30 relative h-12"
+    style={{
+      background: documentManagementTheme.panelSoftBg,
+      borderTop: `1px solid ${documentManagementTheme.border}`,
+    }}
   >
     <div className="flex gap-2 items-center flex-1 min-w-0 overflow-hidden">
       {relatedCodesByTipo.size > 0 ? (
-        <div className="flex gap-2 bg-white px-2 py-1 rounded-md border border-gray-200 shadow-sm overflow-x-auto max-w-full">
+        <div
+          className="flex gap-2 px-2 py-1 rounded-md border overflow-x-auto max-w-full"
+          style={{
+            background: documentManagementTheme.panelBg,
+            borderColor: documentManagementTheme.border,
+            boxShadow: documentManagementTheme.shadowSoft,
+          }}
+        >
           {(Array.from(relatedCodesByTipo.keys()) as FooterDocType[]).map((tipo) => {
             const code = relatedCodesByTipo.get(tipo);
             if (!code) return null;
@@ -75,9 +87,10 @@ export const DocumentDrawerFooter = ({
 
     <div className="flex gap-2 items-center pr-2">
       {saveError ? (
-        <div className="text-[11px] font-bold px-2 py-1 rounded-md border shrink-0"
-             style={{ borderColor: '#fecaca', background: '#fef2f2', color: '#991b1b' }}
-             title={saveError}
+        <div
+          className="text-[11px] font-bold px-2 py-1 rounded-md border shrink-0"
+          style={{ borderColor: '#fecaca', background: '#fff1f2', color: '#9f1239' }}
+          title={saveError}
         >
           Error al guardar
         </div>
@@ -87,7 +100,13 @@ export const DocumentDrawerFooter = ({
         type="button"
         onClick={onPreview}
         disabled={isConverting || isSaving}
-        className="bg-white text-gray-700 px-4 py-1.5 rounded-md hover:bg-gray-50 transition border border-gray-200 shadow-sm text-xs font-bold flex items-center gap-1.5 h-9 disabled:opacity-50"
+        className="text-gray-700 px-4 py-1.5 rounded-md transition border text-xs font-bold flex items-center gap-1.5 h-9 disabled:opacity-50"
+        style={{
+          background: documentManagementTheme.panelBg,
+          borderColor: documentManagementTheme.border,
+          color: documentManagementTheme.text,
+          boxShadow: documentManagementTheme.shadowSoft,
+        }}
       >
         <span className="text-gray-400 opacity-70">📄</span> Previsualizar
       </button>
@@ -97,7 +116,13 @@ export const DocumentDrawerFooter = ({
           type="button"
           onClick={onEdit}
           disabled={isConverting || isSaving}
-          className="bg-white text-gray-700 px-4 py-1.5 rounded-md hover:bg-gray-50 transition border border-gray-200 shadow-sm text-xs font-bold h-9 disabled:opacity-50"
+          className="px-4 py-1.5 rounded-md transition border text-xs font-bold h-9 disabled:opacity-50"
+          style={{
+            background: documentManagementTheme.panelBg,
+            borderColor: documentManagementTheme.border,
+            color: documentManagementTheme.text,
+            boxShadow: documentManagementTheme.shadowSoft,
+          }}
         >
           Editar
         </button>
@@ -107,7 +132,7 @@ export const DocumentDrawerFooter = ({
           onClick={onSave}
           disabled={isConverting || isSaving}
           className="text-white px-4 py-1.5 rounded-md transition flex items-center gap-2 border shadow-sm text-xs font-bold h-9 disabled:opacity-50"
-          style={{ background: '#2563eb', borderColor: '#1d4ed8' }}
+          style={{ background: documentManagementTheme.accent, borderColor: '#db2777' }}
           title="Guardar cambios"
         >
           <span className="opacity-90">💾</span> Guardar
@@ -120,7 +145,7 @@ export const DocumentDrawerFooter = ({
           onClick={() => onEmitOpen(primaryEmitTarget)}
           disabled={isConverting || isSaving || !canEmit(primaryEmitTarget)}
           className="text-white px-4 py-1.5 rounded-md transition flex items-center gap-2 border shadow-sm text-xs font-bold h-9 disabled:opacity-50"
-          style={{ background: '#2563eb', borderColor: '#1d4ed8' }}
+          style={{ background: documentManagementTheme.accent, borderColor: '#db2777' }}
           title={
             !canEmit(primaryEmitTarget)
               ? (primaryEmitTarget === 'ALBARAN' ? 'Primero emite el Pedido' : 'Primero emite el Albarán')
@@ -137,7 +162,13 @@ export const DocumentDrawerFooter = ({
           type="button"
           onClick={onCancelEdit}
           disabled={isSaving}
-          className="bg-white text-gray-700 px-4 py-1.5 rounded-md hover:bg-gray-50 transition border border-gray-200 shadow-sm text-xs font-bold h-9 disabled:opacity-50"
+          className="px-4 py-1.5 rounded-md transition border text-xs font-bold h-9 disabled:opacity-50"
+          style={{
+            background: documentManagementTheme.panelBg,
+            borderColor: documentManagementTheme.border,
+            color: documentManagementTheme.text,
+            boxShadow: documentManagementTheme.shadowSoft,
+          }}
         >
           Cancelar edición
         </button>
@@ -147,7 +178,13 @@ export const DocumentDrawerFooter = ({
         type="button"
         onClick={onCancel}
         disabled={isSaving}
-        className="bg-white text-gray-700 px-4 py-1.5 rounded-md hover:bg-gray-100 text-xs font-bold border border-gray-300 transition-colors h-9 disabled:opacity-50"
+        className="px-4 py-1.5 rounded-md text-xs font-bold border transition-colors h-9 disabled:opacity-50"
+        style={{
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+          borderColor: documentManagementTheme.border,
+          boxShadow: documentManagementTheme.shadowSoft,
+        }}
       >
         Cancelar
       </button>

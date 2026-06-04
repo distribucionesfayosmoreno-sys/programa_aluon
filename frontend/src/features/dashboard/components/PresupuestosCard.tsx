@@ -1,6 +1,6 @@
 import { DashboardCard } from './DashboardCard';
 import { dashboardTheme } from '../dashboardTheme';
-import { navigateToModule } from '../../../services/moduleNavigation';
+import { startBudgetWizard } from '../../budget-wizard/services/budgetWizardLaunch';
 
 type Count = { id: string; label: string; value: number };
 type Recent = { id: string; label: string; estado: string; total: number; fechaIso: string };
@@ -28,7 +28,7 @@ export const PresupuestosCard = ({ counts, recent, formatCurrency }: Props) => {
         <button
           type="button"
           className="btn-ghost px-3 py-2 text-[10px] font-extrabold uppercase tracking-wider"
-          onClick={() => navigateToModule('presupuestos')}
+          onClick={startBudgetWizard}
         >
           Ver módulo
         </button>

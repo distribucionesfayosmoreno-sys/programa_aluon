@@ -32,7 +32,7 @@ import com.aluon.crm.quote.model.QuoteStatus;
 import com.aluon.crm.quote.model.QuoteValidationMode;
 import com.aluon.crm.documents.model.DocumentPrefix;
 import com.aluon.crm.documents.model.DocumentSeries;
-import com.aluon.crm.documents.model.DocumentSeriesParser;
+import com.aluon.crm.documents.model.QuoteSeriesResolver;
 import com.aluon.crm.documents.service.DocumentNumberService;
 
 
@@ -203,7 +203,7 @@ public class QuoteService {
         QuoteRequest quote = Objects.requireNonNull(quoteRequestRepository.findById(quoteId)
                 .orElseThrow(() -> new IllegalArgumentException("Presupuesto no encontrado")), "quote");
 
-        DocumentSeries series = resolveSeries(quote);
+        DocumentSeries series = QuoteSeriesResolver.resolve(quote);
         String seriesKey = series.date().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE)
                 + "-" + String.format("%04d", series.sequence());
 
@@ -215,14 +215,6 @@ public class QuoteService {
                 series.format(DocumentPrefix.FRA),
                 series.format(DocumentPrefix.ABO)
         );
-    }
-
-    private DocumentSeries resolveSeries(QuoteRequest quote) {
-        if (quote.getSeriesDate() != null && quote.getSeriesSequence() != null && quote.getSeriesSequence() > 0) {
-            return new DocumentSeries(quote.getSeriesDate(), quote.getSeriesSequence());
-        }
-        return DocumentSeriesParser.tryParse(quote.getQuoteNumber())
-                .orElseThrow(() -> new IllegalStateException("El presupuesto no tiene serie válida para enlazar documentos"));
     }
 
     private QuoteItem toQuoteItem(QuoteRequest quote, Tariff tariff, QuoteItemRequest item) {

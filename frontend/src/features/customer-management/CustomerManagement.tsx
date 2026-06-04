@@ -4,8 +4,8 @@ import CustomerModal from '../../components/CustomerModal';
 import ConfirmDialog from '../../components/feedback/ConfirmDialog';
 import ErrorDialog from '../../components/feedback/ErrorDialog';
 import CustomerManagementEmptyState from './CustomerManagementEmptyState';
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import { openBudgetWizardForCustomer } from '../budget-wizard/services/budgetWizardLaunch';
+import { Customer360Modal } from '../customer-360/Customer360Modal';
 
 /** Genera un color de avatar determinístico a partir del texto */
 const avatarColor = (name: string): string => {
@@ -24,8 +24,6 @@ const initials = (name: string): string => {
   if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? '?';
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
-
-// ─── Micro components ─────────────────────────────────────────────────────────
 
 /** Avatar circular con iniciales */
 const Avatar = ({ name }: { name: string }) => {
@@ -63,7 +61,6 @@ const TarifaBadge = ({ value }: { value: string }) => {
   );
 };
 
-/** Badge de forma de pago */
 const PagoBadge = ({ value }: { value: string }) => {
   if (!value) return <span style={{ color: '#d1d5db', fontSize: 11 }}>—</span>;
   return (
@@ -116,6 +113,7 @@ const CustomerManagement: React.FC = () => {
   const [confirmDelete, setConfirmDelete] = useState<Customer | null>(null);
   const [deleteError, setDeleteError] = useState<{ title: string; description: string; detail?: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [visionCustomer, setVisionCustomer] = useState<Customer | null>(null);
 
   const visibleCustomers = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
@@ -144,6 +142,16 @@ const CustomerManagement: React.FC = () => {
 
   const handleEdit = (c: Customer) => { setSelectedCustomer(c); setIsModalOpen(true); };
   const handleCreate = () => { setSelectedCustomer(undefined); setIsModalOpen(true); };
+  const handleOpenBudget = (customer: Customer) => {
+    if (!customer.id) return;
+    setIsModalOpen(false);
+    openBudgetWizardForCustomer(customer);
+  };
+  const handleOpenVision360 = (customer: Customer) => {
+    if (!customer.id) return;
+    setIsModalOpen(false);
+    setVisionCustomer(customer);
+  };
 
   const handleAskDelete = useCallback((customer: Customer) => {
     setConfirmDelete(customer);
@@ -286,16 +294,25 @@ const CustomerManagement: React.FC = () => {
                       <tr
                         key={id}
                         className="group transition-colors duration-100"
+                        role="button"
+                        tabIndex={0}
                         style={{
                           borderBottom: '1px solid #f3f4f6',
                           background: isChecked ? 'var(--accent-soft)' : 'transparent',
-                          cursor: 'default',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => handleEdit(c)}
+                        onKeyDown={event => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            handleEdit(c);
+                          }
                         }}
                         onMouseEnter={e => { if (!isChecked) e.currentTarget.style.background = '#f9fafb'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = isChecked ? 'var(--accent-soft)' : 'transparent'; }}
                       >
                         {/* Checkbox */}
-                        <td className="px-3 py-2">
+                        <td className="px-3 py-2" onClick={event => event.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={isChecked}
@@ -311,11 +328,7 @@ const CustomerManagement: React.FC = () => {
                             {isChecked && (
                               <div className="w-0.5 h-4 rounded-full flex-shrink-0" style={{ background: 'var(--accent)' }} />
                             )}
-                            <span
-                              className="font-semibold hover:text-brand cursor-pointer transition-colors"
-                              style={{ color: '#111827' }}
-                              onClick={() => handleEdit(c)}
-                            >
+                            <span className="font-semibold transition-colors" style={{ color: '#111827' }}>
                               {c.nombreComercial || '—'}
                             </span>
                           </div>
@@ -327,7 +340,7 @@ const CustomerManagement: React.FC = () => {
                         </td>
 
                         {/* Contacto con avatar */}
-                        <td className="px-3 py-2.5">
+                        <td className="px-3 py-2.5" onClick={event => event.stopPropagation()}>
                           {c.personaContacto ? (
                             <div className="flex items-center gap-1.5">
                               <Avatar name={c.personaContacto} />
@@ -339,12 +352,12 @@ const CustomerManagement: React.FC = () => {
                         </td>
 
                         {/* Tarifa */}
-                        <td className="px-3 py-2.5">
+                        <td className="px-3 py-2.5" onClick={event => event.stopPropagation()}>
                           <TarifaBadge value={c.tarifa} />
                         </td>
 
                         {/* Forma de pago */}
-                        <td className="px-3 py-2.5">
+                        <td className="px-3 py-2.5" onClick={event => event.stopPropagation()}>
                           <PagoBadge value={c.formaPago} />
                         </td>
 
@@ -362,15 +375,15 @@ const CustomerManagement: React.FC = () => {
                         </td>
 
                         {/* Email */}
-                        <td className="px-3 py-2.5" style={{ color: '#6b7280', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td className="px-3 py-2.5" style={{ color: '#6b7280', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} onClick={event => event.stopPropagation()}>
                           {c.email
-                            ? <a href={`mailto:${c.email.toLowerCase()}`} className="hover:text-brand transition-colors" style={{ color: '#6b7280' }}>{c.email.toLowerCase()}</a>
+                            ? <a href={`mailto:${c.email.toLowerCase()}`} className="hover:text-brand transition-colors" style={{ color: '#6b7280' }} onClick={event => event.stopPropagation()}>{c.email.toLowerCase()}</a>
                             : <span style={{ color: '#d1d5db' }}>—</span>
                           }
                         </td>
 
                         {/* Actions */}
-                        <td className="px-2 py-2.5 text-right">
+                        <td className="px-2 py-2.5 text-right" onClick={event => event.stopPropagation()}>
                           <div className="flex items-center justify-end gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                             <button
                               onClick={() => handleEdit(c)}
@@ -455,8 +468,15 @@ const CustomerManagement: React.FC = () => {
           customer={selectedCustomer}
           onClose={() => setIsModalOpen(false)}
           onSave={saveCustomer}
+          onOpenBudget={handleOpenBudget}
+          onOpenVision360={handleOpenVision360}
         />
       )}
+      <Customer360Modal
+        open={Boolean(visionCustomer)}
+        customer={visionCustomer}
+        onClose={() => setVisionCustomer(null)}
+      />
       <ConfirmDialog
         open={Boolean(confirmDelete)}
         title="Eliminar cliente"

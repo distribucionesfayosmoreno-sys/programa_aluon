@@ -7,7 +7,11 @@ import type {
   QuoteItemDraft,
 } from './BudgetWizard.types';
 import { getCatalogChildrenByFamily, getCatalogFamilies } from './services/catalogApi';
-import { consumeBudgetWizardPrefillCustomerId } from './services/budgetWizardPrefill';
+import {
+  consumeBudgetWizardPrefillCustomer,
+  peekBudgetWizardPrefillCustomer,
+  readBudgetWizardPrefillCustomer,
+} from './services/budgetWizardPrefill';
 import { listCustomers, type CustomerResponse, type DeliveryAddressResponse } from './services/customersApi';
 import { projectStore } from '../project-management/services/projectStore';
 import { createQuote, sendQuote } from './services/quotesApi';
@@ -24,7 +28,37 @@ const defaultBooleans = {
 
 const isHexColor = (value: string): value is ColorHex => /^#[0-9a-fA-F]{6}$/.test(value);
 
+const toPrefillCustomerResponse = (
+  prefill: {
+    customerId: string;
+    nombreComercial: string;
+    razonSocial: string;
+    email: string;
+    telefono: string;
+    tarifa: string;
+    direccionesEntrega: Array<{
+      id: string;
+      nombreAlias: string;
+      direccion: string;
+      cp: string;
+      poblacion: string;
+      provincia: string;
+      telefono: string;
+      contacto: string;
+    }>;
+  },
+): CustomerResponse => ({
+  id: prefill.customerId,
+  nombreComercial: prefill.nombreComercial || null,
+  razonSocial: prefill.razonSocial || null,
+  email: prefill.email || null,
+  telefono: prefill.telefono || null,
+  tarifa: prefill.tarifa || null,
+  direccionesEntrega: prefill.direccionesEntrega,
+});
+
 export const useBudgetWizard = () => {
+  const initialPrefill = peekBudgetWizardPrefillCustomer();
   const { step, setStep } = useBudgetWizardStepHistory();
   const [families, setFamilies] = useState<CatalogFamily[]>([]);
   const [children, setChildren] = useState<CatalogFamilyChild[]>([]);
@@ -41,9 +75,15 @@ export const useBudgetWizard = () => {
   const [bisagras, setBisagras] = useState(defaultBooleans.bisagras);
   const [porteroAutomatico, setPorteroAutomatico] = useState(defaultBooleans.porteroAutomatico);
 
-  const [customers, setCustomers] = useState<CustomerResponse[]>([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [selectedDeliveryAddressId, setSelectedDeliveryAddressId] = useState('');
+  const [prefillCustomer] = useState<CustomerResponse | null>(() => {
+    const prefill = initialPrefill ?? readBudgetWizardPrefillCustomer();
+    return prefill ? toPrefillCustomerResponse(prefill) : null;
+  });
+  const [customers, setCustomers] = useState<CustomerResponse[]>(() => (prefillCustomer ? [prefillCustomer] : []));
+  const [selectedCustomerId, setSelectedCustomerId] = useState(() => prefillCustomer?.id ?? '');
+  const [selectedDeliveryAddressId, setSelectedDeliveryAddressId] = useState(
+    () => prefillCustomer?.direccionesEntrega[0]?.id ?? '',
+  );
   const [savedItems, setSavedItems] = useState<QuoteItemDraft[]>([]);
   const [submittedItems, setSubmittedItems] = useState<QuoteItemDraft[]>([]);
 
@@ -72,6 +112,19 @@ export const useBudgetWizard = () => {
     () => deliveryAddresses.find(address => address.id === selectedDeliveryAddressId) ?? null,
     [deliveryAddresses, selectedDeliveryAddressId],
   );
+
+  useEffect(() => {
+    consumeBudgetWizardPrefillCustomer();
+  }, []);
+
+  useEffect(() => {
+    if (!prefillCustomer) {
+      return;
+    }
+
+    setSelectedCustomerId(current => current || prefillCustomer.id);
+    setSelectedDeliveryAddressId(current => current || prefillCustomer.direccionesEntrega[0]?.id || '');
+  }, [prefillCustomer]);
 
   const itemDraft = useMemo<QuoteItemDraft | null>(() => {
     if (!selectedFamily || !selectedChild || !selectedFamilyQuoteDoorModel) {
@@ -154,7 +207,11 @@ export const useBudgetWizard = () => {
     setError('');
     try {
       const data = await listCustomers();
-      setCustomers(data);
+      setCustomers(() => {
+        if (!prefillCustomer) return data;
+        const exists = data.some(customer => customer.id === prefillCustomer.id);
+        return exists ? data : [prefillCustomer, ...data];
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar clientes');
     } finally {
@@ -209,9 +266,9 @@ export const useBudgetWizard = () => {
     if (!customers.length) {
       await loadCustomers();
     }
-    const prefillCustomerId = consumeBudgetWizardPrefillCustomerId();
-    if (prefillCustomerId && !selectedCustomerId) {
-      setSelectedCustomerId(prefillCustomerId);
+    if (prefillCustomer && !selectedCustomerId) {
+      setSelectedCustomerId(prefillCustomer.id);
+      setSelectedDeliveryAddressId(prefillCustomer.direccionesEntrega[0]?.id ?? '');
     }
     setStep('CLIENTE');
   };
