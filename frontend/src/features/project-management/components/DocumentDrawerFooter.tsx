@@ -132,7 +132,7 @@ export const DocumentDrawerFooter = ({
           onClick={onSave}
           disabled={isConverting || isSaving}
           className="text-white px-4 py-1.5 rounded-md transition flex items-center gap-2 border shadow-sm text-xs font-bold h-9 disabled:opacity-50"
-          style={{ background: documentManagementTheme.accent, borderColor: '#db2777' }}
+          style={{ background: documentManagementTheme.accent, borderColor: documentManagementTheme.accent }}
           title="Guardar cambios"
         >
           <span className="opacity-90">💾</span> Guardar
@@ -145,7 +145,7 @@ export const DocumentDrawerFooter = ({
           onClick={() => onEmitOpen(primaryEmitTarget)}
           disabled={isConverting || isSaving || !canEmit(primaryEmitTarget)}
           className="text-white px-4 py-1.5 rounded-md transition flex items-center gap-2 border shadow-sm text-xs font-bold h-9 disabled:opacity-50"
-          style={{ background: documentManagementTheme.accent, borderColor: '#db2777' }}
+          style={{ background: documentManagementTheme.accent, borderColor: documentManagementTheme.accent }}
           title={
             !canEmit(primaryEmitTarget)
               ? (primaryEmitTarget === 'ALBARAN' ? 'Primero emite el Pedido' : 'Primero emite el Albarán')

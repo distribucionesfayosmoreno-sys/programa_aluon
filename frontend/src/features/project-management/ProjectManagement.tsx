@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ProjectDocumentRow } from './ProjectManagement.types';
 import { DocumentDrawer } from './components/DocumentDrawer';
 import { documentManagementTheme } from './documentManagementTheme';
+import { NewDocumentModal } from './components/NewDocumentModal';
 
 type Props = {
   openRowId: string | null;
@@ -13,14 +14,16 @@ type Props = {
 export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
   const vm = useProjectManagement();
   const [drawerRow, setDrawerRow] = useState<ProjectDocumentRow | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const drawerOpen = useMemo(() => drawerRow !== null, [drawerRow]);
 
   useEffect(() => {
     if (!openRowId) return;
     const match = vm.rows.find(row => row.rowId === openRowId);
-    if (!match) return;
-    setDrawerRow(match);
+    if (match) {
+      setDrawerRow(match);
+    }
     onOpenRowHandled();
   }, [openRowId, onOpenRowHandled, vm.rows]);
 
@@ -52,6 +55,7 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
           rows={vm.rows}
           busyProjectId={vm.busyProjectId}
           onOpenDetails={row => setDrawerRow(row)}
+          onCreateDocument={() => setCreateModalOpen(true)}
         />
       </div>
 
@@ -60,6 +64,18 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
         row={drawerRow}
         onClose={() => setDrawerRow(null)}
         onOpenPdf={(row) => void vm.actions.openPdf(row)}
+      />
+
+      <NewDocumentModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onCreate={vm.actions.createDocument}
+        onCreated={(row) => {
+          setCreateModalOpen(false);
+          if (row.quoteId) {
+            setDrawerRow(row);
+          }
+        }}
       />
     </div>
   );

@@ -6,6 +6,7 @@ type Props = {
   filters: ProjectsTableFilters;
   onChange: (next: ProjectsTableFilters) => void;
   onReset: () => void;
+  onCreateDocument: () => void;
   typeOptions: ProjectDocumentKind[];
   statusOptions: string[];
 };
@@ -17,6 +18,7 @@ export const ProjectsTableFiltersBar = ({
   filters,
   onChange,
   onReset,
+  onCreateDocument,
   typeOptions,
   statusOptions,
 }: Props) => (
@@ -143,6 +145,20 @@ export const ProjectsTableFiltersBar = ({
         }}
       >
         Limpiar
+      </button>
+      <button
+        type="button"
+        onClick={onCreateDocument}
+        className="px-3 py-2 rounded-xl font-bold text-white"
+        style={{
+          border: '1px solid #1d4ed8',
+          background: '#2563eb',
+          color: '#ffffff',
+          fontSize: 12,
+          boxShadow: documentManagementTheme.shadowSoft,
+        }}
+      >
+        Nuevo documento
       </button>
     </div>
   </div>

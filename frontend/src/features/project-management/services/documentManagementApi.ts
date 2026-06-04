@@ -8,6 +8,14 @@ export type DocumentManagementRowsParams = Partial<{
   dateTo: string;
 }>;
 
+export type DocumentManagementCreatableType = Exclude<ProjectDocumentKind, 'PRESUPUESTO'>;
+
+export type DocumentManagementCreateRequest = {
+  customerName: string;
+  type: DocumentManagementCreatableType;
+  number: string;
+};
+
 type DocumentManagementRowApi = {
   rowId: string;
   projectId: string;
@@ -38,18 +46,31 @@ const buildQuery = (params: DocumentManagementRowsParams): string => {
   return qs ? `?${qs}` : '';
 };
 
+const mapRow = (r: DocumentManagementRowApi): ProjectDocumentRow => ({
+  rowId: r.rowId,
+  projectId: r.projectId,
+  quoteId: r.quoteId,
+  customerName: r.customerName,
+  type: r.type,
+  number: r.number,
+  statusLabel: r.statusLabel,
+  createdAt: r.createdAt,
+});
+
 export const fetchDocumentManagementRows = async (params: DocumentManagementRowsParams = {}): Promise<ProjectDocumentRow[]> => {
   const response = await fetch(`/api/document-management/rows${buildQuery(params)}`);
   const rows = await parseJsonOrThrow<DocumentManagementRowApi[]>(response);
-  return rows.map((r) => ({
-    rowId: r.rowId,
-    projectId: r.projectId,
-    quoteId: r.quoteId,
-    customerName: r.customerName,
-    type: r.type,
-    number: r.number,
-    statusLabel: r.statusLabel,
-    createdAt: r.createdAt,
-  }));
+  return rows.map(mapRow);
 };
 
+export const createDocumentManagementDocument = async (
+  payload: DocumentManagementCreateRequest,
+): Promise<ProjectDocumentRow> => {
+  const response = await fetch('/api/document-management/rows', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const row = await parseJsonOrThrow<DocumentManagementRowApi>(response);
+  return mapRow(row);
+};

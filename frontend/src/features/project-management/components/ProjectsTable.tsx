@@ -9,6 +9,7 @@ type ProjectsTableProps = {
   rows: ProjectDocumentRow[];
   busyProjectId: string | null;
   onOpenDetails: (row: ProjectDocumentRow) => void;
+  onCreateDocument: () => void;
 };
 
 // ─── Column header ────────────────────────────────────────────────────────────
@@ -84,6 +85,7 @@ export const ProjectsTable = ({
   rows,
   busyProjectId,
   onOpenDetails,
+  onCreateDocument,
 }: ProjectsTableProps) => {
   const filtering = useProjectsTableFiltering(rows);
   const {
@@ -143,6 +145,7 @@ export const ProjectsTable = ({
           filters={filtering.filters}
           onChange={filtering.setFilters}
           onReset={filtering.resetFilters}
+          onCreateDocument={onCreateDocument}
           typeOptions={filtering.typeOptions}
           statusOptions={filtering.statusOptions}
         />
@@ -219,7 +222,9 @@ export const ProjectsTable = ({
                         background: isChecked ? documentManagementTheme.accentBg : 'transparent',
                         cursor: 'default',
                       }}
-                      onClick={() => onOpenDetails(row)}
+                      onClick={() => {
+                        if (row.quoteId) onOpenDetails(row);
+                      }}
                       onMouseEnter={e => { if (!isChecked) e.currentTarget.style.background = documentManagementTheme.panelSoftBg; }}
                       onMouseLeave={e => { e.currentTarget.style.background = isChecked ? documentManagementTheme.accentBg : 'transparent'; }}
                     >
@@ -269,7 +274,9 @@ export const ProjectsTable = ({
                           <ActionButton
                             label={busy ? '...' : 'VER'}
                             disabled={!canView || busy}
-                            onClick={() => onOpenDetails(row)}
+                            onClick={() => {
+                              if (canView) onOpenDetails(row);
+                            }}
                           />
                         </div>
                       </td>

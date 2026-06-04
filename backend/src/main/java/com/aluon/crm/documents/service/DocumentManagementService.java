@@ -1,6 +1,9 @@
 package com.aluon.crm.documents.service;
 
+import com.aluon.crm.documents.dto.DocumentManagementCreateRequest;
 import com.aluon.crm.documents.dto.DocumentManagementRowResponse;
+import com.aluon.crm.documents.model.ManualDocument;
+import com.aluon.crm.documents.repository.ManualDocumentRepository;
 import com.aluon.crm.quote.model.QuoteDocument;
 import com.aluon.crm.quote.repository.QuoteDocumentRepository;
 import com.aluon.crm.quote.repository.QuoteRequestRepository;
@@ -13,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,7 @@ public class DocumentManagementService {
 
     private final QuoteRequestRepository quoteRequestRepository;
     private final QuoteDocumentRepository quoteDocumentRepository;
+    private final ManualDocumentRepository manualDocumentRepository;
 
     @Transactional(readOnly = true)
     public List<DocumentManagementRowResponse> listRows(
@@ -40,11 +45,10 @@ public class DocumentManagementService {
         LocalDateTime endExclusive = dateTo != null ? dateTo.plusDays(1).atStartOfDay() : DATE_MAX_EXCLUSIVE;
 
         List<QuoteRequestRepository.DocumentManagementQuoteRow> quotes = quoteRequestRepository.findForDocumentManagement(start, endExclusive);
-
-        if (quotes.isEmpty()) return List.of();
-
         List<UUID> quoteIds = quotes.stream().map(QuoteRequestRepository.DocumentManagementQuoteRow::getId).toList();
-        List<QuoteDocument> docs = quoteDocumentRepository.findByQuoteRequestIdInOrderByCreatedAtDesc(quoteIds);
+        List<QuoteDocument> docs = quoteIds.isEmpty()
+                ? List.of()
+                : quoteDocumentRepository.findByQuoteRequestIdInOrderByCreatedAtDesc(quoteIds);
 
         Map<UUID, Map<String, QuoteDocument>> latestDocByQuoteAndType = new HashMap<>();
         for (QuoteDocument doc : docs) {
@@ -93,16 +97,67 @@ public class DocumentManagementService {
             }
         }
 
-        return rows.stream()
+        List<DocumentManagementRowResponse> manualRows = manualDocumentRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(this::toManualRow)
+                .toList();
+
+        return Stream.concat(rows.stream(), manualRows.stream())
+                .filter(r -> matchesQuery(query, r))
                 .filter(r -> matchesType(normalizedType, r.type()))
                 .filter(r -> matchesStatus(normalizedStatus, r.type(), r.statusLabel()))
                 .sorted(Comparator.comparing(DocumentManagementRowResponse::createdAt).reversed())
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public DocumentManagementRowResponse createDocument(DocumentManagementCreateRequest request) {
+        DocumentManagementCreateRequest safeRequest = Objects.requireNonNull(request, "request");
+        String normalizedType = normalizeFilter(safeRequest.type());
+        String normalizedCustomerName = normalizeFreeText(safeRequest.customerName());
+        String normalizedNumber = normalizeFreeText(safeRequest.number());
+
+        if (normalizedType == null) {
+            throw new IllegalArgumentException("El tipo de documento es obligatorio");
+        }
+        if (normalizedCustomerName == null) {
+            throw new IllegalArgumentException("El cliente es obligatorio");
+        }
+        if (normalizedNumber == null) {
+            throw new IllegalArgumentException("El número de documento es obligatorio");
+        }
+        if (!List.of("PEDIDO", "ALBARAN", "FACTURA", "ABONO").contains(normalizedType)) {
+            throw new IllegalArgumentException("Tipo de documento no soportado: " + normalizedType);
+        }
+        if (manualDocumentRepository.existsByTypeIgnoreCaseAndNumberIgnoreCase(normalizedType, normalizedNumber)) {
+            throw new IllegalArgumentException("Ya existe un documento manual con ese tipo y número");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        ManualDocument created = manualDocumentRepository.save(ManualDocument.builder()
+                .customerName(normalizedCustomerName)
+                .type(normalizedType)
+                .number(normalizedNumber)
+                .statusLabel(STATUS_EMITIDO)
+                .createdAt(now)
+                .updatedAt(now)
+                .build());
+
+        return toManualRow(created);
+    }
+
     private static boolean matchesType(String type, String rowType) {
         if (type == null || type.isBlank() || type.equals("ALL")) return true;
         return type.equalsIgnoreCase(rowType);
+    }
+
+    private static boolean matchesQuery(String query, DocumentManagementRowResponse row) {
+        String normalizedQuery = normalizeQuery(query);
+        if (normalizedQuery == null) return true;
+
+        return safe(row.customerName()).toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                || safe(row.number()).toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                || safe(row.type()).toLowerCase(Locale.ROOT).contains(normalizedQuery)
+                || safe(row.statusLabel()).toLowerCase(Locale.ROOT).contains(normalizedQuery);
     }
 
     private static boolean matchesStatus(String status, String rowType, String rowStatus) {
@@ -119,6 +174,18 @@ public class DocumentManagementService {
         return s.isBlank() ? null : s;
     }
 
+    private static String normalizeQuery(String raw) {
+        if (raw == null) return null;
+        String normalized = raw.trim().toLowerCase(Locale.ROOT);
+        return normalized.isBlank() ? null : normalized;
+    }
+
+    private static String normalizeFreeText(String raw) {
+        if (raw == null) return null;
+        String normalized = raw.trim();
+        return normalized.isBlank() ? null : normalized;
+    }
+
     private static String normalizeDocType(String raw) {
         if (raw == null) return "";
         return raw.trim().toUpperCase();
@@ -126,5 +193,18 @@ public class DocumentManagementService {
 
     private static String safe(String value) {
         return value == null ? "" : value;
+    }
+
+    private DocumentManagementRowResponse toManualRow(ManualDocument document) {
+        return new DocumentManagementRowResponse(
+                "manual:" + document.getId(),
+                document.getId().toString(),
+                null,
+                safe(document.getCustomerName()),
+                safe(document.getType()),
+                safe(document.getNumber()),
+                safe(document.getStatusLabel()),
+                document.getCreatedAt()
+        );
     }
 }

@@ -1,10 +1,14 @@
 package com.aluon.crm.documents.controller;
 
+import com.aluon.crm.documents.dto.DocumentManagementCreateRequest;
 import com.aluon.crm.documents.dto.DocumentManagementRowResponse;
 import com.aluon.crm.documents.service.DocumentManagementService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,5 +33,11 @@ public class DocumentManagementController {
     ) {
         return ResponseEntity.ok(documentManagementService.listRows(query, type, status, dateFrom, dateTo));
     }
-}
 
+    @PostMapping("/rows")
+    public ResponseEntity<DocumentManagementRowResponse> createDocument(
+            @RequestBody @Valid DocumentManagementCreateRequest request
+    ) {
+        return ResponseEntity.ok(documentManagementService.createDocument(request));
+    }
+}

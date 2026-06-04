@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ProjectDocumentRow, WorkOrderWorkflowStep } from './ProjectManagement.types';
 import { fetchOrderStatuses } from './services/ordersApi';
 import { ensureQuotePdfGenerated, quotePdfUrl } from './services/quotePdf';
-import { fetchDocumentManagementRows } from './services/documentManagementApi';
+import { createDocumentManagementDocument, fetchDocumentManagementRows } from './services/documentManagementApi';
+
+const sortRowsByCreatedAt = (rows: ProjectDocumentRow[]): ProjectDocumentRow[] =>
+  [...rows].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
 export const useProjectManagement = () => {
   const [documentRows, setDocumentRows] = useState<ProjectDocumentRow[]>([]);
@@ -60,10 +63,28 @@ export const useProjectManagement = () => {
   }, []);
 
   const rows = useMemo(
-    () =>
-      [...documentRows, ...orderDocs].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    () => sortRowsByCreatedAt([...documentRows, ...orderDocs]),
     [documentRows, orderDocs],
   );
+
+  const createDocument = async (payload: { customerName: string; type: 'PEDIDO' | 'ALBARAN' | 'FACTURA' | 'ABONO'; number: string }) => {
+    setBusyProjectId('new-document');
+    setError('');
+    try {
+      const created = await createDocumentManagementDocument(payload);
+      setDocumentRows(prev => sortRowsByCreatedAt([
+        created,
+        ...prev.filter(row => row.rowId !== created.rowId),
+      ]));
+      return created;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'No se pudo crear el documento.';
+      setError(message);
+      throw err;
+    } finally {
+      setBusyProjectId(null);
+    }
+  };
 
   const openPdf = async (row: ProjectDocumentRow) => {
     setBusyProjectId(row.projectId);
@@ -94,6 +115,7 @@ export const useProjectManagement = () => {
     error,
     actions: {
       openPdf,
+      createDocument,
     },
   } as const;
 };
