@@ -8,10 +8,17 @@ import { PresupuestosCard } from './components/PresupuestosCard';
 import { OrdenesTrabajoCard } from './components/OrdenesTrabajoCard';
 import { TransactionsCard } from './components/TransactionsCard';
 import { TrendCard } from './components/TrendCard';
+import { DocumentsAccessCard } from './components/DocumentsAccessCard';
+import { DocumentRowsCard } from './components/DocumentRowsCard';
 import { useDashboardViewModel } from './hooks/useDashboardViewModel';
+import { useDashboardDocuments } from './hooks/useDashboardDocuments';
+import { navigateToModule } from '../../services/moduleNavigation';
+import { navigateToDocument } from '../../services/moduleNavigation';
+import { startBudgetWizard } from '../budget-wizard/services/budgetWizardLaunch';
 
 const Dashboard: FC = () => {
   const vm = useDashboardViewModel();
+  const { documents } = useDashboardDocuments('month');
 
   return (
     <section className="h-full min-h-0 w-full flex flex-col">
@@ -64,10 +71,29 @@ const Dashboard: FC = () => {
                   counts={vm.presupuestos.counts}
                   recent={vm.presupuestos.recent}
                   formatCurrency={vm.formatCurrency}
+                  onRowClick={() => startBudgetWizard()}
                 />
                 <OrdenesTrabajoCard
                   byStep={vm.ordenes.byStep}
                   recent={vm.ordenes.recent}
+                  onRowClick={() => navigateToModule('ordenes')}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <DocumentRowsCard
+                  title="Albaranes"
+                  accentColor="#16a34a"
+                  rows={documents.albaranes}
+                  emptyLabel="No hay albaranes en este rango."
+                  onRowClick={(row) => navigateToDocument(row.id)}
+                />
+                <DocumentRowsCard
+                  title="Facturas"
+                  accentColor="#7c3aed"
+                  rows={documents.facturas}
+                  emptyLabel="No hay facturas en este rango."
+                  onRowClick={(row) => navigateToDocument(row.id)}
                 />
               </div>
 
@@ -78,6 +104,7 @@ const Dashboard: FC = () => {
             </div>
 
             <aside className="grid gap-6">
+              <DocumentsAccessCard />
               <MiniTiles tiles={vm.tiles} formatCurrency={vm.formatCurrency} />
               <TrendCard monthLabel={vm.trend.monthLabel} points={vm.trend.points} />
             </aside>

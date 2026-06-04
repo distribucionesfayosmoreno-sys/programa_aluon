@@ -135,6 +135,16 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf }: Props) => {
     return null;
   }, [effectiveTipo]);
 
+  const relatedCodesByTipo = useMemo(() => {
+    const relatedTypes = ['PEDIDO', 'ALBARAN', 'FACTURA'] as const;
+    return new Map(
+      relatedTypes
+        .filter(tipo => tipo !== effectiveTipo)
+        .map((tipo) => [tipo, existingByTipo.get(tipo) ?? ''] as const)
+        .filter(([, code]) => Boolean(code))
+    );
+  }, [effectiveTipo, existingByTipo]);
+
   const emitAndActivate = async (tipo: string) => {
     if (!row?.quoteId) return;
     if (isConverting) return;
@@ -273,11 +283,7 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf }: Props) => {
             })();
           }}
           onPreview={() => void handleView()}
-          relatedCodesByTipo={new Map(
-            (['PEDIDO', 'ALBARAN', 'FACTURA'] as const)
-              .map((t) => [t, existingByTipo.get(t) ?? ''] as const)
-              .filter(([, code]) => Boolean(code))
-          )}
+          relatedCodesByTipo={relatedCodesByTipo}
           onNavigateRelated={(t) => {
             setActiveTipo(t);
             setSubview('document');

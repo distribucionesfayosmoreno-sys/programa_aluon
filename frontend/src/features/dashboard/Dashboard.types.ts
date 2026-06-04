@@ -26,10 +26,19 @@ export type DashboardMiniTile = {
   gradientTo: string;
 };
 
+export type DashboardDocumentRow = {
+  id: string;
+  type: 'PRESUPUESTO' | 'PEDIDO' | 'ALBARAN' | 'FACTURA' | 'ABONO';
+  number: string;
+  customerName: string;
+  statusLabel: string;
+  createdAt: string;
+  quoteId: string | null;
+};
+
 export type DonutSlice = {
   id: string;
   label: string;
   value: number;
   color: string;
 };
-

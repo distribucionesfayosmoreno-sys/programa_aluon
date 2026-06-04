@@ -1,0 +1,492 @@
+* { box-sizing: border-box; }
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.page {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 13mm 11mm 11mm;
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.headerCell {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.headerLeft {
+  width: 43%;
+  padding-right: 6mm;
+}
+
+.headerRight {
+  width: 57%;
+}
+
+.companyMark {
+  padding: 3mm 0 0;
+  border-top: 2px solid #2563eb;
+}
+
+.companyName {
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  margin: 0;
+}
+
+.companyTagline {
+  margin: 1mm 0 0;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.28em;
+  color: #0f172a;
+  text-transform: uppercase;
+}
+
+.companyLines {
+  margin-top: 4mm;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #2563eb;
+  white-space: pre-line;
+}
+
+.heroCard {
+  width: 100%;
+  min-height: 41mm;
+  border-radius: 2px;
+  border: 1px solid #0f172a;
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.92)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0));
+  box-shadow: none;
+  padding: 7mm 7mm 6mm;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroCard::before {
+  content: "";
+  position: absolute;
+  right: -12mm;
+  top: -10mm;
+  width: 40mm;
+  height: 40mm;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 68%);
+}
+
+.heroCard::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1.2mm;
+  background: linear-gradient(90deg, #2563eb, #93c5fd, transparent);
+}
+
+.heroGrid {
+  position: relative;
+  z-index: 1;
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.heroBrandCell,
+.heroDoorCell {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.heroBrandCell {
+  width: 50%;
+  padding-right: 3mm;
+}
+
+.heroDoorCell {
+  width: 50%;
+}
+
+.heroBrand {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: 0.45px;
+  margin: 0;
+  text-align: left;
+}
+
+.heroTagline {
+  margin: 2mm 0 0;
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.35;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.heroBadge {
+  display: inline-block;
+  margin-top: 3.2mm;
+  padding: 1.8mm 3.2mm;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.10);
+  border-left: 2px solid #93c5fd;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.doorVisual {
+  width: 100%;
+  height: 30mm;
+  position: relative;
+  border-radius: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+  overflow: hidden;
+}
+
+.doorVisual::before {
+  content: "";
+  position: absolute;
+  inset: 4mm 10mm 4mm 10mm;
+  border: 1.5px solid rgba(255, 255, 255, 0.92);
+  border-radius: 1px;
+}
+
+.doorVisual::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 3.8mm;
+  bottom: 3.8mm;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translateX(-0.5px);
+}
+
+.doorPanel {
+  position: absolute;
+  top: 5.7mm;
+  bottom: 5.7mm;
+  width: 19mm;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+}
+
+.doorPanel.left {
+  left: 10mm;
+  transform: skewY(-2deg);
+}
+
+.doorPanel.right {
+  right: 10mm;
+  transform: skewY(2deg);
+}
+
+.doorHandle {
+  position: absolute;
+  top: 50%;
+  width: 3mm;
+  height: 8mm;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  transform: translateY(-50%);
+}
+
+.doorHandle.left {
+  right: 9mm;
+}
+
+.doorHandle.right {
+  left: 9mm;
+}
+
+.customerBlock {
+  margin-top: 3.5mm;
+  text-align: right;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: #0f172a;
+  white-space: pre-line;
+}
+
+.deliveryBlock {
+  margin-top: 2.2mm;
+  text-align: right;
+  font-size: 9.5px;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.deliveryLabel {
+  display: block;
+  margin-bottom: 1mm;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.deliveryLines {
+  white-space: pre-line;
+  font-weight: 700;
+}
+
+.meta {
+  margin-top: 8mm;
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  border-top: 1px solid #dbe5f3;
+  padding-top: 4mm;
+}
+
+.metaCell {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.metaLeft {
+  width: 50%;
+  padding-right: 8mm;
+}
+
+.docDate {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 900;
+  color: #334155;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.docType {
+  margin: 2.5mm 0 0;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.docNumber {
+  margin: 1.8mm 0 0;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+}
+
+.items {
+  margin-top: 8mm;
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 10px;
+  border: 1px solid #dbe5f3;
+}
+
+.items thead th {
+  text-align: left;
+  font-size: 9px;
+  font-weight: 900;
+  color: #6b7280;
+  padding: 2.2mm 2mm 2mm;
+  letter-spacing: 0.16em;
+  border-bottom: 1px solid #dbe5f3;
+  background: #f8fafc;
+}
+
+.items thead th.right {
+  text-align: right;
+}
+
+.items tbody {
+  border-top: 0;
+}
+
+.items tbody tr {
+  border-bottom: 1px solid #dbe5f3;
+}
+
+.items tbody td {
+  padding: 3mm 2mm;
+  vertical-align: top;
+  color: #0f172a;
+}
+
+.qty {
+  width: 18mm;
+  font-weight: 800;
+}
+
+.desc {
+  width: auto;
+  padding-right: 5mm;
+}
+
+.unit {
+  width: 26mm;
+  text-align: right;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.total {
+  width: 24mm;
+  text-align: right;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.itemTitle {
+  font-weight: 900;
+  margin: 0;
+}
+
+.itemMeta {
+  margin-top: 1mm;
+  font-size: 8.5px;
+  line-height: 1.35;
+  color: #64748b;
+  font-weight: 700;
+  white-space: pre-line;
+}
+
+.itemsFooterSpacer td {
+  padding: 0;
+  border: 0;
+  height: 30mm;
+}
+
+.totals {
+  margin-top: 3mm;
+  margin-left: auto;
+  width: 48mm;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.totalsTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.totalsTable td {
+  padding: 1.6mm 0;
+}
+
+.totalsLabel {
+  text-align: right;
+  color: #475569;
+}
+
+.totalsValue {
+  text-align: right;
+  color: #0f172a;
+  width: 22mm;
+  padding-left: 4mm;
+}
+
+.totalsDivider {
+  margin-left: auto;
+  width: 22mm;
+  height: 1px;
+  background: #dbe5f3;
+  margin-top: 1.5mm;
+}
+
+.totalsTotal {
+  margin-top: 1.5mm;
+}
+
+.totalsLabelTotal {
+  color: #0f172a;
+}
+
+.signatures {
+  position: absolute;
+  left: 12mm;
+  right: 12mm;
+  bottom: 17mm;
+}
+
+.sigTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sigTable td {
+  width: 50%;
+  vertical-align: bottom;
+  padding: 0 8mm;
+}
+
+.sig {
+  text-align: center;
+  font-size: 9px;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.sigLine {
+  height: 1px;
+  background: #dbe5f3;
+  margin-bottom: 2mm;
+}
+
+.terms {
+  position: absolute;
+  left: 12mm;
+  right: 12mm;
+  bottom: 5mm;
+  font-size: 8.5px;
+  line-height: 1.45;
+}
+
+.termsTitle {
+  margin: 0 0 1.5mm;
+  font-size: 9px;
+  font-weight: 900;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.18px;
+}
+
+.termsLines {
+  color: #475569;
+  font-weight: 700;
+  white-space: pre-line;
+}

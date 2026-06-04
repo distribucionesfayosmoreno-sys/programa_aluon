@@ -1,15 +1,28 @@
 import { ProjectsTable } from './components/ProjectsTable';
 import { useProjectManagement } from './useProjectManagement';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ProjectDocumentRow } from './ProjectManagement.types';
 import { DocumentDrawer } from './components/DocumentDrawer';
 import { documentManagementTheme } from './documentManagementTheme';
 
-export const ProjectManagement = () => {
+type Props = {
+  openRowId: string | null;
+  onOpenRowHandled: () => void;
+};
+
+export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
   const vm = useProjectManagement();
   const [drawerRow, setDrawerRow] = useState<ProjectDocumentRow | null>(null);
 
   const drawerOpen = useMemo(() => drawerRow !== null, [drawerRow]);
+
+  useEffect(() => {
+    if (!openRowId) return;
+    const match = vm.rows.find(row => row.rowId === openRowId);
+    if (!match) return;
+    setDrawerRow(match);
+    onOpenRowHandled();
+  }, [openRowId, onOpenRowHandled, vm.rows]);
 
   return (
     <div

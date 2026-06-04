@@ -6,10 +6,17 @@ type NavigateModuleDetail = {
   module: ModuleKey;
 };
 
+type NavigateDocumentDetail = {
+  documentId: string;
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isModuleKey = (value: unknown): value is ModuleKey =>
+  typeof value === 'string' && value.length > 0;
+
+const isDocumentId = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0;
 
 export const navigateToModule = (module: ModuleKey): void => {
@@ -29,3 +36,19 @@ export const onNavigateToModule = (handler: (module: ModuleKey) => void): (() =>
   return () => window.removeEventListener(EVENT_NAME, listener);
 };
 
+export const navigateToDocument = (documentId: string): void => {
+  window.dispatchEvent(new CustomEvent<NavigateDocumentDetail>('aluon:open-document', { detail: { documentId } }));
+};
+
+export const onNavigateToDocument = (handler: (documentId: string) => void): (() => void) => {
+  const listener = (event: Event) => {
+    if (!(event instanceof CustomEvent)) return;
+    const detailUnknown: unknown = event.detail;
+    if (!isRecord(detailUnknown)) return;
+    if (!isDocumentId(detailUnknown.documentId)) return;
+    handler(detailUnknown.documentId);
+  };
+
+  window.addEventListener('aluon:open-document', listener);
+  return () => window.removeEventListener('aluon:open-document', listener);
+};

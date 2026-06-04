@@ -11,7 +11,7 @@ import { BudgetWizard } from './features/budget-wizard/BudgetWizard';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
 import { DoorVisualSimulation } from './features/door-visual-simulation/DoorVisualSimulation';
 import { ProjectManagement } from './features/project-management/ProjectManagement';
-import { onNavigateToModule } from './services/moduleNavigation';
+import { onNavigateToDocument, onNavigateToModule } from './services/moduleNavigation';
 import { onBudgetWizardLaunch, startBudgetWizard } from './features/budget-wizard/services/budgetWizardLaunch';
 
 const App = () => {
@@ -19,8 +19,13 @@ const App = () => {
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [budgetWizardSessionKey, setBudgetWizardSessionKey] = useState(0);
+  const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
 
   useEffect(() => onNavigateToModule(setActiveModule), []);
+  useEffect(() => onNavigateToDocument((documentId) => {
+    setActiveModule('gestion-documentos');
+    setPendingDocumentId(documentId);
+  }), []);
   useEffect(() => onBudgetWizardLaunch(() => {
     setBudgetWizardSessionKey(session => session + 1);
   }), []);
@@ -156,7 +161,12 @@ const App = () => {
         <main className="relative flex-1 flex flex-col min-h-0 overflow-hidden">
           <div className="w-full p-3 md:p-4 animate-fade-up flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
             {activeModule === 'clientes' && <CustomerManagement />}
-            {activeModule === 'gestion-documentos' && <ProjectManagement />}
+            {activeModule === 'gestion-documentos' && (
+              <ProjectManagement
+                openRowId={pendingDocumentId}
+                onOpenRowHandled={() => setPendingDocumentId(null)}
+              />
+            )}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
             {activeModule === 'presupuestos' && <BudgetWizard key={budgetWizardSessionKey} />}
             {activeModule === 'inscripciones' && <RegistrationRequests />}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>__DOC_TYPE__ __DOC_NUMBER__</title>
+  <!--__STYLES__-->
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="headerCell headerLeft">
+        <div class="companyMark">
+          <div class="companyName">__COMPANY_NAME__</div>
+          <div class="companyTagline">__COMPANY_TAGLINE__</div>
+          <div class="companyLines">__COMPANY_LINES__</div>
+        </div>
+      </div>
+      <div class="headerCell headerRight">
+        <div class="heroCard">
+          <div class="heroGrid">
+            <div class="heroBrandCell">
+              <div class="heroBrand">__HERO_BRAND__</div>
+              <div class="heroTagline">__HERO_TAGLINE__</div>
+              <div class="heroBadge">Albarán operativo</div>
+            </div>
+            <div class="heroDoorCell">
+              <div class="doorVisual" aria-hidden="true">
+                <div class="doorPanel left"></div>
+                <div class="doorPanel right"></div>
+                <div class="doorHandle left"></div>
+                <div class="doorHandle right"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="customerBlock">__CUSTOMER_BLOCK__</div>
+        <div class="deliveryBlock">
+          <span class="deliveryLabel">Entrega</span>
+          <div class="deliveryLines">__DELIVERY_BLOCK__</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="meta">
+      <div class="metaCell metaLeft">
+        <div class="docDate">__DOC_DATE_LONG__</div>
+        <div class="docType">__DOC_TYPE__</div>
+        <div class="docNumber">__DOC_NUMBER__</div>
+      </div>
+      <div class="metaCell"></div>
+    </div>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th class="qty">CANTIDAD</th>
+          <th class="desc">DESCRIPCIÓN</th>
+          <th class="unit right">PRECIO UD.</th>
+          <th class="total right">TOTAL</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!--__ITEM_ROWS__-->
+        <tr class="itemsFooterSpacer"><td colspan="4"></td></tr>
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <table class="totalsTable">
+        <tr>
+          <td class="totalsLabel">Subtotal:</td>
+          <td class="totalsValue">__SUBTOTAL__</td>
+        </tr>
+        <tr>
+          <td class="totalsLabel">IVA:</td>
+          <td class="totalsValue">__VAT__</td>
+        </tr>
+      </table>
+      <div class="totalsDivider"></div>
+      <table class="totalsTable totalsTotal">
+        <tr>
+          <td class="totalsLabel totalsLabelTotal">Total:</td>
+          <td class="totalsValue">__TOTAL__</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="signatures">
+      <table class="sigTable">
+        <tr>
+          <td>
+            <div class="sig">
+              <div class="sigLine"></div>
+              __SIGNATURE_LEFT_LABEL__
+            </div>
+          </td>
+          <td>
+            <div class="sig">
+              <div class="sigLine"></div>
+              __SIGNATURE_RIGHT_LABEL__
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="terms">
+      <div class="termsTitle">CONDICIONES GENERALES</div>
+      <div class="termsLines">__TERMS__</div>
+    </div>
+  </div>
+</body>
+</html>
