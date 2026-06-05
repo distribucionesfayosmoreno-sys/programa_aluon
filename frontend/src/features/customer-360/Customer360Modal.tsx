@@ -230,6 +230,10 @@ export const Customer360Modal = ({ open, customer, onClose }: Props) => {
     }
   }, [open]);
 
+  const handleDocumentClick = (document: Customer360DocumentItem): void => {
+    setSelectedDocument(document);
+  };
+
   return (
     <AppDialog
       open={open}
@@ -381,7 +385,7 @@ export const Customer360Modal = ({ open, customer, onClose }: Props) => {
                         <DocumentRow
                           key={`${document.source}:${document.id}:${document.number}:${document.createdAt}`}
                           document={document}
-                          onClick={setSelectedDocument}
+                          onClick={handleDocumentClick}
                         />
                       ))
                     ) : (
@@ -416,6 +420,7 @@ export const Customer360Modal = ({ open, customer, onClose }: Props) => {
       <Customer360DocumentModal
         open={Boolean(selectedDocument)}
         document={selectedDocument}
+        onOpenDocument={setSelectedDocument}
         onClose={() => setSelectedDocument(null)}
       />
     </AppDialog>

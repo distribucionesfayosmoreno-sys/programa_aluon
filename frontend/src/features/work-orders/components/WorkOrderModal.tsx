@@ -1,6 +1,20 @@
-import { createPortal } from 'react-dom';
 import type { WorkOrderData } from '../models';
-import { uiColors } from './ui';
+import { DocumentPopupFrame } from '../../documents/components/DocumentPopupFrame';
+import {
+  DocumentInfoLine,
+  DocumentSectionCard,
+  DocumentStatCard,
+  documentSurfaceGradient,
+} from '../../documents/components/documentPopupPrimitives';
+import { dashboardTheme } from '../../dashboard/dashboardTheme';
+
+type WorkOrderModalProps = {
+  open: boolean;
+  onClose: () => void;
+  data: WorkOrderData;
+  canPrint: boolean;
+  onPrint: () => void;
+};
 
 export const WorkOrderModal = ({
   open,
@@ -8,181 +22,135 @@ export const WorkOrderModal = ({
   data,
   canPrint,
   onPrint,
-}: {
-  open: boolean;
-  onClose: () => void;
-  data: WorkOrderData;
-  canPrint: boolean;
-  onPrint: () => void;
-}) => {
-  if (!open) return null;
-
-  const portalTarget =
-    typeof document !== 'undefined' ? document.getElementById('main-layout') : null;
-
-  const content = (
-    <div
-      className="absolute inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-      style={{ background: 'rgba(13,17,23,0.70)', backdropFilter: 'blur(6px)' }}
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="absolute inset-0" onClick={onClose} />
-      <div
-        className="relative w-full max-w-5xl rounded-2xl flex flex-col overflow-hidden animate-fade-up"
-        style={{ background: '#ffffff', maxHeight: 'calc(100vh - 48px)', boxShadow: '0 24px 70px rgba(0,0,0,0.32)' }}
-      >
-        <div
-          className="flex items-center justify-between px-7 py-5"
-          style={{ background: uiColors.surfaceDark, borderBottom: '1px solid #21262d' }}
-        >
-          <div className="flex items-center gap-3.5">
-            <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'var(--accent-shadow-light)' }}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: uiColors.accent }}>
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 6h9M9 12h9M9 18h9M5 6h.01M5 12h.01M5 18h.01" />
-              </svg>
-            </div>
-            <div>
-              <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Orden de trabajo
-              </h2>
-              <p style={{ fontSize: 10, fontWeight: 600, color: uiColors.textSubtle, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
-                {data.workOrderNumber}
-              </p>
-            </div>
-          </div>
+}: WorkOrderModalProps) => {
+  return (
+    <DocumentPopupFrame
+      open={open}
+      title="Orden de trabajo"
+      subtitle={data.workOrderNumber}
+      onClose={onClose}
+      headerVariant="light"
+      footer={(
+        <div className="flex items-center gap-3 ml-auto">
+          <button type="button" onClick={onClose} className="btn-ghost">
+            Cerrar
+          </button>
           <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
-            style={{ color: uiColors.textSubtle }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = uiColors.textSubtle; }}
+            type="button"
+            onClick={onPrint}
+            className="btn-primary"
+            disabled={!canPrint}
+            style={{ opacity: canPrint ? 1 : 0.5, cursor: canPrint ? 'pointer' : 'not-allowed' }}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            Imprimir
           </button>
         </div>
+      )}
+    >
+      <div className="rounded-[22px] border p-6" style={{ ...documentSurfaceGradient, borderColor: dashboardTheme.border }}>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <DocumentStatCard label="Cliente" value={data.customerName} hint={data.customerPhone || 'Sin teléfono'} />
+          <DocumentStatCard label="Modelo" value={data.modelLabel} hint={data.doorModelLabel} />
+          <DocumentStatCard label="Referencia" value={data.modelReference || '—'} hint={data.workOrderDate} />
+        </div>
 
-        <div className="flex-1 overflow-y-auto p-7 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="rounded-xl p-5" style={{ border: `1px solid ${uiColors.border}`, background: '#f9fafb' }}>
-              <div className="text-xs font-black uppercase tracking-widest" style={{ color: uiColors.textSubtle }}>
-                Cliente
-              </div>
-              <div className="mt-2 text-sm font-bold">{data.customerName}</div>
-              <div className="text-xs" style={{ color: uiColors.textMuted }}>{data.customerAddress || '—'}</div>
-              <div className="text-xs" style={{ color: uiColors.textMuted }}>Telf. {data.customerPhone || '—'}</div>
-              <div className="mt-3 text-xs font-bold uppercase" style={{ color: '#111827' }}>
-                {data.workOrderDate}
-              </div>
+        <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[0.95fr_1.05fr]">
+          <DocumentSectionCard
+            title="Datos generales"
+            subtitle="Información comercial y contexto del documento"
+            tone="income"
+          >
+            <div className="space-y-3">
+              <DocumentInfoLine label="Cliente" value={data.customerName} />
+              <DocumentInfoLine label="Dirección" value={data.customerAddress || '—'} />
+              <DocumentInfoLine label="Teléfono" value={data.customerPhone || '—'} />
+              <DocumentInfoLine label="Fecha" value={data.workOrderDate} />
+              <DocumentInfoLine label="Modelo / tipo" value={`${data.doorModelLabel} · ${data.doorTypeLabel}`} />
+              <DocumentInfoLine label="Dimensiones" value={`${data.widthMm} × ${data.heightMm} mm`} />
             </div>
+          </DocumentSectionCard>
 
-            <div className="rounded-xl p-5" style={{ border: `1px solid ${uiColors.border}`, background: '#ffffff' }}>
-              <div className="text-xs font-black uppercase tracking-widest" style={{ color: uiColors.textSubtle }}>
-                Pieza / Modelo
-              </div>
-              <div className="mt-2 text-sm font-bold">{data.modelLabel}</div>
-              <div className="text-xs" style={{ color: uiColors.textMuted }}>Referencia: {data.modelReference || '—'}</div>
-              <div className="text-xs" style={{ color: uiColors.textMuted }}>{data.doorModelLabel} · {data.doorTypeLabel}</div>
-              <div className="text-xs" style={{ color: uiColors.textMuted }}>{data.widthMm} × {data.heightMm} mm</div>
+          <DocumentSectionCard
+            title="Pieza y despiece"
+            subtitle="Resumen técnico previo a producción"
+            tone="transactions"
+          >
+            <div className="space-y-3">
+              <DocumentInfoLine label="Distribuidor" value={data.distributor || '—'} />
+              <DocumentInfoLine label="Nº presupuesto" value={data.budgetNumber || '—'} />
+              <DocumentInfoLine label="Fecha presupuesto" value={data.budgetDate || '—'} />
+              <DocumentInfoLine label="Color" value={data.color || '—'} />
+              <DocumentInfoLine label="Instalador" value={data.installerName || '—'} />
+              {data.notes ? <DocumentInfoLine label="Notas" value={data.notes} /> : null}
             </div>
-          </div>
+          </DocumentSectionCard>
+        </div>
 
-          <div className="rounded-xl p-5" style={{ border: `1px solid ${uiColors.border}`, background: '#ffffff' }}>
-            <div className="text-xs font-black uppercase tracking-widest" style={{ color: uiColors.textSubtle }}>
-              Datos de despiece
+        <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[1fr_0.95fr]">
+          <DocumentSectionCard
+            title="Parámetros técnicos"
+            subtitle="Valores que alimentan el corte y fabricación"
+            tone="issues"
+          >
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <DocumentInfoLine label="Holgura suelo" value={`${data.groundClearanceMm ?? '—'} mm`} />
+              <DocumentInfoLine label="Larguero" value={`${data.largueroMm ?? '—'} mm`} />
+              <DocumentInfoLine label="Marco superior" value={data.topFrame ? 'Sí' : 'No'} />
+              <DocumentInfoLine label="Bisagras" value={data.hingesSide === 'LEFT' ? 'Izquierda' : data.hingesSide === 'RIGHT' ? 'Derecha' : '—'} />
+              <DocumentInfoLine label="Portero automático" value={data.porterAutomatic ? 'Sí' : 'No'} />
+              <DocumentInfoLine label="Automatización" value={data.automationIncluded ? 'Sí' : 'No'} />
+              <DocumentInfoLine label="Refuerzo automatización" value={data.automationReinforcement ? 'Sí' : 'No'} />
+              <DocumentInfoLine label="Primera hoja" value={data.openingSide === 'LEFT' ? 'Izquierda' : data.openingSide === 'RIGHT' ? 'Derecha' : '—'} />
+              <DocumentInfoLine label="Altura izquierda" value={`${data.heightLeftMm ?? '—'} mm`} />
+              <DocumentInfoLine label="Altura derecha" value={`${data.heightRightMm ?? '—'} mm`} />
+              <DocumentInfoLine label="Anchura izquierda" value={`${data.widthLeftMm ?? '—'} mm`} />
+              <DocumentInfoLine label="Anchura derecha" value={`${data.widthRightMm ?? '—'} mm`} />
+              <DocumentInfoLine label="Carril" value={data.railType ?? '—'} />
+              <DocumentInfoLine label="Montaje" value={data.mountingType ?? '—'} />
+              <DocumentInfoLine label="Cola" value={data.tail ? 'Sí' : 'No'} />
             </div>
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs" style={{ color: uiColors.textMuted }}>
-              <div>Distribuidor: {data.distributor || '—'}</div>
-              <div>Nº Presupuesto: {data.budgetNumber || '—'}</div>
-              <div>Fecha: {data.budgetDate || '—'}</div>
-              <div>Color: {data.color || '—'}</div>
-              <div>Instalador: {data.installerName || '—'}</div>
-            </div>
-          </div>
+          </DocumentSectionCard>
 
-          <div className="rounded-xl p-5" style={{ border: `1px solid ${uiColors.border}`, background: '#ffffff' }}>
-            <div className="text-xs font-black uppercase tracking-widest" style={{ color: uiColors.textSubtle }}>
-              Parámetros técnicos
-            </div>
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs" style={{ color: uiColors.textMuted }}>
-              <div>Holgura suelo: {data.groundClearanceMm ?? '—'} mm</div>
-              <div>Larguero: {data.largueroMm ?? '—'} mm</div>
-              <div>Marco superior: {data.topFrame ? 'Sí' : 'No'}</div>
-              <div>Bisagras: {data.hingesSide === 'LEFT' ? 'Izquierda' : data.hingesSide === 'RIGHT' ? 'Derecha' : '—'}</div>
-              <div>Portero automático: {data.porterAutomatic ? 'Sí' : 'No'}</div>
-              <div>Automatización: {data.automationIncluded ? 'Sí' : 'No'}</div>
-              <div>Refuerzo automatización: {data.automationReinforcement ? 'Sí' : 'No'}</div>
-              <div>Primera hoja: {data.openingSide === 'LEFT' ? 'Izquierda' : data.openingSide === 'RIGHT' ? 'Derecha' : '—'}</div>
-              <div>Altura izquierda: {data.heightLeftMm ?? '—'} mm</div>
-              <div>Altura derecha: {data.heightRightMm ?? '—'} mm</div>
-              <div>Anchura izquierda: {data.widthLeftMm ?? '—'} mm</div>
-              <div>Anchura derecha: {data.widthRightMm ?? '—'} mm</div>
-              <div>Carril: {data.railType ?? '—'}</div>
-              <div>Montaje: {data.mountingType ?? '—'}</div>
-              <div>Cola: {data.tail ? 'Sí' : 'No'}</div>
-            </div>
-            {data.notes && (
-              <div className="mt-3 text-xs" style={{ color: uiColors.textMuted }}>
-                Notas: {data.notes}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-xl p-5" style={{ border: `1px solid ${uiColors.border}`, background: '#ffffff' }}>
-            <div className="text-xs font-black uppercase tracking-widest" style={{ color: uiColors.textSubtle }}>
-              Despiece
-            </div>
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f9fafb', color: uiColors.textMuted }}>
-                    <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Descripción</th>
-                    <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Unidades</th>
-                    <th className="text-left px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>Medida corte</th>
+          <DocumentSectionCard
+            title="Despiece"
+            subtitle="Listado de cortes y cantidades"
+            tone="histogram"
+          >
+            <div className="overflow-x-auto rounded-[16px] border" style={{ borderColor: dashboardTheme.border }}>
+              <table className="w-full border-collapse" style={{ fontSize: 12 }}>
+                <thead style={{ background: dashboardTheme.surfaceSoft }}>
+                  <tr>
+                    <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: dashboardTheme.muted }}>
+                      Descripción
+                    </th>
+                    <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: dashboardTheme.muted }}>
+                      Unidades
+                    </th>
+                    <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-[0.14em]" style={{ color: dashboardTheme.muted }}>
+                      Medida corte
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.items.map((item, idx) => (
-                    <tr key={`${data.workOrderNumber}-${idx}`}>
-                      <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>{item.description}</td>
-                      <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>{item.units}x</td>
-                      <td className="px-3 py-2" style={{ border: `1px solid ${uiColors.borderLight}` }}>{item.cutMeasure}</td>
+                    <tr key={`${data.workOrderNumber}-${idx}`} style={{ borderTop: `1px solid ${dashboardTheme.border}` }}>
+                      <td className="px-4 py-3 font-semibold" style={{ color: dashboardTheme.text }}>
+                        {item.description}
+                      </td>
+                      <td className="px-4 py-3 font-medium" style={{ color: dashboardTheme.text }}>
+                        {item.units}x
+                      </td>
+                      <td className="px-4 py-3 font-medium" style={{ color: dashboardTheme.text }}>
+                        {item.cutMeasure}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-
-        <div
-          className="flex items-center justify-between gap-4 px-7 py-5"
-          style={{ borderTop: `1px solid ${uiColors.border}`, background: '#f8f9fb' }}
-        >
-          <p style={{ fontSize: 10, color: uiColors.textSubtle, fontWeight: 600 }} className="hidden sm:block">
-            Confirmación requerida para impresión
-          </p>
-          <div className="flex items-center gap-3 ml-auto">
-            <button type="button" onClick={onClose} className="btn-ghost">Cerrar</button>
-            <button
-              type="button"
-              onClick={onPrint}
-              className="btn-primary"
-              disabled={!canPrint}
-              style={{ opacity: canPrint ? 1 : 0.5, cursor: canPrint ? 'pointer' : 'not-allowed' }}
-            >
-              Imprimir
-            </button>
-          </div>
+          </DocumentSectionCard>
         </div>
       </div>
-    </div>
+    </DocumentPopupFrame>
   );
-
-  return portalTarget ? createPortal(content, portalTarget) : content;
 };

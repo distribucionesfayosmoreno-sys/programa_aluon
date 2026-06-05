@@ -1,16 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
-import AppDialog from '../../components/feedback/AppDialog';
 import type { QuoteResponse } from '../customer-onboarding/models';
 import { dashboardTheme } from '../dashboard/dashboardTheme';
 import type { Customer360DocumentItem } from './customer360Types';
-import { fetchLifecycleNumbers, fetchQuoteById, listQuoteDocuments, quoteDocumentPdfUrl } from '../project-management/services/quoteDetailsApi';
-import { ensureQuotePdfGenerated, quotePdfUrl } from '../project-management/services/quotePdf';
+import { fetchLifecycleNumbers, fetchQuoteById, listQuoteDocuments, quotePreviewPdfUrl } from '../project-management/services/quoteDetailsApi';
 import type { QuoteDocumentRowResponse, QuoteLifecycleNumbersResponse } from '../project-management/components/DocumentDrawer.types';
+import { DocumentPopupFrame } from '../documents/components/DocumentPopupFrame';
+import {
+  DocumentInfoLine,
+  DocumentSectionCard,
+  DocumentStatCard,
+  documentSurfaceGradient,
+} from '../documents/components/documentPopupPrimitives';
 
 type Props = {
   open: boolean;
   document: Customer360DocumentItem | null;
   onClose: () => void;
+  onOpenDocument?: (document: Customer360DocumentItem) => void;
 };
 
 const documentTypeLabel: Record<Customer360DocumentItem['type'], string> = {
@@ -64,36 +70,12 @@ const statusTone = (type: Customer360DocumentItem['type'], status: string): { bg
   return { bg: '#dbeafe', color: '#1d4ed8', label: normalized || 'Pendiente' };
 };
 
-const panelClassName = 'rounded-[18px] border bg-white shadow-[0_18px_40px_rgba(16,24,40,0.08)]';
-
-const InfoLine = ({ label, value }: { label: string; value?: string | null }) => (
-  <div className="flex items-start justify-between gap-4 text-sm">
-    <span className="text-[11px] font-semibold uppercase tracking-[0.08em]" style={{ color: dashboardTheme.muted }}>
-      {label}
-    </span>
-    <span className="text-right font-medium" style={{ color: dashboardTheme.text }}>
-      {value || '—'}
-    </span>
-  </div>
-);
-
-const StatCard = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-[16px] border bg-white px-4 py-4" style={{ borderColor: dashboardTheme.border, boxShadow: dashboardTheme.shadowSoft }}>
-    <div className="text-[10px] font-black uppercase tracking-[0.16em]" style={{ color: dashboardTheme.muted }}>
-      {label}
-    </div>
-    <div className="mt-2 text-[14px] font-black tracking-tight" style={{ color: dashboardTheme.text }}>
-      {value}
-    </div>
-  </div>
-);
-
 const rowsForQuote = (quoteDocuments: QuoteDocumentRowResponse[], selectedType: Customer360DocumentItem['type']): QuoteDocumentRowResponse[] => {
   const selected = selectedType.toUpperCase();
   return quoteDocuments.filter(doc => doc.tipo.toUpperCase() === selected);
 };
 
-export const Customer360DocumentModal = ({ open, document, onClose }: Props) => {
+export const Customer360DocumentModal = ({ open, document, onClose, onOpenDocument }: Props) => {
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteDocuments, setQuoteDocuments] = useState<QuoteDocumentRowResponse[]>([]);
   const [lifecycle, setLifecycle] = useState<QuoteLifecycleNumbersResponse | null>(null);
@@ -150,13 +132,7 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
     if (!document?.quoteId) return;
     setOpeningPdf(true);
     try {
-      if (document.type === 'PRESUPUESTO') {
-        await ensureQuotePdfGenerated(document.quoteId);
-        window.open(quotePdfUrl(document.quoteId), '_blank', 'noopener,noreferrer');
-        return;
-      }
-
-      window.open(quoteDocumentPdfUrl(document.quoteId, document.type), '_blank', 'noopener,noreferrer');
+      window.open(quotePreviewPdfUrl(document.quoteId, document.type, document.number), '_blank', 'noopener,noreferrer');
     } finally {
       setOpeningPdf(false);
     }
@@ -166,21 +142,36 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
 
   const tone = typeTone[document.type];
   const status = statusTone(document.type, document.statusLabel);
+  const handleAssociatedDocumentOpen = (doc: QuoteDocumentRowResponse) => {
+    const nextDocument: Customer360DocumentItem = {
+      id: doc.id,
+      type: doc.tipo as Customer360DocumentItem['type'],
+      number: doc.numeroDocumento,
+      statusLabel: 'EMITIDO',
+      createdAt: doc.createdAt,
+      quoteId: document.quoteId,
+      customerName: document.customerName,
+      source: document.source,
+    };
+    if (onOpenDocument) {
+      onOpenDocument(nextDocument);
+      return;
+    }
+    alert('No hay navegación de documentos conectada para esta vista.');
+  };
 
   return (
-    <AppDialog
+    <DocumentPopupFrame
       open={open}
       title={`${documentTypeLabel[document.type]} #${document.number}`}
       subtitle={document.customerName}
       onClose={onClose}
-      maxWidthClassName="max-w-4xl"
       headerVariant="none"
-      bodyClassName="p-0"
     >
-      <div className="rounded-[22px] border p-6" style={{ borderColor: dashboardTheme.border, background: `linear-gradient(180deg, ${dashboardTheme.surfaceSoft} 0%, ${dashboardTheme.surface} 34%)` }}>
+      <div className="rounded-[22px] border p-6" style={{ ...documentSurfaceGradient, borderColor: dashboardTheme.border }}>
         <div className="space-y-5">
-          <div className={`${panelClassName} p-5`}>
-            <div className="flex items-start justify-between gap-4">
+          <section className="rounded-[18px] border bg-white shadow-[0_18px_40px_rgba(16,24,40,0.08)]">
+            <div className="px-5 pt-4 pb-3 flex items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3">
                   <span className="h-5 w-[3px] rounded-full" style={{ backgroundColor: dashboardTheme.accentBars.transactions }} aria-hidden="true" />
@@ -200,43 +191,27 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <StatCard label="Número" value={document.number} />
-              <StatCard label="Estado" value={status.label} />
-              <StatCard label="Origen" value={document.source === 'backend' ? 'Backend' : 'Local'} />
-              <StatCard label="Fecha" value={formatDate(document.createdAt)} />
+            <div className="px-5 pb-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              <DocumentStatCard label="Número" value={document.number} />
+              <DocumentStatCard label="Estado" value={status.label} />
+              <DocumentStatCard label="Origen" value={document.source === 'backend' ? 'Backend' : 'Local'} />
+              <DocumentStatCard label="Fecha" value={formatDate(document.createdAt)} />
             </div>
-          </div>
+          </section>
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-            <section className={panelClassName}>
-              <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="h-5 w-[3px] rounded-full" style={{ backgroundColor: dashboardTheme.accentBars.income }} aria-hidden="true" />
-                  <h3 className="text-[14px] leading-none font-semibold" style={{ color: dashboardTheme.text }}>
-                    Resumen
-                  </h3>
-                </div>
+            <DocumentSectionCard title="Resumen" tone="income" className="h-full">
+              <div className="space-y-3">
+                <DocumentInfoLine label="Cliente" value={document.customerName} />
+                <DocumentInfoLine label="Identificador de presupuesto" value={document.quoteId} />
+                <DocumentInfoLine label="Tipo" value={documentTypeLabel[document.type]} />
+                <DocumentInfoLine label="Estado" value={status.label} />
+                <DocumentInfoLine label="Origen" value={document.source === 'backend' ? 'Backend' : 'Local'} />
               </div>
-              <div className="px-5 pb-5 space-y-3">
-                <InfoLine label="Cliente" value={document.customerName} />
-                <InfoLine label="Identificador de presupuesto" value={document.quoteId} />
-                <InfoLine label="Tipo" value={documentTypeLabel[document.type]} />
-                <InfoLine label="Estado" value={status.label} />
-                <InfoLine label="Origen" value={document.source === 'backend' ? 'Backend' : 'Local'} />
-              </div>
-            </section>
+            </DocumentSectionCard>
 
-            <section className={panelClassName}>
-              <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="h-5 w-[3px] rounded-full" style={{ backgroundColor: dashboardTheme.accentBars.expenses }} aria-hidden="true" />
-                  <h3 className="text-[14px] leading-none font-semibold" style={{ color: dashboardTheme.text }}>
-                    Acciones
-                  </h3>
-                </div>
-              </div>
-              <div className="px-5 pb-5 space-y-3">
+            <DocumentSectionCard title="Acciones" tone="expenses" className="h-full">
+              <div className="space-y-3">
                 <button
                   type="button"
                   onClick={handleOpenPdf}
@@ -256,39 +231,35 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
                   </div>
                 </div>
               </div>
-            </section>
+            </DocumentSectionCard>
           </div>
 
           {loading ? (
-            <div className={`${panelClassName} px-4 py-3 text-sm font-semibold`} style={{ borderColor: dashboardTheme.border, color: '#1d4ed8', background: '#eff6ff' }}>
+            <div className="rounded-[18px] border px-4 py-3 text-sm font-semibold shadow-[0_18px_40px_rgba(16,24,40,0.08)]" style={{ borderColor: dashboardTheme.border, color: '#1d4ed8', background: '#eff6ff' }}>
               Cargando detalle...
             </div>
           ) : null}
 
           {error ? (
-            <div className={`${panelClassName} px-4 py-3 text-sm font-semibold`} style={{ borderColor: '#fecaca', color: '#b91c1c', background: '#fef2f2' }}>
+            <div className="rounded-[18px] border px-4 py-3 text-sm font-semibold shadow-[0_18px_40px_rgba(16,24,40,0.08)]" style={{ borderColor: '#fecaca', color: '#b91c1c', background: '#fef2f2' }}>
               {error}
             </div>
           ) : null}
 
           {quote ? (
-            <section className={panelClassName}>
-              <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="h-5 w-[3px] rounded-full" style={{ backgroundColor: dashboardTheme.accentBars.transactions }} aria-hidden="true" />
-                  <h3 className="text-[14px] leading-none font-semibold" style={{ color: dashboardTheme.text }}>
-                    Presupuesto vinculado
-                  </h3>
-                </div>
-              </div>
-              <div className="px-5 pb-5 space-y-4">
+            <DocumentSectionCard
+              title="Presupuesto vinculado"
+              subtitle="Datos y líneas relacionadas"
+              tone="transactions"
+            >
+              <div className="space-y-4">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <InfoLine label="Cliente" value={quote.customerNombreComercial || quote.customerName} />
-                  <InfoLine label="Tarifa" value={quote.tariffCode} />
-                  <InfoLine label="Contacto" value={quote.contactEmail || quote.contactWhatsapp} />
-                  <InfoLine label="Total" value={formatCurrency(quote.total)} />
-                  <InfoLine label="Entrega" value={[quote.deliveryDireccionEntrega, quote.deliveryPoblacion].filter(Boolean).join(' · ') || null} />
-                  <InfoLine label="Validado" value={quote.validatedAt ? formatDate(quote.validatedAt) : 'Pendiente'} />
+                  <DocumentInfoLine label="Cliente" value={quote.customerNombreComercial || quote.customerName} />
+                  <DocumentInfoLine label="Tarifa" value={quote.tariffCode} />
+                  <DocumentInfoLine label="Contacto" value={quote.contactEmail || quote.contactWhatsapp} />
+                  <DocumentInfoLine label="Total" value={formatCurrency(quote.total)} />
+                  <DocumentInfoLine label="Entrega" value={[quote.deliveryDireccionEntrega, quote.deliveryPoblacion].filter(Boolean).join(' · ') || null} />
+                  <DocumentInfoLine label="Validado" value={quote.validatedAt ? formatDate(quote.validatedAt) : 'Pendiente'} />
                 </div>
 
                 <div className="rounded-[16px] border bg-white overflow-hidden" style={{ borderColor: dashboardTheme.border }}>
@@ -329,24 +300,26 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
                   </table>
                 </div>
               </div>
-            </section>
+            </DocumentSectionCard>
           ) : null}
 
           {selectedQuoteDocuments.length > 0 ? (
-            <section className={panelClassName}>
-              <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="h-5 w-[3px] rounded-full" style={{ backgroundColor: dashboardTheme.accentBars.histogram }} aria-hidden="true" />
-                  <h3 className="text-[14px] leading-none font-semibold" style={{ color: dashboardTheme.text }}>
-                    Documentos del presupuesto
-                  </h3>
-                </div>
-              </div>
-              <div className="px-5 pb-5 space-y-3">
+            <DocumentSectionCard title="Documentos del presupuesto" tone="histogram">
+              <div className="space-y-3">
                 {selectedQuoteDocuments.map(doc => (
                   <div
                     key={`${doc.tipo}:${doc.id}:${doc.numeroDocumento}:${doc.createdAt}`}
-                    className="rounded-[16px] border bg-white px-4 py-3"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Abrir documento asociado ${doc.tipo} ${doc.numeroDocumento}`}
+                    onClick={() => handleAssociatedDocumentOpen(doc)}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleAssociatedDocumentOpen(doc);
+                      }
+                    }}
+                    className="cursor-pointer rounded-[16px] border bg-white px-4 py-3 transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
                     style={{ borderColor: dashboardTheme.border }}
                   >
                     <div className="flex items-center justify-between gap-4">
@@ -365,30 +338,22 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
                   </div>
                 ))}
               </div>
-            </section>
+            </DocumentSectionCard>
           ) : null}
 
           {lifecycle ? (
-            <section className={panelClassName}>
-              <div className="px-5 pt-4 pb-3 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="h-5 w-[3px] rounded-full" style={{ backgroundColor: dashboardTheme.accentBars.issues }} aria-hidden="true" />
-                  <h3 className="text-[14px] leading-none font-semibold" style={{ color: dashboardTheme.text }}>
-                    Secuencia de documentos
-                  </h3>
-                </div>
+            <DocumentSectionCard title="Secuencia de documentos" tone="issues">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                <DocumentStatCard label="Presupuesto" value={lifecycle.presupuesto} />
+                <DocumentStatCard label="Pedido" value={lifecycle.pedido} />
+                <DocumentStatCard label="Albarán" value={lifecycle.albaran} />
+                <DocumentStatCard label="Factura" value={lifecycle.factura} />
+                <DocumentStatCard label="Abono" value={lifecycle.abono} />
               </div>
-              <div className="px-5 pb-5 grid grid-cols-2 gap-3 md:grid-cols-5">
-                <StatCard label="Presupuesto" value={lifecycle.presupuesto} />
-                <StatCard label="Pedido" value={lifecycle.pedido} />
-                <StatCard label="Albarán" value={lifecycle.albaran} />
-                <StatCard label="Factura" value={lifecycle.factura} />
-                <StatCard label="Abono" value={lifecycle.abono} />
-              </div>
-            </section>
+            </DocumentSectionCard>
           ) : null}
         </div>
       </div>
-    </AppDialog>
+    </DocumentPopupFrame>
   );
 };

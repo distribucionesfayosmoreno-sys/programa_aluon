@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ProjectDocumentRow, WorkOrderWorkflowStep } from './ProjectManagement.types';
 import { fetchOrderStatuses } from './services/ordersApi';
-import { ensureQuotePdfGenerated, quotePdfUrl } from './services/quotePdf';
 import { createDocumentManagementDocument, fetchDocumentManagementRows } from './services/documentManagementApi';
 
 const sortRowsByCreatedAt = (rows: ProjectDocumentRow[]): ProjectDocumentRow[] =>
@@ -90,35 +89,11 @@ export const useProjectManagement = () => {
     }
   };
 
-  const openPdf = async (row: ProjectDocumentRow) => {
-    setBusyProjectId(row.projectId);
-    setError('');
-    try {
-      if (!row.quoteId) {
-        throw new Error('No se puede abrir el documento porque no está vinculado a un presupuesto.');
-      }
-
-      if (row.type === 'PRESUPUESTO') {
-        await ensureQuotePdfGenerated(row.quoteId);
-        window.open(quotePdfUrl(row.quoteId), '_blank', 'noopener,noreferrer');
-        return;
-      }
-
-      const pdfUrl = `/api/quotes/${encodeURIComponent(row.quoteId)}/pdf?type=${encodeURIComponent(row.type)}&number=${encodeURIComponent(row.number)}`;
-      window.open(pdfUrl, '_blank', 'noopener,noreferrer');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo abrir el PDF.');
-    } finally {
-      setBusyProjectId(null);
-    }
-  };
-
   return {
     rows,
     busyProjectId,
     error,
     actions: {
-      openPdf,
       createDocument,
       updateDocumentRow,
     },

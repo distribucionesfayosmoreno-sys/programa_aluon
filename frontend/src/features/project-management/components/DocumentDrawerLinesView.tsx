@@ -20,9 +20,10 @@ type Props = {
   totals: Totals;
   formatEur: (value: number) => string;
   variant?: 'embedded' | 'full';
+  onLineClick?: () => void;
 };
 
-export const DocumentDrawerLinesView = ({ items, totals, formatEur, variant = 'full' }: Props) => (
+export const DocumentDrawerLinesView = ({ items, totals, formatEur, variant = 'full', onLineClick }: Props) => (
   <div
     className="flex flex-col bg-white"
     style={variant === 'embedded' ? { border: '1px solid #e5e7eb', borderRadius: 12, overflow: 'hidden' } : undefined}
@@ -50,7 +51,20 @@ export const DocumentDrawerLinesView = ({ items, totals, formatEur, variant = 'f
             </thead>
             <tbody>
               {items.map((item, idx) => (
-                <tr key={`${item.doorModel}:${idx}`} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                <tr
+                  key={`${item.doorModel}:${idx}`}
+                  style={{ borderBottom: '1px solid #f1f5f9', cursor: onLineClick ? 'pointer' : 'default' }}
+                  onClick={onLineClick}
+                  onKeyDown={event => {
+                    if (!onLineClick) return;
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      onLineClick();
+                    }
+                  }}
+                  role={onLineClick ? 'button' : undefined}
+                  tabIndex={onLineClick ? 0 : undefined}
+                >
                   <td className="px-3 py-2.5 text-xs font-bold" style={{ color: '#94a3b8' }}>
                     {idx + 1}
                   </td>

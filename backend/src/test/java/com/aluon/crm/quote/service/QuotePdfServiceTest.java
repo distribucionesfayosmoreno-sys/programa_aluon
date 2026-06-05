@@ -7,7 +7,6 @@ import com.aluon.crm.quote.model.QuoteChannel;
 import com.aluon.crm.quote.model.QuoteItem;
 import com.aluon.crm.quote.model.QuoteStatus;
 import com.aluon.crm.quote.model.QuoteValidationMode;
-import com.aluon.crm.quote.render.DeliveryNoteHtmlRenderer;
 import com.aluon.crm.quote.render.QuoteHtmlRenderer;
 import com.aluon.crm.quote.render.QuoteTemplateProperties;
 import com.aluon.production.cutlist.model.DoorModel;
@@ -39,8 +38,7 @@ class QuotePdfServiceTest {
                 null
         );
         QuoteHtmlRenderer renderer = new QuoteHtmlRenderer(props);
-        DeliveryNoteHtmlRenderer deliveryRenderer = new DeliveryNoteHtmlRenderer(props);
-        QuotePdfService service = new QuotePdfService(renderer, deliveryRenderer);
+        QuotePdfService service = new QuotePdfService(renderer);
 
         Customer customer = Customer.builder()
                 .id(UUID.randomUUID())
@@ -102,7 +100,7 @@ class QuotePdfServiceTest {
     }
 
     @Test
-    void rendersDeliveryNotePdfFromDedicatedTemplate() {
+    void rendersPdfForAlternateDocumentType() {
         QuoteTemplateProperties props = new QuoteTemplateProperties(
                 "#2563eb",
                 "ALUON",
@@ -117,8 +115,7 @@ class QuotePdfServiceTest {
                 null
         );
         QuoteHtmlRenderer renderer = new QuoteHtmlRenderer(props);
-        DeliveryNoteHtmlRenderer deliveryRenderer = new DeliveryNoteHtmlRenderer(props);
-        QuotePdfService service = new QuotePdfService(renderer, deliveryRenderer);
+        QuotePdfService service = new QuotePdfService(renderer);
 
         Customer customer = Customer.builder()
                 .id(UUID.randomUUID())

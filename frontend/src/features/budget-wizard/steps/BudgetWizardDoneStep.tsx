@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import type { QuoteResponse } from '../../customer-onboarding/models';
 import type { QuoteItemDraft } from '../BudgetWizard.types';
 import AppDialog from '../../../components/feedback/AppDialog';
+import { Customer360DocumentModal } from '../../customer-360/Customer360DocumentModal';
+import type { Customer360DocumentItem } from '../../customer-360/customer360Types';
 
 type Props = {
   quote: QuoteResponse;
@@ -16,24 +18,19 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
   const [emailModalOpen, setEmailModalOpen] = useState(false);
   const [targetEmail, setTargetEmail] = useState(quote.contactEmail || '');
   const [sentStatus, setSentStatus] = useState<string | null>(null);
-  const [pdfOpening, setPdfOpening] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<Customer360DocumentItem | null>(null);
 
-  const openQuotePdf = async () => {
-    if (pdfOpening) return;
-    setPdfOpening(true);
-    try {
-      const response = await fetch(`/api/quotes/${encodeURIComponent(quote.id)}/pdf`, { method: 'POST' });
-      if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || 'Error al generar el PDF');
-      }
-      window.open(`/api/quotes/${encodeURIComponent(quote.id)}/pdf`, '_blank', 'noopener,noreferrer');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'No se pudo abrir el PDF.';
-      alert(message);
-    } finally {
-      setPdfOpening(false);
-    }
+  const openPreviewModal = () => {
+    setPreviewDocument({
+      id: quote.id,
+      type: 'PRESUPUESTO',
+      number: quote.quoteNumber,
+      statusLabel: String(quote.status),
+      createdAt: quote.createdAt,
+      quoteId: quote.id,
+      customerName: quote.customerNombreComercial || quote.customerName,
+      source: 'backend',
+    });
   };
 
   const handleSendEmail = async (e: React.FormEvent) => {
@@ -69,7 +66,7 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
     } else if (postFinalizeAction === 'WHATSAPP') {
       handleSendWhatsapp();
     } else if (postFinalizeAction === 'VIEW') {
-      openQuotePdf();
+      openPreviewModal();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postFinalizeAction]);
@@ -235,12 +232,11 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
           {/* Print Button */}
           <button
             type="button"
-            onClick={openQuotePdf}
-            disabled={pdfOpening}
+            onClick={openPreviewModal}
             className="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-outline-variant bg-surface text-on-surface hover:bg-surface-container font-black text-xs uppercase tracking-wider transition-colors shadow-sm"
           >
-            <span className="material-symbols-outlined text-sm">{pdfOpening ? 'hourglass_empty' : 'picture_as_pdf'}</span>
-            {pdfOpening ? 'Generando…' : 'Ver PDF'}
+            <span className="material-symbols-outlined text-sm">visibility</span>
+            Ver documento
           </button>
 
           {/* New Budget Button */}
@@ -298,6 +294,13 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
           )}
         </form>
       </AppDialog>
+
+      <Customer360DocumentModal
+        open={Boolean(previewDocument)}
+        document={previewDocument}
+        onOpenDocument={setPreviewDocument}
+        onClose={() => setPreviewDocument(null)}
+      />
     </div>
   );
 };
