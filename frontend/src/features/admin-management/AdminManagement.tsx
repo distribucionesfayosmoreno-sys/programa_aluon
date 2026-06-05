@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { AdminUsersPanel } from './AdminUsersPanel';
 import { ProductCatalogManagement } from './ProductCatalogManagement';
+import SocialMediaManagement from './SocialMediaManagement';
 import type { AdminManagementTab } from './AdminManagement.types';
 
 const tabs: Array<{ id: AdminManagementTab; label: string; description: string }> = [
   { id: 'USERS', label: 'Usuarios', description: 'Alta, edición y eliminación de empleados.' },
   { id: 'PRODUCT_FAMILIES', label: 'Familias de producto', description: 'Catálogo visual para presupuestos.' },
+  { id: 'SOCIAL_MEDIA', label: 'RRSS', description: 'Publicaciones internas y configuración por red.' },
 ];
 
 const AdminManagement = () => {
@@ -22,7 +24,7 @@ const AdminManagement = () => {
             </h1>
           </div>
           <p className="text-xs font-semibold uppercase tracking-wide ml-3.5 mt-0.5" style={{ color: '#9ca3af' }}>
-            Usuarios y catálogo configurable de presupuestos
+            Usuarios, catálogo y publicaciones RRSS
           </p>
         </div>
       </div>
@@ -53,7 +55,7 @@ const AdminManagement = () => {
       </div>
 
       <div className="flex-1 min-h-0">
-        {activeTab === 'USERS' ? <AdminUsersPanel /> : <ProductCatalogManagement />}
+        {activeTab === 'USERS' ? <AdminUsersPanel /> : activeTab === 'PRODUCT_FAMILIES' ? <ProductCatalogManagement /> : <SocialMediaManagement />}
       </div>
     </div>
   );

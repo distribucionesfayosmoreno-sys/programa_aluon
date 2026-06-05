@@ -1,7 +1,7 @@
 import type { DoorType } from '../customer-onboarding/models';
 import type { ProductCategory } from '../budget-wizard/BudgetWizard.types';
 
-export type AdminManagementTab = 'USERS' | 'PRODUCT_FAMILIES';
+export type AdminManagementTab = 'USERS' | 'PRODUCT_FAMILIES' | 'SOCIAL_MEDIA';
 
 export type ProductCatalogChild = {
   id: string;
