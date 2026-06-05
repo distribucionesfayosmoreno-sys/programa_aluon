@@ -43,6 +43,12 @@ if [ "$ACTIVE_PROFILE" = "local" ] && [ -f "$PROJECT_ROOT/infra/.env.local" ]; t
   set +a
 fi
 
+# Forzar que el backend local use la BBDD levantada por Docker en este script
+# en lugar de caer al fallback remoto definido en application-*.yml.
+export SPRING_DATASOURCE_URL="${SPRING_DATASOURCE_URL:-jdbc:postgresql://localhost:${DB_PORT}/${DB_NAME:-aluonbbdd}}"
+export SPRING_DATASOURCE_USERNAME="${SPRING_DATASOURCE_USERNAME:-${DB_USER:-aluon}}"
+export SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD:-${DB_PASSWORD:-aluon}}"
+
 # Configurar JAVA_HOME para usar OpenJDK 21 instalado mediante Homebrew
 export JAVA_HOME="/usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 
@@ -72,9 +78,9 @@ fi
 echo "🗄️  Aplicando migraciones SQL en la BBDD local..."
 cd "$PROJECT_ROOT/backend"
 ./mvnw -q -DskipTests \
-  -Dflyway.url="${SPRING_DATASOURCE_URL:-jdbc:postgresql://localhost:3000/${DB_NAME:-aluonbbdd}}" \
-  -Dflyway.user="${SPRING_DATASOURCE_USERNAME:-${DB_USER:-aluon}}" \
-  -Dflyway.password="${SPRING_DATASOURCE_PASSWORD:-${DB_PASSWORD:-aluon}}" \
+  -Dflyway.url="${SPRING_DATASOURCE_URL}" \
+  -Dflyway.user="${SPRING_DATASOURCE_USERNAME}" \
+  -Dflyway.password="${SPRING_DATASOURCE_PASSWORD}" \
   flyway:repair flyway:migrate
 
 echo "🚀 Iniciando Backend (Java 21 + Spring Boot)..."
