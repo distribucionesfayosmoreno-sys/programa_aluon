@@ -10,10 +10,9 @@ type WorkflowProgressParams = {
   adminApproved: boolean;
   developmentGenerated: boolean;
   cutlistGenerated: boolean;
-  prodCut: boolean;
-  prodFab: boolean;
-  prodLac: boolean;
-  prodLacControl: boolean;
+  allStationsCompleted: boolean;
+  stationCompletedCount: number;
+  stationTotalCount: number;
   finalized: boolean;
   ready: '' | 'PICKUP' | 'SHIPPING';
   selectedRequestId: string | null;
@@ -28,16 +27,16 @@ export const useWorkflowProgress = ({
   adminApproved,
   developmentGenerated,
   cutlistGenerated,
-  prodCut,
-  prodFab,
-  prodLac,
-  prodLacControl,
+  allStationsCompleted,
+  stationCompletedCount,
+  stationTotalCount,
   finalized,
   ready,
   selectedRequestId,
 }: WorkflowProgressParams) => {
-  const productionSteps = [prodCut, prodFab, prodLac, prodLacControl];
-  const productionPct = Math.round((productionSteps.filter(Boolean).length / productionSteps.length) * 100);
+  const productionPct = stationTotalCount > 0
+    ? Math.round((stationCompletedCount / stationTotalCount) * 100)
+    : 0;
 
   const overallPct = useMemo(() => {
     const checks = [
@@ -47,10 +46,7 @@ export const useWorkflowProgress = ({
       adminApproved,
       developmentGenerated,
       cutlistGenerated,
-      prodCut,
-      prodFab,
-      prodLac,
-      prodLacControl,
+      allStationsCompleted,
       finalized,
       ready !== '',
     ];
@@ -65,20 +61,17 @@ export const useWorkflowProgress = ({
     adminApproved,
     developmentGenerated,
     cutlistGenerated,
-    prodCut,
-    prodFab,
-    prodLac,
-    prodLacControl,
+    allStationsCompleted,
     finalized,
     ready,
   ]);
 
   const canStartProduction = budgetGenerated && accountingApproved && adminApproved && developmentGenerated && cutlistGenerated;
-  const canFinalize = canStartProduction && prodCut && prodFab && prodLac && prodLacControl;
+  const canFinalize = canStartProduction && allStationsCompleted;
 
   const resolveWorkflowStep = (): TabKey => {
     if (finalized && ready !== '') return 'FINAL';
-    if (prodCut && prodFab && prodLac && prodLacControl) return 'PROD';
+    if (allStationsCompleted) return 'PROD';
     if (developmentGenerated && cutlistGenerated) return 'DEV';
     if (adminApproved) return 'VALIDATION';
     if (budgetGenerated && accountingApproved) return 'BUDGET';
@@ -92,7 +85,7 @@ export const useWorkflowProgress = ({
     { key: 'BUDGET', label: 'Presupuesto', done: budgetGenerated && accountingApproved },
     { key: 'VALIDATION', label: 'Validación ptos', done: adminApproved },
     { key: 'DEV', label: 'Desarrollo', done: developmentGenerated && cutlistGenerated },
-    { key: 'PROD', label: 'Producción', done: prodCut && prodFab && prodLac && prodLacControl },
+    { key: 'PROD', label: 'Producción', done: allStationsCompleted },
     { key: 'FINAL', label: 'Finalización', done: finalized && ready !== '' },
   ];
 

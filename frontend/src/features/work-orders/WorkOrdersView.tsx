@@ -1,4 +1,5 @@
 import type { UseWorkOrdersResult } from './hooks/useWorkOrders';
+import type { UseProductionStationsResult } from './hooks/useProductionStations';
 import { useMemo, useState } from 'react';
 import { WorkOrdersTabs } from './components/WorkOrdersTabs';
 import { WorkOrdersBody } from './components/WorkOrdersBody';
@@ -9,7 +10,7 @@ import ErrorDialog from '../../components/feedback/ErrorDialog';
 import ConfirmDialog from '../../components/feedback/ConfirmDialog';
 import { MODELS } from './constants';
 
-export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
+export const WorkOrdersView = ({ ctx, production }: { ctx: UseWorkOrdersResult; production: UseProductionStationsResult }) => {
   const INBOX = 'INBOX' as UseWorkOrdersResult['tab'];
   const { dev, onOpenNewRequest } = useWorkOrdersViewModel(ctx);
   const [pendingTab, setPendingTab] = useState<UseWorkOrdersResult['tab'] | null>(null);
@@ -135,8 +136,8 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
         }
         return null;
       case 'FINAL':
-        if (!ctx.prodCut || !ctx.prodFab || !ctx.prodLac || !ctx.prodLacControl) {
-          return 'Completa todos los hitos de producción antes de finalizar.';
+        if (!production.allCompleted) {
+          return 'Completa todas las estaciones de producción antes de finalizar.';
         }
         return null;
       default:
@@ -153,10 +154,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
     ctx.adminApproved,
     ctx.developmentGenerated,
     ctx.cutlistGenerated,
-    ctx.prodCut,
-    ctx.prodFab,
-    ctx.prodLac,
-    ctx.prodLacControl,
+    production.allCompleted,
   ]);
 
   const persistWorkflowStep = async (
@@ -294,6 +292,7 @@ export const WorkOrdersView = ({ ctx }: { ctx: UseWorkOrdersResult }) => {
       <WorkOrdersBody
         ctx={ctx}
         dev={dev}
+        production={production}
         advance={{
           onAdvanceStep: handleAdvanceStep,
           canAdvanceStep: Boolean(nextStep && !advanceBlockReason),

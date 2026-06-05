@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { readImageAsDataUrl } from './productCatalogImage';
 import type { ProductCatalogFamily, ProductCatalogFamilyForm } from './AdminManagement.types';
+import AppDialog from '../../components/feedback/AppDialog';
 
 type Props = {
   family?: ProductCatalogFamily | null;
@@ -28,18 +29,23 @@ export const ProductCatalogFamilyModal = ({ family, saving, onClose, onSave }: P
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
-      <div className="absolute inset-0" onClick={onClose} />
-      <form onSubmit={handleSubmit} className="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-          <div>
-            <div className="text-sm font-black uppercase tracking-wider">{family ? 'Editar familia' : 'Nueva familia'}</div>
-            <div className="text-xs mt-1 text-slate-500">Configura la card principal que se mostrará en presupuestos.</div>
-          </div>
-          <button type="button" className="btn-ghost" onClick={onClose}>Cerrar</button>
-        </div>
-
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <AppDialog
+      open={true}
+      title={family ? 'Editar familia' : 'Nueva familia'}
+      subtitle="Configura la card principal que se mostrará en presupuestos."
+      onClose={onClose}
+      maxWidthClassName="max-w-2xl"
+      actions={
+        <>
+          <button type="button" className="btn-ghost" onClick={onClose}>Cancelar</button>
+          <button type="submit" form="family-form" className="btn-primary" disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar familia'}
+          </button>
+        </>
+      }
+    >
+      <form id="family-form" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="field-label">Nombre *</label>
             <input className="field" value={form.name} onChange={event => setForm(prev => ({ ...prev, name: event.target.value }))} required />
@@ -88,12 +94,7 @@ export const ProductCatalogFamilyModal = ({ family, saving, onClose, onSave }: P
             {form.imageUrl && <img src={form.imageUrl} alt="Vista previa familia" className="mt-3 h-32 w-full rounded-2xl object-cover border border-slate-200" />}
           </div>
         </div>
-
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
-          <button type="button" className="btn-ghost" onClick={onClose}>Cancelar</button>
-          <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Guardando...' : 'Guardar familia'}</button>
-        </div>
       </form>
-    </div>
+    </AppDialog>
   );
 };

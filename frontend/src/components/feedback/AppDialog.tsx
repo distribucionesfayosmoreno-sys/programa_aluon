@@ -18,10 +18,10 @@ interface AppDialogProps {
 }
 
 const toneStyles: Record<DialogTone, { header: string; accent: string; iconBg: string }> = {
-  neutral: { header: '#0d1117', accent: 'var(--accent)', iconBg: 'var(--accent-shadow-light)' },
-  danger: { header: '#190b0b', accent: 'var(--danger)', iconBg: 'var(--danger-bg)' },
-  success: { header: '#0b1711', accent: '#16a34a', iconBg: '#dcfce7' },
-  warning: { header: '#1f1305', accent: '#d97706', iconBg: '#fef3c7' },
+  neutral: { header: '#ffffff', accent: 'var(--accent)', iconBg: '#eff6ff' },
+  danger: { header: '#ffffff', accent: 'var(--danger)', iconBg: '#fef2f2' },
+  success: { header: '#ffffff', accent: '#16a34a', iconBg: '#dcfce7' },
+  warning: { header: '#ffffff', accent: '#d97706', iconBg: '#fef3c7' },
 };
 
 const AppDialog: React.FC<AppDialogProps> = ({
@@ -62,7 +62,7 @@ const AppDialog: React.FC<AppDialogProps> = ({
   const content = (
     <div
       className="absolute inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-      style={{ background: 'rgba(13,17,23,0.70)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(16,24,40,0.35)', backdropFilter: 'blur(4px)' }}
       role="dialog"
       aria-modal="true"
     >
@@ -74,7 +74,7 @@ const AppDialog: React.FC<AppDialogProps> = ({
         {headerVariant === 'bar' ? (
           <div
             className="flex items-center justify-between px-7 py-5"
-            style={{ background: styles.header, borderBottom: '1px solid #21262d' }}
+            style={{ background: styles.header, borderBottom: '1px solid #eef1f6' }}
           >
             <div className="flex items-center gap-3.5">
               {icon && (
@@ -86,11 +86,11 @@ const AppDialog: React.FC<AppDialogProps> = ({
                 </div>
               )}
               <div>
-                <h2 style={{ fontSize: 13, fontWeight: 900, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <h2 style={{ fontSize: 13, fontWeight: 900, color: '#101828', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   {title}
                 </h2>
                 {subtitle && (
-                  <p style={{ fontSize: 10, fontWeight: 600, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
+                  <p style={{ fontSize: 10, fontWeight: 600, color: '#667085', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: 2 }}>
                     {subtitle}
                   </p>
                 )}
@@ -99,9 +99,9 @@ const AppDialog: React.FC<AppDialogProps> = ({
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-200"
-              style={{ color: '#8b949e' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#21262d'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#8b949e'; }}
+              style={{ color: '#667085' }}
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#f1f5f9'; e.currentTarget.style.color = '#101828'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#667085'; }}
               aria-label="Cerrar"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

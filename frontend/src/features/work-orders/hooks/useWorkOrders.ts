@@ -16,14 +16,20 @@ export type UseWorkOrdersResult = ReturnType<typeof useWorkOrders>;
 export const useWorkOrders = ({
   openNewRequest,
   onNewRequestHandled,
+  allStationsCompleted = false,
+  stationCompletedCount = 0,
+  stationTotalCount = 7,
 }: {
   openNewRequest?: boolean;
   onNewRequestHandled?: () => void;
+  allStationsCompleted?: boolean;
+  stationCompletedCount?: number;
+  stationTotalCount?: number;
 }) => {
   const { customers } = useCustomers();
   const base = useWorkOrderBaseState();
 
-  const { requests, setRequests, customerId, setCustomerId, modelId, setModelId, modelReference, setModelReference, modelImage, setModelImage, m2, setM2, googleView, setGoogleView, notes, setNotes, developmentGenerated, setDevelopmentGenerated, prodCut, setProdCut, prodFab, setProdFab, prodLac, setProdLac, prodLacControl, setProdLacControl, finalized, setFinalized, ready, setReady, selectedRequestId, setSelectedRequestId, setTab, setShowRequestModal } = base;
+  const { requests, setRequests, customerId, setCustomerId, modelId, setModelId, modelReference, setModelReference, modelImage, setModelImage, m2, setM2, googleView, setGoogleView, notes, setNotes, developmentGenerated, setDevelopmentGenerated, setProdCut, setProdFab, setProdLac, setProdLacControl, finalized, setFinalized, ready, setReady, selectedRequestId, setSelectedRequestId, setTab, setShowRequestModal } = base;
 
   const selectedModel = useMemo(() => MODELS.find(m => m.id === modelId) ?? MODELS[0], [modelId]);
   const hasModelRef = Boolean(modelReference.trim()) || Boolean(modelImage);
@@ -74,10 +80,9 @@ export const useWorkOrders = ({
     adminApproved: budget.adminApproved,
     developmentGenerated,
     cutlistGenerated: cutlist.cutlistGenerated,
-    prodCut,
-    prodFab,
-    prodLac,
-    prodLacControl,
+    allStationsCompleted,
+    stationCompletedCount,
+    stationTotalCount,
     finalized,
     ready,
     selectedRequestId,

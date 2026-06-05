@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { QuoteResponse } from '../../customer-onboarding/models';
 import type { QuoteItemDraft } from '../BudgetWizard.types';
+import AppDialog from '../../../components/feedback/AppDialog';
 
 type Props = {
   quote: QuoteResponse;
@@ -254,48 +255,49 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
       </div>
 
       {/* Email Modal overlay */}
-      {emailModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-xs">
-          <div className="bg-surface rounded-2xl max-w-sm w-full p-6 shadow-xl border border-outline-variant/30">
-            <h3 className="text-sm font-black text-on-surface">Enviar por email</h3>
-            <p className="text-[10px] text-secondary mt-1">Introduce el correo electrónico.</p>
+      <AppDialog
+        open={emailModalOpen}
+        onClose={() => setEmailModalOpen(false)}
+        title="Enviar por email"
+        subtitle="Introduce el correo electrónico."
+        maxWidthClassName="max-w-sm"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setEmailModalOpen(false)}
+              className="px-4 py-2 border border-outline-variant/30 text-secondary hover:bg-surface-container rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="email-form"
+              disabled={submitting}
+              className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+            >
+              {submitting ? 'Enviando...' : 'Enviar'}
+            </button>
+          </>
+        }
+      >
+        <form id="email-form" onSubmit={handleSendEmail} className="space-y-4">
+          <input
+            type="email"
+            required
+            className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs focus:ring-1 focus:ring-primary outline-none"
+            placeholder="correo@ejemplo.com"
+            value={targetEmail}
+            onChange={e => setTargetEmail(e.target.value)}
+          />
 
-            <form onSubmit={handleSendEmail} className="mt-4 space-y-4">
-              <input
-                type="email"
-                required
-                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-3 text-xs focus:ring-1 focus:ring-primary outline-none"
-                placeholder="correo@ejemplo.com"
-                value={targetEmail}
-                onChange={e => setTargetEmail(e.target.value)}
-              />
-
-              {sentStatus && (
-                <div className="text-[10px] font-semibold text-center text-blue-600">
-                  {sentStatus}
-                </div>
-              )}
-
-              <div className="flex gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setEmailModalOpen(false)}
-                  className="px-4 py-2 border border-outline-variant/30 text-secondary hover:bg-surface-container rounded-xl text-[10px] font-bold uppercase tracking-wider"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-wider"
-                >
-                  {submitting ? 'Enviando...' : 'Enviar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+          {sentStatus && (
+            <div className="text-[10px] font-semibold text-center text-blue-600">
+              {sentStatus}
+            </div>
+          )}
+        </form>
+      </AppDialog>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import type { DoorType } from '../customer-onboarding/models';
 import type { ProductCategory } from '../budget-wizard/BudgetWizard.types';
 import { readImageAsDataUrl } from './productCatalogImage';
 import type { ProductCatalogChild, ProductCatalogChildForm, ProductCatalogFamily } from './AdminManagement.types';
+import AppDialog from '../../components/feedback/AppDialog';
 
 type Props = {
   child?: ProductCatalogChild | null;
@@ -37,21 +38,26 @@ export const ProductCatalogChildModal = ({ child, defaultFamilyId, families, sav
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
-      <div className="absolute inset-0" onClick={onClose} />
-      <form onSubmit={handleSubmit} className="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden">
-        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-          <div>
-            <div className="text-sm font-black uppercase tracking-wider">{child ? 'Editar hijo' : 'Nuevo hijo'}</div>
-            <div className="text-xs mt-1 text-slate-500">Estas opciones son las cards del segundo paso del wizard.</div>
-          </div>
-          <button type="button" className="btn-ghost" onClick={onClose}>Cerrar</button>
-        </div>
-
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <AppDialog
+      open={true}
+      title={child ? 'Editar hijo' : 'Nuevo hijo'}
+      subtitle="Estas opciones son las cards del segundo paso del wizard."
+      onClose={onClose}
+      maxWidthClassName="max-w-2xl"
+      actions={
+        <>
+          <button type="button" className="btn-ghost" onClick={onClose}>Cancelar</button>
+          <button type="submit" form="child-form" className="btn-primary" disabled={saving}>
+            {saving ? 'Guardando...' : 'Guardar hijo'}
+          </button>
+        </>
+      }
+    >
+      <form id="child-form" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="field-label">Familia *</label>
-            <select className="field" value={form.familyId} onChange={event => setForm(prev => ({ ...prev, familyId: event.target.value }))} required>
+            <select className="field w-full" value={form.familyId} onChange={event => setForm(prev => ({ ...prev, familyId: event.target.value }))} required>
               <option value="">Selecciona una familia</option>
               {families.map(family => (
                 <option key={family.id} value={family.id}>{family.name}</option>
@@ -60,11 +66,11 @@ export const ProductCatalogChildModal = ({ child, defaultFamilyId, families, sav
           </div>
           <div>
             <label className="field-label">Nombre visible *</label>
-            <input className="field" value={form.name} onChange={event => setForm(prev => ({ ...prev, name: event.target.value }))} required />
+            <input className="field w-full" value={form.name} onChange={event => setForm(prev => ({ ...prev, name: event.target.value }))} required />
           </div>
           <div>
             <label className="field-label">Categoría técnica *</label>
-            <select className="field" value={form.productCategory} onChange={event => setForm(prev => ({ ...prev, productCategory: event.target.value as ProductCategory }))}>
+            <select className="field w-full" value={form.productCategory} onChange={event => setForm(prev => ({ ...prev, productCategory: event.target.value as ProductCategory }))}>
               {productCategories.map(category => (
                 <option key={category} value={category}>{category}</option>
               ))}
@@ -72,7 +78,7 @@ export const ProductCatalogChildModal = ({ child, defaultFamilyId, families, sav
           </div>
           <div>
             <label className="field-label">Tipo técnico *</label>
-            <select className="field" value={form.doorType} onChange={event => setForm(prev => ({ ...prev, doorType: event.target.value as DoorType }))}>
+            <select className="field w-full" value={form.doorType} onChange={event => setForm(prev => ({ ...prev, doorType: event.target.value as DoorType }))}>
               {doorTypes.map(doorType => (
                 <option key={doorType} value={doorType}>{doorType}</option>
               ))}
@@ -80,11 +86,11 @@ export const ProductCatalogChildModal = ({ child, defaultFamilyId, families, sav
           </div>
           <div className="md:col-span-2">
             <label className="field-label">Texto descriptivo</label>
-            <textarea className="field min-h-24" value={form.description} onChange={event => setForm(prev => ({ ...prev, description: event.target.value }))} />
+            <textarea className="field w-full min-h-24" value={form.description} onChange={event => setForm(prev => ({ ...prev, description: event.target.value }))} />
           </div>
           <div>
             <label className="field-label">Orden</label>
-            <input className="field" type="number" value={form.sortOrder} onChange={event => setForm(prev => ({ ...prev, sortOrder: Number(event.target.value) || 0 }))} />
+            <input className="field w-full" type="number" value={form.sortOrder} onChange={event => setForm(prev => ({ ...prev, sortOrder: Number(event.target.value) || 0 }))} />
           </div>
           <div className="flex items-center gap-3 pt-7">
             <input id="child-active" type="checkbox" checked={form.active} onChange={event => setForm(prev => ({ ...prev, active: event.target.checked }))} />
@@ -110,12 +116,7 @@ export const ProductCatalogChildModal = ({ child, defaultFamilyId, families, sav
             {form.imageUrl && <img src={form.imageUrl} alt="Vista previa hijo" className="mt-3 h-32 w-full rounded-2xl object-cover border border-slate-200" />}
           </div>
         </div>
-
-        <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3">
-          <button type="button" className="btn-ghost" onClick={onClose}>Cancelar</button>
-          <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Guardando...' : 'Guardar hijo'}</button>
-        </div>
       </form>
-    </div>
+    </AppDialog>
   );
 };

@@ -1,5 +1,6 @@
 import type { UseWorkOrdersResult } from '../hooks/useWorkOrders';
 import type { DevelopmentSectionProps } from '../sections/development/DevelopmentSection.types';
+import type { UseProductionStationsResult } from '../hooks/useProductionStations';
 import { BudgetModal } from './BudgetModal';
 import { NewRequestModal } from './NewRequestModal';
 import { WorkOrderModal } from './WorkOrderModal';
@@ -16,6 +17,7 @@ import ErrorDialog from '../../../components/feedback/ErrorDialog';
 type WorkOrdersBodyProps = {
   ctx: UseWorkOrdersResult;
   dev: DevelopmentSectionProps;
+  production: UseProductionStationsResult;
   advance: {
     onAdvanceStep: () => void;
     canAdvanceStep: boolean;
@@ -25,7 +27,7 @@ type WorkOrdersBodyProps = {
   onFinalizeOrder: () => void;
 };
 
-export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrdersBodyProps) => {
+export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder }: WorkOrdersBodyProps) => {
   const {
     customers,
     requests,
@@ -40,10 +42,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
     adminApproved,
     developmentGenerated,
     cutlistGenerated,
-    prodCut,
-    prodFab,
-    prodLac,
-    prodLacControl,
+
     finalized,
     ready,
     selectedRequestId,
@@ -55,13 +54,12 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
     hasModelRef,
     canGenerateBudget,
     budget,
-    productionPct,
+
     pendingBudgets,
     budgetValidationError,
     setBudgetValidationError,
     approverUserId,
     canStartProduction,
-    canFinalize,
     budgetData,
     workOrderData,
     setCustomerId,
@@ -71,10 +69,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
     setM2,
     setGoogleView,
     setNotes,
-    setProdCut,
-    setProdFab,
-    setProdLac,
-    setProdLacControl,
+
     setFinalized,
     setReady,
     setSelectedRequestId,
@@ -108,11 +103,9 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
   const highlightDevelopment = tab === 'DEV' && !developmentGenerated;
   const highlightCutlist = tab === 'DEV' && developmentGenerated && !cutlistGenerated;
 
-  const highlightProdCut = tab === 'PROD' && !prodCut;
-  const highlightProdFab = tab === 'PROD' && !prodFab;
-  const highlightProdLac = tab === 'PROD' && !prodLac;
-  const highlightProdLacControl = tab === 'PROD' && !prodLacControl;
-  const canPersistFinal = canFinalize && ready !== '';
+
+  const effectiveCanFinalize = canStartProduction && production.allCompleted;
+  const canPersistFinal = effectiveCanFinalize && ready !== '';
   const visiblePendingBudgets = selectedRequestId
     ? pendingBudgets.filter(budget => budget.requestId === selectedRequestId)
     : pendingBudgets;
@@ -207,23 +200,11 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
 
           {tab === 'PROD' && (
             <ProductionSection
-              productionPct={productionPct}
-              prodCut={prodCut}
-              prodFab={prodFab}
-              prodLac={prodLac}
-              prodLacControl={prodLacControl}
+              production={production}
               canStartProduction={canStartProduction}
               cutlistGenerated={cutlistGenerated}
               cutlistResult={Boolean(dev.cutlist.cutlistResult)}
-              onProdCutChange={value => setProdCut(value)}
-              onProdFabChange={value => setProdFab(value)}
-              onProdLacChange={value => setProdLac(value)}
-              onProdLacControlChange={value => setProdLacControl(value)}
               onOpenWorkOrderModal={() => setShowWorkOrderModal(true)}
-              highlightProdCut={highlightProdCut}
-              highlightProdFab={highlightProdFab}
-              highlightProdLac={highlightProdLac}
-              highlightProdLacControl={highlightProdLacControl}
               onAdvanceStep={advance.onAdvanceStep}
               canAdvanceStep={advance.canAdvanceStep}
               nextStepLabel={advance.nextStepLabel}
@@ -235,7 +216,7 @@ export const WorkOrdersBody = ({ ctx, dev, advance, onFinalizeOrder }: WorkOrder
             <FinalSection
               finalized={finalized}
               ready={ready}
-              canFinalize={canFinalize}
+              canFinalize={effectiveCanFinalize}
               onFinalizedChange={value => setFinalized(value)}
               onReadyChange={value => setReady(value)}
               onAdvanceStep={advance.onAdvanceStep}
