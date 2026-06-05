@@ -83,13 +83,13 @@ export const openBudgetWizardForCustomer = (customer: {
     window.history.replaceState(
       {
         ...currentState,
-        budgetWizardStep: 'CLIENTE',
+        budgetWizardStep: 'MODELO',
         budgetWizardPrefillCustomer: prefill,
       },
       '',
       `${window.location.pathname}${window.location.hash}`,
     );
   }
-  emitBudgetWizardLaunch('CLIENTE');
+  emitBudgetWizardLaunch('MODELO');
   navigateToModule('presupuestos');
 };
