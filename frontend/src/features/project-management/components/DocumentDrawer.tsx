@@ -280,7 +280,13 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onRowUpdated }: 
                 onChange={isEditing ? quoteEdit.patch : undefined}
               />
               <Section title="Líneas">
-                <DocumentDrawerLinesView items={quoteData.items} totals={quoteData.totals} formatEur={fmtEur} variant="embedded" />
+                <DocumentDrawerLinesView
+                  items={quoteData.items}
+                  totals={quoteData.totals}
+                  formatEur={fmtEur}
+                  variant="embedded"
+                  onLineClick={() => void handleView()}
+                />
               </Section>
             </>
           )

@@ -12,6 +12,7 @@ import com.aluon.crm.quote.model.QuoteValidationMode;
 import com.aluon.crm.quote.repository.QuoteDocumentRepository;
 import com.aluon.crm.quote.repository.QuoteItemRepository;
 import com.aluon.crm.quote.repository.QuoteRequestRepository;
+import com.aluon.crm.quote.service.QuotePdfService;
 import com.aluon.production.cutlist.model.DoorModel;
 import com.aluon.production.cutlist.model.DoorType;
 import com.aluon.production.order.model.Order;
@@ -26,7 +27,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -38,6 +38,7 @@ import java.util.UUID;
 
 @Component
 @Profile("local")
+@org.springframework.core.annotation.Order(1)
 @RequiredArgsConstructor
 public class LocalJuneWorkflowSeeder implements ApplicationRunner {
 
@@ -49,6 +50,7 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
     private final QuoteRequestRepository quoteRequestRepository;
     private final QuoteItemRepository quoteItemRepository;
     private final QuoteDocumentRepository quoteDocumentRepository;
+    private final QuotePdfService quotePdfService;
     private final OrderRepository orderRepository;
 
     @Override
@@ -179,8 +181,8 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
                 .build();
     }
 
-    private static QuoteDocument doc(QuoteRequest quote, String tipo, String numero, String createdAt) {
-        byte[] data = ("demo-" + tipo + "-" + numero).getBytes(StandardCharsets.UTF_8);
+    private QuoteDocument doc(QuoteRequest quote, String tipo, String numero, String createdAt) {
+        byte[] data = renderPdf(quote, tipo, numero);
         return QuoteDocument.builder()
                 .quoteRequest(quote)
                 .tipo(tipo)
@@ -190,6 +192,14 @@ public class LocalJuneWorkflowSeeder implements ApplicationRunner {
                 .data(data)
                 .createdAt(LocalDateTime.parse(createdAt))
                 .build();
+    }
+
+    private byte[] renderPdf(QuoteRequest quote, String tipo, String numero) {
+        String normalizedType = tipo == null ? "" : tipo.trim().toUpperCase();
+        if ("PRESUPUESTO".equals(normalizedType) || normalizedType.isBlank()) {
+            return quotePdfService.renderQuotePdf(quote);
+        }
+        return quotePdfService.renderQuotePdf(quote, normalizedType, numero);
     }
 
     private static Order order(

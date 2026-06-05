@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import AppDialog from '../../components/feedback/AppDialog';
 import type { QuoteResponse } from '../customer-onboarding/models';
 import { dashboardTheme } from '../dashboard/dashboardTheme';
 import type { Customer360DocumentItem } from './customer360Types';
 import { fetchLifecycleNumbers, fetchQuoteById, listQuoteDocuments, quoteDocumentPdfUrl } from '../project-management/services/quoteDetailsApi';
 import { ensureQuotePdfGenerated, quotePdfUrl } from '../project-management/services/quotePdf';
 import type { QuoteDocumentRowResponse, QuoteLifecycleNumbersResponse } from '../project-management/components/DocumentDrawer.types';
+import { DocumentPopupFrame } from '../documents/components/DocumentPopupFrame';
 
 type Props = {
   open: boolean;
@@ -168,14 +168,11 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
   const status = statusTone(document.type, document.statusLabel);
 
   return (
-    <AppDialog
+    <DocumentPopupFrame
       open={open}
       title={`${documentTypeLabel[document.type]} #${document.number}`}
       subtitle={document.customerName}
       onClose={onClose}
-      maxWidthClassName="max-w-4xl"
-      headerVariant="none"
-      bodyClassName="p-0"
     >
       <div className="rounded-[22px] border p-6" style={{ borderColor: dashboardTheme.border, background: `linear-gradient(180deg, ${dashboardTheme.surfaceSoft} 0%, ${dashboardTheme.surface} 34%)` }}>
         <div className="space-y-5">
@@ -346,7 +343,17 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
                 {selectedQuoteDocuments.map(doc => (
                   <div
                     key={`${doc.tipo}:${doc.id}:${doc.numeroDocumento}:${doc.createdAt}`}
-                    className="rounded-[16px] border bg-white px-4 py-3"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Abrir documento asociado ${doc.tipo} ${doc.numeroDocumento}`}
+                    onClick={() => void handleOpenPdf()}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        void handleOpenPdf();
+                      }
+                    }}
+                    className="cursor-pointer rounded-[16px] border bg-white px-4 py-3 transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none"
                     style={{ borderColor: dashboardTheme.border }}
                   >
                     <div className="flex items-center justify-between gap-4">
@@ -389,6 +396,6 @@ export const Customer360DocumentModal = ({ open, document, onClose }: Props) => 
           ) : null}
         </div>
       </div>
-    </AppDialog>
+    </DocumentPopupFrame>
   );
 };
