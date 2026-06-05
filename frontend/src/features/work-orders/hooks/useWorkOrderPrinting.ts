@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { BudgetData, CutlistResponse, WorkOrderData } from '../models';
 import type { EmailSignature } from '../../settings/models';
 import { buildBudgetPrintHtml, buildCutlistFormPrintHtml, buildWorkOrderPrintHtml } from '../utils/printTemplates';
+import type { PrintPreviewDocumentKind } from '../../documents/components/PrintPreviewModal.types';
 
 type CutlistPrintPayload = {
   doorType: 'PEATONAL' | 'ABATIBLE_UNA' | 'ABATIBLE_DOS' | 'CORREDERA' | 'VALLA';
@@ -37,6 +38,16 @@ type WorkOrderPrintingParams = {
   cutlistGenerated: boolean;
   cutlistResult: CutlistResponse | null;
   cutlistForm: CutlistPrintPayload;
+  onRequestPrintPreview?: (request: PrintPreviewRequest) => void;
+};
+
+export type PrintPreviewRequest = {
+  printHtml: string;
+  documentKind: PrintPreviewDocumentKind;
+  documentNumber: string;
+  emailTo?: string;
+  emailSubject?: string;
+  emailBody?: string;
 };
 
 export const useWorkOrderPrinting = ({
@@ -48,6 +59,7 @@ export const useWorkOrderPrinting = ({
   cutlistGenerated,
   cutlistResult,
   cutlistForm,
+  onRequestPrintPreview,
 }: WorkOrderPrintingParams) => {
   const [signatureHtml, setSignatureHtml] = useState('');
 
@@ -98,7 +110,19 @@ export const useWorkOrderPrinting = ({
 
   const handlePrint = () => {
     if (!canPrintBudget) return;
-    openPrintWindow(buildBudgetPrintHtml(budgetData), 900, 700);
+    const html = buildBudgetPrintHtml(budgetData);
+    if (onRequestPrintPreview) {
+      onRequestPrintPreview({
+        printHtml: html,
+        documentKind: 'PRESUPUESTO',
+        documentNumber: budgetData.budgetNumber,
+        emailTo: budgetData.customerEmail,
+        emailSubject: `Presupuesto ${budgetData.budgetNumber}`,
+        emailBody: emailBody,
+      });
+      return;
+    }
+    openPrintWindow(html, 900, 700);
   };
 
   const handleEmail = () => {
@@ -110,12 +134,30 @@ export const useWorkOrderPrinting = ({
 
   const handleCutlistFormPrint = () => {
     if (!canGenerateCutlist) return;
-    openPrintWindow(buildCutlistFormPrintHtml(cutlistForm), 1200, 900);
+    const html = buildCutlistFormPrintHtml(cutlistForm);
+    if (onRequestPrintPreview) {
+      onRequestPrintPreview({
+        printHtml: html,
+        documentKind: 'PEDIDO',
+        documentNumber: budgetData.budgetNumber || 'Despiece',
+      });
+      return;
+    }
+    openPrintWindow(html, 1200, 900);
   };
 
   const handleWorkOrderPrint = () => {
     if (!cutlistResult || !cutlistGenerated) return;
-    openPrintWindow(buildWorkOrderPrintHtml(workOrderData), 900, 700);
+    const html = buildWorkOrderPrintHtml(workOrderData);
+    if (onRequestPrintPreview) {
+      onRequestPrintPreview({
+        printHtml: html,
+        documentKind: 'PEDIDO',
+        documentNumber: workOrderData.workOrderNumber,
+      });
+      return;
+    }
+    openPrintWindow(html, 900, 700);
   };
 
   return {

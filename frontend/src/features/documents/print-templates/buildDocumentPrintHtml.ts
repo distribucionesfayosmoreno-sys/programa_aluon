@@ -79,14 +79,33 @@ export const buildDocumentPrintHtml = (data: DocumentPrintData): string => {
     ? data.lines
     : [{ position: 1, description: '', quantity: 1, unitLabel: 'ud.', unitPriceEur: null, totalEur: null }];
 
-  const companyAddress = data.company.addressLines.filter(Boolean).map(line => `<div class="small">${safeText(line)}</div>`).join('');
-  const customerAddress = data.customer.addressLines.filter(Boolean).map(line => `<div class="small">${safeText(line)}</div>`).join('');
+  const companyAddressJoined = data.company.addressLines.filter(Boolean).map(line => safeText(line)).join(' | ');
+  const companyLine1Items = [data.company.taxId ? `CIF: ${safeText(data.company.taxId)}` : null, companyAddressJoined].filter(Boolean);
+  const companyLine1 = companyLine1Items.length ? `<div class="small">${companyLine1Items.join(' | ')}</div>` : '';
+
+  const companyLine2Items = [
+    data.company.phone ? `Telf. ${safeText(data.company.phone)}` : null,
+    data.company.email ? safeText(data.company.email) : null,
+    data.company.website ? safeText(data.company.website) : null
+  ].filter(Boolean);
+  const companyLine2 = companyLine2Items.length ? `<div class="small">${companyLine2Items.join(' | ')}</div>` : '';
+
+  const customerAddressJoined = data.customer.addressLines.filter(Boolean).map(line => safeText(line)).join(' | ');
+  const customerLine1Items = [data.customer.taxId ? safeText(data.customer.taxId) : null, customerAddressJoined].filter(Boolean);
+  const customerLine1 = customerLine1Items.length ? `<div class="small">${customerLine1Items.join(' | ')}</div>` : '';
+
+  const customerLine2Items = [
+    data.customer.phone ? `Telf. ${safeText(data.customer.phone)}` : null,
+    data.customer.email ? `Email ${safeText(data.customer.email)}` : null
+  ].filter(Boolean);
+  const customerLine2 = customerLine2Items.length ? `<div class="small">${customerLine2Items.join(' | ')}</div>` : '';
   const footerLines = (data.footerLines ?? []).filter(Boolean).map(line => `<div class="small">${safeText(line)}</div>`).join('');
 
   return `<!doctype html>
 <html>
 <head>
   <meta charset="utf-8" />
+  <base href="${typeof window !== 'undefined' ? window.location.origin : ''}/" />
   <title>${kindLabel[data.kind]} ${safeText(data.documentNumber)}</title>
   <style>${documentPrintBaseCss}</style>
 </head>
@@ -96,13 +115,9 @@ export const buildDocumentPrintHtml = (data: DocumentPrintData): string => {
     <div class="content">
       <div class="row">
         <div class="box" style="flex:1;">
-          <div class="title">${safeText(data.company.name, '')}</div>
-          ${data.company.legalName ? `<div class="small">${safeText(data.company.legalName)}</div>` : ''}
-          ${data.company.taxId ? `<div class="small">CIF: ${safeText(data.company.taxId)}</div>` : ''}
-          ${companyAddress}
-          ${data.company.phone ? `<div class="small">Telf. ${safeText(data.company.phone)}</div>` : ''}
-          ${data.company.email ? `<div class="small">${safeText(data.company.email)}</div>` : ''}
-          ${data.company.website ? `<div class="small">${safeText(data.company.website)}</div>` : ''}
+          <img src="${publicPath('images/logo.png')}" alt="${safeText(data.company.name, '')}" style="height: 40px; object-fit: contain; margin-bottom: 8px;" />
+          ${companyLine1}
+          ${companyLine2}
         </div>
         <div class="box" style="flex:1;">
           <div class="doc-pill">${safeText(kindLabel[data.kind], '')}</div>
@@ -115,16 +130,16 @@ export const buildDocumentPrintHtml = (data: DocumentPrintData): string => {
           <div style="margin-top:10px;">
             <div class="small" style="font-weight:900; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted);">Cliente</div>
             <div style="margin-top:4px; font-weight:700;">${safeText(data.customer.name)}</div>
-            ${data.customer.taxId ? `<div class="small">CIF/NIF: ${safeText(data.customer.taxId)}</div>` : ''}
-            ${customerAddress}
-            ${data.customer.phone ? `<div class="small">Telf. ${safeText(data.customer.phone)}</div>` : ''}
-            ${data.customer.email ? `<div class="small">Email ${safeText(data.customer.email)}</div>` : ''}
+            ${customerLine1}
+            ${customerLine2}
           </div>
         </div>
       </div>
 
       ${buildLinesHtml(lines, showPrices)}
+    </div>
 
+    <div class="page-footer">
       ${data.totals ? buildTotalsHtml(data.totals) : ''}
 
       ${data.notes ? `<div class="note box"><div class="small" style="font-weight:900; letter-spacing:0.08em; text-transform:uppercase;">Notas</div><div style="margin-top:6px; font-size:11px;">${safeText(data.notes, '')}</div></div>` : ''}

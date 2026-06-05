@@ -13,6 +13,8 @@ import { ProductionSection } from '../sections/ProductionSection';
 import { FinalSection } from '../sections/FinalSection';
 import { SidebarSummary } from '../sections/SidebarSummary';
 import ErrorDialog from '../../../components/feedback/ErrorDialog';
+import { PrintPreviewModal } from '../../documents/components/PrintPreviewModal';
+import { usePrintPreview } from '../../documents/hooks/usePrintPreview';
 
 type WorkOrdersBodyProps = {
   ctx: UseWorkOrdersResult;
@@ -88,7 +90,11 @@ export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder 
     handlePrint,
     handleEmail,
     handleWorkOrderPrint,
+    printPreviewRequest,
+    clearPrintPreview,
   } = ctx;
+
+  const printPreview = usePrintPreview();
   const isInbox = tab === 'INBOX';
   const showSummary = !isInbox;
 
@@ -282,6 +288,24 @@ export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder 
         detail={budgetValidationError || undefined}
         onClose={() => setBudgetValidationError('')}
       />
+
+      {printPreviewRequest ? (
+        <PrintPreviewModal
+          open={Boolean(printPreviewRequest)}
+          documentKind={printPreviewRequest.documentKind}
+          documentNumber={printPreviewRequest.documentNumber}
+          printHtml={printPreviewRequest.printHtml}
+          onClose={clearPrintPreview}
+          onPrint={() => {
+            printPreview.open(printPreviewRequest);
+            printPreview.print();
+          }}
+          onSendEmail={printPreviewRequest.emailTo ? () => {
+            printPreview.open(printPreviewRequest);
+            printPreview.sendEmail();
+          } : undefined}
+        />
+      ) : null}
     </>
   );
 };

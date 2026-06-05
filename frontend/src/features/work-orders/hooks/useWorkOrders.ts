@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCustomers } from '../../../hooks/useCustomers';
 import { buildWorkOrderNumber, formatLongDate } from '../utils/workOrderNumbers';
 import { buildCutlistFormPayload, buildWorkOrderData } from '../utils/workOrderData';
@@ -8,6 +8,7 @@ import { useWorkOrderBaseState } from './useWorkOrderBaseState';
 import { useWorkOrderRequests } from './useWorkOrderRequests';
 import { useWorkflowProgress } from './useWorkflowProgress';
 import { useWorkOrderPrinting } from './useWorkOrderPrinting';
+import type { PrintPreviewRequest } from './useWorkOrderPrinting';
 import { buildWorkOrdersResult } from './workOrdersResult';
 import { listCatalogFamilies } from '../services/catalogModelsApi';
 import {
@@ -217,6 +218,9 @@ export const useWorkOrders = ({
     [cutlistSnapshot, notes],
   );
 
+  const [printPreviewRequest, setPrintPreviewRequest] = useState<PrintPreviewRequest | null>(null);
+  const clearPrintPreview = useCallback(() => setPrintPreviewRequest(null), []);
+
   const printing = useWorkOrderPrinting({
     budgetData: budget.budgetData,
     workOrderData,
@@ -226,6 +230,7 @@ export const useWorkOrders = ({
     cutlistGenerated: cutlist.cutlistGenerated,
     cutlistResult: cutlist.cutlistResult,
     cutlistForm: cutlistFormPayload,
+    onRequestPrintPreview: setPrintPreviewRequest,
   });
 
   const resetDownstream = ({ keepBudget }: { keepBudget?: boolean } = {}) => {
@@ -330,5 +335,7 @@ export const useWorkOrders = ({
     deleteRequest,
     resetDownstream,
     catalogModelOptions,
+    printPreviewRequest,
+    clearPrintPreview,
   });
 };
