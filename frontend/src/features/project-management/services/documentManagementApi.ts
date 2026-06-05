@@ -13,7 +13,6 @@ export type DocumentManagementCreatableType = Exclude<ProjectDocumentKind, 'PRES
 export type DocumentManagementCreateRequest = {
   customerName: string;
   type: DocumentManagementCreatableType;
-  number: string;
 };
 
 type DocumentManagementRowApi = {

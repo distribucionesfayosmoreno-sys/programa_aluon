@@ -22,8 +22,8 @@ public class CustomerController {
     private final CustomerMapper customerMapper;
 
     @GetMapping
-    public List<CustomerResponse> getAll() {
-        return customerService.findAll().stream()
+    public List<CustomerResponse> getAll(@RequestParam(name = "query", required = false) String query) {
+        return customerService.findByNombreComercial(query).stream()
                 .map(customerMapper::toResponse)
                 .toList();
     }

@@ -8,7 +8,6 @@ import { updateWorkOrderWorkflowStep } from './services/requestsApi';
 import AuthorizationDialog from '../../components/feedback/AuthorizationDialog';
 import ErrorDialog from '../../components/feedback/ErrorDialog';
 import ConfirmDialog from '../../components/feedback/ConfirmDialog';
-import { MODELS } from './constants';
 
 export const WorkOrdersView = ({ ctx, production }: { ctx: UseWorkOrdersResult; production: UseProductionStationsResult }) => {
   const INBOX = 'INBOX' as UseWorkOrdersResult['tab'];
@@ -232,7 +231,7 @@ export const WorkOrdersView = ({ ctx, production }: { ctx: UseWorkOrdersResult; 
   const handleConfirmAdvance = async () => {
     setShowDirtyConfirm(false);
     if (!pendingAdvance || !ctx.selectedRequestId || !selectedRequest) return;
-    const modelLabel = MODELS.find(m => m.id === ctx.modelId)?.label ?? selectedRequest.modelLabel ?? selectedRequest.modelId;
+    const modelLabel = ctx.selectedModel.label ?? selectedRequest.modelLabel ?? selectedRequest.modelId;
     ctx.setRequests(prev => prev.map(req => {
       if (req.id !== ctx.selectedRequestId) return req;
       const updatedCustomerName = currentCustomerName || req.customerName;

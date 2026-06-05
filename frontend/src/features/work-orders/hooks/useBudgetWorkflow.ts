@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { BudgetData, PendingBudget, WorkOrderRequest } from '../models';
-import { MODELS } from '../constants';
 import { approveBudgetValidation, createBudgetValidation, listPendingBudgetValidations } from '../services/budgetValidationApi';
 import { buildBudgetNumber, formatLongDate } from '../utils/workOrderNumbers';
+import type { CatalogModelOption } from '../utils/catalogModels';
+import { resolveCatalogModelOption } from '../utils/catalogModels';
 
 type BudgetStatus = {
   budgetGenerated: boolean;
@@ -28,7 +29,8 @@ const emptyBudgetStatus: BudgetStatus = {
 type BudgetWorkflowParams = {
   selectedRequestId: string | null;
   customerId: string;
-  selectedModel: { id: string; label: string; pricePerM2: number };
+  selectedModel: CatalogModelOption;
+  catalogModelOptions: CatalogModelOption[];
   m2: number;
   hasModelRef: boolean;
   modelReference: string;
@@ -41,6 +43,7 @@ export const useBudgetWorkflow = ({
   selectedRequestId,
   customerId,
   selectedModel,
+  catalogModelOptions,
   m2,
   hasModelRef,
   modelReference,
@@ -197,7 +200,7 @@ export const useBudgetWorkflow = ({
     requests.forEach(req => {
       const status = getBudgetStatus(req.id);
       if (!status.validationId || !status.budgetGenerated || !status.accountingApproved || status.adminApproved) return;
-      const model = MODELS.find(m => m.id === req.modelId) ?? MODELS[0];
+      const model = resolveCatalogModelOption(req.modelId, catalogModelOptions) ?? selectedModel;
       const total = status.total ?? Math.round(req.m2 * model.pricePerM2 * 100) / 100;
       pending.push({
         validationId: status.validationId,
@@ -227,7 +230,7 @@ export const useBudgetWorkflow = ({
     });
 
     return pending;
-  }, [requests, budgetStatusByRequestId, getBudgetStatus]);
+  }, [catalogModelOptions, requests, budgetStatusByRequestId, getBudgetStatus, selectedModel]);
 
   const handleToggleAccounting = async () => {
     if (!budgetGenerated) return;

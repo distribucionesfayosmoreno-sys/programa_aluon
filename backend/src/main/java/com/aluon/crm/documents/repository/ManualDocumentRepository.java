@@ -10,4 +10,6 @@ public interface ManualDocumentRepository extends JpaRepository<ManualDocument, 
     List<ManualDocument> findAllByOrderByCreatedAtDesc();
 
     boolean existsByTypeIgnoreCaseAndNumberIgnoreCase(String type, String number);
+
+    boolean existsByTypeIgnoreCaseAndNumberIgnoreCaseAndIdNot(String type, String number, UUID id);
 }

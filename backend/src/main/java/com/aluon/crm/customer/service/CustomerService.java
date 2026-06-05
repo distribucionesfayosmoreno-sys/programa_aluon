@@ -22,7 +22,16 @@ public class CustomerService {
     private final PasswordEncoder passwordEncoder;
 
     public List<Customer> findAll() {
-        return customerRepository.findAllByActiveTrue();
+        return customerRepository.findAllByActiveTrueOrderByNombreComercialAsc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Customer> findByNombreComercial(String query) {
+        String normalizedQuery = query == null ? "" : query.trim();
+        if (normalizedQuery.isBlank()) {
+            return findAll();
+        }
+        return customerRepository.findByActiveTrueAndNombreComercialContainingIgnoreCaseOrderByNombreComercialAsc(normalizedQuery);
     }
 
     @Transactional(readOnly = true)

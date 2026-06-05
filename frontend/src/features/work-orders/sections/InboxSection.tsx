@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { WorkOrderRequest } from '../models';
-import { MODELS, WORKFLOW_STEP_LABELS } from '../constants';
+import { WORKFLOW_STEP_LABELS } from '../constants';
 import { cardStyle, uiColors } from '../components/ui';
 import ConfirmDialog from '../../../components/feedback/ConfirmDialog';
 import ErrorDialog from '../../../components/feedback/ErrorDialog';
 import { OriginalRequestDialog } from '../components/OriginalRequestDialog';
+import type { CatalogModelOption } from '../utils/catalogModels';
+import { resolveCatalogModelOption } from '../utils/catalogModels';
 
 const statusStyles: Record<string, { background: string; color: string; border: string }> = {
   INBOX: { background: 'var(--accent-soft-2)', color: uiColors.accent, border: 'var(--accent-border)' },
@@ -30,6 +32,7 @@ export const InboxSection = ({
   requests,
   selectedRequestId,
   customerId,
+  modelOptions,
   onApplyRequest,
   onDeleteRequest,
   onSelectRequest,
@@ -37,6 +40,7 @@ export const InboxSection = ({
   requests: WorkOrderRequest[];
   selectedRequestId: string | null;
   customerId: string;
+  modelOptions: CatalogModelOption[];
   onApplyRequest: (req: WorkOrderRequest) => void;
   onDeleteRequest: (req: WorkOrderRequest) => Promise<void>;
   onSelectRequest: (id: string) => void;
@@ -83,7 +87,7 @@ export const InboxSection = ({
   const filteredRequests = useMemo(() => {
     const query = filterText.trim().toLowerCase();
     return requests.filter(req => {
-      const modelLabel = req.modelLabel ?? (MODELS.find(m => m.id === req.modelId)?.label ?? '');
+      const modelLabel = req.modelLabel ?? (resolveCatalogModelOption(req.modelId, modelOptions)?.label ?? '');
       const matchesText = !query || [
         req.customerName,
         req.id,
@@ -95,7 +99,7 @@ export const InboxSection = ({
       const matchesDate = !filterDate || req.requestDate === filterDate;
       return matchesText && matchesStatus && matchesDate;
     });
-  }, [filterDate, filterStatus, filterText, requests]);
+  }, [filterDate, filterStatus, filterText, modelOptions, requests]);
 
   return (
     <section className="p-6 rounded-2xl" style={cardStyle}>
@@ -162,7 +166,7 @@ export const InboxSection = ({
         <div className="divide-y" style={{ borderColor: uiColors.border }}>
           {filteredRequests.map(req => {
             const active = selectedRequestId === req.id;
-            const modelLabel = req.modelLabel ?? (MODELS.find(m => m.id === req.modelId)?.label ?? '—');
+            const modelLabel = req.modelLabel ?? (resolveCatalogModelOption(req.modelId, modelOptions)?.label ?? '—');
             const statusStyle = statusStyles[req.workflowStep] ?? statusStyles.INBOX;
             const progress = statusProgress[req.workflowStep] ?? 0;
               return (

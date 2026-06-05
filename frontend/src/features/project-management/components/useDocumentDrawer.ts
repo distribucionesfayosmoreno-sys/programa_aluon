@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { DocumentDrawerData, DocumentDrawerRow, QuoteLifecycleNumbersResponse } from './DocumentDrawer.types';
+import type { ProjectDocumentRow } from '../ProjectManagement.types';
+import type {
+  DocumentDrawerData,
+  QuoteLifecycleNumbersResponse,
+} from './DocumentDrawer.types';
 import { fetchLifecycleNumbers, fetchQuoteById, listQuoteDocuments } from '../services/quoteDetailsApi';
 
 const VAT_RATE_DEFAULT = 0.21;
 
 const sumNumbers = (values: number[]): number => values.reduce((acc, value) => acc + value, 0);
 
-const toDocTypeLabel = (kind: DocumentDrawerRow['kind']): string => {
+const toDocTypeLabel = (kind: ProjectDocumentRow['type']): string => {
   switch (kind) {
     case 'PRESUPUESTO':
       return 'Presupuesto';
@@ -23,7 +27,7 @@ const toDocTypeLabel = (kind: DocumentDrawerRow['kind']): string => {
   }
 };
 
-const resolveDocNumber = (kind: DocumentDrawerRow['kind'], lifecycle: QuoteLifecycleNumbersResponse): string => {
+const resolveDocNumber = (kind: ProjectDocumentRow['type'], lifecycle: QuoteLifecycleNumbersResponse): string => {
   switch (kind) {
     case 'PRESUPUESTO':
       return lifecycle.presupuesto;
@@ -40,7 +44,7 @@ const resolveDocNumber = (kind: DocumentDrawerRow['kind'], lifecycle: QuoteLifec
   }
 };
 
-export const useDocumentDrawer = (row: DocumentDrawerRow | null) => {
+export const useDocumentDrawer = (row: ProjectDocumentRow | null) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [data, setData] = useState<DocumentDrawerData | null>(null);
@@ -53,6 +57,25 @@ export const useDocumentDrawer = (row: DocumentDrawerRow | null) => {
       return;
     }
 
+    if (!row.quoteId) {
+      setLoading(false);
+      setError('');
+      setData({
+        kind: 'manual',
+        document: {
+          id: row.projectId,
+          rowId: row.projectId,
+          customerName: row.customerName,
+          type: row.type,
+          number: row.number,
+          statusLabel: row.statusLabel,
+          createdAt: row.createdAt,
+        },
+      });
+      return;
+    }
+
+    const quoteId = row.quoteId;
     const controller = new AbortController();
     setLoading(true);
     setError('');
@@ -61,9 +84,9 @@ export const useDocumentDrawer = (row: DocumentDrawerRow | null) => {
     const run = async () => {
       try {
         const [quote, lifecycle, existingDocuments] = await Promise.all([
-          fetchQuoteById(row.quoteId, controller.signal),
-          fetchLifecycleNumbers(row.quoteId, controller.signal),
-          listQuoteDocuments(row.quoteId, controller.signal),
+          fetchQuoteById(quoteId, controller.signal),
+          fetchLifecycleNumbers(quoteId, controller.signal),
+          listQuoteDocuments(quoteId, controller.signal),
         ]);
 
         const items = quote.items ?? [];
@@ -72,10 +95,11 @@ export const useDocumentDrawer = (row: DocumentDrawerRow | null) => {
         const vatAmount = Math.round(subtotal * vatRate * 100) / 100;
         const total = Math.round((subtotal + vatAmount) * 100) / 100;
 
-        const docTypeLabel = toDocTypeLabel(row.kind);
-        const docNumber = resolveDocNumber(row.kind, lifecycle);
+        const docTypeLabel = toDocTypeLabel(row.type);
+        const docNumber = resolveDocNumber(row.type, lifecycle);
 
         setData({
+          kind: 'quote',
           quote,
           lifecycle,
           existingDocuments,
@@ -98,7 +122,7 @@ export const useDocumentDrawer = (row: DocumentDrawerRow | null) => {
 
   const title = useMemo(() => {
     if (!row) return '';
-    return `${toDocTypeLabel(row.kind)} · ${row.number}`;
+    return `${toDocTypeLabel(row.type)} · ${row.number}`;
   }, [row]);
 
   return { title, loading, error, data } as const;

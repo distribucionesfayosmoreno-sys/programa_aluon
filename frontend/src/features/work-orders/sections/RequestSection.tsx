@@ -1,11 +1,12 @@
 import type { CustomerOption } from '../models';
-import { MODELS } from '../constants';
 import { cardStyle, Field, FieldLabel, SectionTitle, TextArea, uiColors } from '../components/ui';
+import type { CatalogModelOption } from '../utils/catalogModels';
 
 export const RequestSection = ({
   customers,
   customerId,
   modelId,
+  modelOptions,
   m2,
   modelReference,
   googleView,
@@ -29,6 +30,7 @@ export const RequestSection = ({
   customers: CustomerOption[];
   customerId: string;
   modelId: string;
+  modelOptions: CatalogModelOption[];
   m2: number;
   modelReference: string;
   googleView: boolean;
@@ -75,7 +77,7 @@ export const RequestSection = ({
           value={modelId}
           onChange={e => onModelChange(e.target.value)}
         >
-          {MODELS.map(m => (
+          {modelOptions.map(m => (
             <option key={m.id} value={m.id}>{m.label}</option>
           ))}
         </select>

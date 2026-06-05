@@ -67,7 +67,11 @@ export const useProjectManagement = () => {
     [documentRows, orderDocs],
   );
 
-  const createDocument = async (payload: { customerName: string; type: 'PEDIDO' | 'ALBARAN' | 'FACTURA' | 'ABONO'; number: string }) => {
+  const updateDocumentRow = (nextRow: ProjectDocumentRow) => {
+    setDocumentRows(prev => sortRowsByCreatedAt(prev.map(row => (row.rowId === nextRow.rowId ? nextRow : row))));
+  };
+
+  const createDocument = async (payload: { customerName: string; type: 'PEDIDO' | 'ALBARAN' | 'FACTURA' | 'ABONO' }) => {
     setBusyProjectId('new-document');
     setError('');
     try {
@@ -116,6 +120,7 @@ export const useProjectManagement = () => {
     actions: {
       openPdf,
       createDocument,
+      updateDocumentRow,
     },
   } as const;
 };

@@ -1,23 +1,26 @@
 import { useEffect, useState } from 'react';
 import type { CustomerOption, NewRequestData } from '../models';
-import { MODELS } from '../constants';
 import { Field, FieldLabel, TextArea, uiColors } from './ui';
 import AppDialog from '../../../components/feedback/AppDialog';
+import type { CatalogModelOption } from '../utils/catalogModels';
+import { getDefaultCatalogModelId } from '../utils/catalogModels';
 
 export const NewRequestModal = ({
   open,
   onClose,
   onCreate,
   customers,
+  modelOptions,
 }: {
   open: boolean;
   onClose: () => void;
   onCreate: (data: NewRequestData) => Promise<void>;
   customers: CustomerOption[];
+  modelOptions: CatalogModelOption[];
 }) => {
   const [customerId, setCustomerId] = useState('');
   const [customerName, setCustomerName] = useState('');
-  const [modelId, setModelId] = useState(MODELS[0].id);
+  const [modelId, setModelId] = useState(modelOptions[0]?.id ?? getDefaultCatalogModelId(modelOptions));
   const [widthMm, setWidthMm] = useState(0);
   const [heightMm, setHeightMm] = useState(0);
   const [reference, setReference] = useState('');
@@ -32,7 +35,7 @@ export const NewRequestModal = ({
     if (open) {
       setCustomerId('');
       setCustomerName('');
-      setModelId(MODELS[0].id);
+      setModelId(modelOptions[0]?.id ?? getDefaultCatalogModelId(modelOptions));
       setWidthMm(0);
       setHeightMm(0);
       setReference('');
@@ -43,7 +46,7 @@ export const NewRequestModal = ({
       setSaving(false);
       setError('');
     }
-  }, [open]);
+  }, [open, modelOptions]);
 
   const resolvedCustomerName = (() => {
     const match = customers.find(c => c.id === customerId);
@@ -133,7 +136,7 @@ export const NewRequestModal = ({
             value={modelId}
             onChange={e => setModelId(e.target.value)}
           >
-            {MODELS.map(m => (
+            {modelOptions.map(m => (
               <option key={m.id} value={m.id}>{m.label}</option>
             ))}
           </select>

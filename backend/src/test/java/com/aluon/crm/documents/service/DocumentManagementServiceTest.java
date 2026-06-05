@@ -1,6 +1,8 @@
 package com.aluon.crm.documents.service;
 
 import com.aluon.crm.documents.dto.DocumentManagementCreateRequest;
+import com.aluon.crm.documents.dto.ManualDocumentUpdateRequest;
+import com.aluon.crm.documents.model.DocumentPrefix;
 import com.aluon.crm.documents.model.ManualDocument;
 import com.aluon.crm.documents.repository.ManualDocumentRepository;
 import com.aluon.crm.quote.model.QuoteStatus;
@@ -34,6 +36,9 @@ class DocumentManagementServiceTest {
     @Mock
     private ManualDocumentRepository manualDocumentRepository;
 
+    @Mock
+    private DocumentNumberService documentNumberService;
+
     @Test
     void listRowsIncludesManualDocumentsWhenThereAreNoQuotesInRange() {
         LocalDateTime createdAt = LocalDateTime.of(2026, 6, 4, 10, 30);
@@ -53,7 +58,8 @@ class DocumentManagementServiceTest {
         DocumentManagementService service = new DocumentManagementService(
                 quoteRequestRepository,
                 quoteDocumentRepository,
-                manualDocumentRepository
+                manualDocumentRepository,
+                documentNumberService
         );
 
         var rows = service.listRows(null, null, null, null, null);
@@ -66,7 +72,9 @@ class DocumentManagementServiceTest {
     @Test
     void createDocumentStoresManualDocumentWithoutQuoteRelation() {
         LocalDateTime createdAt = LocalDateTime.of(2026, 6, 4, 12, 15);
-        when(manualDocumentRepository.existsByTypeIgnoreCaseAndNumberIgnoreCase("PEDIDO", "PED-MAN-0001"))
+        when(documentNumberService.nextNumber(DocumentPrefix.PED))
+                .thenReturn("PED-20260604-0001");
+        when(manualDocumentRepository.existsByTypeIgnoreCaseAndNumberIgnoreCase("PEDIDO", "PED-20260604-0001"))
                 .thenReturn(false);
         when(manualDocumentRepository.save(any(ManualDocument.class))).thenAnswer(invocation -> {
             ManualDocument document = invocation.getArgument(0);
@@ -79,13 +87,13 @@ class DocumentManagementServiceTest {
         DocumentManagementService service = new DocumentManagementService(
                 quoteRequestRepository,
                 quoteDocumentRepository,
-                manualDocumentRepository
+                manualDocumentRepository,
+                documentNumberService
         );
 
         var row = service.createDocument(new DocumentManagementCreateRequest(
                 "Cliente Manual",
-                "PEDIDO",
-                "PED-MAN-0001"
+                "PEDIDO"
         ));
 
         ArgumentCaptor<ManualDocument> captor = ArgumentCaptor.forClass(ManualDocument.class);
@@ -93,11 +101,11 @@ class DocumentManagementServiceTest {
 
         assertThat(captor.getValue().getCustomerName()).isEqualTo("Cliente Manual");
         assertThat(captor.getValue().getType()).isEqualTo("PEDIDO");
-        assertThat(captor.getValue().getNumber()).isEqualTo("PED-MAN-0001");
+        assertThat(captor.getValue().getNumber()).isEqualTo("PED-20260604-0001");
         assertThat(row.quoteId()).isNull();
         assertThat(row.customerName()).isEqualTo("Cliente Manual");
         assertThat(row.type()).isEqualTo("PEDIDO");
-        assertThat(row.number()).isEqualTo("PED-MAN-0001");
+        assertThat(row.number()).isEqualTo("PED-20260604-0001");
     }
 
     @Test
@@ -119,7 +127,8 @@ class DocumentManagementServiceTest {
         DocumentManagementService service = new DocumentManagementService(
                 quoteRequestRepository,
                 quoteDocumentRepository,
-                manualDocumentRepository
+                manualDocumentRepository,
+                documentNumberService
         );
 
         var rows = service.listRows(null, null, null, null, null);
@@ -131,20 +140,58 @@ class DocumentManagementServiceTest {
     void createDocumentRejectsDuplicateTypeAndNumber() {
         when(manualDocumentRepository.existsByTypeIgnoreCaseAndNumberIgnoreCase("FACTURA", "FA-MAN-0001"))
                 .thenReturn(true);
+        when(documentNumberService.nextNumber(DocumentPrefix.FRA))
+                .thenReturn("FA-MAN-0001");
 
         DocumentManagementService service = new DocumentManagementService(
                 quoteRequestRepository,
                 quoteDocumentRepository,
-                manualDocumentRepository
+                manualDocumentRepository,
+                documentNumberService
         );
 
         assertThatThrownBy(() -> service.createDocument(new DocumentManagementCreateRequest(
                 "Cliente Manual",
-                "FACTURA",
-                "FA-MAN-0001"
+                "FACTURA"
         )))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Ya existe");
+    }
+
+    @Test
+    void updateManualDocumentChangesStoredValues() {
+        LocalDateTime createdAt = LocalDateTime.of(2026, 6, 4, 12, 15);
+        ManualDocument document = ManualDocument.builder()
+                .id(UUID.randomUUID())
+                .customerName("Cliente Manual")
+                .type("PEDIDO")
+                .number("PED-20260604-0001")
+                .statusLabel("EMITIDO")
+                .createdAt(createdAt)
+                .updatedAt(createdAt)
+                .build();
+
+        when(manualDocumentRepository.findById(document.getId())).thenReturn(java.util.Optional.of(document));
+        when(manualDocumentRepository.existsByTypeIgnoreCaseAndNumberIgnoreCaseAndIdNot("FACTURA", "FA-20260604-0002", document.getId()))
+                .thenReturn(false);
+        when(manualDocumentRepository.save(any(ManualDocument.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        DocumentManagementService service = new DocumentManagementService(
+                quoteRequestRepository,
+                quoteDocumentRepository,
+                manualDocumentRepository,
+                documentNumberService
+        );
+
+        var updated = service.updateManualDocument(document.getId(), new ManualDocumentUpdateRequest(
+                "Cliente Renombrado",
+                "FACTURA",
+                "FA-20260604-0002"
+        ));
+
+        assertThat(updated.customerName()).isEqualTo("Cliente Renombrado");
+        assertThat(updated.type()).isEqualTo("FACTURA");
+        assertThat(updated.number()).isEqualTo("FA-20260604-0002");
     }
 
     private QuoteRequestRepository.DocumentManagementQuoteRow quoteRow(

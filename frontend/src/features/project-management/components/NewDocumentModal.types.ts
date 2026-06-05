@@ -16,5 +16,4 @@ export type NewDocumentModalState = {
   error: string;
   customerName: string;
   selectedType: DocumentManagementCreatableType | '';
-  number: string;
 };

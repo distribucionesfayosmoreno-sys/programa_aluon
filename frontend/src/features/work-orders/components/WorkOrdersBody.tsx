@@ -1,6 +1,6 @@
 import type { UseWorkOrdersResult } from '../hooks/useWorkOrders';
-import type { DevelopmentSectionProps } from '../sections/development/DevelopmentSection.types';
 import type { UseProductionStationsResult } from '../hooks/useProductionStations';
+import type { DevelopmentViewModel } from '../hooks/useWorkOrdersViewModel';
 import { BudgetModal } from './BudgetModal';
 import { NewRequestModal } from './NewRequestModal';
 import { WorkOrderModal } from './WorkOrderModal';
@@ -16,7 +16,7 @@ import ErrorDialog from '../../../components/feedback/ErrorDialog';
 
 type WorkOrdersBodyProps = {
   ctx: UseWorkOrdersResult;
-  dev: DevelopmentSectionProps;
+  dev: DevelopmentViewModel;
   production: UseProductionStationsResult;
   advance: {
     onAdvanceStep: () => void;
@@ -34,6 +34,7 @@ export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder 
     customerId,
     modelId,
     modelReference,
+    catalogModelOptions,
     m2,
     googleView,
     notes,
@@ -119,6 +120,7 @@ export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder 
               requests={requests}
               selectedRequestId={selectedRequestId}
               customerId={customerId}
+              modelOptions={catalogModelOptions}
               onApplyRequest={applyRequest}
               onDeleteRequest={deleteRequest}
               onSelectRequest={setSelectedRequestId}
@@ -130,6 +132,7 @@ export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder 
               customers={customers}
               customerId={customerId}
               modelId={modelId}
+              modelOptions={catalogModelOptions}
               m2={m2}
               modelReference={modelReference}
               googleView={googleView}
@@ -189,6 +192,7 @@ export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder 
           {tab === 'DEV' && (
             <DevelopmentSection
               {...dev}
+              catalogModelOptions={catalogModelOptions}
               highlightDevelopment={highlightDevelopment}
               highlightCutlist={highlightCutlist}
               onAdvanceStep={advance.onAdvanceStep}
@@ -268,6 +272,7 @@ export const WorkOrdersBody = ({ ctx, dev, production, advance, onFinalizeOrder 
         onClose={() => setShowRequestModal(false)}
         onCreate={createRequest}
         customers={customers}
+        modelOptions={catalogModelOptions}
       />
 
       <ErrorDialog

@@ -3,7 +3,7 @@ import type { CutlistDoorModel, CutlistDoorType, CutlistMountingType, CutlistRai
 import type { UseWorkOrdersResult } from './useWorkOrders';
 import type { DevelopmentActions, DevelopmentCutlist, DevelopmentForm, DevelopmentNeeds, DevelopmentStatus } from '../sections/development/DevelopmentSection.types';
 
-type DevelopmentViewModel = {
+export type DevelopmentViewModel = {
   status: DevelopmentStatus;
   form: DevelopmentForm;
   needs: DevelopmentNeeds;
@@ -11,7 +11,7 @@ type DevelopmentViewModel = {
   actions: DevelopmentActions;
 };
 
-type UseWorkOrdersViewModelResult = {
+export type UseWorkOrdersViewModelResult = {
   dev: DevelopmentViewModel;
   onOpenNewRequest: () => void;
   onResetDownstream: () => void;

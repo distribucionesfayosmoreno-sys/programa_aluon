@@ -5,6 +5,7 @@ import type {
   DocumentManagementCreateRequest,
   DocumentManagementCreatableType,
 } from '../services/documentManagementApi';
+import { searchCustomersByNombreComercial, type CustomerLookupCustomer } from '../services/customerLookupApi';
 
 type UseNewDocumentModalParams = {
   open: boolean;
@@ -21,7 +22,9 @@ export const useNewDocumentModal = ({
   const [error, setError] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [selectedType, setSelectedType] = useState<DocumentManagementCreatableType | ''>('');
-  const [number, setNumber] = useState('');
+  const [customerSuggestions, setCustomerSuggestions] = useState<CustomerLookupCustomer[]>([]);
+  const [customerSearchLoading, setCustomerSearchLoading] = useState(false);
+  const [customerSearchError, setCustomerSearchError] = useState('');
 
   useEffect(() => {
     if (!open) {
@@ -29,12 +32,55 @@ export const useNewDocumentModal = ({
       setError('');
       setCustomerName('');
       setSelectedType('');
-      setNumber('');
+      setCustomerSuggestions([]);
+      setCustomerSearchLoading(false);
+      setCustomerSearchError('');
       return;
     }
   }, [open]);
 
-  const canSubmit = customerName.trim() !== '' && selectedType !== '' && number.trim() !== '' && !submitting;
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const query = customerName.trim();
+    if (!query) {
+      setCustomerSuggestions([]);
+      setCustomerSearchLoading(false);
+      setCustomerSearchError('');
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setCustomerSearchLoading(true);
+      setCustomerSearchError('');
+      void searchCustomersByNombreComercial(query, controller.signal)
+        .then((customers) => {
+          setCustomerSuggestions(customers);
+        })
+        .catch((err) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+          setCustomerSuggestions([]);
+          setCustomerSearchError(err instanceof Error ? err.message : 'No se pudieron buscar clientes.');
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) {
+            setCustomerSearchLoading(false);
+          }
+        });
+    }, 220);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [customerName, open]);
+
+  const canSubmit = customerName.trim() !== '' && selectedType !== '' && !submitting;
 
   const submit = async () => {
     if (!canSubmit) {
@@ -49,7 +95,6 @@ export const useNewDocumentModal = ({
       const created = await create({
         customerName: customerName.trim(),
         type: selectedType,
-        number: number.trim(),
       });
       onCreated(created);
     } catch (err) {
@@ -65,13 +110,14 @@ export const useNewDocumentModal = ({
       error,
       customerName,
       selectedType,
-      number,
+      customerSuggestions,
+      customerSearchLoading,
+      customerSearchError,
     },
     canSubmit,
     actions: {
       setCustomerName,
       setSelectedType,
-      setNumber,
       submit,
     },
   } as const;

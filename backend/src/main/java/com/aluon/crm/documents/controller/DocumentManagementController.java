@@ -2,19 +2,23 @@ package com.aluon.crm.documents.controller;
 
 import com.aluon.crm.documents.dto.DocumentManagementCreateRequest;
 import com.aluon.crm.documents.dto.DocumentManagementRowResponse;
+import com.aluon.crm.documents.dto.ManualDocumentUpdateRequest;
 import com.aluon.crm.documents.service.DocumentManagementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/document-management")
@@ -39,5 +43,13 @@ public class DocumentManagementController {
             @RequestBody @Valid DocumentManagementCreateRequest request
     ) {
         return ResponseEntity.ok(documentManagementService.createDocument(request));
+    }
+
+    @PatchMapping("/manual-documents/{id}")
+    public ResponseEntity<DocumentManagementRowResponse> updateManualDocument(
+            @PathVariable UUID id,
+            @RequestBody @Valid ManualDocumentUpdateRequest request
+    ) {
+        return ResponseEntity.ok(documentManagementService.updateManualDocument(id, request));
     }
 }

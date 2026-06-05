@@ -9,6 +9,7 @@ type Props = {
   subview: DocumentDrawerSubview;
   onChangeSubview: (next: DocumentDrawerSubview) => void;
   onClose: () => void;
+  showSubviewToggle?: boolean;
 };
 
 export const DocumentDrawerHeader = ({
@@ -18,6 +19,7 @@ export const DocumentDrawerHeader = ({
   subview,
   onChangeSubview,
   onClose,
+  showSubviewToggle = true,
 }: Props) => (
   <div
     className="px-4 py-3 flex justify-between items-center shrink-0"
@@ -51,20 +53,22 @@ export const DocumentDrawerHeader = ({
     </div>
 
     <div className="flex items-center gap-2 shrink-0">
-      <button
-        type="button"
-        onClick={() => onChangeSubview(subview === 'lines' ? 'document' : 'lines')}
-        className="h-9 w-9 rounded-xl border transition disabled:opacity-60 flex items-center justify-center"
-        style={{
-          borderColor: documentManagementTheme.border,
-          background: documentManagementTheme.panelBg,
-          boxShadow: documentManagementTheme.shadowSoft,
-        }}
-        title={subview === 'lines' ? 'Volver al documento' : 'Gestionar líneas'}
-        aria-label={subview === 'lines' ? 'Volver al documento' : 'Gestionar líneas'}
-      >
-        <img src={logo} alt="Aluon" className="h-5 w-auto object-contain" />
-      </button>
+      {showSubviewToggle ? (
+        <button
+          type="button"
+          onClick={() => onChangeSubview(subview === 'lines' ? 'document' : 'lines')}
+          className="h-9 w-9 rounded-xl border transition disabled:opacity-60 flex items-center justify-center"
+          style={{
+            borderColor: documentManagementTheme.border,
+            background: documentManagementTheme.panelBg,
+            boxShadow: documentManagementTheme.shadowSoft,
+          }}
+          title={subview === 'lines' ? 'Volver al documento' : 'Gestionar líneas'}
+          aria-label={subview === 'lines' ? 'Volver al documento' : 'Gestionar líneas'}
+        >
+          <img src={logo} alt="Aluon" className="h-5 w-auto object-contain" />
+        </button>
+      ) : null}
       <button
         type="button"
         onClick={onClose}

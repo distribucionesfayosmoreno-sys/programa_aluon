@@ -42,9 +42,10 @@ export const NewDocumentModal = ({
             Cliente
           </label>
           <input
+            list="document-customer-suggestions"
             value={vm.state.customerName}
             onChange={(event) => vm.actions.setCustomerName(event.target.value)}
-            placeholder="Nombre del cliente"
+            placeholder="Empieza a escribir el nombre comercial"
             className="w-full rounded-2xl border px-4 py-3 text-sm outline-none"
             style={{
               borderColor: documentManagementTheme.border,
@@ -52,21 +53,25 @@ export const NewDocumentModal = ({
               color: documentManagementTheme.text,
             }}
           />
-
-          <label className="mb-2 mt-5 block text-xs font-bold" style={{ color: documentManagementTheme.muted }}>
-            Número de documento
-          </label>
-          <input
-            value={vm.state.number}
-            onChange={(event) => vm.actions.setNumber(event.target.value)}
-            placeholder="Ej. FA-2026-0001"
-            className="w-full rounded-2xl border px-4 py-3 text-sm outline-none"
-            style={{
-              borderColor: documentManagementTheme.border,
-              background: documentManagementTheme.panelBg,
-              color: documentManagementTheme.text,
-            }}
-          />
+          <datalist id="document-customer-suggestions">
+            {vm.state.customerSuggestions.map((customer) => (
+              <option key={customer.id} value={customer.nombreComercial} />
+            ))}
+          </datalist>
+          <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-semibold" style={{ color: documentManagementTheme.muted }}>
+            <span>
+              {vm.state.customerSearchLoading
+                ? 'Buscando coincidencias...'
+                : vm.state.customerSearchError
+                  ? vm.state.customerSearchError
+                  : vm.state.customerName.trim()
+                    ? `${vm.state.customerSuggestions.length} coincidencias`
+                    : 'Escribe para buscar clientes'}
+            </span>
+          </div>
+          <div className="mt-5 rounded-2xl border px-4 py-3 text-xs font-semibold" style={{ borderColor: documentManagementTheme.border, color: documentManagementTheme.muted }}>
+            El número de documento se generará automáticamente al guardar.
+          </div>
         </section>
 
         <section
@@ -107,7 +112,7 @@ export const NewDocumentModal = ({
               {vm.state.selectedType || 'Tipo pendiente'}
             </div>
             <div className="mt-1 text-xs" style={{ color: documentManagementTheme.muted }}>
-              {vm.state.customerName.trim() || 'Cliente pendiente'} · {vm.state.number.trim() || 'Número pendiente'}
+              {vm.state.customerName.trim() || 'Cliente pendiente'} · Número automático
             </div>
           </div>
 

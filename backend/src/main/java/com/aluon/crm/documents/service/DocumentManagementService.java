@@ -2,6 +2,8 @@ package com.aluon.crm.documents.service;
 
 import com.aluon.crm.documents.dto.DocumentManagementCreateRequest;
 import com.aluon.crm.documents.dto.DocumentManagementRowResponse;
+import com.aluon.crm.documents.dto.ManualDocumentUpdateRequest;
+import com.aluon.crm.documents.model.DocumentPrefix;
 import com.aluon.crm.documents.model.ManualDocument;
 import com.aluon.crm.documents.repository.ManualDocumentRepository;
 import com.aluon.crm.quote.model.QuoteDocument;
@@ -29,6 +31,7 @@ public class DocumentManagementService {
     private final QuoteRequestRepository quoteRequestRepository;
     private final QuoteDocumentRepository quoteDocumentRepository;
     private final ManualDocumentRepository manualDocumentRepository;
+    private final DocumentNumberService documentNumberService;
 
     @Transactional(readOnly = true)
     public List<DocumentManagementRowResponse> listRows(
@@ -114,7 +117,6 @@ public class DocumentManagementService {
         DocumentManagementCreateRequest safeRequest = Objects.requireNonNull(request, "request");
         String normalizedType = normalizeFilter(safeRequest.type());
         String normalizedCustomerName = normalizeFreeText(safeRequest.customerName());
-        String normalizedNumber = normalizeFreeText(safeRequest.number());
 
         if (normalizedType == null) {
             throw new IllegalArgumentException("El tipo de documento es obligatorio");
@@ -122,12 +124,11 @@ public class DocumentManagementService {
         if (normalizedCustomerName == null) {
             throw new IllegalArgumentException("El cliente es obligatorio");
         }
-        if (normalizedNumber == null) {
-            throw new IllegalArgumentException("El número de documento es obligatorio");
-        }
         if (!List.of("PEDIDO", "ALBARAN", "FACTURA", "ABONO").contains(normalizedType)) {
             throw new IllegalArgumentException("Tipo de documento no soportado: " + normalizedType);
         }
+
+        String normalizedNumber = documentNumberService.nextNumber(mapPrefix(normalizedType));
         if (manualDocumentRepository.existsByTypeIgnoreCaseAndNumberIgnoreCase(normalizedType, normalizedNumber)) {
             throw new IllegalArgumentException("Ya existe un documento manual con ese tipo y número");
         }
@@ -143,6 +144,52 @@ public class DocumentManagementService {
                 .build());
 
         return toManualRow(created);
+    }
+
+    @Transactional
+    public DocumentManagementRowResponse updateManualDocument(UUID id, ManualDocumentUpdateRequest request) {
+        UUID documentId = Objects.requireNonNull(id, "id");
+        ManualDocumentUpdateRequest safeRequest = Objects.requireNonNull(request, "request");
+
+        ManualDocument document = manualDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new IllegalArgumentException("Documento manual no encontrado"));
+
+        String normalizedType = normalizeFilter(safeRequest.type());
+        String normalizedCustomerName = normalizeFreeText(safeRequest.customerName());
+        String normalizedNumber = normalizeFreeText(safeRequest.number());
+
+        if (normalizedType == null) {
+            throw new IllegalArgumentException("El tipo de documento es obligatorio");
+        }
+        if (normalizedCustomerName == null) {
+            throw new IllegalArgumentException("El cliente es obligatorio");
+        }
+        if (normalizedNumber == null) {
+            throw new IllegalArgumentException("El número de documento es obligatorio");
+        }
+        if (!List.of("PEDIDO", "ALBARAN", "FACTURA", "ABONO").contains(normalizedType)) {
+            throw new IllegalArgumentException("Tipo de documento no soportado: " + normalizedType);
+        }
+
+        if (manualDocumentRepository.existsByTypeIgnoreCaseAndNumberIgnoreCaseAndIdNot(normalizedType, normalizedNumber, documentId)) {
+            throw new IllegalArgumentException("Ya existe un documento manual con ese tipo y número");
+        }
+
+        document.setCustomerName(normalizedCustomerName);
+        document.setType(normalizedType);
+        document.setNumber(normalizedNumber);
+        document.setUpdatedAt(LocalDateTime.now());
+        return toManualRow(manualDocumentRepository.save(document));
+    }
+
+    private static DocumentPrefix mapPrefix(String type) {
+        return switch (type) {
+            case "PEDIDO" -> DocumentPrefix.PED;
+            case "ALBARAN" -> DocumentPrefix.ALB;
+            case "FACTURA" -> DocumentPrefix.FRA;
+            case "ABONO" -> DocumentPrefix.ABO;
+            default -> throw new IllegalArgumentException("Tipo de documento no soportado: " + type);
+        };
     }
 
     private static boolean matchesType(String type, String rowType) {

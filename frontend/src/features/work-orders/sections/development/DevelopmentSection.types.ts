@@ -7,6 +7,7 @@ import type {
   HingesSide,
   OpeningSide,
 } from '../../models';
+import type { CatalogModelOption } from '../../utils/catalogModels';
 
 export type DevelopmentStatus = {
   developmentGenerated: boolean;
@@ -109,6 +110,7 @@ export type DevelopmentSectionProps = {
   needs: DevelopmentNeeds;
   cutlist: DevelopmentCutlist;
   actions: DevelopmentActions;
+  catalogModelOptions: CatalogModelOption[];
   highlightDevelopment?: boolean;
   highlightCutlist?: boolean;
   onAdvanceStep?: () => void;

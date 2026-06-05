@@ -1,8 +1,9 @@
 import { useCallback, useEffect } from 'react';
 import type { Customer } from '../../../hooks/useCustomers';
 import type { NewRequestData, TabKey, WorkOrderRequest } from '../models';
-import { MODELS } from '../constants';
 import { assignWorkOrderCustomer, createWorkOrderRequest, deleteWorkOrderRequest, updateWorkOrderWorkflowStep } from '../services/requestsApi';
+import type { CatalogModelOption } from '../utils/catalogModels';
+import { resolveCatalogModelOption } from '../utils/catalogModels';
 
 const STEP_ORDER: TabKey[] = ['INBOX', 'REQUEST', 'BUDGET', 'VALIDATION', 'DEV', 'PROD', 'FINAL'];
 
@@ -40,6 +41,7 @@ type UseWorkOrderRequestsParams = {
   onNewRequestHandled?: () => void;
   resetDownstream: (options?: { keepBudget?: boolean }) => void;
   budget: BudgetControls;
+  catalogModelOptions: CatalogModelOption[];
 };
 
 export const useWorkOrderRequests = ({
@@ -60,6 +62,7 @@ export const useWorkOrderRequests = ({
   onNewRequestHandled,
   resetDownstream,
   budget,
+  catalogModelOptions,
 }: UseWorkOrderRequestsParams) => {
   const resolveCustomerId = (name: string) => {
     const match = customers.find(c => {
@@ -109,11 +112,14 @@ export const useWorkOrderRequests = ({
 
   const createRequest = async (data: NewRequestData) => {
     const requestDate = new Date().toISOString().slice(0, 10);
-    const selectedModel = MODELS.find(m => m.id === data.modelId) ?? MODELS[0];
+    const catalogModel = resolveCatalogModelOption(data.modelId, catalogModelOptions) ?? catalogModelOptions[0];
+    if (!catalogModel) {
+      throw new Error('No hay modelos de catálogo disponibles.');
+    }
     const created = await createWorkOrderRequest({
       customerId: data.customerId,
       customerName: data.customerName,
-      modeloPuerta: selectedModel.label,
+      modeloPuerta: catalogModel.label,
       anchoMm: data.widthMm,
       altoMm: data.heightMm,
       reference: data.reference,
@@ -133,7 +139,7 @@ export const useWorkOrderRequests = ({
         customerId: data.customerId || undefined,
         customerName: data.customerName,
         modelId: data.modelId,
-        modelLabel: selectedModel.label,
+        modelLabel: catalogModel.label,
         m2,
         widthMm: data.widthMm,
         heightMm: data.heightMm,

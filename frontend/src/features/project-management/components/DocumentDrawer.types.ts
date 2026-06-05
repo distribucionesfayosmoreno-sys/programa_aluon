@@ -26,14 +26,8 @@ export type DocumentDrawerRow = {
   createdAt: string;
 };
 
-export type DocumentTotals = {
-  subtotal: number;
-  vatRate: number;
-  vatAmount: number;
-  total: number;
-};
-
-export type DocumentDrawerData = {
+export type QuoteDocumentDrawerData = {
+  kind: 'quote';
   quote: QuoteResponse;
   lifecycle: QuoteLifecycleNumbersResponse;
   existingDocuments: QuoteDocumentRowResponse[];
@@ -42,3 +36,25 @@ export type DocumentDrawerData = {
   docTypeLabel: string;
   docNumber: string;
 };
+
+export type ManualDocumentDrawerData = {
+  kind: 'manual';
+  document: {
+    id: string;
+    rowId: string;
+    customerName: string;
+    type: string;
+    number: string;
+    statusLabel: string;
+    createdAt: string;
+  };
+};
+
+export type DocumentTotals = {
+  subtotal: number;
+  vatRate: number;
+  vatAmount: number;
+  total: number;
+};
+
+export type DocumentDrawerData = QuoteDocumentDrawerData | ManualDocumentDrawerData;

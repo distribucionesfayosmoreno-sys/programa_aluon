@@ -13,6 +13,8 @@ import type {
 } from '../models';
 import { generateCutlist } from '../services/cutlistApi';
 import { formatIsoDate } from '../utils/workOrderNumbers';
+import type { CatalogModelOption } from '../utils/catalogModels';
+import { resolveCatalogModelOption } from '../utils/catalogModels';
 
 type CutlistWorkflowParams = {
   budgetNumber: string;
@@ -20,6 +22,7 @@ type CutlistWorkflowParams = {
   notes: string;
   selectedRequest?: WorkOrderRequest | null;
   selectedCustomerName?: string;
+  catalogModelOptions: CatalogModelOption[];
   /** Called with the requestId when a cutlist is successfully generated */
   onCutlistGenerated?: (requestId: string) => void;
 };
@@ -31,7 +34,7 @@ const resolveDoorModel = (request?: WorkOrderRequest | null): CutlistDoorModel |
   if (source.includes('classic')) return 'CLASSIC';
   if (source.includes('inox')) return 'INOX';
   if (source.includes('veneciana')) return 'VENECIANA';
-  if (source.includes('lux')) return 'INOX';
+  if (source.includes('lux')) return 'PREMIUM';
   if (source.includes('pro')) return 'PREMIUM';
   return null;
 };
@@ -42,6 +45,7 @@ export const useCutlistWorkflow = ({
   notes,
   selectedRequest,
   selectedCustomerName,
+  catalogModelOptions,
   onCutlistGenerated,
 }: CutlistWorkflowParams) => {
   const [cutlistGenerated, setCutlistGenerated] = useState(false);
@@ -299,7 +303,9 @@ export const useCutlistWorkflow = ({
   };
 
   const doorTypeLabel = DOOR_TYPES.find(type => type.id === doorType)?.label ?? '—';
-  const doorModelLabel = DOOR_MODELS.find(model => model.id === doorModel)?.label ?? '—';
+  const doorModelLabel = resolveCatalogModelOption(doorModel, catalogModelOptions)?.label
+    ?? DOOR_MODELS.find(model => model.id === doorModel)?.label
+    ?? '—';
 
   return {
     cutlistGenerated,

@@ -6,6 +6,7 @@ import type { UseWorkOrderBaseStateResult } from './useWorkOrderBaseState';
 import type { UseWorkflowProgressResult } from './useWorkflowProgress';
 import type { UseWorkOrderPrintingResult } from './useWorkOrderPrinting';
 import type { NewRequestData } from '../models';
+import type { CatalogModelOption } from '../utils/catalogModels';
 
 type BuildWorkOrdersResultParams = {
   customers: Customer[];
@@ -14,6 +15,7 @@ type BuildWorkOrdersResultParams = {
   cutlist: UseCutlistWorkflowResult;
   workflow: UseWorkflowProgressResult;
   selectedModel: { id: string; label: string; pricePerM2: number };
+  catalogModelOptions: CatalogModelOption[];
   hasModelRef: boolean;
   canGenerateDevelopment: boolean;
   workOrderData: WorkOrderData;
@@ -39,6 +41,7 @@ export const buildWorkOrdersResult = ({
   createRequest,
   deleteRequest,
   resetDownstream,
+  catalogModelOptions,
 }: BuildWorkOrdersResultParams) => ({
   customers,
   requests: base.requests,
@@ -98,6 +101,7 @@ export const buildWorkOrdersResult = ({
   showRequestModal: base.showRequestModal,
   showWorkOrderModal: base.showWorkOrderModal,
   selectedModel,
+  catalogModelOptions,
   hasModelRef,
   canGenerateBudget: budget.canGenerateBudget,
   budget: budget.budget,

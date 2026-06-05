@@ -1,12 +1,14 @@
-import { DOOR_MODELS, DOOR_TYPES } from '../../constants';
+import { DOOR_TYPES } from '../../constants';
 import type { CutlistDoorModel, CutlistDoorType, CutlistMountingType, CutlistRailType, HingesSide, OpeningSide } from '../../models';
 import { Field, FieldLabel, uiColors } from '../../components/ui';
+import type { CatalogModelOption } from '../../utils/catalogModels';
 import type { DevelopmentActions as DevelopmentActionsType, DevelopmentForm as DevelopmentFormType, DevelopmentNeeds, DevelopmentStatus } from './DevelopmentSection.types';
 
 type DevelopmentFormProps = {
   form: DevelopmentFormType;
   needs: DevelopmentNeeds;
   status: DevelopmentStatus;
+  modelOptions: CatalogModelOption[];
   actions: Pick<
     DevelopmentActionsType,
     | 'onDistributorChange'
@@ -37,7 +39,7 @@ type DevelopmentFormProps = {
   >;
 };
 
-export const DevelopmentForm = ({ form, needs, status, actions }: DevelopmentFormProps) => (
+export const DevelopmentForm = ({ form, needs, status, actions, modelOptions }: DevelopmentFormProps) => (
   <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
     <div>
       <FieldLabel>Distribuidor</FieldLabel>
@@ -98,7 +100,7 @@ export const DevelopmentForm = ({ form, needs, status, actions }: DevelopmentFor
         value={form.doorModel}
         onChange={e => actions.onDoorModelChange(e.target.value as CutlistDoorModel)}
       >
-        {DOOR_MODELS.map(model => (
+        {modelOptions.map(model => (
           <option key={model.id} value={model.id}>{model.label}</option>
         ))}
       </select>

@@ -11,6 +11,7 @@ export const DevelopmentSection = ({
   needs,
   cutlist,
   actions,
+  catalogModelOptions,
   highlightDevelopment,
   highlightCutlist,
   onAdvanceStep,
@@ -40,7 +41,7 @@ export const DevelopmentSection = ({
         ))}
       </div>
     )}
-    <DevelopmentForm form={form} needs={needs} status={status} actions={actions} />
+    <DevelopmentForm form={form} needs={needs} status={status} actions={actions} modelOptions={catalogModelOptions} />
     {status.cutlistError && (
       <p className="text-xs font-semibold mt-3" style={{ color: uiColors.danger }}>
         {status.cutlistError}

@@ -1,6 +1,5 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCustomers } from '../../../hooks/useCustomers';
-import { MODELS } from '../constants';
 import { buildWorkOrderNumber, formatLongDate } from '../utils/workOrderNumbers';
 import { buildCutlistFormPayload, buildWorkOrderData } from '../utils/workOrderData';
 import { useBudgetWorkflow } from './useBudgetWorkflow';
@@ -10,6 +9,13 @@ import { useWorkOrderRequests } from './useWorkOrderRequests';
 import { useWorkflowProgress } from './useWorkflowProgress';
 import { useWorkOrderPrinting } from './useWorkOrderPrinting';
 import { buildWorkOrdersResult } from './workOrdersResult';
+import { listCatalogFamilies } from '../services/catalogModelsApi';
+import {
+  buildCatalogModelOptions,
+  getDefaultCatalogModelId,
+  resolveCatalogModelOption,
+} from '../utils/catalogModels';
+import type { CatalogModelOption } from '../utils/catalogModels';
 
 export type UseWorkOrdersResult = ReturnType<typeof useWorkOrders>;
 
@@ -28,10 +34,47 @@ export const useWorkOrders = ({
 }) => {
   const { customers } = useCustomers();
   const base = useWorkOrderBaseState();
+  const [catalogModelOptions, setCatalogModelOptions] = useState(() => buildCatalogModelOptions([]));
+  const [catalogModelsLoaded, setCatalogModelsLoaded] = useState(false);
 
   const { requests, setRequests, customerId, setCustomerId, modelId, setModelId, modelReference, setModelReference, modelImage, setModelImage, m2, setM2, googleView, setGoogleView, notes, setNotes, developmentGenerated, setDevelopmentGenerated, setProdCut, setProdFab, setProdLac, setProdLacControl, finalized, setFinalized, ready, setReady, selectedRequestId, setSelectedRequestId, setTab, setShowRequestModal } = base;
 
-  const selectedModel = useMemo(() => MODELS.find(m => m.id === modelId) ?? MODELS[0], [modelId]);
+  useEffect(() => {
+    let active = true;
+    const loadCatalogModels = async () => {
+      try {
+        const families = await listCatalogFamilies();
+        if (!active) return;
+        setCatalogModelOptions(buildCatalogModelOptions(families));
+      } catch (error) {
+        console.error('[work-orders] Failed to load catalog families', error);
+        if (active) {
+          setCatalogModelOptions(buildCatalogModelOptions([]));
+        }
+      } finally {
+        if (active) {
+          setCatalogModelsLoaded(true);
+        }
+      }
+    };
+
+    loadCatalogModels();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!catalogModelsLoaded) return;
+    if (modelId.trim()) return;
+    setModelId(getDefaultCatalogModelId(catalogModelOptions));
+  }, [catalogModelOptions, catalogModelsLoaded, modelId, setModelId]);
+
+  const selectedModel = useMemo<CatalogModelOption>(() => (
+    resolveCatalogModelOption(modelId, catalogModelOptions)
+    ?? catalogModelOptions[0]
+    ?? buildCatalogModelOptions([])[0]
+  ), [catalogModelOptions, modelId]);
   const hasModelRef = Boolean(modelReference.trim()) || Boolean(modelImage);
   const selectedCustomer = useMemo(() => customers.find(c => c.id === customerId), [customers, customerId]);
   const resolvedCustomerName = useMemo(
@@ -43,6 +86,7 @@ export const useWorkOrders = ({
     selectedRequestId,
     customerId,
     selectedModel,
+    catalogModelOptions,
     m2,
     hasModelRef,
     modelReference,
@@ -64,6 +108,7 @@ export const useWorkOrders = ({
     notes,
     selectedRequest,
     selectedCustomerName: resolvedCustomerName,
+    catalogModelOptions,
     onCutlistGenerated: (requestId: string) => {
       setRequests(prev => prev.map(r =>
         r.id === requestId ? { ...r, workflowStep: 'DEV' } : r,
@@ -209,8 +254,24 @@ export const useWorkOrders = ({
   };
 
   const { applyRequest, createRequest, deleteRequest } = useWorkOrderRequests({
-    customers, setRequests, selectedRequestId, setSelectedRequestId, setCustomerId, setModelId, setM2, setModelReference, setGoogleView, setNotes, setModelImage, setTab, setShowRequestModal, openNewRequest, onNewRequestHandled, resetDownstream,
+    customers,
+    setRequests,
+    selectedRequestId,
+    setSelectedRequestId,
+    setCustomerId,
+    setModelId,
+    setM2,
+    setModelReference,
+    setGoogleView,
+    setNotes,
+    setModelImage,
+    setTab,
+    setShowRequestModal,
+    openNewRequest,
+    onNewRequestHandled,
+    resetDownstream,
     budget: { budgetStatusByRequestId: budget.budgetStatusByRequestId, getBudgetStatus: budget.getBudgetStatus, setBudgetGenerated: budget.setBudgetGenerated, setAccountingApproved: budget.setAccountingApproved, setAdminApproved: budget.setAdminApproved, updateBudgetStatus: budget.updateBudgetStatus },
+    catalogModelOptions,
   });
 
   useEffect(() => {
@@ -268,5 +329,6 @@ export const useWorkOrders = ({
     createRequest,
     deleteRequest,
     resetDownstream,
+    catalogModelOptions,
   });
 };

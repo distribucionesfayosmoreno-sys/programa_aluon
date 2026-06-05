@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { MODELS } from '../constants';
 import { fetchWorkOrderRequests } from '../services/requestsApi';
 import type { TabKey, WorkOrderRequest } from '../models';
 
@@ -39,7 +38,7 @@ type WorkOrderBaseAction<K extends keyof WorkOrderBaseState = keyof WorkOrderBas
 const initialState: WorkOrderBaseState = {
   requests: [],
   customerId: '',
-  modelId: MODELS[0].id,
+  modelId: '',
   modelReference: '',
   modelImage: null,
   m2: 0,

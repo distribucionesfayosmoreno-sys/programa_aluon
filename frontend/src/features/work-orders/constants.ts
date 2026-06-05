@@ -7,12 +7,6 @@ import corte90Img from '../../assets/cutlist/corte90.jpg';
 import corte45y90Img from '../../assets/cutlist/corte45y90.jpg';
 import type { CutlistDoorModel, CutlistDoorType, CutlistImage, WorkOrderRequest, WorkOrderStage } from './models';
 
-export const MODELS = [
-  { id: 'CLASSIC', label: 'ALUON Classic', pricePerM2: 140 },
-  { id: 'PRO', label: 'ALUON Pro', pricePerM2: 190 },
-  { id: 'LUX', label: 'ALUON Lux', pricePerM2: 260 },
-];
-
 export const DOOR_MODELS = [
   { id: 'PREMIUM', label: 'ALUON Premium' },
   { id: 'CLASSIC', label: 'ALUON Classic' },

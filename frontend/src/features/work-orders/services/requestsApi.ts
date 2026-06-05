@@ -40,9 +40,11 @@ type WorkOrderCreatePayload = {
 const resolveModelId = (modeloPuerta?: string | null) => {
   const text = (modeloPuerta ?? '').toLowerCase();
   if (text.includes('classic')) return 'CLASSIC';
-  if (text.includes('bisel')) return 'PRO';
-  if (text.includes('inox')) return 'LUX';
-  if (text.includes('veneciana')) return 'LUX';
+  if (text.includes('premium')) return 'PREMIUM';
+  if (text.includes('inox')) return 'INOX';
+  if (text.includes('veneciana')) return 'VENECIANA';
+  if (text.includes('pro')) return 'PREMIUM';
+  if (text.includes('lux')) return 'PREMIUM';
   return 'CLASSIC';
 };
 

@@ -64,6 +64,10 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
         row={drawerRow}
         onClose={() => setDrawerRow(null)}
         onOpenPdf={(row) => void vm.actions.openPdf(row)}
+        onRowUpdated={(updatedRow) => {
+          setDrawerRow(updatedRow);
+          vm.actions.updateDocumentRow(updatedRow);
+        }}
       />
 
       <NewDocumentModal
