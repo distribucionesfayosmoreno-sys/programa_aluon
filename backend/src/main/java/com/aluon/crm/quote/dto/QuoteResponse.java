@@ -20,6 +20,8 @@ public class QuoteResponse {
     private UUID customerId;
     private String customerName;
     private String customerNombreComercial;
+    private String customerTipoDocumento;
+    private String customerNumeroDocumento;
     private String customerTelefono;
     private String customerDireccion;
     private String customerCp;

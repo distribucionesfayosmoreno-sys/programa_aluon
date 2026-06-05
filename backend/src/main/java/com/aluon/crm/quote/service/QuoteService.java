@@ -273,6 +273,8 @@ public class QuoteService {
                         ? (customer.getNombreComercial() != null ? customer.getNombreComercial() : customer.getRazonSocial())
                         : null)
                 .customerNombreComercial(customer != null ? customer.getNombreComercial() : null)
+                .customerTipoDocumento(customer != null && customer.getTipoDocumento() != null ? customer.getTipoDocumento().name() : null)
+                .customerNumeroDocumento(customer != null ? customer.getNumeroDocumento() : null)
                 .customerTelefono(customer != null ? customer.getTelefono() : null)
                 .customerDireccion(customer != null ? customer.getDireccion() : null)
                 .customerCp(customer != null ? customer.getCp() : null)

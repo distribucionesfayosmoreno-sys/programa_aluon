@@ -9,6 +9,8 @@ export const documentPrintBaseCss = `
     padding: 16mm 14mm;
     margin: 0 auto;
     background: var(--bg);
+    display: flex;
+    flex-direction: column;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -21,7 +23,8 @@ export const documentPrintBaseCss = `
     opacity: 1;
     pointer-events: none;
   }
-  .content { position: relative; z-index: 1; }
+  .content { position: relative; z-index: 1; flex: 1 1 auto; }
+  .page-footer { position: relative; z-index: 1; margin-top: auto; }
   .row { display: flex; justify-content: space-between; gap: 18px; }
   .small { font-size: 11px; color: var(--muted); line-height: 1.35; }
   .title { font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; }

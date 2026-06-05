@@ -4,7 +4,7 @@ import type { UseBudgetWorkflowResult } from './useBudgetWorkflow';
 import type { UseCutlistWorkflowResult } from './useCutlistWorkflow';
 import type { UseWorkOrderBaseStateResult } from './useWorkOrderBaseState';
 import type { UseWorkflowProgressResult } from './useWorkflowProgress';
-import type { UseWorkOrderPrintingResult } from './useWorkOrderPrinting';
+import type { UseWorkOrderPrintingResult, PrintPreviewRequest } from './useWorkOrderPrinting';
 import type { NewRequestData } from '../models';
 import type { CatalogModelOption } from '../utils/catalogModels';
 
@@ -24,6 +24,8 @@ type BuildWorkOrdersResultParams = {
   createRequest: (data: NewRequestData) => Promise<void>;
   deleteRequest: (req: UseWorkOrderBaseStateResult['requests'][number]) => Promise<void>;
   resetDownstream: (options?: { keepBudget?: boolean }) => void;
+  printPreviewRequest: PrintPreviewRequest | null;
+  clearPrintPreview: () => void;
 };
 
 export const buildWorkOrdersResult = ({
@@ -42,6 +44,8 @@ export const buildWorkOrdersResult = ({
   deleteRequest,
   resetDownstream,
   catalogModelOptions,
+  printPreviewRequest,
+  clearPrintPreview,
 }: BuildWorkOrdersResultParams) => ({
   customers,
   requests: base.requests,
@@ -199,4 +203,6 @@ export const buildWorkOrdersResult = ({
   handlePrint: printing.handlePrint,
   handleEmail: printing.handleEmail,
   handleWorkOrderPrint: printing.handleWorkOrderPrint,
+  printPreviewRequest,
+  clearPrintPreview,
 });

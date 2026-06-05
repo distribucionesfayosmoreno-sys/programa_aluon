@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { QuoteResponse } from '../customer-onboarding/models';
 import { dashboardTheme } from '../dashboard/dashboardTheme';
 import type { Customer360DocumentItem } from './customer360Types';
-import { fetchLifecycleNumbers, fetchQuoteById, listQuoteDocuments, quotePreviewPdfUrl } from '../project-management/services/quoteDetailsApi';
+import { fetchLifecycleNumbers, fetchQuoteById, listQuoteDocuments } from '../project-management/services/quoteDetailsApi';
 import type { QuoteDocumentRowResponse, QuoteLifecycleNumbersResponse } from '../project-management/components/DocumentDrawer.types';
 import { DocumentPopupFrame } from '../documents/components/DocumentPopupFrame';
 import {
@@ -11,6 +11,9 @@ import {
   DocumentStatCard,
   documentSurfaceGradient,
 } from '../documents/components/documentPopupPrimitives';
+import { PrintPreviewModal } from '../documents/components/PrintPreviewModal';
+import { usePrintPreview } from '../documents/hooks/usePrintPreview';
+import { buildPrintHtmlFromQuote } from '../documents/utils/buildPrintHtmlFromQuote';
 
 type Props = {
   open: boolean;
@@ -80,8 +83,8 @@ export const Customer360DocumentModal = ({ open, document, onClose, onOpenDocume
   const [quoteDocuments, setQuoteDocuments] = useState<QuoteDocumentRowResponse[]>([]);
   const [lifecycle, setLifecycle] = useState<QuoteLifecycleNumbersResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [openingPdf, setOpeningPdf] = useState(false);
   const [error, setError] = useState('');
+  const printPreview = usePrintPreview();
 
   useEffect(() => {
     const quoteId = document?.quoteId ?? null;
@@ -91,7 +94,6 @@ export const Customer360DocumentModal = ({ open, document, onClose, onOpenDocume
       setLifecycle(null);
       setLoading(false);
       setError('');
-      setOpeningPdf(false);
       return;
     }
 
@@ -128,14 +130,17 @@ export const Customer360DocumentModal = ({ open, document, onClose, onOpenDocume
     document ? rowsForQuote(quoteDocuments, document.type) : []
   ), [document, quoteDocuments]);
 
-  const handleOpenPdf = async () => {
-    if (!document?.quoteId) return;
-    setOpeningPdf(true);
-    try {
-      window.open(quotePreviewPdfUrl(document.quoteId, document.type, document.number), '_blank', 'noopener,noreferrer');
-    } finally {
-      setOpeningPdf(false);
-    }
+  const handleOpenPdf = () => {
+    if (!document?.quoteId || !quote) return;
+    const printHtml = buildPrintHtmlFromQuote(quote, document.type, document.number, document.createdAt);
+    printPreview.open({
+      printHtml,
+      documentKind: document.type,
+      documentNumber: document.number,
+      emailTo: quote.contactEmail ?? '',
+      emailSubject: `${documentTypeLabel[document.type]} ${document.number}`,
+      emailBody: `Adjunto ${documentTypeLabel[document.type]} Nº ${document.number} de ALUON.`,
+    });
   };
 
   if (!document) return null;
@@ -215,11 +220,11 @@ export const Customer360DocumentModal = ({ open, document, onClose, onOpenDocume
                 <button
                   type="button"
                   onClick={handleOpenPdf}
-                  disabled={!document.quoteId || openingPdf}
+                  disabled={!document.quoteId || !quote}
                   className="w-full rounded-[14px] px-4 py-3 text-left text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   style={{ background: dashboardTheme.surfaceSoft, color: dashboardTheme.text, border: `1px solid ${dashboardTheme.border}` }}
                 >
-                  {openingPdf ? 'Abriendo PDF...' : 'Abrir PDF del documento'}
+                  {loading ? 'Cargando...' : 'Ver documento para imprimir'}
                 </button>
 
                 <div className="rounded-[16px] border bg-white px-4 py-4" style={{ borderColor: dashboardTheme.border }}>
@@ -354,6 +359,18 @@ export const Customer360DocumentModal = ({ open, document, onClose, onOpenDocume
           ) : null}
         </div>
       </div>
+
+      {printPreview.state ? (
+        <PrintPreviewModal
+          open={printPreview.isOpen}
+          documentKind={printPreview.state.documentKind}
+          documentNumber={printPreview.state.documentNumber}
+          printHtml={printPreview.state.printHtml}
+          onClose={printPreview.close}
+          onPrint={printPreview.print}
+          onSendEmail={printPreview.sendEmail}
+        />
+      ) : null}
     </DocumentPopupFrame>
   );
 };

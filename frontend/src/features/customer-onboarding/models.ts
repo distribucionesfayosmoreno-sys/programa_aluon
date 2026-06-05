@@ -67,6 +67,8 @@ export type QuoteResponse = {
   customerId: string;
   customerName: string;
   customerNombreComercial: string | null;
+  customerTipoDocumento: string | null;
+  customerNumeroDocumento: string | null;
   customerTelefono: string | null;
   customerDireccion: string | null;
   customerCp: string | null;
