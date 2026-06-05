@@ -23,6 +23,13 @@ public class ErpCustomerController {
         return erpCustomerService.listAll();
     }
 
+    @GetMapping("/check-document")
+    public ResponseEntity<Boolean> checkDocumentExists(
+            @RequestParam String numeroDocumento,
+            @RequestParam(required = false) UUID excludeId) {
+        return ResponseEntity.ok(erpCustomerService.documentExists(numeroDocumento, excludeId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ErpCustomerResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(erpCustomerService.getById(id));

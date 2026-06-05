@@ -68,7 +68,9 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationDialogItems, setValidationDialogItems] = useState<string[]>([]);
   const [validationFocusTargetId, setValidationFocusTargetId] = useState<string>('');
+  const [documentExistsError, setDocumentExistsError] = useState(false);
   const lastPostalLookupRef = useRef<string>('');
+  const lastDocumentLookupRef = useRef<string>('');
 
   useEffect(() => {
     if (!customer?.id) {
@@ -119,6 +121,9 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
     if (!isDocValidNow) {
       items.push(`El número de documento (${form.tipoDocumento}) no es válido.`);
       focusTargetId ||= 'customer-numero-documento';
+    } else if (documentExistsError) {
+      items.push(`El número de documento ya está registrado en otro cliente.`);
+      focusTargetId ||= 'customer-numero-documento';
     }
 
     const isPhoneValidNow = form.telefono.trim().length === 0 ? true : validatePhone(form.telefono);
@@ -164,8 +169,9 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
   const isEdit = Boolean(customer?.id);
   const docHint = documentPatternHint(form.tipoDocumento);
   const isDocValid = validateDocumentNumber(form.tipoDocumento, form.numeroDocumento);
-  const showDocError = normalizeDocumentNumber(form.numeroDocumento).length > 0 && !isDocValid;
-  const showDocOk = normalizeDocumentNumber(form.numeroDocumento).length > 0 && isDocValid;
+  const showDocError = (normalizeDocumentNumber(form.numeroDocumento).length > 0 && !isDocValid) || documentExistsError;
+  const showDocOk = normalizeDocumentNumber(form.numeroDocumento).length > 0 && isDocValid && !documentExistsError;
+  const computedDocHint = documentExistsError ? 'Este documento ya está registrado' : docHint;
 
   const isPhoneValid = validatePhone(form.telefono);
   const showPhoneError = form.telefono.trim().length > 0 && !isPhoneValid;
@@ -180,6 +186,38 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
   const isIbanValid = validateIban(normalizedIban);
   const showIbanError = normalizedIban.length > 0 && !isIbanValid;
   const showIbanOk = normalizedIban.length > 0 && isIbanValid;
+
+  useEffect(() => {
+    const doc = normalizeDocumentNumber(form.numeroDocumento);
+    if (!doc || !validateDocumentNumber(form.tipoDocumento, form.numeroDocumento)) {
+      setDocumentExistsError(false);
+      lastDocumentLookupRef.current = '';
+      return;
+    }
+    
+    if (lastDocumentLookupRef.current === doc) return;
+    lastDocumentLookupRef.current = doc;
+
+    const controller = new AbortController();
+    void (async () => {
+      try {
+        const url = new URL('/api/erp/customers/check-document', window.location.origin);
+        url.searchParams.set('numeroDocumento', doc);
+        if (customer?.id) {
+          url.searchParams.set('excludeId', customer.id);
+        }
+        const response = await fetch(url.toString(), { signal: controller.signal });
+        if (!response.ok) return;
+        const exists = await response.json();
+        setDocumentExistsError(exists);
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+        console.error('Error checking document existence:', err);
+      }
+    })();
+
+    return () => controller.abort();
+  }, [form.numeroDocumento, form.tipoDocumento, customer?.id]);
 
   useEffect(() => {
     const cp = normalizePostalCodeEs(form.cp);
@@ -220,7 +258,7 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
     removeAddr,
     handleSubmit,
     isEdit,
-    docHint,
+    docHint: computedDocHint,
     showDocError,
     showDocOk,
     showPhoneError,

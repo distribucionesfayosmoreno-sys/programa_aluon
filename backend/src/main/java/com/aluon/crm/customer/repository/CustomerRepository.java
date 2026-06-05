@@ -13,4 +13,6 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
     List<Customer> findByActiveTrueAndNombreComercialContainingIgnoreCaseOrderByNombreComercialAsc(String nombreComercial);
     Optional<Customer> findByIdAndActiveTrue(UUID id);
     Optional<Customer> findFirstByEmailIgnoreCaseAndActiveTrue(String email);
+    boolean existsByNumeroDocumentoIgnoreCaseAndActiveTrue(String numeroDocumento);
+    boolean existsByNumeroDocumentoIgnoreCaseAndIdNotAndActiveTrue(String numeroDocumento, UUID id);
 }

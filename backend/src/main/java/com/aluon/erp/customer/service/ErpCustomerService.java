@@ -35,6 +35,11 @@ public class ErpCustomerService {
         return toResponse(customerService.findById(id));
     }
 
+    @Transactional(readOnly = true)
+    public boolean documentExists(String numeroDocumento, UUID excludeId) {
+        return customerService.documentExists(numeroDocumento, excludeId);
+    }
+
     public ErpCustomerResponse create(ErpCustomerCreateRequest request) {
         validate(request);
         Customer customer = toEntity(request);
