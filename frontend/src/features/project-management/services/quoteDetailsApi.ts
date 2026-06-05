@@ -72,5 +72,5 @@ export const patchQuoteById = async (
   return parseJsonOrThrow<QuoteResponse>(response);
 };
 
-export const quoteDocumentPdfUrl = (quoteId: string, tipo: string): string =>
-  `/api/quotes/${encodeURIComponent(quoteId)}/documents/${encodeURIComponent(tipo)}/pdf`;
+export const quotePreviewPdfUrl = (quoteId: string, tipo: string, number: string): string =>
+  `/api/quotes/${encodeURIComponent(quoteId)}/pdf?type=${encodeURIComponent(tipo)}&number=${encodeURIComponent(number)}`;

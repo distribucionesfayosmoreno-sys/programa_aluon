@@ -13,7 +13,7 @@ import { ManualDocumentDrawerPanel } from './ManualDocumentDrawerPanel';
 import { useDocumentDrawer } from './useDocumentDrawer';
 import { useDocumentDrawerEdit } from './useDocumentDrawerEdit';
 import { useManualDocumentDrawerEdit } from './useManualDocumentDrawerEdit';
-import { emitQuoteDocument, quoteDocumentPdfUrl } from '../services/quoteDetailsApi';
+import { emitQuoteDocument } from '../services/quoteDetailsApi';
 import { documentManagementTheme } from '../documentManagementTheme';
 import type { ProjectDocumentKind } from '../ProjectManagement.types';
 
@@ -21,7 +21,7 @@ type Props = {
   open: boolean;
   row: ProjectDocumentRow | null;
   onClose: () => void;
-  onOpenPdf: (row: ProjectDocumentRow) => void;
+  onOpenPreview?: (row: ProjectDocumentRow) => void;
   onRowUpdated?: (row: ProjectDocumentRow) => void;
 };
 
@@ -49,7 +49,7 @@ const toQuoteRowUpdate = (row: ProjectDocumentRow, quote: QuoteResponse): Projec
 const toManualType = (value: string): Exclude<ProjectDocumentKind, 'PRESUPUESTO'> =>
   (value as Exclude<ProjectDocumentKind, 'PRESUPUESTO'>);
 
-export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onRowUpdated }: Props) => {
+export const DocumentDrawer = ({ open, row, onClose, onOpenPreview, onRowUpdated }: Props) => {
   const { loading, error, data } = useDocumentDrawer(row);
   const [quoteOverride, setQuoteOverride] = useState<QuoteResponse | null>(null);
   const [isConverting, setIsConverting] = useState(false);
@@ -120,36 +120,33 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onRowUpdated }: 
     return false;
   };
 
-  const openStoredPdf = (tipo: string) => {
-    if (!row?.quoteId) return;
-    window.open(quoteDocumentPdfUrl(row.quoteId, tipo), '_blank', 'noopener,noreferrer');
-  };
-
-  const emitAndActivate = async (tipo: string) => {
-    if (!row?.quoteId || !quoteData || isConverting) return;
+  const emitOpen = async (tipo: string): Promise<void> => {
+    if (!quoteData || !row?.quoteId) return;
+    const upper = tipo.toUpperCase();
+    if (!canEmit(upper)) return;
     setIsConverting(true);
     try {
-      const created = await emitQuoteDocument(row.quoteId, tipo);
-      setOptimisticByTipo(prev => ({
-        ...prev,
-        [String(created.tipo).toUpperCase()]: created.numeroDocumento,
-      }));
-      setActiveTipo(String(created.tipo).toUpperCase());
+      let emittedNumber = existingByTipo.get(upper) ?? row.number;
+      if (!existingByTipo.has(upper)) {
+        const created = await emitQuoteDocument(row.quoteId, upper);
+        setOptimisticByTipo(prev => ({
+          ...prev,
+          [String(created.tipo).toUpperCase()]: created.numeroDocumento,
+        }));
+        setActiveTipo(String(created.tipo).toUpperCase());
+        emittedNumber = created.numeroDocumento;
+      }
+      onOpenPreview?.({
+        ...row,
+        type: upper as ProjectDocumentKind,
+        number: emittedNumber,
+        quoteId: row.quoteId,
+      });
     } catch (err) {
       alert(err instanceof Error ? err.message : 'No se pudo generar el documento.');
     } finally {
       setIsConverting(false);
     }
-  };
-
-  const emitOpen = async (tipo: string): Promise<void> => {
-    if (!quoteData || !row?.quoteId) return;
-    const upper = tipo.toUpperCase();
-    if (!canEmit(upper)) return;
-    if (!existingByTipo.has(upper)) {
-      await emitAndActivate(upper);
-    }
-    openStoredPdf(upper);
   };
 
   const primaryEmitTarget = useMemo(() => {
@@ -181,20 +178,8 @@ export const DocumentDrawer = ({ open, row, onClose, onOpenPdf, onRowUpdated }: 
   }, [row]);
 
   const handleView = async () => {
-    if (!quoteData || !row?.quoteId) return;
-    const tipo = effectiveTipo || row.type;
-    const upperTipo = tipo.toUpperCase();
-
-    if (upperTipo === 'PRESUPUESTO') {
-      onOpenPdf({ ...row, type: 'PRESUPUESTO' });
-      return;
-    }
-
-    if (!existingByTipo.has(upperTipo)) {
-      if (!canEmit(upperTipo)) return;
-      await emitAndActivate(upperTipo);
-    }
-    openStoredPdf(upperTipo);
+    if (!row) return;
+    onOpenPreview?.(row);
   };
 
   const handleQuoteSave = () => {

@@ -29,6 +29,7 @@ export const WorkOrderModal = ({
       title="Orden de trabajo"
       subtitle={data.workOrderNumber}
       onClose={onClose}
+      headerVariant="light"
       footer={(
         <div className="flex items-center gap-3 ml-auto">
           <button type="button" onClick={onClose} className="btn-ghost">

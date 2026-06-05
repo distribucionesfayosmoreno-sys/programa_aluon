@@ -41,7 +41,7 @@ public class QuoteDocumentController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String number) {
         
-        if (type != null && !type.isBlank() && !type.equalsIgnoreCase("PRESUPUESTO")) {
+        if (type != null && !type.isBlank()) {
             byte[] pdf = quoteDocumentService.generateOnTheFly(id, type, number);
             String safeType = type.trim();
             String safeNum = (number == null || number.isBlank()) ? "documento" : number.trim();

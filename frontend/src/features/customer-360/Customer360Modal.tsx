@@ -5,8 +5,6 @@ import { dashboardTheme } from '../dashboard/dashboardTheme';
 import type { Customer360DocumentItem, Customer360WorkOrderItem } from './customer360Types';
 import { Customer360DocumentModal } from './Customer360DocumentModal';
 import { useCustomer360 } from './useCustomer360';
-import { ensureQuotePdfGenerated, quotePdfUrl } from '../project-management/services/quotePdf';
-import { quoteDocumentPdfUrl } from '../project-management/services/quoteDetailsApi';
 
 type Props = {
   open: boolean;
@@ -232,34 +230,8 @@ export const Customer360Modal = ({ open, customer, onClose }: Props) => {
     }
   }, [open]);
 
-  const openDocumentPdf = async (document: Customer360DocumentItem): Promise<void> => {
-    if (!document.quoteId) return;
-
-    const popup = window.open('about:blank', '_blank');
-    if (!popup) {
-      return;
-    }
-
-    popup.opener = null;
-
-    try {
-      if (document.type === 'PRESUPUESTO') {
-        await ensureQuotePdfGenerated(document.quoteId);
-        popup.location.href = quotePdfUrl(document.quoteId);
-        return;
-      }
-
-      popup.location.href = quoteDocumentPdfUrl(document.quoteId, document.type);
-    } catch (err) {
-      popup.close();
-      setSelectedDocument(document);
-      alert(err instanceof Error ? err.message : 'No se pudo abrir el documento.');
-    }
-  };
-
   const handleDocumentClick = (document: Customer360DocumentItem): void => {
     setSelectedDocument(document);
-    void openDocumentPdf(document);
   };
 
   return (
@@ -448,6 +420,7 @@ export const Customer360Modal = ({ open, customer, onClose }: Props) => {
       <Customer360DocumentModal
         open={Boolean(selectedDocument)}
         document={selectedDocument}
+        onOpenDocument={setSelectedDocument}
         onClose={() => setSelectedDocument(null)}
       />
     </AppDialog>

@@ -5,6 +5,8 @@ import type { ProjectDocumentRow } from './ProjectManagement.types';
 import { DocumentDrawer } from './components/DocumentDrawer';
 import { documentManagementTheme } from './documentManagementTheme';
 import { NewDocumentModal } from './components/NewDocumentModal';
+import { Customer360DocumentModal } from '../customer-360/Customer360DocumentModal';
+import type { Customer360DocumentItem } from '../customer-360/customer360Types';
 
 type Props = {
   openRowId: string | null;
@@ -15,6 +17,7 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
   const vm = useProjectManagement();
   const [drawerRow, setDrawerRow] = useState<ProjectDocumentRow | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [previewDocument, setPreviewDocument] = useState<Customer360DocumentItem | null>(null);
 
   const drawerOpen = useMemo(() => drawerRow !== null, [drawerRow]);
 
@@ -26,6 +29,21 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
     }
     onOpenRowHandled();
   }, [openRowId, onOpenRowHandled, vm.rows]);
+
+  const openPreview = (row: ProjectDocumentRow) => {
+    if (!row.quoteId) return;
+    setDrawerRow(null);
+    setPreviewDocument({
+      id: row.rowId,
+      type: row.type,
+      number: row.number,
+      statusLabel: row.statusLabel,
+      createdAt: row.createdAt,
+      quoteId: row.quoteId,
+      customerName: row.customerName,
+      source: 'local',
+    });
+  };
 
   return (
     <div
@@ -63,7 +81,7 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
         open={drawerOpen}
         row={drawerRow}
         onClose={() => setDrawerRow(null)}
-        onOpenPdf={(row) => void vm.actions.openPdf(row)}
+        onOpenPreview={openPreview}
         onRowUpdated={(updatedRow) => {
           setDrawerRow(updatedRow);
           vm.actions.updateDocumentRow(updatedRow);
@@ -80,6 +98,13 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
             setDrawerRow(row);
           }
         }}
+      />
+
+      <Customer360DocumentModal
+        open={Boolean(previewDocument)}
+        document={previewDocument}
+        onOpenDocument={setPreviewDocument}
+        onClose={() => setPreviewDocument(null)}
       />
     </div>
   );
