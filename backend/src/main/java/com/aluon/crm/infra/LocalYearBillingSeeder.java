@@ -12,17 +12,18 @@ import com.aluon.crm.quote.model.QuoteValidationMode;
 import com.aluon.crm.quote.repository.QuoteDocumentRepository;
 import com.aluon.crm.quote.repository.QuoteItemRepository;
 import com.aluon.crm.quote.repository.QuoteRequestRepository;
+import com.aluon.crm.quote.service.QuotePdfService;
 import com.aluon.production.cutlist.model.DoorModel;
 import com.aluon.production.cutlist.model.DoorType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -37,6 +38,7 @@ import java.util.UUID;
 
 @Component
 @Profile("local")
+@Order(2)
 @RequiredArgsConstructor
 public class LocalYearBillingSeeder implements ApplicationRunner {
 
@@ -49,6 +51,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
     private final QuoteRequestRepository quoteRequestRepository;
     private final QuoteItemRepository quoteItemRepository;
     private final QuoteDocumentRepository quoteDocumentRepository;
+    private final QuotePdfService quotePdfService;
 
     @Override
     @Transactional
@@ -132,7 +135,7 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                         item.lineTotal));
             }
 
-            allDocs.add(invoiceDoc(quote, plan.invoiceNumber, plan.invoiceCreatedAt));
+            allDocs.add(invoiceDoc(quote, plan.invoiceNumber, plan.invoiceCreatedAt, quotePdfService));
         }
 
         quoteItemRepository.saveAll(allItems);
@@ -212,8 +215,12 @@ public class LocalYearBillingSeeder implements ApplicationRunner {
                 .build();
     }
 
-    private static QuoteDocument invoiceDoc(QuoteRequest quote, String invoiceNumber, LocalDateTime createdAt) {
-        byte[] data = ("demo-" + DOC_TIPO_FACTURA + "-" + invoiceNumber).getBytes(StandardCharsets.UTF_8);
+    private static QuoteDocument invoiceDoc(
+            QuoteRequest quote,
+            String invoiceNumber,
+            LocalDateTime createdAt,
+            QuotePdfService quotePdfService) {
+        byte[] data = quotePdfService.renderQuotePdf(quote, DOC_TIPO_FACTURA, invoiceNumber);
         return QuoteDocument.builder()
                 .quoteRequest(quote)
                 .tipo(DOC_TIPO_FACTURA)

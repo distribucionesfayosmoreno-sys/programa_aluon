@@ -96,5 +96,22 @@ export const useCustomers = () => {
     fetchCustomers();
   }, []);
 
-  return { customers, loading, saveCustomer, deleteCustomer, refresh: fetchCustomers };
+  const checkDocumentExists = async (numeroDocumento: string, excludeId?: string): Promise<boolean> => {
+    if (!numeroDocumento) return false;
+    try {
+      const url = new URL('/api/erp/customers/check-document', window.location.origin);
+      url.searchParams.set('numeroDocumento', numeroDocumento);
+      if (excludeId) {
+        url.searchParams.set('excludeId', excludeId);
+      }
+      const response = await fetch(url.toString());
+      if (!response.ok) return false;
+      return await response.json();
+    } catch (error) {
+      console.error('Error checking document:', error);
+      return false;
+    }
+  };
+
+  return { customers, loading, saveCustomer, deleteCustomer, refresh: fetchCustomers, checkDocumentExists };
 };

@@ -43,6 +43,15 @@ public class CustomerService {
         return customerRepository.findFirstByEmailIgnoreCaseAndActiveTrue(normalizedEmail);
     }
 
+    @Transactional(readOnly = true)
+    public boolean documentExists(String numeroDocumento, UUID excludeId) {
+        if (numeroDocumento == null || numeroDocumento.isBlank()) return false;
+        if (excludeId != null) {
+            return customerRepository.existsByNumeroDocumentoIgnoreCaseAndIdNotAndActiveTrue(numeroDocumento.trim(), excludeId);
+        }
+        return customerRepository.existsByNumeroDocumentoIgnoreCaseAndActiveTrue(numeroDocumento.trim());
+    }
+
     public Customer findById(UUID id) {
         UUID customerId = Objects.requireNonNull(id, "id");
         return customerRepository.findByIdAndActiveTrue(customerId)

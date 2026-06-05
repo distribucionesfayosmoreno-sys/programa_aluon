@@ -20,7 +20,7 @@ type Props = {
   totals: Totals;
   formatEur: (value: number) => string;
   variant?: 'embedded' | 'full';
-  onLineClick?: () => void;
+  onLineClick?: (item: Item) => void;
 };
 
 export const DocumentDrawerLinesView = ({ items, totals, formatEur, variant = 'full', onLineClick }: Props) => (
@@ -53,17 +53,22 @@ export const DocumentDrawerLinesView = ({ items, totals, formatEur, variant = 'f
               {items.map((item, idx) => (
                 <tr
                   key={`${item.doorModel}:${idx}`}
-                  style={{ borderBottom: '1px solid #f1f5f9', cursor: onLineClick ? 'pointer' : 'default' }}
-                  onClick={onLineClick}
-                  onKeyDown={event => {
-                    if (!onLineClick) return;
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      onLineClick();
-                    }
-                  }}
                   role={onLineClick ? 'button' : undefined}
                   tabIndex={onLineClick ? 0 : undefined}
+                  aria-label={onLineClick ? `Ver documento asociado de la línea ${idx + 1}` : undefined}
+                  onClick={onLineClick ? () => onLineClick(item) : undefined}
+                  onKeyDown={
+                    onLineClick
+                      ? (event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            onLineClick(item);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={onLineClick ? 'cursor-pointer transition hover:bg-slate-50 focus:bg-slate-50 focus:outline-none' : undefined}
+                  style={{ borderBottom: '1px solid #f1f5f9' }}
                 >
                   <td className="px-3 py-2.5 text-xs font-bold" style={{ color: '#94a3b8' }}>
                     {idx + 1}
