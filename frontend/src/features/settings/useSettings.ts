@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
-import type { EmailSignature, EmailSignatureForm, EmailTemplate } from './models';
+import type { EmailSignature, EmailSignatureForm, EmailTemplate, WhatsappTemplate } from './models';
 import type { SettingsTab } from './Settings.types';
 import {
   createEmailSignature,
@@ -8,6 +8,10 @@ import {
   sendEmailTemplateTest,
   updateEmailTemplate,
 } from './services/emailSettingsApi';
+import {
+  getWhatsappTemplates,
+  updateWhatsappTemplate,
+} from './services/whatsappSettingsApi';
 
 const DEFAULT_FORM: EmailSignatureForm = {
   fullName: '',
@@ -31,6 +35,9 @@ type UseSettingsState = {
   selectedTemplate: EmailTemplate | null;
   templateSubject: string;
   templateBody: string;
+  whatsappTemplates: WhatsappTemplate[];
+  selectedWhatsappTemplate: WhatsappTemplate | null;
+  whatsappMessage: string;
   testEmail: string;
   testNombre: string;
   testTelefono: string;
@@ -42,9 +49,12 @@ type UseSettingsState = {
   handleUseSignature: (signature: EmailSignature) => void;
   handleTemplateSelect: (templateId: string) => void;
   handleTemplateSave: () => Promise<void>;
+  handleWhatsappTemplateSelect: (templateId: string) => void;
+  handleWhatsappTemplateSave: () => Promise<void>;
   handleSendTest: () => Promise<void>;
   setTemplateSubject: (value: string) => void;
   setTemplateBody: (value: string) => void;
+  setWhatsappMessage: (value: string) => void;
   setTestEmail: (value: string) => void;
   setTestNombre: (value: string) => void;
   setTestTelefono: (value: string) => void;
@@ -61,6 +71,9 @@ export const useSettings = (): UseSettingsState => {
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [templateSubject, setTemplateSubject] = useState('');
   const [templateBody, setTemplateBody] = useState('');
+  const [whatsappTemplates, setWhatsappTemplates] = useState<WhatsappTemplate[]>([]);
+  const [selectedWhatsappTemplate, setSelectedWhatsappTemplate] = useState<WhatsappTemplate | null>(null);
+  const [whatsappMessage, setWhatsappMessage] = useState('');
   const [testEmail, setTestEmail] = useState('');
   const [testNombre, setTestNombre] = useState('Cliente Demo');
   const [testTelefono, setTestTelefono] = useState('600 000 000');
@@ -100,6 +113,23 @@ export const useSettings = (): UseSettingsState => {
     };
 
     fetchTemplates();
+  }, []);
+
+  useEffect(() => {
+    const fetchWhatsappTemplates = async () => {
+      try {
+        const data = await getWhatsappTemplates();
+        setWhatsappTemplates(data);
+        if (data.length > 0) {
+          setSelectedWhatsappTemplate(data[0]);
+          setWhatsappMessage(data[0].messageText);
+        }
+      } catch (error) {
+        setStatusMessage(error instanceof Error ? error.message : 'Error al cargar mensajes de WhatsApp');
+      }
+    };
+
+    fetchWhatsappTemplates();
   }, []);
 
   const handleInputChange = useCallback(
@@ -158,6 +188,15 @@ export const useSettings = (): UseSettingsState => {
     [templates],
   );
 
+  const handleWhatsappTemplateSelect = useCallback(
+    (templateId: string) => {
+      const selected = whatsappTemplates.find(template => template.id === templateId) ?? null;
+      setSelectedWhatsappTemplate(selected);
+      setWhatsappMessage(selected?.messageText ?? '');
+    },
+    [whatsappTemplates],
+  );
+
   const handleTemplateSave = useCallback(async () => {
     if (!selectedTemplate) return;
     try {
@@ -173,6 +212,21 @@ export const useSettings = (): UseSettingsState => {
       setStatusMessage(error instanceof Error ? error.message : 'Error al guardar plantilla');
     }
   }, [selectedTemplate, templateBody, templateSubject]);
+
+  const handleWhatsappTemplateSave = useCallback(async () => {
+    if (!selectedWhatsappTemplate) return;
+    try {
+      const updated = await updateWhatsappTemplate(selectedWhatsappTemplate.id, {
+        templateKey: selectedWhatsappTemplate.templateKey,
+        messageText: whatsappMessage,
+      });
+      setWhatsappTemplates(prev => prev.map(template => (template.id === updated.id ? updated : template)));
+      setSelectedWhatsappTemplate(updated);
+      setStatusMessage('Mensaje de WhatsApp actualizado.');
+    } catch (error) {
+      setStatusMessage(error instanceof Error ? error.message : 'Error al guardar mensaje de WhatsApp');
+    }
+  }, [selectedWhatsappTemplate, whatsappMessage]);
 
   const handleSendTest = useCallback(async () => {
     if (!selectedTemplate) return;
@@ -201,6 +255,9 @@ export const useSettings = (): UseSettingsState => {
     selectedTemplate,
     templateSubject,
     templateBody,
+    whatsappTemplates,
+    selectedWhatsappTemplate,
+    whatsappMessage,
     testEmail,
     testNombre,
     testTelefono,
@@ -212,9 +269,12 @@ export const useSettings = (): UseSettingsState => {
     handleUseSignature,
     handleTemplateSelect,
     handleTemplateSave,
+    handleWhatsappTemplateSelect,
+    handleWhatsappTemplateSave,
     handleSendTest,
     setTemplateSubject,
     setTemplateBody,
+    setWhatsappMessage,
     setTestEmail,
     setTestNombre,
     setTestTelefono,

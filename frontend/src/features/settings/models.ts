@@ -32,3 +32,11 @@ export interface EmailTemplate {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface WhatsappTemplate {
+  id: string;
+  templateKey: string;
+  messageText: string;
+  createdAt: string;
+  updatedAt: string;
+}
