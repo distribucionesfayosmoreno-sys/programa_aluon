@@ -4,6 +4,7 @@ import type { QuoteItemDraft } from '../BudgetWizard.types';
 import AppDialog from '../../../components/feedback/AppDialog';
 import { Customer360DocumentModal } from '../../customer-360/Customer360DocumentModal';
 import type { Customer360DocumentItem } from '../../customer-360/customer360Types';
+import { getQuoteWhatsappLink } from '../services/quoteWhatsappApi';
 
 type Props = {
   quote: QuoteResponse;
@@ -46,14 +47,18 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
   };
 
   const handleSendWhatsapp = async () => {
+    const popup = window.open('about:blank', '_blank', 'noopener,noreferrer');
     try {
       await onSendChannel('WHATSAPP');
-      const text = encodeURIComponent(
-        `Hola, te adjunto el Presupuesto oficial Nº ${quote.quoteNumber} de ALUON por un importe total de ${quote.total.toFixed(2)} €. Puedes consultar los detalles aquí.`
-      );
-      const url = `https://api.whatsapp.com/send?phone=${quote.contactWhatsapp || ''}&text=${text}`;
-      window.open(url, '_blank');
+      const { url } = await getQuoteWhatsappLink(quote.id);
+      if (popup) {
+        popup.location.href = url;
+        popup.focus();
+      } else {
+        window.location.href = url;
+      }
     } catch {
+      popup?.close();
       alert('Error al enviar por WhatsApp.');
     }
   };

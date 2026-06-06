@@ -1,1 +1,1 @@
-export type SettingsTab = 'signatures' | 'templates';
+export type SettingsTab = 'signatures' | 'templates' | 'whatsapp';

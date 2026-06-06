@@ -5,6 +5,7 @@ import com.aluon.crm.quote.dto.QuoteEmailSendRequest;
 import com.aluon.crm.quote.dto.QuoteWhatsappLinkResponse;
 import com.aluon.crm.quote.model.QuoteDocument;
 import com.aluon.crm.quote.service.QuoteDocumentService;
+import com.aluon.crm.quote.service.QuoteWhatsappLinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -27,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class QuoteDocumentController {
     private final QuoteDocumentService quoteDocumentService;
+    private final QuoteWhatsappLinkService quoteWhatsappLinkService;
     private final MailService mailService;
 
     @PostMapping("/{id}/pdf")
@@ -76,10 +76,7 @@ public class QuoteDocumentController {
 
     @GetMapping("/{id}/send/whatsapp-link")
     public ResponseEntity<QuoteWhatsappLinkResponse> getWhatsappLink(@PathVariable UUID id) {
-        QuoteDocument document = quoteDocumentService.getLatest(id);
-        String text = "Te envío el presupuesto: " + buildPdfFilename(document);
-        String encoded = URLEncoder.encode(text, StandardCharsets.UTF_8);
-        return ResponseEntity.ok(new QuoteWhatsappLinkResponse("https://wa.me/?text=" + encoded));
+        return ResponseEntity.ok(quoteWhatsappLinkService.buildLink(id));
     }
 
     private String escapeHtml(String raw) {
