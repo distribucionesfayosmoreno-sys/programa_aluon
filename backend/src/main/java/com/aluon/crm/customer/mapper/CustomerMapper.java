@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import com.aluon.crm.customer.model.Customer;
+import com.aluon.crm.customer.model.CustomerTariff;
 import com.aluon.crm.customer.dto.CustomerRequest;
 import com.aluon.crm.customer.dto.CustomerResponse;
 import com.aluon.crm.customer.model.DeliveryAddress;
@@ -28,7 +29,7 @@ public class CustomerMapper {
                 customer.getNombreComercial(),
                 customer.getRazonSocial(),
                 customer.getPersonaContacto(),
-                customer.getTarifa(),
+                CustomerTariff.normalizeCode(customer.getTarifa()),
                 customer.getTipoDocumento(),
                 customer.getNumeroDocumento(),
                 customer.getTelefono(),
@@ -54,7 +55,7 @@ public class CustomerMapper {
         customer.setNombreComercial(request.nombreComercial());
         customer.setRazonSocial(request.razonSocial());
         customer.setPersonaContacto(request.personaContacto());
-        customer.setTarifa(request.tarifa());
+        customer.setTarifa(CustomerTariff.normalizeCode(request.tarifa()));
         customer.setTipoDocumento(request.tipoDocumento());
         customer.setNumeroDocumento(request.numeroDocumento());
         customer.setTelefono(request.telefono());

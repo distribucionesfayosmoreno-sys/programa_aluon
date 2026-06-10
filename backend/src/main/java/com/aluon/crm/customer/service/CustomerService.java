@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import com.aluon.crm.customer.model.Customer;
+import com.aluon.crm.customer.model.CustomerTariff;
+import com.aluon.crm.customer.model.PaymentMethod;
 import com.aluon.crm.customer.repository.CustomerRepository;
 
 
@@ -68,6 +70,10 @@ public class CustomerService {
             customer.setActive(true);
         }
 
+        validatePaymentMethod(customer.getFormaPago());
+        customer.setFormaPago(PaymentMethod.normalize(customer.getFormaPago()));
+        customer.setTarifa(CustomerTariff.normalizeCode(customer.getTarifa()));
+
         String normalizedPassword = rawPassword == null ? "" : rawPassword.trim();
         if (!normalizedPassword.isBlank()) {
             if (normalizedPassword.length() < 8) {
@@ -94,6 +100,15 @@ public class CustomerService {
         if (customer.isActive()) {
             customer.setActive(false);
             customerRepository.save(customer);
+        }
+    }
+
+    private void validatePaymentMethod(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("La forma de pago es obligatoria");
+        }
+        if (!PaymentMethod.isValid(value)) {
+            throw new IllegalArgumentException("La forma de pago debe ser TRANSFERENCIA, GIRO, TARJETA o CONTADO");
         }
     }
 }

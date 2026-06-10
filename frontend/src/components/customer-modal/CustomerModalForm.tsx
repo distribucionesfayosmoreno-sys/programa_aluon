@@ -1,7 +1,8 @@
 import React from 'react';
 import { AccordionSection } from './AccordionSection';
-import { FL, FI, ValidationHint, SectionTitle } from './CustomerModalComponents';
+import { FL, FI, FS, ValidationHint, SectionTitle } from './CustomerModalComponents';
 import type { Customer, DeliveryAddress } from '../../hooks/useCustomers';
+import type { CustomerTariffOption } from './customerTariffOptions';
 import {
   emailPatternHint,
   ibanPatternHint,
@@ -10,6 +11,7 @@ import {
   normalizePostalCodeEs,
   phonePatternHint,
 } from './customerModalValidators';
+import { CUSTOMER_PAYMENT_METHODS, isCustomerPaymentMethod } from './customerPaymentMethods';
 
 type Props = {
   form: Customer;
@@ -28,7 +30,11 @@ type Props = {
   showEmailOk: boolean;
   showIbanError: boolean;
   showIbanOk: boolean;
+  showPaymentError: boolean;
+  showPaymentOk: boolean;
+  paymentHint: string;
   submitError: string;
+  tariffOptions: CustomerTariffOption[];
   onSubmit: (e: React.FormEvent) => void;
 };
 
@@ -49,10 +55,15 @@ export const CustomerModalForm = ({
   showEmailOk,
   showIbanError,
   showIbanOk,
+  showPaymentError,
+  showPaymentOk,
+  paymentHint,
   submitError,
+  tariffOptions,
   onSubmit,
 }: Props) => {
   const [showPassword, setShowPassword] = React.useState(false);
+  const paymentValue = isCustomerPaymentMethod(form.formaPago) ? form.formaPago : '';
 
   return (
     <form id="customer-modal-form" onSubmit={onSubmit} className="space-y-4">
@@ -216,7 +227,13 @@ export const CustomerModalForm = ({
           </div>
           <div className="md:col-span-2">
             <FL>Tarifa</FL>
-            <FI name="tarifa" value={form.tarifa} onChange={handleChange} />
+            <FS name="tarifa" value={form.tarifa} onChange={handleChange}>
+              {tariffOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </FS>
           </div>
         </div>
       </AccordionSection>
@@ -277,7 +294,30 @@ export const CustomerModalForm = ({
           </div>
           <div className="md:col-span-2">
             <FL>Forma de pago</FL>
-            <FI name="formaPago" value={form.formaPago} onChange={handleChange} />
+            <FS
+              id="customer-forma-pago"
+              name="formaPago"
+              value={paymentValue}
+              onChange={handleChange}
+              aria-invalid={showPaymentError}
+              style={{
+                outline: 'none',
+                borderColor: showPaymentOk ? 'var(--success, #16a34a)' : showPaymentError ? 'var(--danger, #ef4444)' : '#e5e7eb',
+                boxShadow: showPaymentOk
+                  ? '0 0 0 3px rgba(22,163,74,0.12)'
+                  : showPaymentError
+                    ? '0 0 0 3px rgba(239,68,68,0.12)'
+                    : undefined,
+              }}
+            >
+              <option value="">Selecciona…</option>
+              {CUSTOMER_PAYMENT_METHODS.map(method => (
+                <option key={method} value={method}>
+                  {method}
+                </option>
+              ))}
+            </FS>
+            <ValidationHint status={showPaymentError ? 'error' : showPaymentOk ? 'ok' : 'neutral'} hint={paymentHint} />
           </div>
           <div className="md:col-span-2">
             <FL>Días vencimiento</FL>

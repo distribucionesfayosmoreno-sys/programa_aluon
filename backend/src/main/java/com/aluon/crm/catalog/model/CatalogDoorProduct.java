@@ -19,6 +19,7 @@ import lombok.Setter;
 import org.hibernate.annotations.TenantId;
 
 import java.util.UUID;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "aluon_saas_catalogo_puertas")
@@ -47,4 +48,13 @@ public class CatalogDoorProduct {
 
     @Column(name = "imagen_modelo", columnDefinition = "TEXT")
     private String imagenModelo;
+
+    @Column(name = "precio_tarifa_a", precision = 12, scale = 2)
+    private BigDecimal precioTarifaA;
+
+    @Column(name = "precio_tarifa_b", precision = 12, scale = 2)
+    private BigDecimal precioTarifaB;
+
+    @Column(name = "metros2_minimo", precision = 12, scale = 4)
+    private BigDecimal metros2Minimo;
 }

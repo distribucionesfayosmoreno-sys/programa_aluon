@@ -1,3 +1,5 @@
+import { normalizeCustomerTariffCode } from '../../../components/customer-modal/customerTariffOptions';
+
 const STORAGE_KEY = 'aluon.budget-wizard.prefill.v1';
 const HISTORY_STATE_KEY = 'budgetWizardPrefillCustomer';
 
@@ -72,7 +74,7 @@ const toPrefillState = (raw: unknown): PrefillState | null => {
     razonSocial: typeof raw.razonSocial === 'string' ? raw.razonSocial : '',
     email: typeof raw.email === 'string' ? raw.email : '',
     telefono: typeof raw.telefono === 'string' ? raw.telefono : '',
-    tarifa: typeof raw.tarifa === 'string' ? raw.tarifa : '',
+    tarifa: normalizeCustomerTariffCode(typeof raw.tarifa === 'string' ? raw.tarifa : ''),
     direccionesEntrega,
   };
 };
@@ -104,7 +106,7 @@ export const buildBudgetWizardPrefillCustomer = (customer: {
     razonSocial: customer.razonSocial?.trim() ?? '',
     email: customer.email?.trim() ?? '',
     telefono: customer.telefono?.trim() ?? '',
-    tarifa: customer.tarifa?.trim() ?? '',
+    tarifa: normalizeCustomerTariffCode(customer.tarifa),
     direccionesEntrega: (customer.direccionesEntrega ?? []).flatMap(address => {
       const id = address.id?.trim() ?? '';
       if (!id) return [];

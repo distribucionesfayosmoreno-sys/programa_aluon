@@ -8,6 +8,10 @@ export const FI = (p: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input {...p} className="field" autoComplete="off" />
 );
 
+export const FS = (p: React.SelectHTMLAttributes<HTMLSelectElement>) => (
+  <select {...p} className="field" autoComplete="off" />
+);
+
 export type ValidationStatus = 'neutral' | 'error' | 'ok';
 
 interface ValidationHintProps {

@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 import com.aluon.crm.customer.model.Customer;
+import com.aluon.crm.customer.model.CustomerTariff;
 import com.aluon.crm.customer.mapper.CustomerMapper;
+import com.aluon.crm.customer.dto.CustomerTariffOptionResponse;
 import com.aluon.crm.customer.dto.CustomerRequest;
 import com.aluon.crm.customer.dto.CustomerResponse;
 import com.aluon.crm.customer.service.CustomerService;
@@ -44,6 +46,14 @@ public class CustomerController {
     public CustomerResponse update(@PathVariable UUID id, @RequestBody CustomerRequest request) {
         Customer updated = customerService.save(customerMapper.toEntity(request, id), request.password());
         return customerMapper.toResponse(updated);
+    }
+
+    @GetMapping("/tariffs")
+    public ResponseEntity<List<CustomerTariffOptionResponse>> getTariffs() {
+        return ResponseEntity.ok(List.of(
+                new CustomerTariffOptionResponse(CustomerTariff.TARIFA_A.code(), CustomerTariff.TARIFA_A.label()),
+                new CustomerTariffOptionResponse(CustomerTariff.TARIFA_B.code(), CustomerTariff.TARIFA_B.label())
+        ));
     }
 
     @DeleteMapping("/{id}")

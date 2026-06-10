@@ -6,6 +6,7 @@ import ErrorDialog from '../../components/feedback/ErrorDialog';
 import CustomerManagementEmptyState from './CustomerManagementEmptyState';
 import { openBudgetWizardForCustomer } from '../budget-wizard/services/budgetWizardLaunch';
 import { Customer360Modal } from '../customer-360/Customer360Modal';
+import { CustomerTariffBadge } from './CustomerTariffBadge';
 
 /** Genera un color de avatar determinístico a partir del texto */
 const avatarColor = (name: string): string => {
@@ -35,29 +36,6 @@ const Avatar = ({ name }: { name: string }) => {
     >
       {initials(name || '?')}
     </div>
-  );
-};
-
-/** Badge de tarifa con color */
-const TarifaBadge = ({ value }: { value: string }) => {
-  const map: Record<string, { bg: string; color: string }> = {
-    'A': { bg: '#fef3c7', color: '#92400e' },
-    'B': { bg: '#dbeafe', color: '#1e40af' },
-    'C': { bg: '#f3f4f6', color: '#374151' },
-    'VIP': { bg: '#fae8ff', color: '#7c3aed' },
-    'PREMIUM': { bg: '#fdf4ff', color: '#9333ea' },
-    'GENERAL': { bg: '#f0fdf4', color: '#15803d' },
-  };
-  const upper = (value || '').toUpperCase();
-  const style = map[upper] ?? { bg: '#f3f4f6', color: '#6b7280' };
-  if (!upper) return <span style={{ color: '#d1d5db' }}>—</span>;
-  return (
-    <span
-      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold"
-      style={{ background: style.bg, color: style.color, fontSize: 10 }}
-    >
-      {upper}
-    </span>
   );
 };
 
@@ -353,7 +331,7 @@ const CustomerManagement: React.FC = () => {
 
                         {/* Tarifa */}
                         <td className="px-3 py-2.5" onClick={event => event.stopPropagation()}>
-                          <TarifaBadge value={c.tarifa} />
+                          <CustomerTariffBadge value={c.tarifa} />
                         </td>
 
                         {/* Forma de pago */}
