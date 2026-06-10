@@ -3,8 +3,9 @@ package com.aluon.crm.quote.service;
 import com.aluon.crm.customer.model.Customer;
 import com.aluon.crm.customer.model.DeliveryAddress;
 import com.aluon.crm.customer.repository.CustomerRepository;
-import com.aluon.crm.pricing.model.Tariff;
-import com.aluon.crm.pricing.service.TariffService;
+import com.aluon.crm.catalog.service.CatalogDoorPricingResult;
+import com.aluon.crm.catalog.service.CatalogDoorPricingService;
+import com.aluon.crm.customer.model.CustomerTariff;
 import com.aluon.production.cutlist.model.DoorModel;
 import com.aluon.production.cutlist.model.DoorType;
 import lombok.RequiredArgsConstructor;
@@ -40,11 +41,9 @@ import com.aluon.crm.documents.service.DocumentNumberService;
 @RequiredArgsConstructor
 public class QuoteService {
 
-    private static final BigDecimal MM2_IN_M2 = BigDecimal.valueOf(1_000_000);
-
     private final QuoteRequestRepository quoteRequestRepository;
     private final CustomerRepository customerRepository;
-    private final TariffService tariffService;
+    private final CatalogDoorPricingService catalogDoorPricingService;
     private final DocumentNumberService documentNumberService;
 
     @Transactional
@@ -55,7 +54,7 @@ public class QuoteService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado"));
 
-        Tariff tariff = tariffService.getTariffByCode(customer.getTarifa());
+        CustomerTariff customerTariff = CustomerTariff.fromRaw(customer.getTarifa());
 
         QuoteValidationMode validationMode = customer.isAutoApproveQuotes() ? QuoteValidationMode.AUTO : QuoteValidationMode.MANUAL;
         QuoteChannel channel = request.getChannel() == null ? QuoteChannel.BOTH : request.getChannel();
@@ -67,7 +66,7 @@ public class QuoteService {
                 .seriesDate(series.date())
                 .seriesSequence(series.sequence())
                 .customer(customer)
-                .tariffCode(tariff.getCode())
+                .tariffCode(customerTariff.code())
                 .contactEmail(customer.getEmail())
                 .contactWhatsapp(customer.getTelefono())
                 .status(validationMode == QuoteValidationMode.AUTO ? QuoteStatus.ENVIADO : QuoteStatus.PENDIENTE_VALIDACION)
@@ -77,7 +76,7 @@ public class QuoteService {
                 .build();
 
         List<QuoteItem> items = request.getItems().stream()
-                .map(item -> toQuoteItem(quote, tariff, item))
+                .map(item -> toQuoteItem(quote, customerTariff, item))
                 .toList();
 
         BigDecimal total = items.stream()
@@ -217,9 +216,9 @@ public class QuoteService {
         );
     }
 
-    private QuoteItem toQuoteItem(QuoteRequest quote, Tariff tariff, QuoteItemRequest item) {
+    private QuoteItem toQuoteItem(QuoteRequest quote, CustomerTariff customerTariff, QuoteItemRequest item) {
         Objects.requireNonNull(quote, "quote");
-        Objects.requireNonNull(tariff, "tariff");
+        Objects.requireNonNull(customerTariff, "customerTariff");
         Objects.requireNonNull(item, "item");
         DoorModel doorModel = item.getDoorModel();
         DoorType doorType = item.getDoorType() != null ? item.getDoorType() : item.getOpeningVariant();
@@ -228,13 +227,16 @@ public class QuoteService {
         Integer widthMm = Objects.requireNonNull(item.getWidthMm(), "widthMm");
         Integer heightMm = Objects.requireNonNull(item.getHeightMm(), "heightMm");
 
-        BigDecimal m2 = BigDecimal.valueOf(widthMm)
-                .multiply(BigDecimal.valueOf(heightMm))
-                .divide(MM2_IN_M2, 4, RoundingMode.HALF_UP);
-
-        BigDecimal pricePerM2 = tariffService.getPricePerM2(tariff, doorModel, doorType)
-                .setScale(2, RoundingMode.HALF_UP);
-
+        CatalogDoorPricingResult pricing = catalogDoorPricingService.resolve(
+                doorModel,
+                doorType,
+                item.getProductCategory(),
+                customerTariff.code(),
+                widthMm,
+                heightMm
+        );
+        BigDecimal m2 = pricing.m2();
+        BigDecimal pricePerM2 = pricing.pricePerM2();
         BigDecimal lineTotal = m2.multiply(pricePerM2).setScale(2, RoundingMode.HALF_UP);
 
         return QuoteItem.builder()

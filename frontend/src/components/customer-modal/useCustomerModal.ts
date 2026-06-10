@@ -2,6 +2,12 @@ import { useState, useEffect, useRef, ChangeEvent, FormEvent } from 'react';
 import { Customer, DeliveryAddress } from '../../hooks/useCustomers';
 import { TabKey } from './customerModalTypes';
 import {
+  DEFAULT_CUSTOMER_TARIFF_OPTIONS,
+  CustomerTariffOption,
+  normalizeCustomerTariffCode,
+  parseCustomerTariffOptions,
+} from './customerTariffOptions';
+import {
   documentPatternHint,
   lookupPostalCodeEs,
   normalizeDocumentNumber,
@@ -14,10 +20,15 @@ import {
   validateIban,
   validatePhone,
 } from './customerModalValidators';
+import {
+  customerPaymentMethodHint,
+  isCustomerPaymentMethod,
+  normalizeCustomerPaymentMethod,
+} from './customerPaymentMethods';
 
 export const EMPTY_CUSTOMER: Customer = {
   nombreComercial: '', razonSocial: '', personaContacto: '',
-  tarifa: '', tipoDocumento: 'CIF', numeroDocumento: '', telefono: '', email: '',
+  tarifa: 'A', tipoDocumento: 'CIF', numeroDocumento: '', telefono: '', email: '',
   password: '', hasPassword: false,
   direccion: '', cp: '', poblacion: '', provincia: '', pais: 'ESPAÑA',
   iban: '', formaPago: '', diasVencimiento: 0, remanente: 0, direccionesEntrega: [],
@@ -31,7 +42,7 @@ const createBlankCustomer = (): Customer => ({
   nombreComercial: '',
   razonSocial: '',
   personaContacto: '',
-  tarifa: '',
+  tarifa: 'A',
   tipoDocumento: '' as Customer['tipoDocumento'],
   numeroDocumento: '',
   telefono: '',
@@ -69,6 +80,8 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
   const [validationDialogItems, setValidationDialogItems] = useState<string[]>([]);
   const [validationFocusTargetId, setValidationFocusTargetId] = useState<string>('');
   const [documentExistsError, setDocumentExistsError] = useState(false);
+  const [paymentMethodServerError, setPaymentMethodServerError] = useState(false);
+  const [tariffOptions, setTariffOptions] = useState<CustomerTariffOption[]>(DEFAULT_CUSTOMER_TARIFF_OPTIONS);
   const lastPostalLookupRef = useRef<string>('');
   const lastDocumentLookupRef = useRef<string>('');
 
@@ -83,13 +96,43 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
     setForm(sanitizeCustomer(customer, EMPTY_CUSTOMER));
     setNewAddr(EMPTY_ADDR);
     setTab('GENERAL');
+    setPaymentMethodServerError(false);
   }, [customer]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void (async () => {
+      try {
+        const response = await fetch('/api/customers/tariffs', { signal: controller.signal });
+        if (!response.ok) {
+          return;
+        }
+
+        const data: unknown = await response.json();
+        setTariffOptions(parseCustomerTariffOptions(data));
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
+        setTariffOptions(DEFAULT_CUSTOMER_TARIFF_OPTIONS);
+      }
+    })();
+
+    return () => controller.abort();
+  }, []);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === 'formaPago') {
+      setPaymentMethodServerError(false);
+    }
     setForm(p => ({
       ...p,
-      [name]: name === 'password' ? value : value.toUpperCase(),
+      [name]: name === 'password'
+        ? value
+        : name === 'tarifa'
+          ? normalizeCustomerTariffCode(value)
+          : value.toUpperCase(),
     }));
   };
 
@@ -146,6 +189,11 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
       focusTargetId ||= 'customer-iban';
     }
 
+    if (!isCustomerPaymentMethod(form.formaPago)) {
+      items.push('La forma de pago es obligatoria y debe ser una de las opciones permitidas.');
+      focusTargetId ||= 'customer-forma-pago';
+    }
+
     if (items.length > 0) {
       setValidationDialogItems(items);
       setValidationFocusTargetId(focusTargetId);
@@ -160,7 +208,9 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
       onClose();
     } catch (err) {
       console.error('Error saving customer:', err);
-      setSubmitError(err instanceof Error ? err.message : 'Error desconocido al guardar el cliente');
+      const message = err instanceof Error ? err.message : 'Error desconocido al guardar el cliente';
+      setPaymentMethodServerError(message.toLowerCase().includes('forma de pago'));
+      setSubmitError(message);
     } finally {
       setIsSaving(false);
     }
@@ -186,6 +236,15 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
   const isIbanValid = validateIban(normalizedIban);
   const showIbanError = normalizedIban.length > 0 && !isIbanValid;
   const showIbanOk = normalizedIban.length > 0 && isIbanValid;
+  const normalizedPaymentMethod = normalizeCustomerPaymentMethod(form.formaPago);
+  const isPaymentMethodValid = isCustomerPaymentMethod(form.formaPago);
+  const showPaymentError = paymentMethodServerError || (form.formaPago.trim().length > 0 && !isPaymentMethodValid);
+  const showPaymentOk = isPaymentMethodValid && !paymentMethodServerError;
+  const paymentHint = showPaymentError
+    ? paymentMethodServerError
+      ? 'El servidor rechazó la forma de pago. Selecciona una de las opciones permitidas.'
+      : 'Valor heredado no compatible. Selecciona una de las opciones permitidas.'
+    : normalizedPaymentMethod || customerPaymentMethodHint;
 
   useEffect(() => {
     const doc = normalizeDocumentNumber(form.numeroDocumento);
@@ -267,8 +326,12 @@ export const useCustomerModal = ({ customer, onClose, onSave }: UseCustomerModal
     showEmailOk,
     showIbanError,
     showIbanOk,
+    showPaymentError,
+    showPaymentOk,
+    paymentHint,
     isSaving,
     submitError,
+    tariffOptions,
     validationDialogOpen,
     validationDialogItems,
     validationFocusTargetId,

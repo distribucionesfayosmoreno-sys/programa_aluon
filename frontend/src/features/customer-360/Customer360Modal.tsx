@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import AppDialog from '../../components/feedback/AppDialog';
 import type { Customer } from '../../hooks/useCustomers';
+import { resolveCustomerTariffLabel } from '../../components/customer-modal/customerTariffOptions';
 import { dashboardTheme } from '../dashboard/dashboardTheme';
 import type { Customer360DocumentItem, Customer360WorkOrderItem } from './customer360Types';
 import { Customer360DocumentModal } from './Customer360DocumentModal';
@@ -263,7 +264,7 @@ export const Customer360Modal = ({ open, customer, onClose }: Props) => {
               <div className="grid min-w-[220px] grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <InfoBlock title="Documento fiscal">
                   <InfoLine label="Número" value={data?.customer.numeroDocumento ?? customer?.numeroDocumento} />
-                  <InfoLine label="Tarifa" value={data?.customer.tarifa ?? customer?.tarifa} />
+                  <InfoLine label="Tarifa" value={resolveCustomerTariffLabel(data?.customer.tarifa ?? customer?.tarifa)} />
                 </InfoBlock>
               </div>
             </div>

@@ -63,13 +63,16 @@ public class CatalogService {
         UUID id = Objects.requireNonNull(modeloId, "modeloId");
         CatalogProductModel modelo = modelRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Modelo no encontrado"));
-        return doorProductRepository.findAllByModeloOrderByProductoAsc(modelo)
+        return doorProductRepository.findAllByModeloIdOrderByProductoAsc(modelo.getId())
                 .stream()
                 .map(puerta -> new CatalogDoorProductResponse(
                         puerta.getId(),
                         puerta.getModelo().getId(),
                         puerta.getProducto(),
-                        puerta.getImagenModelo()
+                        puerta.getImagenModelo(),
+                        puerta.getPrecioTarifaA(),
+                        puerta.getPrecioTarifaB(),
+                        puerta.getMetros2Minimo()
                 ))
                 .toList();
     }

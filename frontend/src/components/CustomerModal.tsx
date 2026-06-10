@@ -26,8 +26,12 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
     showEmailOk,
     showIbanError,
     showIbanOk,
+    showPaymentError,
+    showPaymentOk,
+    paymentHint,
     isSaving,
     submitError,
+    tariffOptions,
     validationDialogOpen,
     validationDialogItems,
     validationFocusTargetId,
@@ -111,7 +115,11 @@ const CustomerModal: React.FC<CustomerModalProps> = ({ customer, onClose, onSave
         showEmailOk={showEmailOk}
         showIbanError={showIbanError}
         showIbanOk={showIbanOk}
+        showPaymentError={showPaymentError}
+        showPaymentOk={showPaymentOk}
+        paymentHint={paymentHint}
         submitError={submitError ?? ''}
+        tariffOptions={tariffOptions}
       />
       <WarningDialog
         open={validationDialogOpen}

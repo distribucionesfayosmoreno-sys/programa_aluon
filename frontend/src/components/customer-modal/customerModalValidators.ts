@@ -1,4 +1,5 @@
 import { Customer } from '../../hooks/useCustomers';
+import { normalizeCustomerTariffCode } from './customerTariffOptions';
 
 export type DocumentType = Customer['tipoDocumento'];
 
@@ -266,7 +267,7 @@ export const sanitizeCustomer = (
     nombreComercial: sanitize(customer.nombreComercial),
     razonSocial: sanitize(customer.razonSocial),
     personaContacto: sanitize(customer.personaContacto),
-    tarifa: sanitize(customer.tarifa),
+    tarifa: normalizeCustomerTariffCode(customer.tarifa),
     tipoDocumento: customer.tipoDocumento || 'CIF',
     numeroDocumento: sanitize(customer.numeroDocumento),
     telefono: sanitize(customer.telefono),
