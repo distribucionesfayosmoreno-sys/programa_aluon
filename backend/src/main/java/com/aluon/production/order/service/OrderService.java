@@ -8,6 +8,7 @@ import com.aluon.core.user.repository.UserRepository;
 import com.aluon.production.cutlist.model.Cutlist;
 import com.aluon.production.cutlist.model.CutlistItem;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +39,7 @@ import com.aluon.production.order.dto.OrderCustomerBulkAssignResponse;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -248,15 +250,9 @@ public class OrderService {
                 .workflowStage(OrderWorkflowStep.INBOX.name())
                 .build();
 
-        List<MultipartFile> attachments = request.getAttachments();
-        if (attachments != null) {
-            attachments.stream()
-                    .filter(file -> !file.isEmpty())
-                    .forEach(file -> order.addAttachment(buildAttachment(file)));
-        }
-
         Order savedOrder = orderRepository.save(order);
         savedOrder = Objects.requireNonNull(savedOrder, "savedOrder");
+        attachFilesIfAny(savedOrder, request.getAttachments());
         return WorkOrderRequestResponseDto.builder()
                 .id(savedOrder.getId())
                 .codigoOrden(savedOrder.getCodigoOrden())
@@ -357,6 +353,29 @@ public class OrderService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private void attachFilesIfAny(Order order, List<MultipartFile> attachments) {
+        if (order == null || attachments == null || attachments.isEmpty()) {
+            return;
+        }
+
+        boolean updated = false;
+        for (MultipartFile file : attachments) {
+            if (file == null || file.isEmpty()) {
+                continue;
+            }
+            try {
+                order.addAttachment(buildAttachment(file));
+                updated = true;
+            } catch (RuntimeException ex) {
+                log.warn("No se pudo guardar un adjunto para la orden {}: {}", order.getCodigoOrden(), ex.getMessage());
+            }
+        }
+
+        if (updated) {
+            orderRepository.save(order);
+        }
     }
 
     private OrderAttachment buildAttachment(MultipartFile file) {
