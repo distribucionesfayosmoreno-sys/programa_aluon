@@ -14,8 +14,29 @@ type ProjectsTableProps = {
 };
 
 // ─── Column header ────────────────────────────────────────────────────────────
-const TH = ({ label, right }: { label: string; right?: boolean }) => (
+type SortColumn = 'document' | 'customerName' | 'type' | 'number' | 'createdAt' | 'statusLabel' | 'workOrderStep';
+type SortDirection = 'asc' | 'desc';
+const textCollator = new Intl.Collator('es', { numeric: true, sensitivity: 'base' });
+const dateFormatter = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid' });
+
+const sortValue = (row: ProjectDocumentRow, column: SortColumn): string | number | null => {
+  if (column === 'createdAt') {
+    const timestamp = Date.parse(row.createdAt);
+    return Number.isFinite(timestamp) ? timestamp : null;
+  }
+  if (column === 'workOrderStep') return row.type === 'PEDIDO' ? row.workOrderStep ?? null : null;
+  return row[column === 'document' ? 'number' : column] || null;
+};
+
+const TH = ({ label, right, direction, onSort }: {
+  label: string;
+  right?: boolean;
+  direction?: SortDirection;
+  onSort?: () => void;
+}) => (
   <th
+    scope="col"
+    aria-sort={onSort ? (direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none') : undefined}
     className={`px-3 py-2 whitespace-nowrap select-none group ${right ? 'text-right' : 'text-left'}`}
     style={{
       fontSize: 10,
@@ -27,9 +48,18 @@ const TH = ({ label, right }: { label: string; right?: boolean }) => (
       borderBottom: `1px solid ${documentManagementTheme.border}`,
     }}
   >
-    <span className="flex items-center gap-1 group-hover:text-gray-900 transition-colors" style={{ justifyContent: right ? 'flex-end' : 'flex-start' }}>
-      {label}
-    </span>
+    {onSort ? (
+      <button
+        type="button"
+        onClick={onSort}
+        className="flex w-full items-center gap-1 rounded group-hover:text-gray-900 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        style={{ font: 'inherit', textTransform: 'inherit', letterSpacing: 'inherit', justifyContent: right ? 'flex-end' : 'flex-start' }}
+        aria-label={`Ordenar por ${label.toLowerCase()} ${direction === 'asc' ? 'descendente' : 'ascendente'}`}
+      >
+        {label}
+        <span aria-hidden="true">{direction === 'asc' ? '↑' : direction === 'desc' ? '↓' : '↕'}</span>
+      </button>
+    ) : label}
   </th>
 );
 
@@ -89,6 +119,26 @@ export const ProjectsTable = ({
   onCreateDocument,
 }: ProjectsTableProps) => {
   const filtering = useProjectsTableFiltering(rows);
+  const [sort, setSort] = useState<{ column: SortColumn; direction: SortDirection }>({ column: 'createdAt', direction: 'desc' });
+  const sortedRows = useMemo(() => [...filtering.filteredRows].sort((a, b) => {
+    const left = sortValue(a, sort.column);
+    const right = sortValue(b, sort.column);
+    // Keep missing dates and values at the end in either direction.
+    if (left === null) return right === null ? 0 : 1;
+    if (right === null) return -1;
+    const comparison = typeof left === 'number' && typeof right === 'number'
+      ? left - right
+      : textCollator.compare(String(left), String(right));
+    return sort.direction === 'asc' ? comparison : -comparison;
+  }), [filtering.filteredRows, sort]);
+
+  const sortHeader = (column: SortColumn) => ({
+    direction: sort.column === column ? sort.direction : undefined,
+    onSort: () => setSort(current => ({
+      column,
+      direction: current.column === column && current.direction === 'asc' ? 'desc' : 'asc',
+    })),
+  });
   const {
     currentPage,
     pageSize,
@@ -101,7 +151,7 @@ export const ProjectsTable = ({
     tableHeadRef,
     footerRef,
     firstRowRef,
-  } = useProjectsTablePagination(filtering.filteredRows);
+  } = useProjectsTablePagination(sortedRows);
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const filteredRowIds = useMemo(() => new Set(filtering.filteredRows.map(r => r.rowId)), [filtering.filteredRows]);
@@ -182,19 +232,20 @@ export const ProjectsTable = ({
                     style={{ accentColor: documentManagementTheme.accent, width: 14, height: 14 }}
                   />
                 </th>
-                <TH label="Documento" />
-                <TH label="Cliente" />
-                <TH label="Tipo" />
-                <TH label="Número" />
-                <TH label="Estado" />
-                <TH label="OT" />
+                <TH label="Documento" {...sortHeader('document')} />
+                <TH label="Cliente" {...sortHeader('customerName')} />
+                <TH label="Tipo" {...sortHeader('type')} />
+                <TH label="Número" {...sortHeader('number')} />
+                <TH label="Fecha" {...sortHeader('createdAt')} />
+                <TH label="Estado" {...sortHeader('statusLabel')} />
+                <TH label="OT" {...sortHeader('workOrderStep')} />
                 <TH label="Acciones" right />
               </tr>
             </thead>
             <tbody>
               {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={9}>
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: '#f9fafb', border: '1px solid #e5e7eb' }}>
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#9ca3af' }}>
@@ -263,6 +314,11 @@ export const ProjectsTable = ({
                       </td>
                       <td className="px-3 py-2.5 font-medium" style={{ color: '#374151' }}>
                         {row.number || '—'}
+                      </td>
+                      <td className="px-3 py-2.5 whitespace-nowrap" style={{ color: '#6b7280' }}>
+                        {Number.isFinite(Date.parse(row.createdAt)) ? (
+                          <time dateTime={row.createdAt}>{dateFormatter.format(new Date(row.createdAt))}</time>
+                        ) : '—'}
                       </td>
                       <td className="px-3 py-2.5" style={{ color: '#6b7280' }}>
                         {row.statusLabel || '—'}

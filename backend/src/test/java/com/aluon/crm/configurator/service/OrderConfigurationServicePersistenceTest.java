@@ -67,6 +67,33 @@ class OrderConfigurationServicePersistenceTest {
     }
 
     @Test
+    void preservesImportedSpecificationInVersionedPayloadAndAudit() throws Exception {
+        var payload = objectMapper.createObjectNode();
+        var spec = payload.putObject("referenceSpecification");
+        spec.put("catalogVersion", 1).put("formId", "cancela-peatonal").put("modelId", "unica");
+        spec.putObject("values").put("anchoLuces-5", 1200);
+        var json = objectMapper.createObjectNode().put("customerName", "Cliente de referencia").put("reference", "MARVER-001")
+                .put("productType", "REFERENCIA_MARVER").put("status", "PENDING_REVIEW");
+        json.set("payload", payload);
+        var request = objectMapper.treeToValue(json, OrderConfigurationRequest.class);
+        when(repository.save(any(OrderConfiguration.class))).thenAnswer(invocation -> {
+            OrderConfiguration entity = invocation.getArgument(0);
+            entity.setId(UUID.randomUUID()); entity.setCreatedAt(LocalDateTime.now()); entity.setUpdatedAt(LocalDateTime.now());
+            return entity;
+        });
+        when(sectionRepository.findAllByConfigurationIdAndVersionOrderBySectionNumber(any(), any())).thenReturn(List.of());
+        when(documentRepository.findAllByConfigurationIdAndVersionOrderByCreatedAtDesc(any(), any())).thenReturn(List.of());
+        var service = new OrderConfigurationService(repository, auditRepository, sectionRepository, documentRepository, objectMapper, adminAuditService);
+        var response = service.save(request);
+        assertThat(response.status()).isEqualTo("PENDING_REVIEW");
+        assertThat(response.payload().path("referenceSpecification").path("modelName").asText()).isEqualTo("Serie Única");
+        assertThat(response.payload().path("referenceSpecification").path("values").path("anchoLuces-5").asInt()).isEqualTo(1200);
+        var audit = ArgumentCaptor.forClass(com.aluon.crm.configurator.model.OrderConfigurationAudit.class);
+        verify(auditRepository).save(audit.capture());
+        assertThat(audit.getValue().getSnapshot()).contains("referenceSpecification", "1200");
+    }
+
+    @Test
     void blocksSilentChangesInProduction() {
         var entity = OrderConfiguration.builder().id(UUID.randomUUID()).status("IN_PRODUCTION").version(2).reference("ALUON-002").productType("VALLA").payload("{}").build();
         when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));

@@ -12,6 +12,8 @@ export type StaffLoginResponse = {
   user: StaffUser;
 };
 
+export const STAFF_LOGIN_REQUIRED_EVENT = 'aluon-staff-login-required';
+
 const TOKEN_KEY = 'aluon-staff-token';
 
 export const getStaffToken = () => localStorage.getItem(TOKEN_KEY);
@@ -36,7 +38,10 @@ export const loginStaff = async (username: string, password: string): Promise<St
 export const loadCurrentStaff = async (): Promise<StaffUser | null> => {
   if (!getStaffToken()) return null;
   const response = await fetch('/api/staff-auth/me', { headers: staffAuthHeaders() });
-  if (response.status === 204 || response.status === 401) return null;
+  if (response.status === 204 || response.status === 401) {
+    localStorage.removeItem(TOKEN_KEY);
+    return null;
+  }
   if (!response.ok) throw new Error('No se pudo comprobar la sesión.');
   return response.json() as Promise<StaffUser>;
 };
@@ -46,5 +51,17 @@ export const logoutStaff = async () => {
     await fetch('/api/staff-auth/logout', { method: 'POST', headers: staffAuthHeaders() });
   } finally {
     localStorage.removeItem(TOKEN_KEY);
+  }
+};
+
+/** Check the current session before attempting a protected change. */
+export const requireStaffRole = async (roles: readonly string[]): Promise<void> => {
+  const user = await loadCurrentStaff();
+  if (!user) {
+    window.dispatchEvent(new Event(STAFF_LOGIN_REQUIRED_EVENT));
+    throw new Error('Inicia sesión y vuelve a guardar. El borrador se conserva.');
+  }
+  if (!roles.includes(user.role)) {
+    throw new Error('Tu usuario no tiene permiso para guardar configuraciones de pedidos.');
   }
 };

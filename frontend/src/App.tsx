@@ -3,7 +3,7 @@ import Sidebar, { ModuleKey } from './components/Sidebar';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
 import { onNavigateToDocument, onNavigateToModule } from './services/moduleNavigation';
 import { onBudgetWizardLaunch, startBudgetWizard } from './features/budget-wizard/services/budgetWizardLaunch';
-import { loadCurrentStaff, StaffUser } from './services/staffAuthApi';
+import { loadCurrentStaff, STAFF_LOGIN_REQUIRED_EVENT, StaffUser } from './services/staffAuthApi';
 
 const CustomerManagement = lazy(() => import('./features/customer-management/CustomerManagement'));
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
@@ -29,6 +29,12 @@ const App = () => {
 
   useEffect(() => {
     loadCurrentStaff().then(setStaffUser).catch(() => setStaffUser(null));
+  }, []);
+
+  useEffect(() => {
+    const requestLogin = () => { setStaffUser(null); setLoginOpen(true); };
+    window.addEventListener(STAFF_LOGIN_REQUIRED_EVENT, requestLogin);
+    return () => window.removeEventListener(STAFF_LOGIN_REQUIRED_EVENT, requestLogin);
   }, []);
 
   useEffect(() => onNavigateToModule(setActiveModule), []);

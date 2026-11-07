@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Step } from './BudgetWizard.types';
 
 const isStep = (value: string | null): value is Step =>
@@ -51,7 +51,7 @@ export const useBudgetWizardStepHistory = () => {
     return () => window.removeEventListener('popstate', syncStepFromHistory);
   }, []);
 
-  const setStep = (nextStep: Step) => {
+  const setStep = useCallback((nextStep: Step) => {
     if (nextStep === stepRef.current) {
       return;
     }
@@ -61,7 +61,7 @@ export const useBudgetWizardStepHistory = () => {
       '',
       `${window.location.pathname}${window.location.hash}`,
     );
-  };
+  }, []);
 
   return { step, setStep };
 };

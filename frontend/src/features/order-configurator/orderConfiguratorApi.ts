@@ -1,3 +1,7 @@
+import { requireStaffRole, staffAuthHeaders } from '../../services/staffAuthApi';
+
+const configurationRoles = ['SUPERADMIN', 'ADMIN', 'DIOS', 'COMERCIAL', 'PRODUCCION', 'DISTRIBUIDOR'] as const;
+
 export type SavedOrderConfiguration = {
   id: string;
   customerId?: string;
@@ -31,6 +35,7 @@ export const saveOrderConfiguration = async (payload: {
   status: 'DRAFT' | 'PENDING_REVIEW' | 'CONFIRMED' | 'IN_PRODUCTION' | 'FINALIZED' | 'CANCELLED';
   payload: unknown;
 }): Promise<SavedOrderConfiguration> => {
+  await requireStaffRole(configurationRoles);
   const response = await fetch('/api/order-configurations', {
     method: 'POST',
     headers: staffAuthHeaders({ 'Content-Type': 'application/json' }),
@@ -38,12 +43,14 @@ export const saveOrderConfiguration = async (payload: {
   });
   if (!response.ok) {
     const message = await response.text().catch(() => '');
+    if (response.status === 403) throw new Error('La sesión no autoriza este cambio. Comprueba tu acceso de personal; el borrador se conserva.');
     throw new Error(message || 'No se pudo guardar la configuración.');
   }
   return response.json() as Promise<SavedOrderConfiguration>;
 };
 
 export const updateOrderConfiguration = async (id: string, payload: Parameters<typeof saveOrderConfiguration>[0]): Promise<SavedOrderConfiguration> => {
+  await requireStaffRole(configurationRoles);
   const response = await fetch(`/api/order-configurations/${encodeURIComponent(id)}`, {
     method: 'PUT',
     headers: staffAuthHeaders({ 'Content-Type': 'application/json' }),
@@ -51,6 +58,7 @@ export const updateOrderConfiguration = async (id: string, payload: Parameters<t
   });
   if (!response.ok) {
     const message = await response.text().catch(() => '');
+    if (response.status === 403) throw new Error('La sesión no autoriza este cambio. Comprueba tu acceso de personal; el borrador se conserva.');
     throw new Error(message || 'No se pudo actualizar la configuración.');
   }
   return response.json() as Promise<SavedOrderConfiguration>;
@@ -74,5 +82,3 @@ export const getOrderConfigurationHistory = async (id: string): Promise<OrderCon
   if (!response.ok) throw new Error('No se pudo cargar el historial.');
   return response.json() as Promise<OrderConfigurationAudit[]>;
 };
-import { staffAuthHeaders } from '../../services/staffAuthApi';
-
