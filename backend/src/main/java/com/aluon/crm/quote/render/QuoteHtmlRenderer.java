@@ -1,5 +1,6 @@
 package com.aluon.crm.quote.render;
 
+import com.aluon.crm.catalog.porton.PortonDescription;
 import com.aluon.crm.quote.dto.QuoteRequest;
 import com.aluon.crm.quote.model.QuoteItem;
 import org.springframework.core.io.ClassPathResource;
@@ -114,6 +115,8 @@ public final class QuoteHtmlRenderer {
         StringBuilder html = new StringBuilder(240);
         html.append("<div class=\"itemDescTitle\">").append(HtmlEscaper.escape(title)).append("</div>");
         String meta = buildItemMeta(category, dims, item.getUnidades(), item.getM2());
+        String porton = PortonDescription.describe(item.getPortonConfiguration());
+        if (!porton.isBlank()) meta += "\n" + porton;
         if (!meta.isBlank()) {
             html.append("<div class=\"itemDescMeta\">").append(HtmlEscaper.escape(meta)).append("</div>");
         }

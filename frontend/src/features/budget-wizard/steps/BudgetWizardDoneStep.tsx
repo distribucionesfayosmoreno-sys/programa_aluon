@@ -153,6 +153,7 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
                 </div>
               </div>
 
+              {item.portonDescription && <p className="text-xs text-secondary">{item.portonDescription}</p>}
               {/* Specs Badge list */}
               <div className="flex flex-wrap gap-1.5 pt-1.5">
                 <span className="text-[8px] font-bold text-secondary uppercase bg-surface-container px-2 py-0.5 rounded font-space flex items-center gap-1">

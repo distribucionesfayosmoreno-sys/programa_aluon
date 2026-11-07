@@ -1,5 +1,6 @@
 package com.aluon.crm.quote.dto;
 
+import com.aluon.crm.catalog.porton.PortonConfiguration;
 import com.aluon.crm.catalog.model.ProductCategory;
 import com.aluon.production.cutlist.model.DoorModel;
 import com.aluon.production.cutlist.model.DoorType;
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 @Getter
 @Builder
 public class QuoteItemResponse {
+    private PortonConfiguration portonConfiguration;
     private DoorModel doorModel;
     private DoorType doorType;
     private ProductCategory productCategory;
@@ -24,6 +26,7 @@ public class QuoteItemResponse {
     private Boolean marcoSuperior;
     private Boolean bisagras;
     private Boolean porteroAutomatico;
+    private String portonDescription;
     private BigDecimal m2;
     private BigDecimal pricePerM2;
     private BigDecimal lineTotal;

@@ -1,5 +1,9 @@
 
+import type { ReactNode } from 'react';
+
 type Props = {
+  technicalFields?: ReactNode;
+  technicalErrors?: string[];
   stepText?: string;
   widthMm: number;
   heightMm: number;
@@ -18,6 +22,8 @@ type Props = {
 };
 
 export const BudgetWizardMeasurementsStep = ({
+  technicalFields,
+  technicalErrors = [],
   stepText,
   widthMm,
   heightMm,
@@ -35,7 +41,8 @@ export const BudgetWizardMeasurementsStep = ({
   onNext,
 }: Props) => {
   const handleNext = () => {
-    if (widthMm <= 0 || heightMm <= 0) {
+    if (technicalErrors.length) return;
+    if (!Number.isFinite(widthMm) || !Number.isFinite(heightMm) || widthMm <= 0 || heightMm <= 0) {
       alert('Por favor introduce medidas válidas para ancho y alto.');
       return;
     }
@@ -151,12 +158,15 @@ export const BudgetWizardMeasurementsStep = ({
         </div>
       </div>
 
+      {technicalFields}
+      {technicalErrors.length > 0 && <ul role="alert" className="text-xs text-red-700 list-disc pl-5">{technicalErrors.map(message => <li key={message}>{message}</li>)}</ul>}
       <button
         type="button"
+        disabled={technicalErrors.length > 0}
         onClick={handleNext}
         className="w-full py-3.5 px-6 bg-blue-600 text-white font-black text-xs uppercase tracking-widest rounded-2xl shadow-md hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
       >
-        Continuar al Resumen
+        Continuar al cliente
         <span className="material-symbols-outlined text-sm">arrow_forward</span>
       </button>
 

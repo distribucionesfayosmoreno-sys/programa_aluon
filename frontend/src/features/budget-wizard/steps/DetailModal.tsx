@@ -105,6 +105,7 @@ export const DetailModal = ({ isOpen, onClose, items }: Props) => {
               )}
             </div>
 
+            {item.portonDescription && <p className="text-xs text-secondary">{item.portonDescription}</p>}
             {/* Data Table */}
             <div className="bg-surface-container rounded-xl p-3 border border-outline-variant/20">
                 <div className="divide-y divide-outline-variant/10 text-xs text-secondary">

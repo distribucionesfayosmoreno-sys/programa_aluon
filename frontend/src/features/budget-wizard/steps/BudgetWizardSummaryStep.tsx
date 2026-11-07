@@ -3,6 +3,7 @@ import { resolveChildCardImage } from '../budgetWizardCatalogMedia';
 import { budgetWizardPublicPath, budgetWizardStaticImagePath } from '../utils/budgetWizardAssetPath';
 
 type Props = {
+  portonDescription?: string;
   family: CatalogFamily;
   child: CatalogFamilyChild;
   color: string;
@@ -40,6 +41,7 @@ const getOpeningImage = (doorType: string, bisagras: boolean) => {
 };
 
 export const BudgetWizardSummaryStep = ({
+  portonDescription,
   family,
   child,
   color,
@@ -167,6 +169,7 @@ export const BudgetWizardSummaryStep = ({
         </div>
       </div>
 
+      {portonDescription && <p className="text-xs text-secondary rounded-xl border p-4">{portonDescription}</p>}
       <button
         type="button"
         disabled={submitting}

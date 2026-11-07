@@ -17,6 +17,7 @@ export default defineConfig(function (_a) {
         plugins: [react()],
         server: {
             port: 5173,
+            allowedHosts: ['desarrollowebaluon.iconseriespeliculas.xyz'],
             proxy: {
                 '/api': {
                     target: apiTarget,

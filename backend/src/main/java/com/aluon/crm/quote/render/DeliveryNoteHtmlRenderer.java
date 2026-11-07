@@ -1,5 +1,6 @@
 package com.aluon.crm.quote.render;
 
+import com.aluon.crm.catalog.porton.PortonDescription;
 import com.aluon.crm.customer.model.Customer;
 import com.aluon.crm.customer.model.DeliveryAddress;
 import com.aluon.crm.quote.dto.QuoteRequest;
@@ -121,6 +122,7 @@ public final class DeliveryNoteHtmlRenderer {
                 ? item.getWidthMm() + " x " + item.getHeightMm() + " mm"
                 : "";
 
+        appendMeta(out, "Portón", PortonDescription.describe(item.getPortonConfiguration()));
         appendMeta(out, "Categoría", category);
         appendMeta(out, "Medidas", dims);
         appendMeta(out, "Color", item.getColorCode());

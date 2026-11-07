@@ -1,3 +1,4 @@
+import { PortonTechnicalFields } from './porton/PortonTechnicalFields';
 import { BudgetWizardColorStep } from './steps/BudgetWizardColorStep';
 import { BudgetWizardCustomerStep } from './steps/BudgetWizardCustomerStep';
 import { BudgetWizardDoneStep } from './steps/BudgetWizardDoneStep';
@@ -72,6 +73,10 @@ export const BudgetWizard = () => {
 
           {wizard.step === 'MEDIDAS' && wizard.selectedFamily && wizard.selectedChild && (
             <BudgetWizardMeasurementsStep
+              technicalErrors={wizard.technicalErrors}
+              technicalFields={<PortonTechnicalFields catalog={wizard.portonCatalog} loadError={wizard.portonLoadError}
+                onRetry={wizard.loadPortonCatalog} child={wizard.selectedChild} value={wizard.portonConfiguration}
+                onChange={wizard.setPortonConfiguration} widthMm={wizard.widthMm} heightMm={wizard.heightMm} />}
               widthMm={wizard.widthMm}
               heightMm={wizard.heightMm}
               floorClearanceMm={wizard.floorClearanceMm}
@@ -117,6 +122,7 @@ export const BudgetWizard = () => {
 
           {wizard.step === 'RESUMEN' && wizard.selectedFamily && wizard.selectedChild && (
             <BudgetWizardSummaryStep
+              portonDescription={wizard.itemDraft?.portonDescription}
               family={wizard.selectedFamily}
               child={wizard.selectedChild}
               color={wizard.color}

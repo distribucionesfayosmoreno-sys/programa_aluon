@@ -1,5 +1,7 @@
 package com.aluon.crm.quote.model;
 
+import com.aluon.crm.catalog.porton.PortonConfigurationConverter;
+import com.aluon.crm.catalog.porton.PortonConfiguration;
 import com.aluon.crm.catalog.model.ProductCategory;
 import com.aluon.production.cutlist.model.DoorModel;
 import com.aluon.production.cutlist.model.DoorType;
@@ -75,6 +77,10 @@ public class QuoteItem {
 
     @Column(name = "portero_automatico")
     private Boolean porteroAutomatico;
+
+    @Convert(converter = PortonConfigurationConverter.class)
+    @Column(name = "porton_configuration", columnDefinition = "TEXT")
+    private PortonConfiguration portonConfiguration;
 
     @Column(name = "unidades", nullable = false)
     @Builder.Default

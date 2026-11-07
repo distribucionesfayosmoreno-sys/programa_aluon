@@ -1,5 +1,7 @@
 package com.aluon.crm.quote.service;
 
+import com.aluon.crm.catalog.porton.PortonDescription;
+import com.aluon.crm.catalog.porton.PortonRules;
 import com.aluon.crm.customer.model.Customer;
 import com.aluon.crm.customer.model.DeliveryAddress;
 import com.aluon.crm.customer.repository.CustomerRepository;
@@ -56,7 +58,10 @@ public class QuoteService {
 
         CustomerTariff customerTariff = CustomerTariff.fromRaw(customer.getTarifa());
 
-        QuoteValidationMode validationMode = customer.isAutoApproveQuotes() ? QuoteValidationMode.AUTO : QuoteValidationMode.MANUAL;
+        // Technical references carry options without a supplier price in this catalog.
+        boolean requiresTechnicalReview = request.getItems().stream().anyMatch(item -> item.getPortonConfiguration() != null);
+        QuoteValidationMode validationMode = customer.isAutoApproveQuotes() && !requiresTechnicalReview
+                ? QuoteValidationMode.AUTO : QuoteValidationMode.MANUAL;
         QuoteChannel channel = request.getChannel() == null ? QuoteChannel.BOTH : request.getChannel();
 
         DocumentSeries series = documentNumberService.nextSeries();
@@ -254,6 +259,7 @@ public class QuoteService {
                 .marcoSuperior(item.getMarcoSuperior())
                 .bisagras(item.getBisagras())
                 .porteroAutomatico(item.getPorteroAutomatico())
+                .portonConfiguration(item.getPortonConfiguration())
                 .unidades(1)
                 .m2(m2)
                 .pricePerM2(pricePerM2)
@@ -311,6 +317,8 @@ public class QuoteService {
                                 .marcoSuperior(item.getMarcoSuperior())
                                 .bisagras(item.getBisagras())
                                 .porteroAutomatico(item.getPorteroAutomatico())
+                                .portonConfiguration(item.getPortonConfiguration())
+                                .portonDescription(PortonDescription.describe(item.getPortonConfiguration()))
                                 .m2(item.getM2())
                                 .pricePerM2(item.getPricePerM2())
                                 .lineTotal(item.getLineTotal())
@@ -345,6 +353,7 @@ public class QuoteService {
             if (item.getHeightMm() == null || item.getHeightMm() <= 0) {
                 throw new IllegalArgumentException("El alto es obligatorio");
             }
+            PortonRules.validate(item);
         }
     }
 }
