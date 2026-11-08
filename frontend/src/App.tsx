@@ -1,18 +1,17 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
+import DevelopmentNotice from './components/DevelopmentNotice';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
 import { onNavigateToConfiguration, onNavigateToDocument, onNavigateToModule } from './services/moduleNavigation';
-import { onBudgetWizardLaunch, startBudgetWizard } from './features/budget-wizard/services/budgetWizardLaunch';
+import { onBudgetWizardLaunch } from './features/budget-wizard/services/budgetWizardLaunch';
 import { loadCurrentStaff, STAFF_LOGIN_REQUIRED_EVENT, StaffUser } from './services/staffAuthApi';
 
 const CustomerManagement = lazy(() => import('./features/customer-management/CustomerManagement'));
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
 const AdminManagement = lazy(() => import('./features/admin-management/AdminManagement'));
 const WorkOrders = lazy(() => import('./features/work-orders/WorkOrders'));
-const RegistrationRequests = lazy(() => import('./features/registration-requests/RegistrationRequests'));
 const Settings = lazy(() => import('./features/settings/Settings'));
 const Cutlist = lazy(() => import('./features/cutlist/Cutlist'));
-const BudgetWizard = lazy(() => import('./features/budget-wizard/BudgetWizard').then(module => ({ default: module.BudgetWizard })));
 const DoorVisualSimulation = lazy(() => import('./features/door-visual-simulation/DoorVisualSimulation').then(module => ({ default: module.DoorVisualSimulation })));
 const ProjectManagement = lazy(() => import('./features/project-management/ProjectManagement').then(module => ({ default: module.ProjectManagement })));
 const OrderConfigurator = lazy(() => import('./features/order-configurator/OrderConfigurator'));
@@ -22,7 +21,6 @@ const App = () => {
   const [activeModule, setActiveModule] = useState<ModuleKey>('clientes');
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [budgetWizardSessionKey, setBudgetWizardSessionKey] = useState(0);
   const [configurationId, setConfigurationId] = useState<string | null>(null);
   const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
   const [staffUser, setStaffUser] = useState<StaffUser | null>(null);
@@ -41,20 +39,20 @@ const App = () => {
   useEffect(() => onNavigateToModule(setActiveModule), []);
   useEffect(() => onNavigateToConfiguration(id => {
     setConfigurationId(id);
-    setActiveModule('configurador');
+    setActiveModule('presupuestos');
   }), []);
   useEffect(() => onNavigateToDocument((documentId) => {
     setActiveModule('gestion-documentos');
     setPendingDocumentId(documentId);
   }), []);
   useEffect(() => onBudgetWizardLaunch(() => {
-    setBudgetWizardSessionKey(session => session + 1);
+    setConfigurationId(null);
+    setActiveModule('presupuestos');
   }), []);
 
   const handleSelectModule = (module: ModuleKey) => {
-    if (module === 'configurador') setConfigurationId(null);
-    if (module === 'presupuestos') {
-      startBudgetWizard();
+    if (module === 'configurador' || module === 'presupuestos') {
+      setConfigurationId(null);
       setActiveModule('presupuestos');
       return;
     }
@@ -74,7 +72,7 @@ const App = () => {
       case 'presupuestos':
         return 'Presupuestos';
       case 'configurador':
-        return 'Configurador de pedidos';
+        return 'Presupuestos';
       case 'simulacion-puertas':
         return 'Simulación Visual de Puertas';
       case 'inscripciones':
@@ -194,9 +192,8 @@ const App = () => {
               />
             )}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
-            {activeModule === 'presupuestos' && <BudgetWizard key={budgetWizardSessionKey} />}
-            {activeModule === 'configurador' && <OrderConfigurator key={configurationId} configurationId={configurationId} />}
-            {activeModule === 'inscripciones' && <RegistrationRequests />}
+            {activeModule === 'presupuestos' && <OrderConfigurator key={configurationId ?? 'new'} configurationId={configurationId} />}
+            {activeModule === 'inscripciones' && <DevelopmentNotice />}
             {activeModule === 'ordenes' && (
               <WorkOrders
                 openNewRequest={openNewRequest}

@@ -555,6 +555,7 @@ export default function OrderConfigurator({ configurationId = null }: { configur
   const [marverError, setMarverError] = useState('');
   const [marverRetry, setMarverRetry] = useState(0);
   const isReference = config.productType === 'REFERENCIA_MARVER';
+  const isFunctionalOnly = isReference || isVideo;
   const referenceSpecification = config.referenceSpecification;
 
   useEffect(() => {
@@ -583,9 +584,14 @@ export default function OrderConfigurator({ configurationId = null }: { configur
   useEffect(() => { listConfigCatalogRules(config.productType).then(setCatalogRules).catch(() => setCatalogRules([])); }, [config.productType]);
   useEffect(() => { localStorage.setItem('aluon-order-configurator-draft', JSON.stringify(config)); }, [config]);
   useEffect(() => {
+    if (isFunctionalOnly) {
+      setDrafts([]);
+      setDraftsLoading(false);
+      return;
+    }
     setDraftsLoading(true);
     listOrderConfigurations('DRAFT').then(setDrafts).catch(() => setDrafts([])).finally(() => setDraftsLoading(false));
-  }, [savedId]);
+  }, [isFunctionalOnly, savedId]);
 
   const model = useMemo(() => models.find(option => option.technicalModel === config.model) ?? models[0] ?? null, [models, config.model]);
   const activeFenceSection = config.sections[selectedFenceSection] ?? config.sections[0];
@@ -702,6 +708,15 @@ export default function OrderConfigurator({ configurationId = null }: { configur
   }, [configurationId, loadDraft]);
 
   const save = async (status: 'DRAFT' | 'CONFIRMED' | 'PENDING_REVIEW', configOverride?: Config) => {
+    if (isFunctionalOnly) {
+      setSavedId(null);
+      setHistory([]);
+      setCurrentStatus(status);
+      setMessage(status === 'DRAFT'
+        ? 'Borrador local preparado. Esta vista no se guarda en presupuestos ni pedidos.'
+        : 'Simulación completada. Esta vista es funcional y no entra en el flujo real de la aplicación.');
+      return;
+    }
     if (isReference && referenceSpecification && status !== 'DRAFT') {
       const errors = referenceErrors(marverCatalog, referenceSpecification);
       if (errors.length) { setStepError(errors[0]); return; }
@@ -738,7 +753,7 @@ export default function OrderConfigurator({ configurationId = null }: { configur
     <div className="configurator-shell max-w-7xl mx-auto w-full pb-28">
       <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div><div className="flex items-center gap-2"><div className="w-1 h-6 rounded-full bg-brand" /><h1 className="text-xl font-black uppercase tracking-tight">Configurador de pedidos</h1></div><p className="ml-3.5 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Fase 1 · configuración inequívoca</p></div>
-        <div style={isVideo ? { display: 'none' } : undefined} className="configurator-surface-actions flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto [&>*]:shrink-0 [&>button]:whitespace-nowrap">
+        <div style={isFunctionalOnly ? { display: 'none' } : undefined} className="configurator-surface-actions flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto [&>*]:shrink-0 [&>button]:whitespace-nowrap">
           {savedId && <button type="button" className="btn-ghost" onClick={duplicateConfiguration}>Duplicar configuración</button>}
           <button type="button" className="btn-ghost" onClick={() => { setConfig(initialConfig); setSelectedFenceSection(0); setSavedId(null); setHistory([]); setCurrentStatus('DRAFT'); setStep(1); localStorage.removeItem('aluon-order-configurator-draft'); }}>Nuevo borrador</button>
           <select className="field !w-auto max-w-xs" aria-label="Recuperar borrador" defaultValue="" onChange={e => { void loadDraft(e.target.value); }} disabled={draftsLoading || saving}>
@@ -752,7 +767,7 @@ export default function OrderConfigurator({ configurationId = null }: { configur
         <button type="button" className="btn-ghost" aria-pressed={isReference && !isVideo} onClick={() => { leaveVideo(); update('productType', 'REFERENCIA_MARVER'); setStep(1); }}>Plantillas Marver del ZIP</button>
         <button type="button" className="btn-ghost" aria-pressed={isVideo} onClick={() => setIsVideo(true)}>Marver · Recorrido del vídeo</button>
       </div>
-      {isVideo ? marverCatalog && !marverError ? <MarverVideoConfigurator catalog={marverCatalog} customers={customers} configurationId={config.presentation === 'MARVER_VIDEO' ? savedId : null} /> : <div role="status" className="rounded-xl border p-4">{marverError || 'Cargando recorrido Marver…'}{marverError && <button type="button" className="underline ml-3" onClick={() => setMarverRetry(value => value + 1)}>Reintentar</button>}</div> : <>
+      {isVideo ? marverCatalog && !marverError ? <MarverVideoConfigurator catalog={marverCatalog} customers={customers} /> : <div role="status" className="rounded-xl border p-4">{marverError || 'Cargando recorrido Marver…'}{marverError && <button type="button" className="underline ml-3" onClick={() => setMarverRetry(value => value + 1)}>Reintentar</button>}</div> : <>
       {isReference && (!marverCatalog || marverError) && <div className="rounded-xl border p-4 mb-4 text-sm" role="status">{marverError || 'Cargando plantillas Marver…'}{marverError && <button type="button" className="underline ml-3" onClick={() => setMarverRetry(value => value + 1)}>Reintentar</button>}</div>}
       <ProposalOneStepper step={step} reviewStep={reviewStep} isReference={isReference} setStep={value => { setStepError(''); setStep(value); }} />
       <nav className="configurator-steps legacy-configurator-steps mb-5" aria-label="Pasos del configurador">
@@ -785,7 +800,7 @@ export default function OrderConfigurator({ configurationId = null }: { configur
               <button type="button" className="btn-ghost" onClick={() => save('DRAFT')} disabled={saving}>{saving ? 'Guardando…' : 'Guardar borrador'}</button>
               {step === reviewStep && <>
                 <button type="button" className="btn-ghost" onClick={async () => { const name = documentFileName(config.reference, history.length + 1); const base64 = await downloadSummary(config, customerName, (isReference ? referenceSpecification?.formName : products.find(p => p.id === config.productType)?.label) || config.productType, history.length + 1, selectedFenceSection); const next = { ...config, generatedDocuments: [...config.generatedDocuments, { name, type: 'ORDER_CONFIGURATION_PDF', generatedAt: new Date().toISOString(), mimeType: 'application/pdf', contentBase64: base64 }] }; setConfig(next); if (savedId) await save('DRAFT', next); }} disabled={saving}>Generar PDF</button>
-                <button type="button" className="btn-primary" onClick={() => save(isPeatonal && technicalWarnings.length === 0 ? 'CONFIRMED' : 'PENDING_REVIEW')} disabled={saving || validation.length > 0}>{isPeatonal && technicalWarnings.length === 0 ? 'Confirmar pedido' : 'Enviar a revisión técnica'}</button>
+                <button type="button" className="btn-primary" onClick={() => save(isPeatonal && technicalWarnings.length === 0 ? 'CONFIRMED' : 'PENDING_REVIEW')} disabled={saving || validation.length > 0}>{isFunctionalOnly ? 'Simular revisión' : isPeatonal && technicalWarnings.length === 0 ? 'Confirmar pedido' : 'Enviar a revisión técnica'}</button>
               </>}
               {step < reviewStep && <button type="button" className="btn-primary" disabled={saving || validatingRules} onClick={goNext}>{validatingRules ? 'Validando…' : 'Siguiente →'}</button>}
             </div>

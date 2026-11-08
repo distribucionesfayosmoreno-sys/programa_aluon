@@ -9,6 +9,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @Component
 @RequiredArgsConstructor
@@ -46,6 +47,29 @@ public class GoogleStreetViewClient {
         } catch (RestClientResponseException ex) {
             throw ex;
         }
+    }
+
+    public GeocodedLocation geocode(String address) {
+        assertEnabledAndConfigured();
+        if (!StringUtils.hasText(address)) throw new IllegalArgumentException("address es obligatorio");
+
+        String uri = UriComponentsBuilder
+                .fromUriString(baseUrl())
+                .path("/maps/api/geocode/json")
+                .queryParam("address", address)
+                .queryParam("key", props.apiKey())
+                .build()
+                .toUriString();
+
+        JsonNode response = doorSimulationRestClient.get().uri(uri).retrieve().body(JsonNode.class);
+        if (response == null || !"OK".equals(response.path("status").asText()) || !response.path("results").elements().hasNext()) {
+            throw new IllegalArgumentException("No se pudo localizar la dirección");
+        }
+        JsonNode location = response.path("results").get(0).path("geometry").path("location");
+        return new GeocodedLocation(location.path("lat").asDouble(), location.path("lng").asDouble());
+    }
+
+    public record GeocodedLocation(double latitude, double longitude) {
     }
 
     private String baseUrl() {

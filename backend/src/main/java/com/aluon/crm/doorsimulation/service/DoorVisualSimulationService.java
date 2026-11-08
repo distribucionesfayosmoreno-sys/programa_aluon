@@ -5,6 +5,7 @@ import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationRequest;
 import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationResponse;
 import com.aluon.crm.doorsimulation.dto.DoorSimulationFrontendConfigResponse;
 import com.aluon.crm.doorsimulation.dto.DoorSimulationStatusResponse;
+import com.aluon.crm.doorsimulation.dto.GeocodeResponse;
 import com.aluon.crm.doorsimulation.dto.MaskRectDto;
 import com.aluon.crm.doorsimulation.dto.StartInpaintRequest;
 import com.aluon.crm.doorsimulation.dto.StartInpaintResponse;
@@ -110,6 +111,11 @@ public class DoorVisualSimulationService {
     public DoorSimulationFrontendConfigResponse getFrontendConfig() {
         String browserApiKey = StringUtils.hasText(googleProps.browserApiKey()) ? googleProps.browserApiKey() : googleProps.apiKey();
         return new DoorSimulationFrontendConfigResponse(googleProps.enabled(), browserApiKey);
+    }
+
+    public GeocodeResponse geocode(String address) {
+        GoogleStreetViewClient.GeocodedLocation location = streetViewClient.geocode(requireNonBlank(address, "address"));
+        return new GeocodeResponse(location.latitude(), location.longitude());
     }
 
     private static int[] parseSize(String imageSize) {

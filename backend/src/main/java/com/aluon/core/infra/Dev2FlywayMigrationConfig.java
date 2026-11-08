@@ -21,6 +21,7 @@ public class Dev2FlywayMigrationConfig {
                     .locations("classpath:db/migration")
                     .baselineOnMigrate(true)
                     .baselineVersion(MigrationVersion.fromVersion("0"))
+                    .outOfOrder(true)
                     .load();
 
             configured.repair();

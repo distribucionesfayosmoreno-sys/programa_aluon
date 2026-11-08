@@ -4,6 +4,7 @@ import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationRequest;
 import com.aluon.crm.doorsimulation.dto.CreateDoorSimulationResponse;
 import com.aluon.crm.doorsimulation.dto.DoorSimulationFrontendConfigResponse;
 import com.aluon.crm.doorsimulation.dto.DoorSimulationStatusResponse;
+import com.aluon.crm.doorsimulation.dto.GeocodeResponse;
 import com.aluon.crm.doorsimulation.dto.StartInpaintRequest;
 import com.aluon.crm.doorsimulation.dto.StartInpaintResponse;
 import com.aluon.crm.doorsimulation.service.DoorVisualSimulationService;
@@ -22,6 +23,11 @@ import java.util.UUID;
 public class DoorVisualSimulationController {
 
     private final DoorVisualSimulationService service;
+
+    @GetMapping("/geocode")
+    public ResponseEntity<GeocodeResponse> geocode(@RequestParam String address) {
+        return ResponseEntity.ok(service.geocode(address));
+    }
 
     @PostMapping
     public ResponseEntity<CreateDoorSimulationResponse> create(@Valid @RequestBody CreateDoorSimulationRequest request) {
