@@ -8,6 +8,7 @@ export type CreateQuotePayload = {
 };
 
 type QuoteItemRequestPayload = {
+  portonConfiguration: QuoteItemDraft['portonConfiguration'];
   doorModel: QuoteItemDraft['doorModel'];
   doorType: QuoteItemDraft['doorType'];
   productCategory: QuoteItemDraft['productCategory'];
@@ -33,6 +34,7 @@ const readTextError = async (response: Response): Promise<string> => {
 
 export const createQuote = async (payload: CreateQuotePayload): Promise<QuoteResponse> => {
   const items: QuoteItemRequestPayload[] = payload.items.map(item => ({
+    portonConfiguration: item.portonConfiguration,
     doorModel: item.doorModel,
     doorType: item.doorType,
     productCategory: item.productCategory,

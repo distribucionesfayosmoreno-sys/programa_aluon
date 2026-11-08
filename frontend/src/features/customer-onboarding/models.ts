@@ -1,3 +1,5 @@
+import type { PortonConfiguration } from '../budget-wizard/porton/portonCatalog';
+
 export type DoorModel = 'PREMIUM' | 'CLASSIC' | 'INOX' | 'VENECIANA';
 export type DoorType = 'PEATONAL' | 'ABATIBLE_UNA' | 'ABATIBLE_DOS' | 'CORREDERA' | 'VALLA';
 
@@ -38,6 +40,8 @@ export type QuoteItemDraft = {
 };
 
 export type QuoteItemResponse = {
+  portonConfiguration?: PortonConfiguration | null;
+  portonDescription?: string;
   doorModel: DoorModel;
   doorType: DoorType;
   productCategory: string;

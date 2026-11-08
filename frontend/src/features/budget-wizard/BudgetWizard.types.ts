@@ -1,3 +1,4 @@
+import type { PortonConfiguration } from './porton/portonCatalog';
 import type { DoorModel, DoorType } from '../customer-onboarding/models';
 
 export type ProductCategory = 'PUERTA_PASO' | 'PUERTA_GARAJE' | 'VALLA' | 'REJA';
@@ -34,6 +35,8 @@ export type Step =
   | 'FINALIZADO';
 
 export type QuoteItemDraft = {
+  portonConfiguration?: PortonConfiguration | null;
+  portonDescription?: string;
   catalogFamilyId: string;
   catalogChildId: string;
   familyName: string;

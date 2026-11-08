@@ -1,5 +1,6 @@
 package com.aluon.crm.quote.dto;
 
+import com.aluon.crm.catalog.porton.PortonConfiguration;
 import com.aluon.crm.catalog.model.ProductCategory;
 import com.aluon.production.cutlist.model.DoorModel;
 import com.aluon.production.cutlist.model.DoorType;
@@ -9,6 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class QuoteItemRequest {
+    private PortonConfiguration portonConfiguration;
     private DoorModel doorModel;
     private DoorType doorType;
     private ProductCategory productCategory;

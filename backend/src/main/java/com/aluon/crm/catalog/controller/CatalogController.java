@@ -1,5 +1,6 @@
 package com.aluon.crm.catalog.controller;
 
+import com.aluon.crm.catalog.porton.PortonCatalog;
 import com.aluon.crm.catalog.dto.CatalogDoorProductResponse;
 import com.aluon.crm.catalog.dto.CatalogFamilyChildResponse;
 import com.aluon.crm.catalog.dto.CatalogFamilyResponse;
@@ -22,6 +23,11 @@ import java.util.UUID;
 public class CatalogController {
 
     private final CatalogService catalogService;
+
+    @GetMapping("/portones")
+    public PortonCatalog portones() {
+        return PortonCatalog.reference();
+    }
 
     @GetMapping("/families")
     public ResponseEntity<List<CatalogFamilyResponse>> listFamilies() {

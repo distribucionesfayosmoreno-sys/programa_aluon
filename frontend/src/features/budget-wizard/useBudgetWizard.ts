@@ -20,6 +20,8 @@ import { createQuote, sendQuote } from './services/quotesApi';
 import { useBudgetWizardStepHistory } from './useBudgetWizardStepHistory';
 import { resolveDoorModelForQuote } from './budgetWizardDoorModel';
 
+import { describePorton, portonErrors, type PortonCatalog, type PortonConfiguration } from './porton/portonCatalog';
+
 const defaultBooleans = {
   primerRequired: false,
   larguero: false,
@@ -66,6 +68,10 @@ export const useBudgetWizard = () => {
   const [children, setChildren] = useState<CatalogFamilyChild[]>([]);
   const [selectedFamily, setSelectedFamily] = useState<CatalogFamily | null>(null);
   const [selectedChild, setSelectedChild] = useState<CatalogFamilyChild | null>(null);
+
+  const [portonCatalog, setPortonCatalog] = useState<PortonCatalog | null>(null);
+  const [portonLoadError, setPortonLoadError] = useState('');
+  const [portonConfiguration, setPortonConfiguration] = useState<PortonConfiguration | null>(null);
 
   const [color, setColorState] = useState<ColorHex>('#ffffff');
   const [primerRequired, setPrimerRequired] = useState(defaultBooleans.primerRequired);
@@ -129,11 +135,28 @@ export const useBudgetWizard = () => {
     setSelectedDeliveryAddressId(current => current || prefillCustomer.direccionesEntrega[0]?.id || '');
   }, [prefillCustomer]);
 
+  const loadPortonCatalog = async () => {
+    setPortonLoadError('');
+    try {
+      const response = await fetch('/api/catalog/portones');
+      if (!response.ok) throw new Error('No se pudo cargar la referencia de portones.');
+      setPortonCatalog(await response.json() as PortonCatalog);
+    } catch (err) {
+      setPortonLoadError(err instanceof Error ? err.message : 'Error al cargar portones.');
+    }
+  };
+
+  useEffect(() => { void loadPortonCatalog(); }, []);
+
+  const technicalErrors = portonErrors(portonCatalog, portonConfiguration, widthMm, heightMm, floorClearanceMm);
+
   const itemDraft = useMemo<QuoteItemDraft | null>(() => {
     if (!selectedFamily || !selectedChild || !selectedFamilyQuoteDoorModel) {
       return null;
     }
     return {
+      portonConfiguration,
+      portonDescription: describePorton(portonCatalog, portonConfiguration),
       catalogFamilyId: selectedFamily.id,
       catalogChildId: selectedChild.id,
       familyName: selectedFamily.name,
@@ -152,6 +175,8 @@ export const useBudgetWizard = () => {
       porteroAutomatico,
     };
   }, [
+    portonConfiguration,
+    portonCatalog,
     bisagras,
     color,
     floorClearanceMm,
@@ -265,6 +290,7 @@ export const useBudgetWizard = () => {
   };
 
   const resetCurrentDoor = () => {
+    setPortonConfiguration(null);
     setChildren([]);
     setSelectedFamily(null);
     setSelectedChild(null);
@@ -281,6 +307,7 @@ export const useBudgetWizard = () => {
   };
 
   const restoreItemState = (item: QuoteItemDraft) => {
+    setPortonConfiguration(item.portonConfiguration ?? null);
     setColorState(item.colorCode);
     setPrimerRequired(item.primerRequired);
     setWidthMm(item.widthMm);
@@ -302,6 +329,7 @@ export const useBudgetWizard = () => {
   };
 
   const selectChild = (child: CatalogFamilyChild) => {
+    setPortonConfiguration(null);
     setSelectedChild(child);
     setBisagras(defaultBooleans.bisagras);
     setStep('COLOR');
@@ -319,6 +347,8 @@ export const useBudgetWizard = () => {
   };
 
   const addCurrentItem = () => {
+    if (technicalErrors.length) { setError(technicalErrors.join(" ")); return; }
+    setError('');
     if (!itemDraft) {
       if (selectedFamily && selectedChild && !selectedFamilyQuoteDoorModel) {
         setError(`El modelo técnico "${selectedFamily.technicalModel}" no está soportado para presupuestos.`);
@@ -393,6 +423,8 @@ export const useBudgetWizard = () => {
       return;
     }
 
+    const invalidItems = itemsToSubmit.flatMap(item => portonErrors(portonCatalog, item.portonConfiguration, item.widthMm, item.heightMm, item.floorClearanceMm));
+    if (invalidItems.length) { setError(invalidItems.join(' ')); return; }
     setSubmitting(true);
     setError('');
     setSubmittedItems(itemsToSubmit);
@@ -441,6 +473,12 @@ export const useBudgetWizard = () => {
   };
 
   return {
+    portonCatalog,
+    portonLoadError,
+    loadPortonCatalog,
+    portonConfiguration,
+    setPortonConfiguration,
+    technicalErrors,
     step,
     loading,
     submitting,

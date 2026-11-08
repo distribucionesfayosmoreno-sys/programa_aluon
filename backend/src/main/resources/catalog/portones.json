@@ -1,0 +1,617 @@
+{
+  "source": "Referencia de portones Portalum · 30/10/2026",
+  "notes": [
+    "Datos de referencia para preparar el presupuesto; confirmar viabilidad y tarifa de panel, acabado, motor y accesorios antes de fabricar.",
+    "Cola de corredera: el análisis contiene criterios contradictorios; confirmar con ficha vigente. No se calcula automáticamente.",
+    "No se trasladan garantías, certificaciones ni declaraciones normativas del proveedor a ALUON."
+  ],
+  "variants": [
+    {
+      "code": "CORREDERA_UNA",
+      "label": "Corredera · 1 hoja",
+      "doorType": "CORREDERA",
+      "productCategory": "PUERTA_GARAJE",
+      "minWidthMm": 1000,
+      "maxWidthMm": 6200,
+      "minHeightMm": 500,
+      "maxHeightMm": 3000,
+      "motorAllowed": true,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "CORREDERA_DOS",
+      "label": "Corredera · 2 hojas",
+      "doorType": "CORREDERA",
+      "productCategory": "PUERTA_GARAJE",
+      "minWidthMm": 1000,
+      "maxWidthMm": 6200,
+      "minHeightMm": 500,
+      "maxHeightMm": 3000,
+      "motorAllowed": true,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "TELESCOPICA",
+      "label": "Corredera telescópica",
+      "doorType": "CORREDERA",
+      "productCategory": "PUERTA_GARAJE",
+      "minWidthMm": 1000,
+      "maxWidthMm": 6200,
+      "minHeightMm": 500,
+      "maxHeightMm": 3000,
+      "motorAllowed": true,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "CORREDERA_PEATONAL",
+      "label": "Corredera con peatonal integrada",
+      "doorType": "CORREDERA",
+      "productCategory": "PUERTA_GARAJE",
+      "minWidthMm": 1000,
+      "maxWidthMm": 6200,
+      "minHeightMm": 500,
+      "maxHeightMm": 3000,
+      "motorAllowed": true,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "PIVOTANTE_UNA",
+      "label": "Pivotante · 1 hoja",
+      "doorType": "ABATIBLE_UNA",
+      "productCategory": "PUERTA_PASO",
+      "minWidthMm": 1000,
+      "maxWidthMm": 3200,
+      "minHeightMm": 500,
+      "maxHeightMm": 3000,
+      "motorAllowed": true,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B25",
+        "B40",
+        "B80",
+        "B100",
+        "B120",
+        "B150",
+        "B200",
+        "B300",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "PIVOTANTE_DOS",
+      "label": "Pivotante · 2 hojas",
+      "doorType": "ABATIBLE_DOS",
+      "productCategory": "PUERTA_PASO",
+      "minWidthMm": 1000,
+      "maxWidthMm": 6000,
+      "minHeightMm": 500,
+      "maxHeightMm": 3000,
+      "motorAllowed": true,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B25",
+        "B40",
+        "B80",
+        "B100",
+        "B120",
+        "B150",
+        "B200",
+        "B300",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "PIVOTANTE_DESIGUAL",
+      "label": "Pivotante · 2 hojas desiguales",
+      "doorType": "ABATIBLE_DOS",
+      "productCategory": "PUERTA_PASO",
+      "minWidthMm": 1000,
+      "maxWidthMm": 6000,
+      "minHeightMm": 500,
+      "maxHeightMm": 3000,
+      "motorAllowed": true,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B25",
+        "B40",
+        "B80",
+        "B100",
+        "B120",
+        "B150",
+        "B200",
+        "B300",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "PEATONAL_PEQUENA",
+      "label": "Peatonal · 1 hoja pequeña",
+      "doorType": "PEATONAL",
+      "productCategory": "PUERTA_PASO",
+      "minWidthMm": 600,
+      "maxWidthMm": 1200,
+      "minHeightMm": null,
+      "maxHeightMm": 2600,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "PEATONAL_GRANDE",
+      "label": "Peatonal · 1 hoja grande",
+      "doorType": "PEATONAL",
+      "productCategory": "PUERTA_PASO",
+      "minWidthMm": 600,
+      "maxWidthMm": 1600,
+      "minHeightMm": null,
+      "maxHeightMm": 2600,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "PEATONAL_DOS_PEQUENAS",
+      "label": "Peatonal · 2 hojas pequeñas",
+      "doorType": "ABATIBLE_DOS",
+      "productCategory": "PUERTA_PASO",
+      "minWidthMm": null,
+      "maxWidthMm": 2400,
+      "minHeightMm": null,
+      "maxHeightMm": 2600,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "PEATONAL_DOS_GRANDES",
+      "label": "Peatonal · 2 hojas grandes",
+      "doorType": "ABATIBLE_DOS",
+      "productCategory": "PUERTA_PASO",
+      "minWidthMm": null,
+      "maxWidthMm": 3000,
+      "minHeightMm": null,
+      "maxHeightMm": 2600,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200",
+        "SIN_PANEL"
+      ]
+    },
+    {
+      "code": "VALLADO_PILASTRA",
+      "label": "Vallado con pilastra",
+      "doorType": "VALLA",
+      "productCategory": "VALLA",
+      "minWidthMm": null,
+      "maxWidthMm": 2000,
+      "minHeightMm": 800,
+      "maxHeightMm": 2000,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B25",
+        "B40",
+        "B80",
+        "B100",
+        "B120",
+        "B150",
+        "B200",
+        "B300"
+      ]
+    },
+    {
+      "code": "VALLADO_HORIZONTAL",
+      "label": "Vallado horizontal",
+      "doorType": "VALLA",
+      "productCategory": "VALLA",
+      "minWidthMm": null,
+      "maxWidthMm": 2000,
+      "minHeightMm": 800,
+      "maxHeightMm": 2000,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330"
+      ]
+    },
+    {
+      "code": "VALLADO_ENMARCADO",
+      "label": "Vallado enmarcado",
+      "doorType": "VALLA",
+      "productCategory": "VALLA",
+      "minWidthMm": null,
+      "maxWidthMm": 2000,
+      "minHeightMm": 800,
+      "maxHeightMm": 2000,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B40",
+        "B80",
+        "B150",
+        "B200"
+      ]
+    },
+    {
+      "code": "VALLADO_VERTICAL",
+      "label": "Vallado vertical",
+      "doorType": "VALLA",
+      "productCategory": "VALLA",
+      "minWidthMm": null,
+      "maxWidthMm": 2000,
+      "minHeightMm": 800,
+      "maxHeightMm": 2000,
+      "motorAllowed": false,
+      "panelCodes": [
+        "M100",
+        "M200",
+        "M330",
+        "C210",
+        "C340",
+        "LV",
+        "LA",
+        "B25",
+        "B40",
+        "B80",
+        "B100",
+        "B120",
+        "B150",
+        "B200",
+        "B300"
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "code": "M100",
+      "label": "Machihembrado 100",
+      "kgPerM2": 9.6
+    },
+    {
+      "code": "M200",
+      "label": "Machihembrado 200",
+      "kgPerM2": 9.6
+    },
+    {
+      "code": "M330",
+      "label": "Machihembrado 330",
+      "kgPerM2": 12.6
+    },
+    {
+      "code": "C210",
+      "label": "Compuesto 210",
+      "kgPerM2": 10.8
+    },
+    {
+      "code": "C340",
+      "label": "Compuesto 340",
+      "kgPerM2": 10.8
+    },
+    {
+      "code": "LV",
+      "label": "Lama ventilada",
+      "kgPerM2": 10.7
+    },
+    {
+      "code": "LA",
+      "label": "Lama avión 120",
+      "kgPerM2": 8.4
+    },
+    {
+      "code": "B25",
+      "label": "Barrotillo B25",
+      "kgPerM2": null
+    },
+    {
+      "code": "B40",
+      "label": "Barrotillo 40 × 20",
+      "kgPerM2": 11.4
+    },
+    {
+      "code": "B80",
+      "label": "Barrotillo 80 × 25",
+      "kgPerM2": 8.4
+    },
+    {
+      "code": "B100",
+      "label": "Barrotillo 100 × 40",
+      "kgPerM2": 9
+    },
+    {
+      "code": "B120",
+      "label": "Barrotillo 120 × 20",
+      "kgPerM2": 9
+    },
+    {
+      "code": "B150",
+      "label": "Barrotillo 150 × 30",
+      "kgPerM2": 11.7
+    },
+    {
+      "code": "B200",
+      "label": "Barrotillo 200 × 40",
+      "kgPerM2": 13.7
+    },
+    {
+      "code": "B300",
+      "label": "Barrotillo 300 × 40",
+      "kgPerM2": 16
+    },
+    {
+      "code": "SIN_PANEL",
+      "label": "Sin panel",
+      "kgPerM2": null
+    }
+  ],
+  "finishes": [
+    {
+      "code": "RAL_8007_B",
+      "label": "RAL 8007 B",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_8014_T",
+      "label": "RAL 8014 T",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_8019_TM",
+      "label": "RAL 8019 TM",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_7022_TM",
+      "label": "RAL 7022 TM",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_7011_B",
+      "label": "RAL 7011 B",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_7016_TM",
+      "label": "RAL 7016 TM",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_6005_B",
+      "label": "RAL 6005 B",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_6009_T",
+      "label": "RAL 6009 T",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_9005_T",
+      "label": "RAL 9005 T",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_Negro_M",
+      "label": "Negro M",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_1013_BT",
+      "label": "RAL 1013 BT",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_9010_T",
+      "label": "RAL 9010 T",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_9016_T",
+      "label": "RAL 9016 T",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_9006_B",
+      "label": "RAL 9006 B",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_7035_B",
+      "label": "RAL 7035 B",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_7024_TB",
+      "label": "RAL 7024 TB",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_Blanco_MB",
+      "label": "Blanco MB",
+      "group": "RAL"
+    },
+    {
+      "code": "RAL_1015",
+      "label": "RAL 1015",
+      "group": "RAL"
+    },
+    {
+      "code": "MADERA_18",
+      "label": "Roble medio L",
+      "group": "Madera"
+    },
+    {
+      "code": "MADERA_19",
+      "label": "Pino medio T",
+      "group": "Madera"
+    },
+    {
+      "code": "MADERA_20",
+      "label": "Embero T",
+      "group": "Madera"
+    },
+    {
+      "code": "MADERA_21",
+      "label": "Nogal oscuro L/T",
+      "group": "Madera"
+    },
+    {
+      "code": "MADERA_22",
+      "label": "Nogal verdoso T",
+      "group": "Madera"
+    },
+    {
+      "code": "MADERA_23",
+      "label": "Cerezo verdoso T",
+      "group": "Madera"
+    },
+    {
+      "code": "ANODIZADO_PLATA",
+      "label": "Plata",
+      "group": "Anodizado"
+    },
+    {
+      "code": "ANODIZADO_INOX",
+      "label": "Inox",
+      "group": "Anodizado"
+    },
+    {
+      "code": "ANODIZADO_TITANIO",
+      "label": "Titanio",
+      "group": "Anodizado"
+    },
+    {
+      "code": "OTRO_RAL",
+      "label": "Otro RAL · consultar",
+      "group": "RAL"
+    }
+  ]
+}
