@@ -1,4 +1,4 @@
-import type { ProjectDocumentKind } from '../ProjectManagement.types';
+import type { ProjectDocumentRowKind } from '../ProjectManagement.types';
 import type { ProjectsTableFilters } from './ProjectsTableFilters.types';
 import { documentManagementTheme } from '../documentManagementTheme';
 
@@ -7,7 +7,7 @@ type Props = {
   onChange: (next: ProjectsTableFilters) => void;
   onReset: () => void;
   onCreateDocument: () => void;
-  typeOptions: ProjectDocumentKind[];
+  typeOptions: ProjectDocumentRowKind[];
   statusOptions: string[];
 };
 

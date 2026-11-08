@@ -5,6 +5,7 @@ import AppDialog from '../../../components/feedback/AppDialog';
 import { Customer360DocumentModal } from '../../customer-360/Customer360DocumentModal';
 import type { Customer360DocumentItem } from '../../customer-360/customer360Types';
 import { getQuoteWhatsappLink } from '../services/quoteWhatsappApi';
+import { navigateToDocument } from '../../../services/moduleNavigation';
 import { convertQuoteToOrder, duplicateQuote } from '../services/quotesApi';
 
 type Props = {
@@ -238,6 +239,14 @@ export const BudgetWizardDoneStep = ({ quote, submittedItems, postFinalizeAction
           <span className="text-base font-black text-blue-600">{quote.total.toFixed(2)} €</span>
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => navigateToDocument(`${quote.id}:PRESUPUESTO`)}
+        className="btn-primary w-full"
+      >
+        Abrir en Gestión Documentos
+      </button>
 
       {/* Share / Action Buttons */}
       <div className="space-y-3">

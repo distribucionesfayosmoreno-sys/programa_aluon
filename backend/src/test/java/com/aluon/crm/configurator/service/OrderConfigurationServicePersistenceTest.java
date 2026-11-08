@@ -104,4 +104,39 @@ class OrderConfigurationServicePersistenceTest {
         assertThatThrownBy(() -> service.update(entity.getId(), request)).isInstanceOf(IllegalStateException.class).hasMessageContaining("autorización");
         verify(repository, never()).save(any());
     }
+    @Test
+    void preservesGroupedVideoFormsAttachmentsAndAudit() throws Exception {
+        var payload = objectMapper.createObjectNode().put("presentation", "MARVER_VIDEO");
+        var forms = payload.putArray("videoForms");
+        for (String formId : List.of("cancela-peatonal", "corredera")) {
+            var item = forms.addObject().put("id", formId);
+            var spec = item.putObject("specification").put("catalogVersion", 1).put("formId", formId).put("modelId", "grinon");
+            spec.putObject("values");
+        }
+        payload.set("referenceSpecification", forms.get(0).path("specification").deepCopy());
+        payload.putObject("videoDraft").set("forms", forms.deepCopy());
+        payload.putArray("generatedDocuments").addObject().put("name", "plano.png").put("type", "REFERENCE_ATTACHMENT").put("mimeType", "image/png").put("formId", "corredera").put("contentBase64", "data:image/png;base64,YWJj");
+        var json = objectMapper.createObjectNode().put("reference", "VIDEO-001").put("productType", "REFERENCIA_MARVER").put("status", "PENDING_REVIEW");
+        json.set("payload", payload);
+        var request = objectMapper.treeToValue(json, OrderConfigurationRequest.class);
+        when(repository.save(any(OrderConfiguration.class))).thenAnswer(invocation -> {
+            OrderConfiguration entity = invocation.getArgument(0);
+            entity.setId(UUID.randomUUID()); entity.setCreatedAt(LocalDateTime.now()); entity.setUpdatedAt(LocalDateTime.now());
+            return entity;
+        });
+        when(sectionRepository.findAllByConfigurationIdAndVersionOrderBySectionNumber(any(), any())).thenReturn(List.of());
+        when(documentRepository.findAllByConfigurationIdAndVersionOrderByCreatedAtDesc(any(), any())).thenReturn(List.of());
+        var service = new OrderConfigurationService(repository, auditRepository, sectionRepository, documentRepository, objectMapper, adminAuditService);
+        var response = service.save(request);
+        assertThat(response.payload().path("videoForms").size()).isEqualTo(2);
+        assertThat(response.payload().path("videoForms").get(1).path("specification").path("formName").asText()).isEqualTo("Corredera");
+        var document = ArgumentCaptor.forClass(com.aluon.crm.configurator.model.OrderConfigurationDocument.class);
+        verify(documentRepository).save(document.capture());
+        assertThat(document.getValue().getContentBytes()).isEqualTo("abc".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        assertThat(document.getValue().getMetadata()).contains("corredera").doesNotContain("contentBase64");
+        var audit = ArgumentCaptor.forClass(com.aluon.crm.configurator.model.OrderConfigurationAudit.class);
+        verify(auditRepository).save(audit.capture());
+        assertThat(audit.getValue().getSnapshot()).contains("MARVER_VIDEO", "videoForms", "corredera");
+    }
+
 }

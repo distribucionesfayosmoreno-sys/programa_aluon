@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useCustomers, type Customer } from '../../hooks/useCustomers';
 import { listCatalogFamilies } from '../work-orders/services/catalogModelsApi';
 import { buildCatalogModelOptions, type CatalogModelOption } from '../work-orders/utils/catalogModels';
 import { getOrderConfiguration, getOrderConfigurationHistory, listOrderConfigurations, saveOrderConfiguration, updateOrderConfiguration, type OrderConfigurationAudit, type SavedOrderConfiguration } from './orderConfiguratorApi';
 import { listConfigCatalogOptions, listConfigCatalogRules, validateConfigCatalog, type ConfigCatalogOption, type ConfigCatalogRule } from './catalogRulesApi';
+import { navigateToModule } from '../../services/moduleNavigation';
 import { openBudgetWizardForCustomer } from '../budget-wizard/services/budgetWizardLaunch';
 import OrderConfiguratorSketch from './OrderConfiguratorSketch';
 
+import MarverVideoConfigurator from './marver/MarverVideoConfigurator';
 import { MarverReferenceFields, MarverReferenceSummary, MarverTemplateSelector } from './marver/MarverReferenceFields';
 import { referenceErrors, type MarverSpecification, type ReferenceCatalog } from './marver/marverReference';
 
@@ -16,6 +18,8 @@ type GuideSystem = 'INTERIOR_ROLLERS_U' | 'BRIDGE_ROLLERS';
 type FenceVerticalLabel = 'ALTO' | 'ANCHO';
 type FenceSection = { widthMm: number; heightMm: number; encounterType: 'NONE' | 'INNER' | 'OUTER'; staggered: boolean };
 type Config = {
+  wizardStep?: Step;
+  presentation?: 'MARVER_VIDEO';
   referenceSpecification?: MarverSpecification | null;
   customerId: string;
   customerName: string;
@@ -136,6 +140,19 @@ const modelPreview = (model: CatalogModelOption): string => {
   return '/ideas/aluon/images/aluonClassic.jpg';
 };
 
+const ralSwatches: Record<string, string> = {
+  '7016': '#383E42',
+  '9005': '#0A0A0A',
+  '9016': '#F1F0EA',
+};
+
+const colorSwatch = (option: Pick<ConfigCatalogOption, 'code' | 'label'>): string | undefined => {
+  const code = option.code.trim();
+  if (/^#(?:[\da-f]{3}|[\da-f]{6})$/i.test(code)) return code;
+  const ral = `${code} ${option.label}`.match(/\bRAL[\s_-]*(\d{4})\b/i);
+  return ral ? ralSwatches[ral[1]] : undefined;
+};
+
 const ProposalOneDataStep = ({
   config,
   update,
@@ -215,13 +232,17 @@ const ProposalOneDataStep = ({
           <section>
             <h3>2. Color</h3>
             <div className="proposal-one-colors">
-              {colorOptions.length > 0 ? colorOptions.map(option => (
+              {colorOptions.length > 0 ? colorOptions.map(option => {
+                const swatch = colorSwatch(option);
+                return (
                 <button type="button" key={option.id} className={`proposal-one-color ${config.color === option.code ? 'is-selected' : ''}`} onClick={() => update('color', option.code)} aria-pressed={config.color === option.code}>
-                  <span className="proposal-one-swatch" style={{ backgroundColor: option.code?.startsWith('#') ? option.code : undefined }} />
+                  <span className="proposal-one-swatch" style={{ background: swatch ?? '#F2F4F7' }} title={swatch ? `Muestra aproximada: ${option.label}` : 'Muestra de color no disponible'} aria-hidden="true">{!swatch && '?'}</span>
                   <strong>{option.label}</strong><small>{option.code}</small>
                 </button>
-              )) : <label className="proposal-one-inline-field">Color<input className="field" value={config.color} onChange={event => update('color', event.target.value)} placeholder="RAL 7016" /></label>}
+                );
+              }) : <label className="proposal-one-inline-field">Color<input className="field" value={config.color} onChange={event => update('color', event.target.value)} placeholder="RAL 7016" /></label>}
             </div>
+            {colorOptions.length > 0 && <p className="mt-2 text-xs text-slate-500">Colores aproximados en pantalla. Confirmar el tono con la carta RAL física.</p>}
           </section>
           <section>
             <h3>Acabado</h3>
@@ -249,22 +270,29 @@ const ProposalOneDataStep = ({
         </div>
         {!referenceContent && <div className="proposal-one-visuals">
           <div className="proposal-one-hero"><img src={selectedModel ? modelPreview(selectedModel) : '/ideas/aluon/images/aluonClassic.jpg'} alt="Vista previa del modelo seleccionado" /></div>
-          <div className="proposal-one-sketch"><OrderConfiguratorSketch widthMm={isFence ? config.sections[0]?.widthMm ?? 0 : config.widthMm} heightMm={config.heightMm} groundClearanceMm={config.groundClearanceMm} hingeSide={config.hingeSide || 'LEFT'} openingSide={config.openingSide} productType={config.productType} modelLabel={selectedModel?.label} /><span>Vista frontal · Medidas en milímetros</span></div>
+          <div className="proposal-one-sketch"><OrderConfiguratorSketch color={colorSwatch(catalogOptions.COLOR?.find(option => option.code === config.color) ?? { code: config.color, label: config.color })} colorLabel={config.color} widthMm={isFence ? config.sections[0]?.widthMm ?? 0 : config.widthMm} heightMm={config.heightMm} groundClearanceMm={config.groundClearanceMm} hingeSide={config.hingeSide || 'LEFT'} openingSide={config.openingSide} productType={config.productType} modelLabel={selectedModel?.label} /><span>Vista frontal · Medidas en milímetros</span></div>
         </div>}
       </div>
     </div>
   );
 };
 
-const ProposalOneStepper = ({ step, reviewStep, setStep }: { step: Step; reviewStep: Step; setStep: (value: Step) => void }) => {
-  const current = step <= 2 ? 1 : step <= 4 ? 2 : step === 5 ? 3 : 4;
-  const items: Array<{ label: string; target: Step }> = [
+const ProposalOneStepper = ({ step, reviewStep, setStep, isReference }: { step: Step; reviewStep: Step; setStep: (value: Step) => void; isReference: boolean }) => {
+  const current = isReference ? step : step <= 2 ? 1 : step <= 4 ? 2 : step === 5 ? 3 : 4;
+  const items: Array<{ label: string; target: Step }> = isReference ? [
+    { label: 'Plantilla', target: 1 },
+    { label: 'Modelo y acabado', target: 2 },
+    { label: 'Fabricación', target: 3 },
+    { label: 'Medidas', target: 4 },
+    { label: 'Accesorios y opciones', target: 5 },
+    { label: 'Revisión', target: reviewStep },
+  ] : [
     { label: 'Datos del pedido', target: 2 },
     { label: 'Configuración', target: 3 },
     { label: 'Accesorios', target: 5 },
     { label: 'Revisión', target: reviewStep },
   ];
-  return <nav className="proposal-one-stepper" aria-label="Progreso del pedido"><ol>{items.map((item, index) => { const number = index + 1; return <li key={item.label} className={current === number ? 'is-active' : current > number ? 'is-complete' : ''}><button type="button" onClick={() => setStep(item.target)} aria-current={current === number ? 'step' : undefined}><span>{current > number ? '✓' : number}</span>{item.label}</button>{index < items.length - 1 && <i aria-hidden="true" />}</li>; })}</ol></nav>;
+  return <nav className={`proposal-one-stepper${isReference ? " proposal-one-stepper-reference" : ""}`} aria-label="Progreso del pedido"><ol>{items.map((item, index) => { const number = index + 1; return <li key={item.label} className={current === number ? 'is-active' : current > number ? 'is-complete' : ''}><button type="button" onClick={() => setStep(item.target)} aria-current={current === number ? 'step' : undefined}><span>{current > number ? '✓' : number}</span>{item.label}</button>{index < items.length - 1 && <i aria-hidden="true" />}</li>; })}</ol></nav>;
 };
 
 const SpecificMeasurements = ({ config, update, selectedFenceSection, setSelectedFenceSection }: { config: Config; update: ConfigUpdater; selectedFenceSection: number; setSelectedFenceSection: (value: number) => void }) => {
@@ -500,8 +528,10 @@ const downloadSummary = async (config: Config, customerName: string, productLabe
   return dataUri;
 };
 
-export default function OrderConfigurator() {
+export default function OrderConfigurator({ configurationId = null }: { configurationId?: string | null }) {
   const { customers, loading: customersLoading } = useCustomers();
+  const [isVideo, setIsVideo] = useState(() => localStorage.getItem('aluon-configurator-presentation') === 'MARVER_VIDEO');
+  useEffect(() => { localStorage.setItem('aluon-configurator-presentation', isVideo ? 'MARVER_VIDEO' : 'STANDARD'); }, [isVideo]);
   const [config, setConfig] = useState<Config>(() => {
     try { return hydrateConfig(JSON.parse(localStorage.getItem('aluon-order-configurator-draft') || '{}')); } catch { return initialConfig; }
   });
@@ -528,7 +558,7 @@ export default function OrderConfigurator() {
   const referenceSpecification = config.referenceSpecification;
 
   useEffect(() => {
-    if (!isReference) return;
+    if (!isReference && !isVideo) return;
     const controller = new AbortController();
     setMarverError('');
     fetch('/reference/marver/catalog.json', { signal: controller.signal }).then(async response => {
@@ -537,7 +567,7 @@ export default function OrderConfigurator() {
       setMarverCatalog(catalog);
     }).catch(error => { if (!controller.signal.aborted) setMarverError(error instanceof Error ? error.message : 'Error al cargar Marver.'); });
     return () => controller.abort();
-  }, [isReference, marverRetry]);
+  }, [isReference, isVideo, marverRetry]);
 
   const updateReference = (spec: MarverSpecification) => {
     setServerErrors([]); setStepError('');
@@ -560,6 +590,10 @@ export default function OrderConfigurator() {
   const model = useMemo(() => models.find(option => option.technicalModel === config.model) ?? models[0] ?? null, [models, config.model]);
   const activeFenceSection = config.sections[selectedFenceSection] ?? config.sections[0];
   const update = <K extends keyof Config>(key: K, value: Config[K]) => { setServerErrors([]); setStepError(''); setConfig(current => ({ ...current, [key]: value, ...(key === 'productType' && value !== 'REFERENCIA_MARVER' && current.productType === 'REFERENCIA_MARVER' ? { referenceSpecification: null, model: 'CLASSIC', color: '', finish: '' } : {}) })); };
+  const leaveVideo = () => {
+    setIsVideo(false);
+    if (config.presentation === 'MARVER_VIDEO') { setConfig(initialConfig); setSavedId(null); setHistory([]); }
+  };
   const selectedCustomer = customers.find(customer => customer.id === config.customerId);
   const filteredCustomers = useMemo(() => {
     const query = customerSearch.trim().toLowerCase();
@@ -639,22 +673,33 @@ export default function OrderConfigurator() {
     setStep((step + 1) as Step);
   };
 
-  const loadDraft = async (id: string) => {
+  const loadDraft = useCallback(async (id: string) => {
     if (!id) return;
     setSaving(true); setMessage('');
     try {
       const result = await getOrderConfiguration(id);
       const restored = hydrateConfig(result.payload as Partial<Config>);
       setConfig(restored);
+      setIsVideo(restored.presentation === 'MARVER_VIDEO');
       setSelectedFenceSection(restored.selectedFenceSection);
       setSavedId(result.id);
       setCurrentStatus(result.status);
-      setStep(1);
+      const restoredReviewStep: Step = restored.productType === 'CORREDERA' ? 7 : 6;
+      const savedStep = restored.wizardStep;
+      setStep(result.status !== 'DRAFT'
+        ? restoredReviewStep
+        : savedStep && Number.isInteger(savedStep) && savedStep >= 1 && savedStep <= restoredReviewStep
+          ? savedStep
+          : 1);
       setHistory(await getOrderConfigurationHistory(result.id));
-      setMessage(`Borrador recuperado · ${result.reference} · versión ${result.version}`);
+      setMessage(`Configuración recuperada · ${result.reference} · versión ${result.version}`);
     } catch (error) { setMessage(error instanceof Error ? error.message : 'No se pudo recuperar el borrador.'); }
     finally { setSaving(false); }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (configurationId) void loadDraft(configurationId);
+  }, [configurationId, loadDraft]);
 
   const save = async (status: 'DRAFT' | 'CONFIRMED' | 'PENDING_REVIEW', configOverride?: Config) => {
     if (isReference && referenceSpecification && status !== 'DRAFT') {
@@ -666,7 +711,7 @@ export default function OrderConfigurator() {
       if (isReference && status !== 'DRAFT') status = 'PENDING_REVIEW';
       const baseConfig = configOverride || config;
       const savedConfig = ['ABATIBLE_UNA', 'ABATIBLE_DOS'].includes(baseConfig.productType) ? { ...baseConfig, useMode: 'PREPARED' as const } : baseConfig;
-      const payload = { customerId: savedConfig.customerId || undefined, customerName, reference: savedConfig.reference, productType: savedConfig.productType, status, payload: savedConfig } as const;
+      const payload = { customerId: savedConfig.customerId || undefined, customerName, reference: savedConfig.reference, productType: savedConfig.productType, status, payload: { ...savedConfig, wizardStep: status === 'DRAFT' ? step : reviewStep } } as const;
       const result = savedId ? await updateOrderConfiguration(savedId, payload) : await saveOrderConfiguration(payload);
       setSavedId(result.id);
       setCurrentStatus(result.status);
@@ -693,21 +738,23 @@ export default function OrderConfigurator() {
     <div className="configurator-shell max-w-7xl mx-auto w-full pb-28">
       <div className="flex flex-wrap items-start justify-between gap-4 mb-5">
         <div><div className="flex items-center gap-2"><div className="w-1 h-6 rounded-full bg-brand" /><h1 className="text-xl font-black uppercase tracking-tight">Configurador de pedidos</h1></div><p className="ml-3.5 mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Fase 1 · configuración inequívoca</p></div>
-        <div className="flex flex-wrap gap-2">
+        <div style={isVideo ? { display: 'none' } : undefined} className="configurator-surface-actions flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto [&>*]:shrink-0 [&>button]:whitespace-nowrap">
           {savedId && <button type="button" className="btn-ghost" onClick={duplicateConfiguration}>Duplicar configuración</button>}
           <button type="button" className="btn-ghost" onClick={() => { setConfig(initialConfig); setSelectedFenceSection(0); setSavedId(null); setHistory([]); setCurrentStatus('DRAFT'); setStep(1); localStorage.removeItem('aluon-order-configurator-draft'); }}>Nuevo borrador</button>
-          <select className="field max-w-xs" aria-label="Recuperar borrador" defaultValue="" onChange={e => { void loadDraft(e.target.value); }} disabled={draftsLoading || saving}>
+          <select className="field !w-auto max-w-xs" aria-label="Recuperar borrador" defaultValue="" onChange={e => { void loadDraft(e.target.value); }} disabled={draftsLoading || saving}>
             <option value="">{draftsLoading ? 'Cargando borradores…' : 'Recuperar borrador'}</option>
             {drafts.map(draft => <option key={draft.id} value={draft.id}>{draft.reference} · v{draft.version}</option>)}
           </select>
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 mb-4" role="group" aria-label="Origen de la configuración">
-        <button type="button" className="btn-ghost" aria-pressed={!isReference} onClick={() => update('productType', 'PUERTA_PEATONAL')}>Catálogo ALUON</button>
-        <button type="button" className="btn-ghost" aria-pressed={isReference} onClick={() => { update('productType', 'REFERENCIA_MARVER'); setStep(1); }}>Plantillas Marver del ZIP</button>
+      <div className="configurator-surface-actions flex flex-wrap gap-2 mb-4" role="group" aria-label="Origen de la configuración">
+        <button type="button" className="btn-ghost" aria-pressed={!isReference && !isVideo} onClick={() => { leaveVideo(); update('productType', 'PUERTA_PEATONAL'); }}>Catálogo ALUON</button>
+        <button type="button" className="btn-ghost" aria-pressed={isReference && !isVideo} onClick={() => { leaveVideo(); update('productType', 'REFERENCIA_MARVER'); setStep(1); }}>Plantillas Marver del ZIP</button>
+        <button type="button" className="btn-ghost" aria-pressed={isVideo} onClick={() => setIsVideo(true)}>Marver · Recorrido del vídeo</button>
       </div>
+      {isVideo ? marverCatalog && !marverError ? <MarverVideoConfigurator catalog={marverCatalog} customers={customers} configurationId={config.presentation === 'MARVER_VIDEO' ? savedId : null} /> : <div role="status" className="rounded-xl border p-4">{marverError || 'Cargando recorrido Marver…'}{marverError && <button type="button" className="underline ml-3" onClick={() => setMarverRetry(value => value + 1)}>Reintentar</button>}</div> : <>
       {isReference && (!marverCatalog || marverError) && <div className="rounded-xl border p-4 mb-4 text-sm" role="status">{marverError || 'Cargando plantillas Marver…'}{marverError && <button type="button" className="underline ml-3" onClick={() => setMarverRetry(value => value + 1)}>Reintentar</button>}</div>}
-      <ProposalOneStepper step={step} reviewStep={reviewStep} setStep={value => { setStepError(''); setStep(value); }} />
+      <ProposalOneStepper step={step} reviewStep={reviewStep} isReference={isReference} setStep={value => { setStepError(''); setStep(value); }} />
       <nav className="configurator-steps legacy-configurator-steps mb-5" aria-label="Pasos del configurador">
         <ol className="grid grid-cols-2 gap-2 md:grid-cols-7" role="tablist">
           {stepLabels.map((label, index) => { const number = (index + 1) as Step; const isActive = step === number; const isComplete = step > number; return <li key={label} className="min-w-0"><button type="button" role="tab" aria-selected={isActive} aria-current={isActive ? 'step' : undefined} onClick={() => { setStepError(''); setStep(number); }} className={`step-tab w-full rounded-xl px-3 py-3 text-left ${isActive ? 'step-tab-active' : isComplete ? 'step-tab-complete' : ''}`}><span className="step-tab-number">{isComplete ? '✓' : `0${number}`}</span><span className="step-tab-label">{label}</span></button></li>; })}
@@ -723,7 +770,7 @@ export default function OrderConfigurator() {
           {step === 4 && !isReference && <div><h2 className="text-lg font-black mb-2">Medidas · vista interior</h2><p className="text-sm text-slate-500 mb-5">Cada tipología muestra sus cotas propias. Las medidas se almacenan normalizadas en milímetros.</p><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><SpecificMeasurements config={config} update={update} selectedFenceSection={selectedFenceSection} setSelectedFenceSection={setSelectedFenceSection} /></div><p className="mt-4 text-xs text-slate-500">No se deducen medidas de fabricación ni se convierten en reglas bloqueantes sin aprobación de ingeniería.</p></div>}
           {step === (isSliding ? 6 : 5) && !isReference && <div><h2 className="text-lg font-black mb-5">Observaciones e instalador</h2><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><label className="field-label">Modalidad de instalación<select className="field mt-1" value={config.installation} onChange={e => update('installation', e.target.value as Config['installation'])}><option value="BETWEEN_PILLARS">Entre pilares</option><option value="BEHIND_WALL">Detrás de muro</option><option value="SUPPORTS">Con soportes</option></select></label><SpecificOptions config={config} update={update} /><label className="field-label">Nombre del instalador<input className="field mt-1" value={config.installerName} onChange={e => update('installerName', e.target.value)} placeholder="Nombre y apellidos" /></label><label className="field-label">Observaciones<textarea className="field mt-1 min-h-28" value={config.notes} onChange={e => update('notes', e.target.value)} placeholder="Notas para revisión técnica o instalación" /></label>{config.productType !== 'PUERTA_PEATONAL' && <label className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 text-sm font-bold"><input type="checkbox" checked={config.electricStrike} onChange={e => update('electricStrike', e.target.checked)} /> Cerradero eléctrico compatible</label>}<label className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 text-sm font-bold"><input type="checkbox" checked={config.automaticDoorPhone} onChange={e => update('automaticDoorPhone', e.target.checked)} /> Portero automático: {config.automaticDoorPhone ? 'Sí' : 'No'}</label></div></div>}
           {isReference && marverCatalog && referenceSpecification && [3, 4, 5].includes(step) && <MarverReferenceFields catalog={marverCatalog} spec={referenceSpecification} stage={step} onChange={updateReference} />}
-          {step === reviewStep && <div><h2 className="text-lg font-black mb-5">Revisión y confirmación</h2><div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm"><div><span className="text-slate-400">Cliente</span><div className="font-bold">{customerName || '—'}</div></div><div><span className="text-slate-400">Referencia</span><div className="font-bold">{config.reference || '—'}</div></div><div><span className="text-slate-400">Producto</span><div className="font-bold">{(isReference ? referenceSpecification?.formName : products.find(p => p.id === config.productType)?.label)}</div></div><div><span className="text-slate-400">Medidas</span><div className="font-bold">{isReference ? 'Ver cotas en el resumen Marver' : isFence ? `${config.sections.length} tramos · V${selectedFenceSection + 1}` : `${config.widthMm} × ${config.heightMm} mm · holgura ${config.groundClearanceMm} mm`}</div></div><div><span className="text-slate-400">Uso</span><div className="font-bold">{isReference ? 'Según plantilla Marver' : config.useMode}</div></div><div><span className="text-slate-400">Estado actual</span><div className="font-bold">{statusLabels[currentStatus] || currentStatus}</div></div></div>{validation.length > 0 && <div className="mt-5 rounded-xl bg-rose-50 border border-rose-200 p-4 text-sm text-rose-800"><div className="font-black mb-1">Faltan datos</div>{validation.map(item => <div key={item}>· {item}</div>)}</div>}{technicalWarnings.length > 0 && <div className="mt-5 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900"><div className="font-black mb-1">Revisión técnica necesaria</div>{technicalWarnings.map(item => <div key={item}>· {item}</div>)}</div>}<div className="mt-5 flex flex-wrap gap-3"><button type="button" className="btn-ghost" onClick={() => save('DRAFT')} disabled={saving}>Guardar borrador</button><button type="button" className="btn-ghost" onClick={async () => { const name = documentFileName(config.reference, history.length + 1); const base64 = await downloadSummary(config, customerName, (isReference ? referenceSpecification?.formName : products.find(p => p.id === config.productType)?.label) || config.productType, history.length + 1, selectedFenceSection); const next = { ...config, generatedDocuments: [...config.generatedDocuments, { name, type: 'ORDER_CONFIGURATION_PDF', generatedAt: new Date().toISOString(), mimeType: 'application/pdf', contentBase64: base64 }] }; setConfig(next); if (savedId) await save('DRAFT', next); }}>Generar ficha PDF</button><button type="button" className="btn-ghost" disabled={!selectedCustomer || isReference} title={isReference ? 'La referencia Marver requiere valoración antes de generar un presupuesto ALUON.' : undefined} onClick={() => selectedCustomer && !isReference && openBudgetWizardForCustomer(selectedCustomer, config)}>Continuar en presupuesto</button><button type="button" className="btn-primary" onClick={() => save(isPeatonal && technicalWarnings.length === 0 ? 'CONFIRMED' : 'PENDING_REVIEW')} disabled={saving || validation.length > 0}>{isPeatonal && technicalWarnings.length === 0 ? 'Confirmar pedido' : 'Enviar a revisión técnica'}</button></div>{message && <div className="mt-4 rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm font-bold text-blue-800">{message}</div>}{history.length > 0 && <div className="mt-6 border-t border-slate-200 pt-4"><div className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2">Historial de cambios</div><div className="space-y-2">{history.map(item => <div key={item.id} className="flex flex-wrap justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs"><span className="font-bold">v{item.version} · {item.action}</span><span className="text-slate-500">{item.status} · {new Date(item.createdAt).toLocaleString()}</span></div>)}</div></div>}</div>}
+          {step === reviewStep && <div><h2 className="text-lg font-black mb-5">Revisión y confirmación</h2><div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm"><div><span className="text-slate-400">Cliente</span><div className="font-bold">{customerName || '—'}</div></div><div><span className="text-slate-400">Referencia</span><div className="font-bold">{config.reference || '—'}</div></div><div><span className="text-slate-400">Producto</span><div className="font-bold">{(isReference ? referenceSpecification?.formName : products.find(p => p.id === config.productType)?.label)}</div></div><div><span className="text-slate-400">Medidas</span><div className="font-bold">{isReference ? 'Ver cotas en el resumen Marver' : isFence ? `${config.sections.length} tramos · V${selectedFenceSection + 1}` : `${config.widthMm} × ${config.heightMm} mm · holgura ${config.groundClearanceMm} mm`}</div></div><div><span className="text-slate-400">Uso</span><div className="font-bold">{isReference ? 'Según plantilla Marver' : config.useMode}</div></div><div><span className="text-slate-400">Estado actual</span><div className="font-bold">{statusLabels[currentStatus] || currentStatus}</div></div></div>{validation.length > 0 && <div className="mt-5 rounded-xl bg-rose-50 border border-rose-200 p-4 text-sm text-rose-800"><div className="font-black mb-1">Faltan datos</div>{validation.map(item => <div key={item}>· {item}</div>)}</div>}{technicalWarnings.length > 0 && <div className="mt-5 rounded-xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-900"><div className="font-black mb-1">Revisión técnica necesaria</div>{technicalWarnings.map(item => <div key={item}>· {item}</div>)}</div>}<div className="mt-5 flex flex-nowrap items-center gap-3 overflow-x-auto py-1 [&>button]:shrink-0"><button type="button" className="btn-ghost" disabled={!selectedCustomer || isReference} title={isReference ? 'La referencia Marver requiere valoración antes de generar un presupuesto ALUON.' : undefined} onClick={() => selectedCustomer && !isReference && openBudgetWizardForCustomer(selectedCustomer, config)}>Continuar en presupuesto</button>{savedId && <button type="button" className="btn-ghost" onClick={() => navigateToModule('gestion-documentos')}>Abrir en Gestión Documentos</button>}</div>{message && <div className="mt-4 rounded-xl bg-blue-50 border border-blue-200 p-3 text-sm font-bold text-blue-800">{message}</div>}{history.length > 0 && <div className="mt-6 border-t border-slate-200 pt-4"><div className="text-xs font-black uppercase tracking-wider text-slate-500 mb-2">Historial de cambios</div><div className="space-y-2">{history.map(item => <div key={item.id} className="flex flex-wrap justify-between gap-2 rounded-xl bg-slate-50 px-3 py-2 text-xs"><span className="font-bold">v{item.version} · {item.action}</span><span className="text-slate-500">{item.status} · {new Date(item.createdAt).toLocaleString()}</span></div>)}</div></div>}</div>}
           {step === 6 && config.productType === 'PUERTA_PEATONAL' && <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm"><div className="font-black uppercase tracking-wide text-slate-500">Detalle peatonal revisado</div><div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2"><div>Bisagra: <strong>{config.hingeSide === 'LEFT' ? 'Izquierda' : config.hingeSide === 'RIGHT' ? 'Derecha' : 'Pendiente'}</strong></div><div>Apertura: <strong>Interior</strong></div><div>Tirador exterior: <strong>30 × 550 mm</strong></div><div>Manilla interior: <strong>Inox</strong></div><div>Cerradura: <strong>Pestillo y paletón · una vuelta</strong></div><div>Portero: <strong>{config.automaticDoorPhone ? 'Sí' : 'No'}</strong></div><div>Instalador: <strong>{config.installerName || '—'}</strong></div><div>Holgura: <strong>{config.groundClearanceMm} mm</strong></div></div></div>}
           {step === 6 && config.productType === 'ABATIBLE_UNA' && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm"><div className="font-black uppercase tracking-wide text-amber-900">Detalle abatible de una hoja revisado</div><div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2"><div>Estado: <strong>Preparada para automatizar</strong></div><div>Incluir automatización: <strong className={config.motorIncluded ? 'text-amber-700' : ''}>{config.motorIncluded ? 'Sí' : 'No'}</strong></div><div>Bisagra: <strong>{config.hingeSide === 'LEFT' ? 'Izquierda' : config.hingeSide === 'RIGHT' ? 'Derecha' : 'Pendiente'}</strong></div><div>Apertura: <strong>Hacia el interior · vista interior</strong></div><div>Medidas: <strong>{config.widthMm} × {config.heightMm} mm</strong></div><div>Holgura: <strong>{config.groundClearanceMm} mm</strong></div><div>Herrajes manuales: <strong>No definidos por ALUON</strong></div><div>Instalador: <strong>{config.installerName || '—'}</strong></div></div></div>}
           {step === 6 && config.productType === 'ABATIBLE_DOS' && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm"><div className="font-black uppercase tracking-wide text-amber-900">Detalle abatible de dos hojas revisado</div><div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2"><div>Estado: <strong>Preparada para automatizar</strong></div><div>Incluir automatización: <strong className={config.motorIncluded ? 'text-amber-700' : ''}>{config.motorIncluded ? 'Sí' : 'No'}</strong></div><div>Primera hoja de apertura: <strong>{config.activeLeaf === 'LEFT' ? 'izquierda' : config.activeLeaf === 'RIGHT' ? 'derecha' : 'Pendiente'}</strong></div><div>Vista: <strong>Interior · dos hojas</strong></div><div>Medidas totales: <strong>{config.widthMm} × {config.heightMm} mm</strong></div><div>Holgura: <strong>{config.groundClearanceMm} mm</strong></div><div>Reparto activa/pasiva: <strong>Pendiente de confirmación ALUON</strong></div><div>Instalador: <strong>{config.installerName || '—'}</strong></div></div></div>}
@@ -732,10 +779,21 @@ export default function OrderConfigurator() {
           {step === 3 && isSliding && <div><h2 className="text-lg font-black mb-1">Automatización y sentido de apertura</h2><p className="text-sm text-slate-500 mb-5">La corredera queda preparada para automatizar. Selecciona una única opción de automatización y un único sentido de apertura.</p><SlidingAutomationStep config={config} update={update} /></div>}
           {step === 5 && isSliding && <div><h2 className="text-lg font-black mb-1">Montaje y sistema de guía</h2><p className="text-sm text-slate-500 mb-5">Selecciona el montaje y el esquema de rodillos. No se bloquean combinaciones hasta confirmación de ALUON.</p><SlidingMountingGuideStep config={config} update={update} /></div>}
           {stepError && <div className="mt-4 rounded-xl bg-rose-50 border border-rose-200 p-3 text-sm font-bold text-rose-800" role="alert" aria-live="assertive">{stepError}</div>}
-          <div className="configurator-actions mt-8 flex justify-between border-t border-slate-100 pt-5" role="group" aria-label="Acciones del configurador"><button type="button" className="btn-ghost btn-large" disabled={step === 1} onClick={() => { setStepError(''); setStep((step - 1) as Step); }}>← Atrás</button><div className="flex flex-wrap justify-end gap-2"><button type="button" className="btn-ghost btn-large" onClick={() => save('DRAFT')} disabled={saving}>{saving ? 'Guardando…' : 'Guardar borrador'}</button><button type="button" className="btn-primary btn-large" disabled={step === reviewStep || saving || validatingRules} onClick={goNext}>{validatingRules ? 'Validando…' : 'Siguiente →'}</button></div></div>
+          <div className="configurator-actions" role="group" aria-label="Acciones del configurador">
+            <button type="button" className="btn-ghost configurator-back" disabled={step === 1} onClick={() => { setStepError(''); setStep((step - 1) as Step); }}>← Atrás</button>
+            <div className="configurator-action-buttons">
+              <button type="button" className="btn-ghost" onClick={() => save('DRAFT')} disabled={saving}>{saving ? 'Guardando…' : 'Guardar borrador'}</button>
+              {step === reviewStep && <>
+                <button type="button" className="btn-ghost" onClick={async () => { const name = documentFileName(config.reference, history.length + 1); const base64 = await downloadSummary(config, customerName, (isReference ? referenceSpecification?.formName : products.find(p => p.id === config.productType)?.label) || config.productType, history.length + 1, selectedFenceSection); const next = { ...config, generatedDocuments: [...config.generatedDocuments, { name, type: 'ORDER_CONFIGURATION_PDF', generatedAt: new Date().toISOString(), mimeType: 'application/pdf', contentBase64: base64 }] }; setConfig(next); if (savedId) await save('DRAFT', next); }} disabled={saving}>Generar PDF</button>
+                <button type="button" className="btn-primary" onClick={() => save(isPeatonal && technicalWarnings.length === 0 ? 'CONFIRMED' : 'PENDING_REVIEW')} disabled={saving || validation.length > 0}>{isPeatonal && technicalWarnings.length === 0 ? 'Confirmar pedido' : 'Enviar a revisión técnica'}</button>
+              </>}
+              {step < reviewStep && <button type="button" className="btn-primary" disabled={saving || validatingRules} onClick={goNext}>{validatingRules ? 'Validando…' : 'Siguiente →'}</button>}
+            </div>
+          </div>
         </section>
-        {isReference && referenceSpecification ? <MarverReferenceSummary spec={referenceSpecification} /> : <aside className="configurator-aside lg:sticky lg:top-4 lg:self-start"><div className="configurator-summary rounded-2xl bg-white border border-slate-200 p-4 mb-4" aria-label="Resumen permanente del pedido"><div className="flex items-center justify-between gap-3"><div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Resumen del pedido</div><span className="summary-live">En directo</span></div><div className="mt-3 space-y-2 text-xs"><div><span className="text-slate-400">Producto</span><div className="font-bold">{(isReference ? referenceSpecification?.formName : products.find(p => p.id === config.productType)?.label) || '—'}</div></div><div><span className="text-slate-400">Cliente / referencia</span><div className="font-bold">{customerName || '—'} · {config.reference || 'Sin referencia'}</div></div><div><span className="text-slate-400">Modelo · color · acabado</span><div className="font-bold">{model?.label || config.model || '—'} · {config.color || '—'} · {config.finish || '—'}</div></div>{isFence ? <><div><span className="text-slate-400">Tramos</span><div className="font-bold">{config.sections.length}/8 · seleccionado V{selectedFenceSection + 1}</div></div><div><span className="text-slate-400">Cotas V{selectedFenceSection + 1}</span><div className="font-bold">{activeFenceSection?.widthMm || '—'} × {activeFenceSection?.heightMm || '—'} mm · {config.verticalDimensionLabel === 'ANCHO' ? 'Ancho' : 'Alto'} vertical</div></div></> : <div><span className="text-slate-400">Medidas</span><div className="font-bold">{config.widthMm || '—'} × {config.heightMm || '—'} mm · holgura {config.groundClearanceMm || '—'} mm</div></div>}{isSliding ? <><div><span className="text-slate-400">Sentido de apertura</span><div className="font-bold">{config.openingSide === 'LEFT' ? 'Izquierda' : 'Derecha'}</div></div><div><span className="text-slate-400">Carril · montaje</span><div className="font-bold">Ø{config.railType === 'CARRIL_16' ? '16' : '20'} mm · Montaje {config.mountingType}</div></div><div><span className="text-slate-400">Guía / esquema</span><div className="font-bold">{config.guideSystem === 'INTERIOR_ROLLERS_U' ? 'Rodillos interiores y carril en U' : 'Puente y rodillos exterior e interior'} · {config.selectedSketch}</div></div></> : !isFence && (config.productType === 'ABATIBLE_DOS' ? <div><span className="text-slate-400">Primera hoja de apertura</span><div className="font-black text-blue-700">{config.activeLeaf === 'LEFT' ? 'izquierda' : config.activeLeaf === 'RIGHT' ? 'derecha' : 'Pendiente'}</div></div> : <div><span className="text-slate-400">Bisagra · apertura</span><div className="font-bold">{config.hingeSide === 'LEFT' ? 'Izquierda' : config.hingeSide === 'RIGHT' ? 'Derecha' : 'Pendiente'} · interior</div></div>)}{['ABATIBLE_UNA', 'ABATIBLE_DOS', 'CORREDERA'].includes(config.productType) && <div><span className="text-slate-400">Automatización</span><div className={config.motorIncluded ? 'font-black text-amber-700' : 'font-bold'}>Preparada para automatizar · Incluir: {config.motorIncluded ? 'Sí' : 'No'}</div></div>}<div><span className="text-slate-400">Estado</span><div className="font-bold text-blue-700">{statusLabels[currentStatus] || currentStatus}</div></div></div></div><OrderConfiguratorSketch widthMm={isFence ? activeFenceSection?.widthMm ?? 0 : config.widthMm} heightMm={isFence ? activeFenceSection?.heightMm ?? 0 : config.heightMm} groundClearanceMm={config.groundClearanceMm} hingeSide={config.hingeSide || 'LEFT'} openingSide={config.productType === 'ABATIBLE_UNA' ? (config.hingeSide === 'RIGHT' ? 'RIGHT' : 'LEFT') : config.openingSide} firstOpeningLeaf={config.productType === 'ABATIBLE_DOS' ? config.activeLeaf : undefined} mountingType={isSliding ? config.mountingType : undefined} guideSystem={isSliding ? config.guideSystem : undefined} sectionIndex={isFence ? selectedFenceSection : undefined} verticalDimensionLabel={isFence ? config.verticalDimensionLabel : undefined} productType={config.productType} modelLabel={model?.label} freePassageWidthMm={config.productType === 'PUERTA_PEATONAL' ? config.freePassageWidthMm : undefined} freePassageHeightMm={config.productType === 'PUERTA_PEATONAL' ? config.freePassageHeightMm : undefined} leftLeafWidthMm={config.leftLeafWidthMm} rightLeafWidthMm={config.rightLeafWidthMm} /><div className="mt-4 rounded-2xl bg-white border border-slate-200 p-4"><div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Control</div><div className="mt-2 text-sm font-bold">{validation.length === 0 ? 'Configuración completa para revisión' : `${validation.length} validación(es) pendiente(s)`}</div><div className="mt-3 h-2 rounded-full bg-slate-100"><div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${Math.round((step / stepLabels.length) * 100)}%` }} /></div></div></aside>}
+        {isReference && referenceSpecification ? <MarverReferenceSummary spec={referenceSpecification} /> : <aside className="configurator-aside lg:sticky lg:top-4 lg:self-start"><div className="configurator-summary rounded-2xl bg-white border border-slate-200 p-4 mb-4" aria-label="Resumen permanente del pedido"><div className="flex items-center justify-between gap-3"><div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Resumen del pedido</div><span className="summary-live">En directo</span></div><div className="mt-3 space-y-2 text-xs"><div><span className="text-slate-400">Producto</span><div className="font-bold">{(isReference ? referenceSpecification?.formName : products.find(p => p.id === config.productType)?.label) || '—'}</div></div><div><span className="text-slate-400">Cliente / referencia</span><div className="font-bold">{customerName || '—'} · {config.reference || 'Sin referencia'}</div></div><div><span className="text-slate-400">Modelo · color · acabado</span><div className="font-bold">{model?.label || config.model || '—'} · {config.color || '—'} · {config.finish || '—'}</div></div>{isFence ? <><div><span className="text-slate-400">Tramos</span><div className="font-bold">{config.sections.length}/8 · seleccionado V{selectedFenceSection + 1}</div></div><div><span className="text-slate-400">Cotas V{selectedFenceSection + 1}</span><div className="font-bold">{activeFenceSection?.widthMm || '—'} × {activeFenceSection?.heightMm || '—'} mm · {config.verticalDimensionLabel === 'ANCHO' ? 'Ancho' : 'Alto'} vertical</div></div></> : <div><span className="text-slate-400">Medidas</span><div className="font-bold">{config.widthMm || '—'} × {config.heightMm || '—'} mm · holgura {config.groundClearanceMm || '—'} mm</div></div>}{isSliding ? <><div><span className="text-slate-400">Sentido de apertura</span><div className="font-bold">{config.openingSide === 'LEFT' ? 'Izquierda' : 'Derecha'}</div></div><div><span className="text-slate-400">Carril · montaje</span><div className="font-bold">Ø{config.railType === 'CARRIL_16' ? '16' : '20'} mm · Montaje {config.mountingType}</div></div><div><span className="text-slate-400">Guía / esquema</span><div className="font-bold">{config.guideSystem === 'INTERIOR_ROLLERS_U' ? 'Rodillos interiores y carril en U' : 'Puente y rodillos exterior e interior'} · {config.selectedSketch}</div></div></> : !isFence && (config.productType === 'ABATIBLE_DOS' ? <div><span className="text-slate-400">Primera hoja de apertura</span><div className="font-black text-blue-700">{config.activeLeaf === 'LEFT' ? 'izquierda' : config.activeLeaf === 'RIGHT' ? 'derecha' : 'Pendiente'}</div></div> : <div><span className="text-slate-400">Bisagra · apertura</span><div className="font-bold">{config.hingeSide === 'LEFT' ? 'Izquierda' : config.hingeSide === 'RIGHT' ? 'Derecha' : 'Pendiente'} · interior</div></div>)}{['ABATIBLE_UNA', 'ABATIBLE_DOS', 'CORREDERA'].includes(config.productType) && <div><span className="text-slate-400">Automatización</span><div className={config.motorIncluded ? 'font-black text-amber-700' : 'font-bold'}>Preparada para automatizar · Incluir: {config.motorIncluded ? 'Sí' : 'No'}</div></div>}<div><span className="text-slate-400">Estado</span><div className="font-bold text-blue-700">{statusLabels[currentStatus] || currentStatus}</div></div></div></div><OrderConfiguratorSketch color={colorSwatch(catalogOptions.COLOR?.find(option => option.code === config.color) ?? { code: config.color, label: config.color })} colorLabel={config.color} widthMm={isFence ? activeFenceSection?.widthMm ?? 0 : config.widthMm} heightMm={isFence ? activeFenceSection?.heightMm ?? 0 : config.heightMm} groundClearanceMm={config.groundClearanceMm} hingeSide={config.hingeSide || 'LEFT'} openingSide={config.productType === 'ABATIBLE_UNA' ? (config.hingeSide === 'RIGHT' ? 'RIGHT' : 'LEFT') : config.openingSide} firstOpeningLeaf={config.productType === 'ABATIBLE_DOS' ? config.activeLeaf : undefined} mountingType={isSliding ? config.mountingType : undefined} guideSystem={isSliding ? config.guideSystem : undefined} sectionIndex={isFence ? selectedFenceSection : undefined} verticalDimensionLabel={isFence ? config.verticalDimensionLabel : undefined} productType={config.productType} modelLabel={model?.label} freePassageWidthMm={config.productType === 'PUERTA_PEATONAL' ? config.freePassageWidthMm : undefined} freePassageHeightMm={config.productType === 'PUERTA_PEATONAL' ? config.freePassageHeightMm : undefined} leftLeafWidthMm={config.leftLeafWidthMm} rightLeafWidthMm={config.rightLeafWidthMm} /><div className="mt-4 rounded-2xl bg-white border border-slate-200 p-4"><div className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Control</div><div className="mt-2 text-sm font-bold">{validation.length === 0 ? 'Configuración completa para revisión' : `${validation.length} validación(es) pendiente(s)`}</div><div className="mt-3 h-2 rounded-full bg-slate-100"><div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${Math.round((step / stepLabels.length) * 100)}%` }} /></div></div></aside>}
       </div>
+      </>}
     </div>
   );
 }

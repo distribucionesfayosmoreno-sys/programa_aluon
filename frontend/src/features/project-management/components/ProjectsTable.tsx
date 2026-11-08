@@ -66,6 +66,7 @@ const TH = ({ label, right, direction, onSort }: {
 // ─── Badges ───────────────────────────────────────────────────────────────────
 const TypeBadge = ({ type }: { type: string }) => {
   const map: Record<string, { bg: string; color: string }> = {
+    'CONFIGURACION': { bg: '#e0e7ff', color: '#3730a3' },
     'PRESUPUESTO': { bg: '#dbeafe', color: '#1e40af' }, // blue
     'PEDIDO': { bg: '#fef3c7', color: '#92400e' }, // yellow
     'ALBARAN': { bg: '#f0fdf4', color: '#15803d' }, // green
@@ -262,7 +263,7 @@ export const ProjectsTable = ({
               ) : (
                 pageRows.map((row, index) => {
                   const busy = busyProjectId === row.projectId;
-                  const canView = row.quoteId !== null;
+                  const canView = row.quoteId !== null || Boolean(row.configurationId);
                   const isChecked = selected.has(row.rowId);
 
                   return (
@@ -276,7 +277,7 @@ export const ProjectsTable = ({
                         cursor: 'default',
                       }}
                       onClick={() => {
-                        if (row.quoteId) onOpenDetails(row);
+                        if (canView) onOpenDetails(row);
                       }}
                       onMouseEnter={e => { if (!isChecked) e.currentTarget.style.background = documentManagementTheme.panelSoftBg; }}
                       onMouseLeave={e => { e.currentTarget.style.background = isChecked ? documentManagementTheme.accentBg : 'transparent'; }}

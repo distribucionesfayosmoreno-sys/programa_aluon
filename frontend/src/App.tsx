@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
-import { onNavigateToDocument, onNavigateToModule } from './services/moduleNavigation';
+import { onNavigateToConfiguration, onNavigateToDocument, onNavigateToModule } from './services/moduleNavigation';
 import { onBudgetWizardLaunch, startBudgetWizard } from './features/budget-wizard/services/budgetWizardLaunch';
 import { loadCurrentStaff, STAFF_LOGIN_REQUIRED_EVENT, StaffUser } from './services/staffAuthApi';
 
@@ -23,6 +23,7 @@ const App = () => {
   const [openNewRequest, setOpenNewRequest] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [budgetWizardSessionKey, setBudgetWizardSessionKey] = useState(0);
+  const [configurationId, setConfigurationId] = useState<string | null>(null);
   const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
   const [staffUser, setStaffUser] = useState<StaffUser | null>(null);
   const [loginOpen, setLoginOpen] = useState(false);
@@ -38,6 +39,10 @@ const App = () => {
   }, []);
 
   useEffect(() => onNavigateToModule(setActiveModule), []);
+  useEffect(() => onNavigateToConfiguration(id => {
+    setConfigurationId(id);
+    setActiveModule('configurador');
+  }), []);
   useEffect(() => onNavigateToDocument((documentId) => {
     setActiveModule('gestion-documentos');
     setPendingDocumentId(documentId);
@@ -47,6 +52,7 @@ const App = () => {
   }), []);
 
   const handleSelectModule = (module: ModuleKey) => {
+    if (module === 'configurador') setConfigurationId(null);
     if (module === 'presupuestos') {
       startBudgetWizard();
       setActiveModule('presupuestos');
@@ -189,7 +195,7 @@ const App = () => {
             )}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
             {activeModule === 'presupuestos' && <BudgetWizard key={budgetWizardSessionKey} />}
-            {activeModule === 'configurador' && <OrderConfigurator />}
+            {activeModule === 'configurador' && <OrderConfigurator key={configurationId} configurationId={configurationId} />}
             {activeModule === 'inscripciones' && <RegistrationRequests />}
             {activeModule === 'ordenes' && (
               <WorkOrders

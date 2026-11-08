@@ -13,7 +13,7 @@ export const MarverTemplateSelector = ({ catalog, spec, onChange }: { catalog: R
   </div>;
 };
 
-const ReferenceInput = ({ field, form, spec, onChange }: { field: ReferenceField; form: ReferenceForm; spec: MarverSpecification; onChange: (spec: MarverSpecification) => void }) => {
+export const ReferenceInput = ({ field, form, spec, onChange }: { field: ReferenceField; form: ReferenceForm; spec: MarverSpecification; onChange: (spec: MarverSpecification) => void }) => {
   const id = useId();
   const [fileError, setFileError] = useState('');
   const value = spec.values[field.id];
@@ -71,7 +71,7 @@ export const MarverReferenceFields = ({ catalog, spec, stage, onChange }: { cata
       </div>)}</div>
     </fieldset>}
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">{fields.filter(field => !field.appearance.startsWith('Adicional')).map(field => <ReferenceInput key={field.id} field={field} form={form} spec={spec} onChange={onChange} />)}</div>
-    {fields.some(field => field.appearance.startsWith('Adicional')) && <details className="rounded-xl border p-4"><summary className="font-bold cursor-pointer">Opciones adicionales · confirmar aplicabilidad</summary><div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">{fields.filter(field => field.appearance.startsWith('Adicional')).map(field => <ReferenceInput key={field.id} field={field} form={form} spec={spec} onChange={onChange} />)}</div></details>}
+    {fields.some(field => field.appearance.startsWith('Adicional')) && <section className="rounded-xl border p-4" aria-label="Opciones adicionales de la plantilla"><h3 className="font-bold">Opciones adicionales de la plantilla</h3><p className="mt-1 text-sm text-slate-600">Confirma su aplicabilidad en la revisión técnica.</p><div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-4">{fields.filter(field => field.appearance.startsWith('Adicional')).map(field => <ReferenceInput key={field.id} field={field} form={form} spec={spec} onChange={onChange} />)}</div></section>}
     {!fields.length && stage !== 2 && <p className="text-sm text-slate-500">Esta plantilla no tiene más opciones en este paso. Puedes continuar.</p>}
     {stage === 5 && <details className="rounded-xl border p-4"><summary className="font-bold cursor-pointer">Catálogos y manuales de instalación (10 PDF)</summary><ul className="space-y-2 mt-3">{catalog.documents.map(doc => <li key={doc.id}><a className="text-sm text-blue-700 underline" href={doc.url} target="_blank" rel="noreferrer">{doc.name}</a><span className="text-xs text-slate-500 ml-2">{(doc.sizeBytes / 1048576).toFixed(1)} MB</span></li>)}</ul></details>}
   </div>;

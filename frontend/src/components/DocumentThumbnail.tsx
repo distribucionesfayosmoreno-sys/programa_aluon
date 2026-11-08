@@ -1,6 +1,7 @@
-import type { ProjectDocumentKind } from '../features/project-management/ProjectManagement.types';
+import type { ProjectDocumentRowKind } from '../features/project-management/ProjectManagement.types';
 
-const thumbnailByType: Record<ProjectDocumentKind, string> = {
+const thumbnailByType: Record<ProjectDocumentRowKind, string> = {
+  CONFIGURACION: '/images/Modelo Bisel - Puerta.png',
   PRESUPUESTO: '/images/Modelo Bisel - Puerta.png',
   PEDIDO: '/images/Modelo Bisel - Puerta Abatible Una Hoja.png',
   ALBARAN: '/images/Modelo Veneciana - Puerta.png',
@@ -8,7 +9,8 @@ const thumbnailByType: Record<ProjectDocumentKind, string> = {
   ABONO: '/images/Modelo Bisel - Valla.png',
 };
 
-const labelByType: Record<ProjectDocumentKind, string> = {
+const labelByType: Record<ProjectDocumentRowKind, string> = {
+  CONFIGURACION: 'Configuración',
   PRESUPUESTO: 'Presupuesto',
   PEDIDO: 'Pedido',
   ALBARAN: 'Albarán',
@@ -17,7 +19,7 @@ const labelByType: Record<ProjectDocumentKind, string> = {
 };
 
 type Props = {
-  type: ProjectDocumentKind;
+  type: ProjectDocumentRowKind;
   size?: 'sm' | 'md' | 'lg' | 'hero';
 };
 

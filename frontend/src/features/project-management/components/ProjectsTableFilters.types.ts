@@ -1,8 +1,8 @@
-import type { ProjectDocumentKind } from '../ProjectManagement.types';
+import type { ProjectDocumentRowKind } from '../ProjectManagement.types';
 
 export type ProjectsTableFilters = {
   query: string;
-  type: ProjectDocumentKind | 'ALL';
+  type: ProjectDocumentRowKind | 'ALL';
   status: string | 'ALL';
   dateFrom: string;
   dateTo: string;

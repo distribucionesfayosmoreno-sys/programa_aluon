@@ -45,7 +45,7 @@ const buildQuery = (params: DocumentManagementRowsParams): string => {
   return qs ? `?${qs}` : '';
 };
 
-const mapRow = (r: DocumentManagementRowApi): ProjectDocumentRow => ({
+const mapRow = (r: DocumentManagementRowApi): DocumentManagementRowApi => ({
   rowId: r.rowId,
   projectId: r.projectId,
   quoteId: r.quoteId,
@@ -56,7 +56,7 @@ const mapRow = (r: DocumentManagementRowApi): ProjectDocumentRow => ({
   createdAt: r.createdAt,
 });
 
-export const fetchDocumentManagementRows = async (params: DocumentManagementRowsParams = {}): Promise<ProjectDocumentRow[]> => {
+export const fetchDocumentManagementRows = async (params: DocumentManagementRowsParams = {}): Promise<DocumentManagementRowApi[]> => {
   const response = await fetch(`/api/document-management/rows${buildQuery(params)}`);
   const rows = await parseJsonOrThrow<DocumentManagementRowApi[]>(response);
   return rows.map(mapRow);

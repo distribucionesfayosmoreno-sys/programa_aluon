@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { ProjectDocumentKind, ProjectDocumentRow } from '../ProjectManagement.types';
+import type { ProjectDocumentRowKind, ProjectDocumentRow } from '../ProjectManagement.types';
 import { defaultProjectsTableFilters } from './ProjectsTableFilters.types';
 import type { ProjectsTableFilters } from './ProjectsTableFilters.types';
 
@@ -29,19 +29,19 @@ type FilteringResult = {
   setFilters: (next: ProjectsTableFilters) => void;
   resetFilters: () => void;
   filteredRows: ProjectDocumentRow[];
-  typeOptions: ProjectDocumentKind[];
+  typeOptions: ProjectDocumentRowKind[];
   statusOptions: string[];
   matchCount: number;
 };
 
-const compareKinds = (a: ProjectDocumentKind, b: ProjectDocumentKind): number => a.localeCompare(b);
+const compareKinds = (a: ProjectDocumentRowKind, b: ProjectDocumentRowKind): number => a.localeCompare(b);
 const compareText = (a: string, b: string): number => a.localeCompare(b);
 
 export const useProjectsTableFiltering = (rows: ProjectDocumentRow[]): FilteringResult => {
   const [filters, setFilters] = useState<ProjectsTableFilters>(defaultProjectsTableFilters);
 
   const typeOptions = useMemo(() => {
-    const set = new Set<ProjectDocumentKind>();
+    const set = new Set<ProjectDocumentRowKind>();
     for (const r of rows) set.add(r.type);
     return [...set].sort(compareKinds);
   }, [rows]);

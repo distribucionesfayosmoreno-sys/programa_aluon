@@ -53,7 +53,7 @@ export SPRING_DATASOURCE_PASSWORD="${SPRING_DATASOURCE_PASSWORD:-${DB_PASSWORD:-
 export JAVA_HOME="/usr/local/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 
 # Configurar orígenes CORS permitidos para desarrollo local
-export APP_CORS_ALLOWED_ORIGINS="http://localhost:5173,https://app-aluon-unqc.vercel.app,https://aluondev.iconseriespeliculas.xyz"
+export APP_CORS_ALLOWED_ORIGINS="${APP_CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174,http://192.168.99.61:5174,https://desarrollowebaluon.iconseriespeliculas.xyz,https://app-aluon-unqc.vercel.app,https://aluondev.iconseriespeliculas.xyz,https://desarrolloprogramagestionaluon.iconseriespeliculas.xyz}"
 
 echo "🐘 Levantando PostgreSQL local (${ACTIVE_PROFILE})..."
 if [ "$ACTIVE_PROFILE" = "dev2" ]; then

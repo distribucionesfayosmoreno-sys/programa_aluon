@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ProjectDocumentRow, WorkOrderWorkflowStep } from './ProjectManagement.types';
+import { listOrderConfigurations } from '../order-configurator/orderConfiguratorApi';
 import { fetchOrderStatuses } from './services/ordersApi';
 import { createDocumentManagementDocument, fetchDocumentManagementRows } from './services/documentManagementApi';
 
@@ -8,6 +9,8 @@ const sortRowsByCreatedAt = (rows: ProjectDocumentRow[]): ProjectDocumentRow[] =
 
 export const useProjectManagement = () => {
   const [documentRows, setDocumentRows] = useState<ProjectDocumentRow[]>([]);
+  const [configurationRows, setConfigurationRows] = useState<ProjectDocumentRow[]>([]);
+  const [configurationError, setConfigurationError] = useState('');
   const [orderDocs, setOrderDocs] = useState<ProjectDocumentRow[]>([]);
   const [busyProjectId, setBusyProjectId] = useState<string | null>(null);
   const [error, setError] = useState<string>('');
@@ -61,9 +64,35 @@ export const useProjectManagement = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const statuses: Record<string, string> = {
+      DRAFT: 'Borrador', PENDING_REVIEW: 'Pendiente de revisión técnica',
+      CONFIRMED: 'Configuración confirmada', IN_PRODUCTION: 'En fabricación',
+      FINALIZED: 'Finalizada', CANCELLED: 'Anulada',
+    };
+    void listOrderConfigurations().then(configurations => {
+      if (cancelled) return;
+      setConfigurationRows(configurations.map(configuration => ({
+        rowId: `configuration:${configuration.id}`,
+        projectId: configuration.id,
+        configurationId: configuration.id,
+        quoteId: null,
+        customerName: configuration.customerName || '',
+        type: 'CONFIGURACION',
+        number: configuration.reference,
+        statusLabel: statuses[configuration.status] || configuration.status,
+        createdAt: configuration.createdAt || configuration.updatedAt || '',
+      })));
+    }).catch(error => {
+      if (!cancelled) setConfigurationError(error instanceof Error ? error.message : 'No se pudieron cargar las configuraciones.');
+    });
+    return () => { cancelled = true; };
+  }, []);
+
   const rows = useMemo(
-    () => sortRowsByCreatedAt([...documentRows, ...orderDocs]),
-    [documentRows, orderDocs],
+    () => sortRowsByCreatedAt([...documentRows, ...orderDocs, ...configurationRows]),
+    [documentRows, orderDocs, configurationRows],
   );
 
   const updateDocumentRow = (nextRow: ProjectDocumentRow) => {
@@ -92,7 +121,7 @@ export const useProjectManagement = () => {
   return {
     rows,
     busyProjectId,
-    error,
+    error: [error, configurationError].filter(Boolean).join(' '),
     actions: {
       createDocument,
       updateDocumentRow,

@@ -7,10 +7,12 @@ La opción **Configurador → Plantillas Marver del ZIP** incorpora el contenido
 - 25 plantillas, incluidas peatonales con fijos, batientes, correderas telescópicas, bi-folding, vallados, Welcome, remates, accesorios, series especiales y presupuesto especial.
 - 467 fichas de modelo por plantilla y 189 imágenes distintas, extraídas de los datos incrustados en el HTML. Los códigos se normalizan sin tildes ni espacios; se conserva el código original como referencia.
 - 829 campos del inventario de recorrido, completados con opciones adicionales del otro inventario: 1.298 entradas de campo de los inventarios. Se añaden 17 campos de adjunto propios de ALUON en las plantillas donde no se había capturado uno (1.315 entradas en el catálogo adaptado). Incluyen repeticiones entre plantillas y campos de familias alternativas del portal original.
-- Condiciones observadas para mostrar u ocultar campos, restricciones de modelo y opciones particulares. Los campos adicionales cuya aplicabilidad no pudo observarse se agrupan en un desplegable y requieren confirmación técnica. No se reproducen los bloqueos del portal que ocultaban todos los herrajes tras la casilla «ENTENDIDO».
+- Condiciones observadas para mostrar u ocultar campos, restricciones de modelo y opciones particulares. Los campos adicionales cuya aplicabilidad no pudo observarse se muestran en una sección abierta de opciones adicionales y requieren confirmación técnica. No se reproducen los bloqueos del portal que ocultaban todos los herrajes tras la casilla «ENTENDIDO».
 - Diez PDF locales: cinco manuales y cinco catálogos. Se descargan bajo demanda. Las dos grabaciones son material de análisis y no se publican como documentación del cliente.
 
 ## Flujo
+
+La navegación Marver muestra sus seis pasos, incluido el acceso directo a Medidas. Las opciones adicionales permanecen visibles en el paso al que corresponden; los campos condicionales siguen dependiendo del modelo y de las respuestas seleccionadas.
 
 1. **Producto:** elegir origen Marver y plantilla. Cambiar de plantilla reinicia sus respuestas y adjuntos.
 2. **Datos del pedido:** cliente del CRM o nombre manual, referencia, modelo visual, color y acabado de la plantilla.

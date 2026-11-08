@@ -1,5 +1,7 @@
 import type { ModuleKey } from '../components/Sidebar';
 
+const CONFIGURATION_EVENT_NAME = 'aluon:open-configuration';
+
 const EVENT_NAME = 'aluon:navigate-module';
 
 type NavigateModuleDetail = {
@@ -51,4 +53,17 @@ export const onNavigateToDocument = (handler: (documentId: string) => void): (()
 
   window.addEventListener('aluon:open-document', listener);
   return () => window.removeEventListener('aluon:open-document', listener);
+};
+
+export const navigateToConfiguration = (id: string): void => {
+  window.dispatchEvent(new CustomEvent(CONFIGURATION_EVENT_NAME, { detail: { id } }));
+};
+
+export const onNavigateToConfiguration = (handler: (id: string) => void): (() => void) => {
+  const listener = (event: Event) => {
+    if (!(event instanceof CustomEvent) || !isRecord(event.detail)) return;
+    if (typeof event.detail.id === 'string' && event.detail.id) handler(event.detail.id);
+  };
+  window.addEventListener(CONFIGURATION_EVENT_NAME, listener);
+  return () => window.removeEventListener(CONFIGURATION_EVENT_NAME, listener);
 };

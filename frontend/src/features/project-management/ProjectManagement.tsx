@@ -1,3 +1,4 @@
+import { navigateToConfiguration } from '../../services/moduleNavigation';
 import { ProjectsTable } from './components/ProjectsTable';
 import { useProjectManagement } from './useProjectManagement';
 import { useEffect, useMemo, useState } from 'react';
@@ -24,14 +25,15 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
   useEffect(() => {
     if (!openRowId) return;
     const match = vm.rows.find(row => row.rowId === openRowId);
-    if (match) {
-      setDrawerRow(match);
-    }
+    // Keep the requested document pending until the asynchronous list contains it.
+    if (!match) return;
+    if (match.configurationId) navigateToConfiguration(match.configurationId);
+    else setDrawerRow(match);
     onOpenRowHandled();
   }, [openRowId, onOpenRowHandled, vm.rows]);
 
   const openPreview = (row: ProjectDocumentRow) => {
-    if (!row.quoteId) return;
+    if (!row.quoteId || row.type === 'CONFIGURACION') return;
     setDrawerRow(null);
     setPreviewDocument({
       id: row.rowId,
@@ -72,7 +74,10 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
         <ProjectsTable
           rows={vm.rows}
           busyProjectId={vm.busyProjectId}
-          onOpenDetails={row => setDrawerRow(row)}
+          onOpenDetails={row => {
+            if (row.configurationId) navigateToConfiguration(row.configurationId);
+            else setDrawerRow(row);
+          }}
           onCreateDocument={() => setCreateModalOpen(true)}
         />
       </div>

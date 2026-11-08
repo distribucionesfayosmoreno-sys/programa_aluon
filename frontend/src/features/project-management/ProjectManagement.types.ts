@@ -83,12 +83,15 @@ export type ProjectEntity = {
   workOrder?: ProjectWorkOrder;
 };
 
+export type ProjectDocumentRowKind = ProjectDocumentKind | 'CONFIGURACION';
+
 export type ProjectDocumentRow = {
   rowId: string;
   projectId: string;
   quoteId: string | null;
+  configurationId?: string;
   customerName: string;
-  type: ProjectDocumentKind;
+  type: ProjectDocumentRowKind;
   number: string;
   statusLabel: string;
   createdAt: string;

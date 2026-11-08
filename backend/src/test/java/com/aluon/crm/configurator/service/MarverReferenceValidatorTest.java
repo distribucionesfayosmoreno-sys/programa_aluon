@@ -63,4 +63,38 @@ class MarverReferenceValidatorTest {
         assertThatCode(() -> MarverReferenceValidator.validate(payload, "PUERTA_PEATONAL", "CONFIRMED")).doesNotThrowAnyException();
         assertThat(payload.has("referenceSpecification")).isFalse();
     }
+    private ObjectNode videoPayload() {
+        var payload = payload("cancela-peatonal", "unica");
+        payload.put("presentation", "MARVER_VIDEO");
+        var forms = payload.putArray("videoForms");
+        forms.addObject().put("id", "first").set("specification", payload.path("referenceSpecification").deepCopy());
+        forms.addObject().put("id", "second").set("specification", payload("corredera", "grinon").path("referenceSpecification"));
+        return payload;
+    }
+    @Test void validatesAndCanonicalizesEveryVideoForm() {
+        var payload = videoPayload();
+        MarverReferenceValidator.validate(payload, "REFERENCIA_MARVER", "PENDING_REVIEW");
+        assertThat(payload.path("videoForms").get(0).path("specification").path("formName").asText()).isEqualTo("Cancela peatonal");
+        assertThat(payload.path("videoForms").get(1).path("specification").path("formName").asText()).isEqualTo("Corredera");
+        assertThat(payload.path("referenceSpecification")).isEqualTo(payload.path("videoForms").get(0).path("specification"));
+    }
+    @Test void rejectsInvalidSecondaryVideoAnswersAndModels() {
+        var payload = videoPayload();
+        ((ObjectNode) payload.path("videoForms").get(1).path("specification").path("values")).put("invented", 2);
+        assertThatThrownBy(() -> MarverReferenceValidator.validate(payload, "REFERENCIA_MARVER", "DRAFT")).hasMessageContaining("Campo Marver desconocido");
+        var missingModel = videoPayload();
+        ((ObjectNode) missingModel.path("videoForms").get(1).path("specification")).put("modelId", "");
+        assertThatThrownBy(() -> MarverReferenceValidator.validate(missingModel, "REFERENCIA_MARVER", "PENDING_REVIEW")).hasMessageContaining("modelo de referencia");
+        assertThatCode(() -> MarverReferenceValidator.validate(missingModel, "REFERENCIA_MARVER", "DRAFT")).doesNotThrowAnyException();
+    }
+    @Test void rejectsDuplicateOrEmptyVideoFormsAndUnreviewedConfirmation() {
+        var duplicate = videoPayload();
+        ((ObjectNode) duplicate.path("videoForms").get(1)).put("id", "first");
+        assertThatThrownBy(() -> MarverReferenceValidator.validate(duplicate, "REFERENCIA_MARVER", "DRAFT")).hasMessageContaining("duplicado");
+        var empty = videoPayload(); empty.putArray("videoForms");
+        assertThatThrownBy(() -> MarverReferenceValidator.validate(empty, "REFERENCIA_MARVER", "DRAFT")).hasMessageContaining("entre 1 y 50");
+        assertThatThrownBy(() -> MarverReferenceValidator.validate(videoPayload(), "REFERENCIA_MARVER", "CONFIRMED")).hasMessageContaining("revisión técnica");
+        assertThatThrownBy(() -> MarverReferenceValidator.validate(videoPayload(), "PUERTA_PEATONAL", "DRAFT")).hasMessageContaining("configuración de referencia");
+    }
+
 }

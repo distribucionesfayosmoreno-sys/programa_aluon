@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.core.io.ClassPathResource;
 import java.io.IOException;
 import java.util.Set;
+import java.util.HashSet;
 
 /** Captured supplier options require technical review; they are not ALUON engineering rules. */
 public final class MarverReferenceValidator {
@@ -22,9 +23,23 @@ public final class MarverReferenceValidator {
     public static void validate(JsonNode payload, String productType, String status) {
         JsonNode spec = payload.path("referenceSpecification");
         boolean reference = "REFERENCIA_MARVER".equalsIgnoreCase(productType);
-        if (!reference && (spec.isMissingNode() || spec.isNull())) return;
+        if (!reference && (spec.isMissingNode() || spec.isNull()) && !payload.has("videoForms")) return;
         require(reference, "La ficha Marver requiere una configuración de referencia.");
         require(STATUSES.contains(status), "La referencia Marver requiere revisión técnica y valoración antes de confirmar o fabricar.");
+        validateSpecification(spec, status);
+        JsonNode videoForms = payload.path("videoForms");
+        if (payload.has("videoForms") || "MARVER_VIDEO".equals(payload.path("presentation").asText())) {
+            require(videoForms.isArray() && !videoForms.isEmpty() && videoForms.size() <= 50, "El presupuesto debe contener entre 1 y 50 formularios Marver.");
+            Set<String> ids = new HashSet<>();
+            for (JsonNode item : videoForms) {
+                String id = item.path("id").asText();
+                require(!id.isBlank() && id.length() <= 80 && ids.add(id), "Identificador de formulario Marver no válido o duplicado.");
+                validateSpecification(item.path("specification"), status);
+            }
+            ((ObjectNode) payload).set("referenceSpecification", videoForms.get(0).path("specification").deepCopy());
+        }
+    }
+    private static void validateSpecification(JsonNode spec, String status) {
         require(spec.isObject() && spec.path("catalogVersion").asInt() == 1, "Ficha Marver no válida.");
         JsonNode form = find(CatalogHolder.CATALOG.path("forms"), "id", spec.path("formId").asText());
         require(form != null, "Plantilla Marver desconocida.");

@@ -10,6 +10,8 @@ export type ConfiguratorSketchProps = {
   openingSide: 'LEFT' | 'RIGHT';
   productType: string;
   modelLabel?: string;
+  color?: string;
+  colorLabel?: string;
   freePassageWidthMm?: number;
   freePassageHeightMm?: number;
   leftLeafWidthMm?: number;
@@ -31,6 +33,8 @@ export default function OrderConfiguratorSketch({
   openingSide,
   productType,
   modelLabel,
+  color,
+  colorLabel,
   freePassageWidthMm,
   freePassageHeightMm,
   firstOpeningLeaf,
@@ -44,6 +48,10 @@ export default function OrderConfiguratorSketch({
   const activeView: SketchView = isDoubleLeaf ? 'INTERIOR' : view;
   const isSliding = productType === 'CORREDERA';
   const isFence = productType === 'VALLA';
+  const hex = color?.slice(1);
+  const rgb = hex?.length === 3 ? hex.split('').map(value => value + value).join('') : hex;
+  const isDarkColor = rgb ? [0, 2, 4].reduce((sum, offset, index) => sum + parseInt(rgb.slice(offset, offset + 2), 16) * [0.2126, 0.7152, 0.0722][index], 0) < 128 : false;
+  const detailColor = isDarkColor ? '#e2e8f0' : '#334155';
   const totalWidth = Math.max(widthMm, 1);
   const totalHeight = Math.max(heightMm, 1);
   const scale = Math.min(220 / totalWidth, 300 / totalHeight);
@@ -64,6 +72,7 @@ export default function OrderConfiguratorSketch({
         <div>
           <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-500">Croquis técnico</div>
           <div className="text-xs font-bold text-blue-700 mt-1">{modelLabel ?? 'Modelo'} · {activeView === 'INTERIOR' ? 'Vista interior' : 'Vista exterior'}</div>
+          {color && <div className="mt-1 text-[10px] text-slate-500">{colorLabel} · Color aproximado</div>}
         </div>
         <div className="flex rounded-lg border border-slate-200 bg-white p-0.5" role="group" aria-label="Vista del croquis">
           {(['INTERIOR', 'EXTERIOR'] as SketchView[]).map(option => (
@@ -91,25 +100,25 @@ export default function OrderConfiguratorSketch({
           <line x1={right} y1={top} x2={right} y2={bottom} stroke="#0f172a" strokeWidth="3" />
           {isFence ? (
             <>
-              <line x1={left + 8} y1={top} x2={left + 8} y2={bottom} stroke="#334155" strokeWidth="5" />
-              <line x1={right - 8} y1={top} x2={right - 8} y2={bottom} stroke="#334155" strokeWidth="5" />
-              {[0.25, 0.5, 0.75].map(ratio => <line key={ratio} x1={left + 11} y1={top + doorHeight * ratio} x2={right - 11} y2={top + doorHeight * ratio} stroke="#64748b" strokeWidth="3" />)}
+              <line x1={left + 8} y1={top} x2={left + 8} y2={bottom} stroke={color ?? '#334155'} strokeWidth="5" />
+              <line x1={right - 8} y1={top} x2={right - 8} y2={bottom} stroke={color ?? '#334155'} strokeWidth="5" />
+              {[0.25, 0.5, 0.75].map(ratio => <line key={ratio} x1={left + 11} y1={top + doorHeight * ratio} x2={right - 11} y2={top + doorHeight * ratio} stroke={color ?? '#64748b'} strokeWidth="3" />)}
           <text x="150" y={top - 8} textAnchor="middle" fontSize="9" fill="#475569">VALLA · TRAMO V{(sectionIndex ?? 0) + 1} / SOPORTES</text>
             </>
           ) : isDoubleLeaf ? (
             <>
-              <path d={`M ${left + 5} ${top + 5} L 150 ${top + 5} L 150 ${bottom - 5} L ${left + 5} ${bottom - 5} Z`} fill={firstOpeningLeaf === 'LEFT' ? '#fef3c7' : '#f8fafc'} stroke={firstOpeningLeaf === 'LEFT' ? '#d97706' : '#cbd5e1'} strokeWidth={firstOpeningLeaf === 'LEFT' ? '2' : '1'} />
-              <path d={`M 150 ${top + 5} L ${right - 5} ${top + 5} L ${right - 5} ${bottom - 5} L 150 ${bottom - 5} Z`} fill={firstOpeningLeaf === 'RIGHT' ? '#fef3c7' : '#f8fafc'} stroke={firstOpeningLeaf === 'RIGHT' ? '#d97706' : '#cbd5e1'} strokeWidth={firstOpeningLeaf === 'RIGHT' ? '2' : '1'} />
+              <path d={`M ${left + 5} ${top + 5} L 150 ${top + 5} L 150 ${bottom - 5} L ${left + 5} ${bottom - 5} Z`} fill={color ?? (firstOpeningLeaf === 'LEFT' ? '#fef3c7' : '#f8fafc')} stroke={firstOpeningLeaf === 'LEFT' ? '#d97706' : '#cbd5e1'} strokeWidth={firstOpeningLeaf === 'LEFT' ? '2' : '1'} />
+              <path d={`M 150 ${top + 5} L ${right - 5} ${top + 5} L ${right - 5} ${bottom - 5} L 150 ${bottom - 5} Z`} fill={color ?? (firstOpeningLeaf === 'RIGHT' ? '#fef3c7' : '#f8fafc')} stroke={firstOpeningLeaf === 'RIGHT' ? '#d97706' : '#cbd5e1'} strokeWidth={firstOpeningLeaf === 'RIGHT' ? '2' : '1'} />
               <line x1={150} y1={top} x2={150} y2={bottom} stroke="#64748b" strokeWidth="2" strokeDasharray="4 3" />
-              <line x1={left + 5} y1={top + 8} x2={150 - 7} y2={bottom - 8} stroke="#cbd5e1" strokeWidth="1" />
-              <line x1={right - 5} y1={top + 8} x2={150 + 7} y2={bottom - 8} stroke="#cbd5e1" strokeWidth="1" />
+              <line x1={left + 5} y1={top + 8} x2={150 - 7} y2={bottom - 8} stroke={color ? detailColor : '#cbd5e1'} strokeWidth="1" />
+              <line x1={right - 5} y1={top + 8} x2={150 + 7} y2={bottom - 8} stroke={color ? detailColor : '#cbd5e1'} strokeWidth="1" />
               <text x="150" y={bottom + 17} textAnchor="middle" fontSize="9" fill="#475569">{firstOpeningLeaf ? `primera apertura ${firstOpeningLeaf === 'LEFT' ? 'izquierda' : 'derecha'}` : 'primera apertura pendiente'}</text>
             </>
           ) : (
-            <rect x={left + 4} y={top + 4} width={Math.max(1, doorWidth - 8)} height={Math.max(1, doorHeight - 8)} fill={activeView === 'INTERIOR' ? '#e2e8f0' : '#cbd5e1'} stroke="#334155" strokeWidth="1.5" />
+            <rect x={left + 4} y={top + 4} width={Math.max(1, doorWidth - 8)} height={Math.max(1, doorHeight - 8)} fill={color ?? (activeView === 'INTERIOR' ? '#e2e8f0' : '#cbd5e1')} stroke="#334155" strokeWidth="1.5" />
           )}
           {!isFence && <circle cx={hingeX} cy={top + 18} r="4" fill="#f59e0b" />}
-          {!isSliding && !isFence && <rect x={handleX - 3} y={top + doorHeight / 2 - 4} width="6" height="8" rx="2" fill="#475569" />}
+          {!isSliding && !isFence && <rect x={handleX - 3} y={top + doorHeight / 2 - 4} width="6" height="8" rx="2" fill={color ? detailColor : '#475569'} />}
           {!isSliding && !isFence && <path d={arcPath} fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="5 4" markerEnd="url(#aluon-arrow)" />}
           {isSliding && <line x1={left - 34} y1={bottom + 11} x2={right + 34} y2={bottom + 11} stroke="#64748b" strokeWidth="3" />}
           <line x1={left} y1={bottom + 31} x2={right} y2={bottom + 31} stroke="#64748b" markerStart="url(#aluon-arrow)" markerEnd="url(#aluon-arrow)" />
