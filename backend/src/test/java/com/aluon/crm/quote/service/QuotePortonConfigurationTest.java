@@ -12,6 +12,8 @@ import com.aluon.crm.quote.dto.*;
 import com.aluon.crm.quote.model.*;
 import com.aluon.crm.quote.repository.QuoteRequestRepository;
 import com.aluon.production.cutlist.model.*;
+import com.aluon.production.order.service.OrderService;
+import com.aluon.production.order.repository.OrderRepository;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import java.math.BigDecimal;
@@ -30,7 +32,8 @@ class QuotePortonConfigurationTest {
         var customers = mock(CustomerRepository.class);
         var prices = mock(CatalogDoorPricingService.class);
         var numbers = mock(DocumentNumberService.class);
-        var service = new QuoteService(quotes, customers, prices, numbers);
+        var service = new QuoteService(quotes, customers, prices, numbers,
+                mock(OrderService.class), mock(OrderRepository.class));
         UUID customerId = UUID.randomUUID();
         when(customers.findById(customerId)).thenReturn(Optional.of(Customer.builder().id(customerId).tarifa("A").autoApproveQuotes(true).build()));
         when(numbers.nextSeries()).thenReturn(new DocumentSeries(LocalDate.of(2026, 11, 7), 1));
