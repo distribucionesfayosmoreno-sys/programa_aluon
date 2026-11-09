@@ -2,9 +2,10 @@ import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import Sidebar, { ModuleKey } from './components/Sidebar';
 import DevelopmentNotice from './components/DevelopmentNotice';
 import { JiraFloatingButton } from './features/jira-shortcut/JiraFloatingButton';
-import { onNavigateToConfiguration, onNavigateToDocument, onNavigateToModule } from './services/moduleNavigation';
+import { onNavigateToAdminTab, onNavigateToConfiguration, onNavigateToDocument, onNavigateToModule } from './services/moduleNavigation';
 import { onBudgetWizardLaunch } from './features/budget-wizard/services/budgetWizardLaunch';
-import { loadCurrentStaff, STAFF_LOGIN_REQUIRED_EVENT, StaffUser } from './services/staffAuthApi';
+import { canAccessCutlist, loadCurrentStaff, logoutStaff, STAFF_LOGIN_REQUIRED_EVENT, StaffUser } from './services/staffAuthApi';
+import type { AdminManagementTab } from './features/admin-management/AdminManagement.types';
 
 const CustomerManagement = lazy(() => import('./features/customer-management/CustomerManagement'));
 const Dashboard = lazy(() => import('./features/dashboard/Dashboard'));
@@ -24,10 +25,15 @@ const App = () => {
   const [configurationId, setConfigurationId] = useState<string | null>(null);
   const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
   const [staffUser, setStaffUser] = useState<StaffUser | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [adminTab, setAdminTab] = useState<AdminManagementTab>('USERS');
 
   useEffect(() => {
-    loadCurrentStaff().then(setStaffUser).catch(() => setStaffUser(null));
+    loadCurrentStaff()
+      .then(setStaffUser)
+      .catch(() => setStaffUser(null))
+      .finally(() => setAuthLoading(false));
   }, []);
 
   useEffect(() => {
@@ -45,18 +51,30 @@ const App = () => {
     setActiveModule('gestion-documentos');
     setPendingDocumentId(documentId);
   }), []);
+  useEffect(() => onNavigateToAdminTab(tab => {
+    setAdminTab(tab);
+    setActiveModule('administracion');
+  }), []);
   useEffect(() => onBudgetWizardLaunch(() => {
     setConfigurationId(null);
     setActiveModule('presupuestos');
   }), []);
 
   const handleSelectModule = (module: ModuleKey) => {
+    if (module === 'despiece' && !canAccessCutlist(staffUser)) return;
     if (module === 'configurador' || module === 'presupuestos') {
       setConfigurationId(null);
       setActiveModule('presupuestos');
       return;
     }
     setActiveModule(module);
+  };
+
+  const handleLogout = async () => {
+    await logoutStaff();
+    setStaffUser(null);
+    setLoginOpen(false);
+    setActiveModule('clientes');
   };
 
   const breadcrumb = useMemo(() => {
@@ -87,6 +105,18 @@ const App = () => {
     }
   }, [activeModule]);
 
+  if (authLoading) {
+    return <main className="flex min-h-screen items-center justify-center bg-[#f8f9fb] text-sm font-semibold text-slate-500">Comprobando sesión…</main>;
+  }
+
+  if (!staffUser) {
+    return (
+      <Suspense fallback={<main className="flex min-h-screen items-center justify-center bg-[#f8f9fb] text-sm font-semibold text-slate-500">Cargando acceso…</main>}>
+        <StaffLoginPanel fullPage onAuthenticated={setStaffUser} />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="aluon-app flex h-screen overflow-hidden" style={{ backgroundColor: '#f8f9fb' }}>
       <Sidebar
@@ -96,6 +126,8 @@ const App = () => {
           setActiveModule('ordenes');
           setOpenNewRequest(true);
         }}
+        staffUser={staffUser}
+        onLogout={() => void handleLogout()}
         isOpen={sidebarOpen}
       />
 
@@ -192,7 +224,7 @@ const App = () => {
               />
             )}
             {activeModule === 'simulacion-puertas' && <DoorVisualSimulation />}
-            {activeModule === 'presupuestos' && <OrderConfigurator key={configurationId ?? 'new'} configurationId={configurationId} />}
+            {activeModule === 'presupuestos' && <OrderConfigurator key={configurationId ?? 'new'} configurationId={configurationId} staffUser={staffUser} />}
             {activeModule === 'inscripciones' && <DevelopmentNotice />}
             {activeModule === 'ordenes' && (
               <WorkOrders
@@ -200,10 +232,10 @@ const App = () => {
                 onNewRequestHandled={() => setOpenNewRequest(false)}
               />
             )}
-            {activeModule === 'despiece' && <Cutlist />}
+            {activeModule === 'despiece' && canAccessCutlist(staffUser) && <Cutlist />}
             {activeModule === 'dashboard' && <Dashboard />}
             {activeModule === 'ajustes' && <Settings />}
-            {activeModule === 'administracion' && <AdminManagement />}
+            {activeModule === 'administracion' && <AdminManagement initialTab={adminTab} />}
             </Suspense>
           </div>
         </main>

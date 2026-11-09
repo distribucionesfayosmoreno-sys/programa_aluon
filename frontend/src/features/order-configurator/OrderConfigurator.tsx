@@ -5,6 +5,7 @@ import { buildCatalogModelOptions, type CatalogModelOption } from '../work-order
 import { getOrderConfiguration, getOrderConfigurationHistory, listOrderConfigurations, saveOrderConfiguration, updateOrderConfiguration, type OrderConfigurationAudit, type SavedOrderConfiguration } from './orderConfiguratorApi';
 import { listConfigCatalogOptions, listConfigCatalogRules, validateConfigCatalog, type ConfigCatalogOption, type ConfigCatalogRule } from './catalogRulesApi';
 import { navigateToModule } from '../../services/moduleNavigation';
+import { canAccessMarverSources, type StaffUser } from '../../services/staffAuthApi';
 import { openBudgetWizardForCustomer } from '../budget-wizard/services/budgetWizardLaunch';
 import OrderConfiguratorSketch from './OrderConfiguratorSketch';
 
@@ -528,7 +529,7 @@ const downloadSummary = async (config: Config, customerName: string, productLabe
   return dataUri;
 };
 
-export default function OrderConfigurator({ configurationId = null }: { configurationId?: string | null }) {
+export default function OrderConfigurator({ configurationId = null, staffUser = null }: { configurationId?: string | null; staffUser?: StaffUser | null }) {
   const { customers, loading: customersLoading } = useCustomers();
   const [isVideo, setIsVideo] = useState(() => localStorage.getItem('aluon-configurator-presentation') === 'MARVER_VIDEO');
   useEffect(() => { localStorage.setItem('aluon-configurator-presentation', isVideo ? 'MARVER_VIDEO' : 'STANDARD'); }, [isVideo]);
@@ -554,9 +555,14 @@ export default function OrderConfigurator({ configurationId = null }: { configur
   const [marverCatalog, setMarverCatalog] = useState<ReferenceCatalog | null>(null);
   const [marverError, setMarverError] = useState('');
   const [marverRetry, setMarverRetry] = useState(0);
-  const isReference = config.productType === 'REFERENCIA_MARVER';
+  const canUseMarverSources = canAccessMarverSources(staffUser);
+  const isReference = canUseMarverSources && config.productType === 'REFERENCIA_MARVER';
   const isFunctionalOnly = isReference || isVideo;
   const referenceSpecification = config.referenceSpecification;
+
+  useEffect(() => {
+    if (!canUseMarverSources && isVideo) setIsVideo(false);
+  }, [canUseMarverSources, isVideo]);
 
   useEffect(() => {
     if (!isReference && !isVideo) return;
@@ -764,8 +770,8 @@ export default function OrderConfigurator({ configurationId = null }: { configur
       </div>
       <div className="configurator-surface-actions flex flex-wrap gap-2 mb-4" role="group" aria-label="Origen de la configuración">
         <button type="button" className="btn-ghost" aria-pressed={!isReference && !isVideo} onClick={() => { leaveVideo(); update('productType', 'PUERTA_PEATONAL'); }}>Catálogo ALUON</button>
-        <button type="button" className="btn-ghost" aria-pressed={isReference && !isVideo} onClick={() => { leaveVideo(); update('productType', 'REFERENCIA_MARVER'); setStep(1); }}>Plantillas Marver del ZIP</button>
-        <button type="button" className="btn-ghost" aria-pressed={isVideo} onClick={() => setIsVideo(true)}>Marver · Recorrido del vídeo</button>
+        {canUseMarverSources && <button type="button" className="btn-ghost" aria-pressed={isReference && !isVideo} onClick={() => { leaveVideo(); update('productType', 'REFERENCIA_MARVER'); setStep(1); }}>Plantillas Marver del ZIP</button>}
+        {canUseMarverSources && <button type="button" className="btn-ghost" aria-pressed={isVideo} onClick={() => setIsVideo(true)}>Marver · Recorrido del vídeo</button>}
       </div>
       {isVideo ? marverCatalog && !marverError ? <MarverVideoConfigurator catalog={marverCatalog} customers={customers} /> : <div role="status" className="rounded-xl border p-4">{marverError || 'Cargando recorrido Marver…'}{marverError && <button type="button" className="underline ml-3" onClick={() => setMarverRetry(value => value + 1)}>Reintentar</button>}</div> : <>
       {isReference && (!marverCatalog || marverError) && <div className="rounded-xl border p-4 mb-4 text-sm" role="status">{marverError || 'Cargando plantillas Marver…'}{marverError && <button type="button" className="underline ml-3" onClick={() => setMarverRetry(value => value + 1)}>Reintentar</button>}</div>}

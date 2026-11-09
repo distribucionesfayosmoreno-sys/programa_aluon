@@ -32,6 +32,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aluonbbdd
       SPRING_DATASOURCE_USERNAME: aluon
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:?Define DB_PASSWORD in the environment file}
+      GOOGLE_STREET_VIEW_API_KEY: ${GOOGLE_STREET_VIEW_API_KEY:-}
+      GOOGLE_MAPS_BROWSER_API_KEY: ${GOOGLE_MAPS_BROWSER_API_KEY:-}
       APP_CORS_ALLOWED_ORIGINS: ${APP_CORS_ALLOWED_ORIGINS:-http://localhost:5174,http://127.0.0.1:5174,http://192.168.99.61:5174,https://desarrollowebaluon.iconseriespeliculas.xyz}
       DOOR_SIMULATION_LOCAL_BASE_DIR: /app/door-simulation-assets
     ports:

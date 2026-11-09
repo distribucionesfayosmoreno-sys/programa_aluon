@@ -6,6 +6,18 @@ export type StaffUser = {
   role: string;
 };
 
+const normalizedUsername = (user: StaffUser | null | undefined) => user?.username.trim().toLowerCase() ?? '';
+
+export const canAccessCutlist = (user: StaffUser | null | undefined): boolean => {
+  const username = normalizedUsername(user);
+  return username === 'admin' || username === 'diego.onate@aluon.es';
+};
+
+export const canAccessMarverSources = (user: StaffUser | null | undefined): boolean => {
+  const username = normalizedUsername(user);
+  return username === 'admin' || username === 'daniel.onate@aluon.es';
+};
+
 export type StaffLoginResponse = {
   token: string;
   expiresInSeconds: number;

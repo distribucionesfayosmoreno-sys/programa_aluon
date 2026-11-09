@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AdminUsersPanel } from './AdminUsersPanel';
 import { ProductCatalogManagement } from './ProductCatalogManagement';
 import { CatalogRulesManagement } from './CatalogRulesManagement';
@@ -18,8 +18,12 @@ const tabs: Array<{ id: AdminManagementTab; label: string; description: string }
   { id: 'SOCIAL_MEDIA', label: 'RRSS', description: 'Publicaciones internas y configuración por red.' },
 ];
 
-const AdminManagement = () => {
-  const [activeTab, setActiveTab] = useState<AdminManagementTab>('USERS');
+const AdminManagement = ({ initialTab = 'USERS' }: { initialTab?: AdminManagementTab }) => {
+  const [activeTab, setActiveTab] = useState<AdminManagementTab>(initialTab);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   return (
     <div className="flex flex-col gap-4 min-h-0">

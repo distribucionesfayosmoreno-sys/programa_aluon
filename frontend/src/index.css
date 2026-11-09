@@ -121,6 +121,28 @@
   .btn-ghost:hover { background-color: #f8f9fb; color: #0d1117; border-color: #d1d5db; }
   .btn-ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  .admin-compact-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.65rem;
+    color: #334155;
+    background: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 12px -10px rgba(15, 23, 42, 0.55);
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  .admin-compact-button:hover { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; transform: translateY(-1px); box-shadow: 0 8px 16px -12px rgba(37, 99, 235, 0.8); }
+  .admin-compact-button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+  .admin-compact-button--primary { border-color: #2563eb; color: #ffffff; background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+  .admin-compact-button--primary:hover { color: #ffffff; background: linear-gradient(135deg, #1d4ed8, #1e40af); }
+  .admin-compact-button--action { min-height: 28px; padding: 0.3rem 0.55rem; font-size: 0.68rem; }
+
   .btn-large { min-height: 46px; padding-inline: 1.1rem; }
   .configurator-shell { color: #172033; }
   .configurator-shell :is(.btn-primary, .btn-ghost, select) {
@@ -384,6 +406,29 @@
   }
   .nav-item:hover { color: #c9d1d9; background-color: #21262d; }
   .nav-item-active { color: #ffffff !important; background-color: var(--accent) !important; box-shadow: 0 8px 20px -14px var(--accent-shadow-strong); }
+
+  .sidebar-group-label {
+    padding: 0.65rem 0.35rem 0.35rem;
+    color: #484f58;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .sidebar-group-label-spaced { padding-top: 1rem; }
+  .sidebar-logout-button {
+    display: inline-flex;
+    height: 2rem;
+    width: 2rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.55rem;
+    color: #8b949e;
+    transition: background-color .15s, color .15s;
+  }
+  .sidebar-logout-button:hover { color: #ffffff; background: #21262d; }
+  .sidebar-logout-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .icon-box {
     width: 2rem;

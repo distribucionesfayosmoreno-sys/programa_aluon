@@ -71,17 +71,30 @@ type StreetViewLibrary = {
 
 const GOOGLE_SCRIPT_ID = 'aluon-google-maps-script';
 
+let googleMapsLoadPromise: Promise<MapsWindow['google']> | null = null;
+
 const loadGoogleMaps = async (apiKey: string): Promise<MapsWindow['google']> => {
   const mapsWindow = window as MapsWindow;
   if (mapsWindow.google?.maps) {
     return mapsWindow.google;
   }
 
-  await new Promise<void>((resolve, reject) => {
+  if (!googleMapsLoadPromise) {
+    googleMapsLoadPromise = new Promise<MapsWindow['google']>((resolve, reject) => {
+      const finish = () => {
+        if (mapsWindow.google?.maps) {
+          resolve(mapsWindow.google);
+          return;
+        }
+        reject(new Error('Google Maps no disponible'));
+      };
+
+      const fail = () => reject(new Error('No se pudo cargar Google Maps'));
     const existing = document.getElementById(GOOGLE_SCRIPT_ID) as HTMLScriptElement | null;
     if (existing) {
-      existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', () => reject(new Error('No se pudo cargar Google Maps')), { once: true });
+      existing.addEventListener('load', finish, { once: true });
+      existing.addEventListener('error', fail, { once: true });
+      if (mapsWindow.google?.maps) finish();
       return;
     }
 
@@ -90,15 +103,18 @@ const loadGoogleMaps = async (apiKey: string): Promise<MapsWindow['google']> => 
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly`;
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('No se pudo cargar Google Maps'));
+    script.onload = finish;
+    script.onerror = fail;
     document.head.appendChild(script);
-  });
-
-  if (!mapsWindow.google?.maps) {
-    throw new Error('Google Maps no disponible');
+    });
   }
-  return mapsWindow.google;
+
+  try {
+    return await googleMapsLoadPromise;
+  } catch (error) {
+    googleMapsLoadPromise = null;
+    throw error;
+  }
 };
 
 export const GoogleStreetViewExplorer = ({

@@ -7,6 +7,7 @@ type Props = {
   onChange: (next: ProjectsTableFilters) => void;
   onReset: () => void;
   onCreateDocument: () => void;
+  onOpenOrders: () => void;
   typeOptions: ProjectDocumentRowKind[];
   statusOptions: string[];
 };
@@ -19,6 +20,7 @@ export const ProjectsTableFiltersBar = ({
   onChange,
   onReset,
   onCreateDocument,
+  onOpenOrders,
   typeOptions,
   statusOptions,
 }: Props) => (
@@ -145,6 +147,20 @@ export const ProjectsTableFiltersBar = ({
         }}
       >
         Limpiar
+      </button>
+      <button
+        type="button"
+        onClick={onOpenOrders}
+        className="px-3 py-2 rounded-xl font-bold"
+        style={{
+          border: `1px solid ${documentManagementTheme.border}`,
+          background: documentManagementTheme.panelBg,
+          color: documentManagementTheme.text,
+          fontSize: 12,
+          boxShadow: documentManagementTheme.shadowSoft,
+        }}
+      >
+        Pedidos y configuraciones
       </button>
       <button
         type="button"

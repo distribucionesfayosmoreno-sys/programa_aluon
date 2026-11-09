@@ -1,4 +1,4 @@
-import { navigateToConfiguration } from '../../services/moduleNavigation';
+import { navigateToAdminTab, navigateToConfiguration } from '../../services/moduleNavigation';
 import { ProjectsTable } from './components/ProjectsTable';
 import { useProjectManagement } from './useProjectManagement';
 import { useEffect, useMemo, useState } from 'react';
@@ -79,6 +79,7 @@ export const ProjectManagement = ({ openRowId, onOpenRowHandled }: Props) => {
             else setDrawerRow(row);
           }}
           onCreateDocument={() => setCreateModalOpen(true)}
+          onOpenOrders={() => navigateToAdminTab('ORDERS')}
         />
       </div>
 

@@ -11,6 +11,7 @@ type ProjectsTableProps = {
   busyProjectId: string | null;
   onOpenDetails: (row: ProjectDocumentRow) => void;
   onCreateDocument: () => void;
+  onOpenOrders: () => void;
 };
 
 // ─── Column header ────────────────────────────────────────────────────────────
@@ -118,6 +119,7 @@ export const ProjectsTable = ({
   busyProjectId,
   onOpenDetails,
   onCreateDocument,
+  onOpenOrders,
 }: ProjectsTableProps) => {
   const filtering = useProjectsTableFiltering(rows);
   const [sort, setSort] = useState<{ column: SortColumn; direction: SortDirection }>({ column: 'createdAt', direction: 'desc' });
@@ -198,6 +200,7 @@ export const ProjectsTable = ({
           onChange={filtering.setFilters}
           onReset={filtering.resetFilters}
           onCreateDocument={onCreateDocument}
+          onOpenOrders={onOpenOrders}
           typeOptions={filtering.typeOptions}
           statusOptions={filtering.statusOptions}
         />
